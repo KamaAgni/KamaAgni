@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Intimacy Selector - 1000 Positions & Twist</title>
+
+    <style>
+    :root {
+        --bg:#070814;
+        --card:#0b1220;
+        --accent:#ff6b81;
+        --muted:#9fb0c8;
+        --dice-size:100px;
+        --perform-color: #38c172;
+        --like-color: #ff6b81;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { 
+        min-height: 100%; /* Changed from height to min-height */
+        margin: 0; 
+    }
+    
+    body {
+        font-family:'Inter',system-ui,Segoe UI,Roboto,Arial;
+        background:radial-gradient(1200px 600px at 10% 10%,#0f2036 0%, #071022 40%, #02040a 100%);
+        color:#e9f2ff;
+        display:flex;
+        
+        /* FIX: Changed from align-items: center; to align-items: flex-start; */
+        align-items:flex-start; 
+        
+        justify-content:center;
+        padding:20px;
+    }
+
+    .app {
+        width:100%;
+        max-width:1100px;
+        background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.3));
+        border-radius:18px;
+        padding:28px;
+        box-shadow:0 12px 50px rgba(2,6,23,0.7);
+    }
+
+    header { text-align:center; }
+    h1 { margin:0; font-size:24px; color:var(--accent); text-shadow:0 6px 20px rgba(255,107,129,0.12); }
+    p.lead { margin:8px 0 0; color:var(--muted); }
+
+    .controls {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        justify-content: center;
+        margin-top: 18px;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+
+    button.roll {
+        background:linear-gradient(90deg,var(--accent),#ff9aa2);
+        color:white;
+        border:none;
+        padding:14px 26px;
+        border-radius:999px;
+        font-weight:700;
+        font-size:18px;
+        cursor:pointer;
+        box-shadow:0 10px 30px rgba(255,107,129,0.18);
+    }
+    
+    button.link-btn {
+        background: rgba(255,255,255,0.1);
+        color: white;
+        border: none;
+        padding: 14px 26px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 18px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .game {
+        display:flex;
+        gap:15px;
+        align-items:center;
+        justify-content:center;
+        margin-top:26px;
+        flex-wrap:wrap;
+    }
+
+    .die {
+        width:var(--dice-size);
+        height:var(--dice-size);
+        perspective:1000px;
+        position:relative;
+    }
+    
+    .cube {
+        width:100%;
+        height:100%;
+        position:absolute;
+        transform-style:preserve-3d;
+    }
+
+    .face {
+        position:absolute;
+        width:100%;
+        height:100%;
+        backface-visibility:hidden;
+    }
+
+    /* Proper 3D positioning for 6 faces of a cube */
+    .face:nth-child(1) { transform: rotateY(  0deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(2) { transform: rotateY( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(3) { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(4) { transform: rotateY(-90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(5) { transform: rotateX( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--dice-size)/2)); }
+
+
+    .face {
+        position:absolute; inset:0;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border-radius:18px;
+        padding:10px;
+        text-align:center;
+        font-weight:800;
+        line-height:1;
+        backface-visibility:hidden;
+        box-shadow:0 8px 30px rgba(2,6,23,0.6);
+    }
+
+    /* D10 Dice Styling (Numbers) */
+    .die[data-die-type="d10"] .face { 
+        background:linear-gradient(145deg,#b7e0ff,#dff4ff); 
+        color:#02122a; 
+        font-size: 32px; 
+    }
+
+    /* D6 Dice Styling (Twist) */
+    .die[data-die-type="d6"] .face { 
+        background:linear-gradient(145deg,#fff5c7,#ffdca8); 
+        color:#1b1205; 
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* Custom ink-wash filter */
+    .ink-wash {
+        filter: grayscale(100%) contrast(150%) brightness(120%);
+        object-fit: contain; 
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
+    }
+    
+    .die .shadow {
+        position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
+        width:70%; height:18px;
+        border-radius:50%;
+        filter:blur(10px);
+        background:rgba(0,0,0,0.45);
+        transition:width .7s, height .7s, opacity .7s;
+    }
+
+    .die.rolling .shadow{width:95%; height:26px; opacity:0.6;}
+
+    .results {
+        margin-top:20px;
+        text-align:center;
+        color:#f2fbff;
+        min-height:300px; 
+    }
+
+    .result-card.show {
+        background: rgba(255,255,255,0.08);
+        border-radius: 16px;
+        padding: 18px 22px;
+        max-width: 800px; 
+        margin: 20px auto;
+        animation: fadeIn 0.5s ease;
+        word-break: break-word;
+        display: grid;
+        grid-template-areas: 
+            "image image" 
+            "actions actions"
+            "prompt prompt"; 
+        grid-template-columns: 1fr;
+        gap: 10px 15px;
+        align-items: center;
+    }
+    
+    .result-prompt {
+        grid-area: prompt; 
+        font-size: 18px;
+        color: #fff;
+        font-weight: 600;
+        margin-top: 0;
+        text-align: center;
+    }
+    
+    .position-image-container {
+        grid-area: image;
+        width: 100%;
+        height: 450px; 
+        background: var(--card);
+        border-radius: 10px;
+        margin: 10px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    .result-actions {
+        grid-area: actions;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 10px;
+    }
+
+    .action-btn {
+        flex-grow: 1;
+        max-width: 250px;
+        border: none;
+        padding: 12px 16px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    #performBtn, .perform-action {
+        background: var(--perform-color);
+        color: white;
+        box-shadow: 0 6px 20px rgba(56, 193, 114, 0.25);
+    }
+    
+    #likeBtn, .like-action {
+        background: var(--like-color);
+        color: white;
+        box-shadow: 0 6px 20px rgba(255, 107, 129, 0.25);
+    }
+    
+    /* --- History / Gallery Page Styling --- */
+    .data-view-container {
+        padding: 20px;
+        text-align: center;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .history-controls {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .history-controls button {
+        background: rgba(255,255,255,0.1);
+        color: var(--muted);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s, color 0.2s;
+    }
+    
+    .history-controls button.active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    .data-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+
+    .history-item, .gallery-item {
+        background: var(--card);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        position: relative;
+        cursor: pointer;
+        min-height: 220px; 
+    }
+
+    .history-item-image {
+        width: 100%;
+        height: 140px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    /*image color changer */
+    .history-item-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain; 
+        filter: grayscale(100%) contrast(150%) brightness(120%);
+    }
+
+    .history-item-info {
+        padding: 8px;
+        text-align: left;
+        font-size: 13px;
+    }
+    
+    .history-item-info p {
+        margin: 0;
+        line-height: 1.4;
+        color: var(--muted);
+    }
+
+    .history-item-number {
+        font-weight: 700;
+        color: white;
+        font-size: 16px;
+    }
+    
+    .history-tags {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        display: flex;
+        gap: 5px;
+    }
+
+    .history-tag {
+        font-size: 12px;
+        padding: 2px 6px;
+        border-radius: 5px;
+        font-weight: 700;
+        opacity: 0.8; 
+    }
+
+    .tag-performed { background: var(--perform-color); color: white; }
+    .tag-liked { background: var(--like-color); color: white; }
+    .tag-count { background: rgba(255,255,255,0.1); color: var(--muted); }
+    
+    /* Modal Overlay for Zoom/Actions */
+    .modal-overlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        padding: 20px;
+    }
+
+    .modal-card {
+        background: var(--card);
+        border-radius: 18px;
+        padding: 25px;
+        max-width: 650px;
+        width: 100%;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-image-container {
+        width: 100%;
+        height: 400px;
+        background: var(--bg);
+        border-radius: 10px;
+        margin-bottom: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    
+    .modal-details {
+        text-align: center;
+    }
+    
+    .modal-details h3 {
+        margin-top: 0;
+        color: var(--accent);
+    }
+    
+    .modal-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .modal-close {
+        position: absolute;
+        top: 15px;
+        right: 25px;
+        font-size: 30px;
+        cursor: pointer;
+        color: var(--muted);
+        line-height: 1;
+    }
+    
+    #resetDataBtn {
+        background: #a94442;
+        color: white;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        font-size: 14px;
+    }
+
+
+    /* --- MOBILE FRIENDLY RESPONSIVE FIXES --- */
+    @media (max-width: 720px) {
+        :root { --dice-size: 70px; }
+        .app { padding: 15px; }
+        .position-image-container { height: 250px; } 
+        .result-card.show { max-width: 100%; padding: 15px; }
+        .action-btn { font-size: 13px; padding: 8px; }
+        .data-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+        .history-item-image { height: 100px; }
+        .modal-image-container { height: 250px; }
+        .modal-card { padding: 15px; }
+    }
+</style>
+</head>
+
+<body>
+    <div class="app" id="mainApp" role="application">
+        <div id="diceSection">
+            <header>
+                <h1>🔥 1000 Position & Twist Selector </h1>
+                <p class="lead">Roll three for a unique Sex Positions and one for a Twist.</p>
+            </header>
+
+            <div class="controls">
+                <button id="rollBtn" class="roll">Roll the Dice!</button>
+                <button id="historyLinkBtn" class="link-btn">My Intimacy Journey</button>
+                <button id="galleryLinkBtn" class="link-btn">Explore Positions</button> </div>
+            <div class="game" id="game">
+                <div class="die" data-index="0" data-die-type="d10">
+                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Hundreds</p>
+                </div>
+                <div class="die" data-index="1" data-die-type="d10">
+                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Tens</p>
+                </div>
+                <div class="die" data-index="2" data-die-type="d10">
+                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Units</p>
+                </div>
+                <div class="die" data-index="3" data-die-type="d6">
+                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">The Twist</p>
+                </div>
+            </div>
+
+            <div class="results" id="results"></div>
+
+            <div class="tip" id="tip">Communication and consent make every position the perfect position.</div>
+        </div>
+
+        <div id="historySection" class="data-view-container" style="display: none;">
+            <header>
+                <h1>📜 My Intimacy Journey </h1>
+                <button id="backToRollBtnHistory" class="link-btn" style="margin-top: 15px;">Back to Roller</button>
+                </header>
+            
+            <div class="history-controls">
+                <button data-filter="all" class="active">All</button>
+                <button data-filter="performed">Performed</button>
+                <button data-filter="liked">Liked / Saved</button>
+                <button data-filter="not_performed">Not Performed</button>
+            </div>
+
+            <div id="historyGrid" class="data-grid"></div>
+            <p id="historyEmpty" style="color: var(--muted); margin-top: 30px; display: none;">No positions rolled yet.</p>
+
+            <button id="resetDataBtn">⚠️ Clear All Saved Data</button>
+        </div>
+        
+        <div id="gallerySection" class="data-view-container" style="display: none;">
+            <header>
+                <h1>🖼️ Explore All Positions (000-999) </h1>
+                <p class="lead" style="margin-bottom: 20px;">Browse the entire catalog and mark your favorites.</p>
+                <button id="backToRollBtnGallery" class="link-btn" style="margin-top: 5px;">Back to Roller</button>
+            </header>
+            
+            <div id="galleryGrid" class="data-grid"></div>
+        </div>
+    </div>
+    
+    <div id="historyModal" class="modal-overlay">
+        <div class="modal-card">
+            <span class="modal-close" id="modalClose">&times;</span>
+            <div class="modal-image-container">
+                <img id="modalImage" class="ink-wash" src="" alt="Position Image">
+            </div>
+            <div class="modal-details">
+                <h3 id="modalTitle"></h3>
+                <p id="modalTwist" style="color:var(--muted); font-style:italic; margin-bottom: 0;"></p>
+                <p id="modalCount" style="font-size:14px; color:var(--muted); margin-top: 5px;"></p>
+            </div>
+            <div class="modal-actions">
+                <button id="modalPerformBtn" class="action-btn perform-action">Mark Performed ✅</button>
+                <button id="modalLikeBtn" class="action-btn like-action">Like / Save Position ❤️</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1000 Position Data (Placeholder Auto-Generator) ---
+        const positionData = [];
+        const baseNames = [""];
+        const baseDescriptions = [""];
+
+        positionData.push({
+            id: 0,
+            number: '000',
+            name: ` (000)`,
+            description: ``
+        });
+        
+        for(let i = 1; i < 1000; i++) {
+            const baseIndex = i % 10;
+            const number = i.toString().padStart(3, '0');
+            positionData.push({
+                id: i,
+                number: number,
+                name: `${baseNames[baseIndex]} (${number})`,
+                description: `This is a unique variation of the "${baseNames[baseIndex]}" position. ${baseDescriptions[baseIndex]}`
+            });
+        }
+        
+        // --- D6 Twist Options ---
+        const d6Twists = [
+            "Use only your non-dominant hand for all support/touch.",
+            "Say only kind compliments for the next minute.",
+            "Maintain soft, direct eye contact throughout.",
+            "Focus on one single, non-genital body part for 30 seconds.",
+            "Half your current speed for 10 movements.",
+            "Synchronize movement to partner's breath sound.",
+            "Only connected parts move; all hands stay still.",
+            "Introduce one contrasting element (ice, scent) to the scene.",
+            "Use only non-word sounds (moans, sighs) to communicate pleasure.",
+            "Whisper one specific thing you love that is happening now.",
+            "Pause to whisper three non-sexual reasons you love them.",
+            "Take turns whispering a playful, exciting fantasy.",
+            "Incorporate a soft garment or blindfold as a playful prop.",
+            "Intentionally touch/kiss a non-genital spot for 30 seconds."
+        ];
+        
+        const defaultTwist = "Roll to start!"; 
+        
+        // --- Core Elements ---
+        const diceEls = document.querySelectorAll('.die');
+        const rollBtn = document.getElementById('rollBtn');
+        const resultsEl = document.getElementById('results');
+        const historyLinkBtn = document.getElementById('historyLinkBtn');
+        const galleryLinkBtn = document.getElementById('galleryLinkBtn'); // CRITICAL: This was previously in HTML but not here.
+        const backToRollBtnHistory = document.getElementById('backToRollBtnHistory');
+        const backToRollBtnGallery = document.getElementById('backToRollBtnGallery'); 
+        const diceSection = document.getElementById('diceSection');
+        const historySection = document.getElementById('historySection');
+        const gallerySection = document.getElementById('gallerySection'); 
+        const historyGrid = document.getElementById('historyGrid');
+        const galleryGrid = document.getElementById('galleryGrid'); 
+        const historyControls = document.querySelectorAll('.history-controls button');
+        const resetDataBtn = document.getElementById('resetDataBtn');
+        
+        const historyModal = document.getElementById('historyModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalImage = document.getElementById('modalImage');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalTwist = document.getElementById('modalTwist');
+        const modalCount = document.getElementById('modalCount');
+        const modalPerformBtn = document.getElementById('modalPerformBtn');
+        const modalLikeBtn = document.getElementById('modalLikeBtn');
+        
+        const d10Faces = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; 
+        const HISTORY_KEY = 'position_roll_history_v3'; 
+        const ROLL_DURATION = 3500; // Increased duration for slower animation
+        const DEFAULT_D10_FACE = '---'; 
+
+        // --- STATE MANAGEMENT ---
+        function getHistory() {
+            try {
+                return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+            } catch (e) {
+                console.error("Error parsing history from localStorage", e);
+                return [];
+            }
+        }
+
+        function saveHistory(history) {
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+        }
+
+        function findOrCreateItem(posId, twist = defaultTwist) {
+            let history = getHistory();
+            // In gallery view, we only care about the posId, not the twist
+            const searchTwist = twist === defaultTwist ? defaultTwist : twist; 
+            let index = history.findIndex(item => item.id === posId && item.twist === searchTwist);
+            
+            const position = positionData.find(p => p.id === posId);
+            if (!position) return null;
+
+            if (index === -1) {
+                // If it's a gallery item (defaultTwist), only add if it's the base entry
+                if (twist === defaultTwist && history.some(item => item.id === posId && item.twist === defaultTwist)) {
+                     index = history.findIndex(item => item.id === posId && item.twist === defaultTwist);
+                } else {
+                     const newItem = {
+                        id: posId,
+                        number: position.number,
+                        twist: searchTwist,
+                        isLiked: false,
+                        performedCount: 0,
+                        timestamp: searchTwist === defaultTwist ? 0 : Date.now() 
+                    };
+                    history.push(newItem);
+                    saveHistory(history);
+                    index = history.length - 1;
+                }
+            }
+            return {item: history[index], index, history};
+        }
+
+        function updateHistory(posId, twist, action) {
+            const data = findOrCreateItem(posId, twist);
+            if (!data) return;
+
+            let {item, index, history} = data;
+
+            if (action === 'like') {
+                item.isLiked = !item.isLiked; 
+            } else if (action === 'perform') {
+                item.performedCount = (item.performedCount || 0) + 1;
+            }
+            
+            // Only update timestamp for rolls or actions taken on non-gallery base items
+            if (twist !== defaultTwist) {
+                 item.timestamp = Date.now();
+            }
+            history[index] = item;
+            
+            saveHistory(history);
+            
+            // Re-render only the active view after an update
+            if (historySection.style.display !== 'none') {
+                 const activeFilter = document.querySelector('.history-controls button.active').getAttribute('data-filter');
+                 renderHistory(activeFilter);
+            }
+            
+             if (gallerySection.style.display !== 'none') {
+                 renderGallery();
+            }
+            
+            return item;
+        }
+
+        // --- Dice Face Setup and Roll Function ---
+        function applyFaces(){
+            diceEls.forEach((die) => {
+                const cube = die.querySelector('.cube');
+                // Ensure no residual transition is on the cube before setting up faces
+                cube.style.transition = 'none'; 
+                cube.innerHTML = '';
+                const dieType = die.getAttribute('data-die-type');
+                
+                const defaultText = dieType === 'd10' ? DEFAULT_D10_FACE : defaultTwist;
+                
+                for(let f=0; f<6; f++) {
+                    const face = document.createElement('div');
+                    face.className = 'face';
+                    // The front face (f=0) gets the default text. Others get generic filler.
+                    face.textContent = f === 0 ? defaultText : (dieType === 'd10' ? d10Faces[f] : d6Twists[f]);
+                    cube.appendChild(face);
+                }
+            });
+        }
+        
+
+        function realisticRoll() {
+            if (rollBtn.classList.contains('rolling-lock')) return;
+            rollBtn.classList.add('rolling-lock');
+            
+            resultsEl.innerHTML = '';
+            
+            // Re-apply faces to reset cube state, crucial for the animation restart
+            applyFaces();
+            diceEls.forEach(d => d.classList.add('rolling'));
+
+            let positionDigits = [];
+            let twistText = '';
+            
+            const finalFaceEls = {}; 
+
+            diceEls.forEach((die, index) => {
+                const cube = die.querySelector('.cube');
+                const faces = cube.querySelectorAll('.face');
+                
+                let actualRollValue;
+                let faceIndex;
+
+                if (die.getAttribute('data-die-type') === 'd10') {
+                    actualRollValue = Math.floor(Math.random() * 10);
+                    positionDigits.push(actualRollValue);
+                    
+                    faceIndex = actualRollValue % 6; 
+                    
+                    finalFaceEls[index] = {el: faces[faceIndex], value: actualRollValue};
+
+                } else if (die.getAttribute('data-die-type') === 'd6') {
+                    actualRollValue = Math.floor(Math.random() * 6);
+                    twistText = d6Twists[actualRollValue];
+                    faceIndex = actualRollValue;
+                    
+                    finalFaceEls[index] = {el: faces[faceIndex], value: twistText};
+                }
+
+                // Standard face rotations
+                const faceRotations = [
+                    'rotateX(0deg) rotateY(0deg)', 'rotateY(-90deg)', 'rotateY(-180deg)', 
+                    'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'
+                ];
+
+                // Added rotation for the spin effect
+                const extraX = 360 * (3 + Math.floor(Math.random() * 3));
+                const extraY = 360 * (3 + Math.floor(Math.random() * 3));
+                const finalRotation = `${faceRotations[faceIndex]} rotateX(${extraX}deg) rotateY(${extraY}deg)`;
+
+                // SET THE TRANSITION: Use the longer duration here
+                cube.style.transition = `transform ${ROLL_DURATION}ms cubic-bezier(.2,.9,.3,1)`;
+                cube.style.transform = finalRotation;
+                
+                // Set the correct text value during the roll
+                setTimeout(() => {
+                    // For d10, we display the digit (0-9). For d6, we display the face index + 1 (1-6). 
+                    faces[faceIndex].textContent = die.getAttribute('data-die-type') === 'd10' ? actualRollValue : actualRollValue + 1; 
+                }, 500); 
+            });
+
+            // Handle results after the full roll duration
+            setTimeout(() => {
+                const posIndex = (positionDigits[0] * 100) + (positionDigits[1] * 10) + positionDigits[2];
+                const pos = positionData.find(p => p.id === posIndex);
+                const currentTwist = twistText;
+                
+                // --- FIX: Stop Animation and Display Final Value ---
+                // 1. Remove the transition property to prevent repeating animation/flicker
+                diceEls.forEach(d => {
+                    const cube = d.querySelector('.cube');
+                    cube.style.transition = 'none';
+                    d.classList.remove('rolling');
+                });
+                
+                // 2. Ensure all dice display their final number/text correctly
+                if(finalFaceEls[0]) finalFaceEls[0].el.textContent = finalFaceEls[0].value;
+                if(finalFaceEls[1]) finalFaceEls[1].el.textContent = finalFaceEls[1].value;
+                if(finalFaceEls[2]) finalFaceEls[2].el.textContent = finalFaceEls[2].value;
+                if(finalFaceEls[3]) finalFaceEls[3].el.textContent = finalFaceEls[3].value;
+                // ---------------------------------------------------------------------
+
+                if (!pos) {
+                    resultsEl.innerHTML = '<div style="color:var(--accent); margin-top:20px;">Error: Position data missing.</div>';
+                    rollBtn.classList.remove('rolling-lock');
+                    return;
+                }
+
+                const rolledItem = updateHistory(pos.id, currentTwist, 'roll');
+                const isLiked = rolledItem ? rolledItem.isLiked : false;
+                const likedText = isLiked ? 'Liked / Saved ❤️' : 'Like / Save Position';
+                
+                const fileIndex = pos.id + 1;
+                const imagePath = `Sex Position/Sex Position/New folder (${fileIndex}).jpg`;
+                
+                const positionImageElement = `
+                    <img src="${imagePath}" 
+                            alt="Position ${pos.number}" 
+                            class="ink-wash" 
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                            style="object-fit: contain;"
+                    >
+                    <div style="display:none; color:var(--muted); text-align:center;">
+                        Image not found for position #${pos.number}. 
+                    </div>
+                `;
+                
+                resultsEl.innerHTML = `
+                    <div class="result-card show" data-pos-id="${pos.id}" data-twist="${currentTwist}">
+                        <div class="position-image-container">
+                            ${positionImageElement}
+                        </div>
+                        <div class="result-actions">
+                            <button id="performBtn" class="action-btn perform-action">Performed ✅</button>
+                            <button id="likeBtn" class="action-btn like-action" data-liked="${isLiked}">${likedText}</button>
+                        </div>
+                        <p class="result-prompt">
+                            Sex Positions #${pos.number}
+                            <br>
+                            The Twist: ${currentTwist}
+                        </p>
+                    </div>
+                `;
+
+                // Add action listeners for the main roll result
+                document.getElementById('performBtn').addEventListener('click', () => {
+                    updateHistory(pos.id, currentTwist, 'perform');
+                    alert(`Position #${pos.number} marked as Performed!`);
+                });
+
+                const likeBtnEl = document.getElementById('likeBtn');
+                likeBtnEl.addEventListener('click', () => {
+                    const updatedItem = updateHistory(pos.id, currentTwist, 'like');
+                    const newIsLiked = updatedItem ? updatedItem.isLiked : false;
+                    likeBtnEl.textContent = newIsLiked ? 'Liked / Saved ❤️' : 'Like / Save Position';
+                });
+
+                rollBtn.classList.remove('rolling-lock'); 
+            }, ROLL_DURATION);
+        }
+
+        // --- History / Gallery Functions ---
+
+        function getTags(item) {
+            const tags = [];
+            if (item.isLiked) tags.push('<span class="history-tag tag-liked">❤️</span>');
+            if (item.performedCount > 0) tags.push('<span class="history-tag tag-performed">✅</span>');
+            if (item.performedCount > 1) tags.push(`<span class="history-tag tag-count">x${item.performedCount}</span>`);
+            return tags.join('');
+        }
+
+        function createItemHtml(item, isGallery = false) {
+            const fileIndex = item.id + 1;
+            const imagePath = `Sex Position/Sex Position (${fileIndex}).jpg`;
+            const position = positionData.find(p => p.id === item.id);
+            const posName = position ? position.name.split(' (')[0] : 'Unknown Position';
+
+            // Determine if the item in history/gallery is the base (defaultTwist) or a rolled position.
+            const itemTwist = item.twist || defaultTwist;
+
+            const infoText = isGallery 
+                ? posName
+                : (itemTwist !== defaultTwist ? (itemTwist.substring(0, 30) + (itemTwist.length > 30 ? '...' : '')) : posName);
+
+            return `
+                <div class="${isGallery ? 'gallery-item' : 'history-item'}" data-id="${item.id}" data-twist="${itemTwist}">
+                    <div class="history-item-image">
+                        <img src="${imagePath}" 
+                            alt="Position ${item.number}" 
+                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                        >
+                        <div style="display:none; color:var(--muted); text-align:center;">
+                            No Image
+                        </div>
+                    </div>
+                    <div class="history-tags">${getTags(item)}</div>
+                    <div class="history-item-info">
+                        <p class="history-item-number">#${item.number}</p>
+                        <p title="${itemTwist !== defaultTwist ? itemTwist : posName}">${infoText}</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderHistory(filter) {
+            const history = getHistory();
+            
+            // Filter out base gallery entries (twist === defaultTwist) for the History page
+            let rolledHistory = history.filter(item => item.twist !== defaultTwist);
+
+            if (rolledHistory.length === 0) {
+                historyGrid.innerHTML = '';
+                document.getElementById('historyEmpty').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('historyEmpty').style.display = 'none';
+
+            let filteredHistory = rolledHistory;
+
+            if (filter === 'performed') {
+                filteredHistory = rolledHistory.filter(item => item.performedCount > 0);
+            } else if (filter === 'liked') {
+                filteredHistory = rolledHistory.filter(item => item.isLiked);
+            } else if (filter === 'not_performed') {
+                filteredHistory = rolledHistory.filter(item => item.performedCount === 0);
+            }
+
+            filteredHistory.sort((a, b) => b.timestamp - a.timestamp); 
+
+            historyGrid.innerHTML = filteredHistory.map(item => createItemHtml(item, false)).join('');
+
+            // CRITICAL FIX: Re-attach listeners to the newly rendered items
+            document.querySelectorAll('.history-item').forEach(itemEl => {
+                itemEl.addEventListener('click', openModal);
+            });
+        }
+        
+        function renderGallery() {
+            // Ensure every position has a base entry in history to track likes/performs
+            const allPositions = positionData.map(pos => {
+                const data = findOrCreateItem(pos.id, defaultTwist); 
+                return data ? data.item : null; 
+            }).filter(item => item !== null);
+
+            // Sort by ID
+            allPositions.sort((a, b) => a.id - b.id);
+
+            galleryGrid.innerHTML = allPositions.map(item => createItemHtml(item, true)).join('');
+
+            // CRITICAL FIX: Re-attach listeners to the newly rendered items
+            document.querySelectorAll('.gallery-item').forEach(itemEl => {
+                itemEl.addEventListener('click', openModal);
+            });
+        }
+        
+        // --- Modal Functionality ---
+        function openModal(event) {
+            const itemEl = event.currentTarget;
+            const posId = parseInt(itemEl.getAttribute('data-id'));
+            
+            // Get the twist from the element. If it's a gallery item, the twist will be defaultTwist.
+            let twist = itemEl.getAttribute('data-twist');
+            
+            const data = findOrCreateItem(posId, twist);
+            if (!data) return;
+            const item = data.item;
+
+            const position = positionData.find(p => p.id === posId);
+            const posName = position ? position.name.split(' (')[0] : 'Unknown Position';
+
+            const fileIndex = item.id + 1;
+            const imagePath = `Sex Position/Sex Position (${fileIndex}).jpg`;
+
+            modalImage.src = imagePath;
+            modalTitle.textContent = `#${item.number} ${posName}`;
+            
+            if (item.twist === defaultTwist) {
+                 modalTwist.textContent = "Base Position (Roll the dice for a specific twist!)";
+                 modalTwist.style.fontStyle = 'normal';
+            } else {
+                 modalTwist.textContent = `Rolled Twist: ${item.twist}`;
+                 modalTwist.style.fontStyle = 'italic';
+            }
+            
+            modalCount.textContent = item.performedCount > 0 
+                ? `Performed ${item.performedCount} time(s)` 
+                : 'Not performed yet.';
+            
+            modalLikeBtn.textContent = item.isLiked ? 'Saved / Liked ❤️' : 'Like / Save Position';
+            
+            // Store the data on the buttons themselves for click handling
+            modalPerformBtn.setAttribute('data-id', posId);
+            modalPerformBtn.setAttribute('data-twist', twist);
+            modalLikeBtn.setAttribute('data-id', posId);
+            modalLikeBtn.setAttribute('data-twist', twist);
+
+            historyModal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            historyModal.style.display = 'none';
+        }
+
+        // --- Global View Switching ---
+        function switchView(view) {
+            diceSection.style.display = 'none';
+            historySection.style.display = 'none';
+            gallerySection.style.display = 'none';
+            
+            if (view === 'dice') {
+                diceSection.style.display = 'block';
+                // Reset results when returning to dice view
+                resultsEl.innerHTML = '';
+            } else if (view === 'history') {
+                historySection.style.display = 'block';
+                // Ensure correct filter is active on load (default to 'all')
+                historyControls.forEach(btn => btn.classList.remove('active'));
+                document.querySelector('.history-controls button[data-filter="all"]').classList.add('active');
+                renderHistory('all'); 
+            } else if (view === 'gallery') {
+                 gallerySection.style.display = 'block';
+                 renderGallery();
+            }
+        }
+        
+        // --- Reset Data Function ---
+        function clearAllData() {
+            if (confirm("Are you sure you want to permanently delete ALL saved positions, likes, and performance history? This cannot be undone.")) {
+                localStorage.removeItem(HISTORY_KEY);
+                alert("All saved data has been cleared. Restarting...");
+                window.location.reload(); 
+            }
+        }
+
+
+        // --- Initialization and Event Listeners ---
+        applyFaces();
+        rollBtn.addEventListener('click', realisticRoll);
+        rollBtn.addEventListener('keydown',e=>{
+            if(e.key==='Enter'||e.key===' '){
+                e.preventDefault();
+                realisticRoll();
+            }
+        });
+
+        // View switching listeners
+        historyLinkBtn.addEventListener('click', () => switchView('history'));
+        galleryLinkBtn.addEventListener('click', () => switchView('gallery')); 
+        backToRollBtnHistory.addEventListener('click', () => switchView('dice'));
+        backToRollBtnGallery.addEventListener('click', () => switchView('dice')); 
+        
+        // Data Reset Listener
+        resetDataBtn.addEventListener('click', clearAllData);
+
+        // History filtering listeners
+        historyControls.forEach(button => {
+            button.addEventListener('click', function() {
+                historyControls.forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                renderHistory(this.getAttribute('data-filter'));
+            });
+        });
+        
+        // Modal listeners
+        modalClose.addEventListener('click', closeModal);
+        historyModal.addEventListener('click', (e) => {
+            if (e.target.id === 'historyModal') {
+                closeModal(); 
+            }
+        });
+        
+        // Modal Action Listeners (CRITICAL: These were here but need to use the data on the buttons)
+        modalPerformBtn.addEventListener('click', function() {
+            const posId = parseInt(this.getAttribute('data-id'));
+            const twist = this.getAttribute('data-twist');
+            updateHistory(posId, twist, 'perform');
+            alert(`Position #${posId.toString().padStart(3, '0')} marked as Performed!`);
+            closeModal();
+        });
+        
+        modalLikeBtn.addEventListener('click', function() {
+            const posId = parseInt(this.getAttribute('data-id'));
+            const twist = this.getAttribute('data-twist');
+            const updatedItem = updateHistory(posId, twist, 'like');
+            
+            this.textContent = updatedItem.isLiked ? 'Saved / Liked ❤️' : 'Like / Save Position';
+        });
+
+        // Initialize view
+        switchView('dice'); 
+    </script>
+</body>
+</html>

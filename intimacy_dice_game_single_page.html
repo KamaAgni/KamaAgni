@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Intimacy Dice What, Where, How</title>
+
+    <style>
+        :root {
+            --bg:#070814;
+            --card:#0b1220;
+            --accent:#ff6b81;
+            --muted:#9fb0c8;
+            --dice-size:150px;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family:'Inter',system-ui,Segoe UI,Roboto,Arial;
+            background:radial-gradient(1200px 600px at 10% 10%,#0f2036 0%, #071022 40%, #02040a 100%);
+            color:#e9f2ff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            padding:20px;
+        }
+
+        .app {
+            width:100%;
+            max-width:1100px;
+            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.3));
+            border-radius:18px;
+            padding:28px;
+            box-shadow:0 12px 50px rgba(2,6,23,0.7);
+        }
+
+        header { text-align:center; }
+        h1 { margin:0; font-size:24px; color:var(--accent); text-shadow:0 6px 20px rgba(255,107,129,0.12); }
+        p.lead { margin:8px 0 0; color:var(--muted); }
+
+        .controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            margin-top: 18px;
+            flex-wrap: wrap; /* Allows wrapping on small screens */
+            width: 100%;
+        }
+
+        select {
+            background:#0f2438; color:white;
+            border:1px solid rgba(255,255,255,0.06);
+            border-radius:10px;
+            padding:10px 12px;
+            font-size:15px;
+        }
+
+        button.roll {
+            background:linear-gradient(90deg,var(--accent),#ff9aa2);
+            color:white;
+            border:none;
+            padding:14px 26px;
+            border-radius:999px;
+            font-weight:700;
+            font-size:18px;
+            cursor:pointer;
+            box-shadow:0 10px 30px rgba(255,107,129,0.18);
+        }
+
+        .game {
+            display:flex;
+            gap:20px;
+            align-items:center;
+            justify-content:center;
+            margin-top:26px;
+            flex-wrap:wrap; /* Allows dice to wrap/stack if space is tight */
+        }
+
+        .die {
+            width:var(--dice-size);
+            height:var(--dice-size);
+            perspective:1000px;
+            position:relative;
+        }
+
+        .cube {
+            width:100%; height:100%;
+            position:absolute;
+            transform-style:preserve-3d;
+            transition:transform 1100ms cubic-bezier(.2,.9,.3,1);
+        }
+
+        .face {
+            position:absolute; inset:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            border-radius:18px;
+            padding:10px;
+            text-align:center;
+            font-weight:800;
+            font-size:20px;
+            line-height:1;
+            backface-visibility:hidden;
+            box-shadow:0 8px 30px rgba(2,6,23,0.6);
+        }
+
+        .face.action { background:linear-gradient(145deg,#ff7f9a,#ffb3c0); color:#08101a; }
+        .face.body { background:linear-gradient(145deg,#b7e0ff,#dff4ff); color:#02122a; }
+        .face.manner { background:linear-gradient(145deg,#fff5c7,#ffdca8); color:#1b1205; }
+
+        .face:nth-child(1){transform:rotateY(0deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+        .face:nth-child(2){transform:rotateY(90deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+        .face:nth-child(3){transform:rotateY(180deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+        .face:nth-child(4){transform:rotateY(-90deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+        .face:nth-child(5){transform:rotateX(90deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+        .face:nth-child(6){transform:rotateX(-90deg) translateZ(calc(var(--dice-size)/2 - 6px))}
+
+        .die .shadow {
+            position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
+            width:70%; height:18px;
+            border-radius:50%;
+            filter:blur(10px);
+            background:rgba(0,0,0,0.45);
+            transition:width .7s, height .7s, opacity .7s;
+        }
+
+        .die.rolling .shadow{width:95%; height:26px; opacity:0.6;}
+
+        .results {
+            margin-top:20px;
+            text-align:center;
+            color:#f2fbff;
+            min-height:60px;
+        }
+
+        .tip {
+            margin-top:18px;
+            font-size:14px;
+            color:var(--muted);
+            text-align:center;
+        }
+        
+        /* Result Card Styles */
+        .results div {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .results div:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 20px rgba(255,107,129,0.25);
+        }
+        .result-card.show {
+            background: rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 18px 22px;
+            max-width: 520px;
+            margin: 20px auto;
+            animation: fadeIn 0.5s ease;
+            word-break: break-word;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: nowrap;
+        }
+
+        .result-header .emoji {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .result-text {
+            flex-grow: 1;
+            color: #fff;
+            font-size: 20px;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        .save-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 22px;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+
+        .save-btn:hover {
+            transform: scale(1.2);
+            color: #ff9aa2;
+        }
+
+        .result-prompt {
+            font-size: 15px;
+            color: var(--muted);
+            margin-top: 10px;
+            text-align: left;
+        }
+        
+        /* Favorites Section Styling */
+        #favorites {
+            text-align: center;
+        }
+        
+        #clearFavs {
+            /* Default/Desktop styles */
+            width: auto;
+            display: inline-block;
+            margin: 10px auto 0 auto !important; /* Override JS inline margin */
+        }
+        
+        /* --- MOBILE FRIENDLY RESPONSIVE FIXES --- */
+        @media (max-width: 720px) {
+
+            :root {
+                --dice-size: 100px; /* slightly larger than the old 90px for readability */
+            }
+
+            body {
+                padding: 12px;
+            }
+
+            .app {
+                padding: 20px;
+                border-radius: 14px;
+            }
+
+            h1 {
+                font-size: 20px;
+                line-height: 1.2;
+            }
+
+            p.lead {
+                font-size: 14px;
+            }
+
+            /* Controls */
+            .controls {
+                flex-direction: column; /* Stack controls vertically */
+                gap: 10px;
+            }
+
+            select {
+                width: 100%; /* Full width for select box */
+                font-size: 16px;
+                padding: 12px;
+            }
+
+            button.roll {
+                width: 100%; /* Full width for roll button */
+                font-size: 18px;
+                padding: 14px;
+            }
+
+            /* Dice layout */
+            .game {
+                /* Let the dice wrap naturally. If 3 don't fit horizontally, they'll wrap. */
+                gap: 15px;
+            }
+            
+            .die p {
+                font-size: 13px; /* Smaller text below the dice */
+            }
+            
+            .face {
+                font-size: 16px; /* Smaller text on the dice faces */
+            }
+
+
+            /* Result card */
+            .result-card.show {
+                padding: 14px 16px;
+                margin-top: 16px;
+                max-width: 100%;
+                border-radius: 14px;
+            }
+
+            .result-header {
+                align-items: center; /* Better alignment when elements wrap */
+            }
+
+            .result-text {
+                font-size: 17px;
+            }
+
+            .result-prompt {
+                font-size: 13px;
+            }
+
+            /* Favorites */
+            #favorites h3 {
+                font-size: 16px;
+            }
+
+            #favList {
+                font-size: 13px;
+                padding: 0 10px;
+            }
+
+            #clearFavs {
+                /* Center the clear button on mobile */
+                width: auto !important; 
+                display: block;
+                margin: 10px auto 0 auto !important;
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        /* EXTRA SMALL DEVICES */
+        @media (max-width: 420px) {
+
+            :root {
+                --dice-size: 85px; /* Minimum comfortable size */
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+            
+            .die p {
+                font-size: 12px; 
+            }
+
+            .result-text {
+                font-size: 16px;
+            }
+        }
+        .home-btn {
+  display:inline-block;
+  margin-top:12px;
+  padding:8px 16px;
+  background:linear-gradient(90deg,var(--accent),#ff9aa2);
+  color:#fff;
+  border-radius:999px;
+  font-weight:600;
+  text-decoration:none;
+  font-size:14px;
+  box-shadow:0 6px 20px rgba(255,107,129,0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-btn:hover {
+  transform: scale(1.05);
+  box-shadow:0 12px 35px rgba(255,107,129,0.35);
+}
+
+    </style>
+</head>
+
+<body>
+    <div class="app" role="application">
+        <nav>
+  <a href="Index.html" class="home-btn">🏠 Home</a>
+</nav>
+
+        <header>
+            <h1>Intimacy Dice What, Where, How</h1>
+            <p class="lead">Each dice represents: <strong>What</strong>, <strong>Where</strong>, and <strong>How</strong>. Choose a joy level and roll to discover your next connection move!</p>
+        </header>
+
+        <div class="controls">
+            <select id="level" aria-label="Joy level">
+                <option value="soft">💖 Gentle Joy — comfort & closeness</option>
+                <option value="medium">🔥 Passionate Joy — warm & flirty</option>
+                <option value="wild">💥 Wild Joy — bold & playful</option>
+            </select>
+            <button id="rollBtn" class="roll">Roll the dice</button>
+        </div>
+
+        <div class="game" id="game">
+            <div class="die" data-index="0"><div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">What</p></div>
+            <div class="die" data-index="1"><div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Where</p></div>
+            <div class="die" data-index="2"><div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">How</p></div>
+        </div>
+
+        <div class="results" id="results"></div>
+
+        <div class="tip" id="tip">Tip: Actions like affectionate touch, shared novelty, eye contact and laughter boost connection.</div>
+    </div>
+
+    <script>
+        const pools = {
+            soft: {
+                actions:['HOLD HANDS','TRACE','KISS','CUDDLE','COMPLIMENT','Massage'],
+                bodies:['CHEEK','FOREHEAD','HAND','BACK','SHOULDER','ARM','lips','Neck','Ears'],
+                manners:['SLOWLY','SOFTLY','With Eye Contact','Teasingly','TENDERLY','WHILE BREATHING TOGETHER']
+            },
+            medium: {
+                actions:['KISS DEEPLY','MASSAGE Deeply','NIBBLE','TEASE','Pull Closer','Explore With Tongue'],
+                bodies:['NECK','LIPS','EAR','WAIST','CHEST','HAIR','Stomach','Inner Thighs','Hips'],
+                manners:['With Rhythm','WITH EYE CONTACT','With Moans','WHILE LAUGHING','Alternating Fast And Slow','WITH A WHISPER']
+            },
+            wild: {
+                actions:['TEASE','Spank','Bite','KISS FIRMLY','TRACE WITH FINGERTIPS','Lick','Scratch'],
+                bodies:['NECK','HIPS','INNER THIGH','LOWER BACK','COLLAR BONE','WRIST','Hips','Bottom', 'Nipples', 'Genitals', 'Whole Body'],
+                manners:['WITH CONFIDENCE','Blindfolded','With Playful Dominance','SILENTLY','With Dirty Talk','Following Their Moans' ]
+            }
+        };
+
+        const diceEls = document.querySelectorAll('.die');
+        const rollBtn = document.getElementById('rollBtn');
+        const levelSel = document.getElementById('level');
+        const resultsEl = document.getElementById('results');
+        const tipEl = document.getElementById('tip');
+
+        // Favorites container
+        const favSection = document.createElement('div');
+        favSection.id = 'favorites';
+        favSection.style.marginTop = '30px';
+        favSection.innerHTML = `
+            <h3 style="text-align:center;color:#ff9aa2;">❤️ Saved Favorites</h3>
+            <div id="favList" style="text-align:center;color:#e9f2ff;font-size:15px;line-height:1.6;"></div>
+            <button id="clearFavs" style="margin-top:10px;background:#222;color:#fff;border:none;padding:8px 16px;border-radius:8px;cursor:pointer;">Clear Favorites</button>
+        `;
+        document.querySelector('.app').appendChild(favSection);
+
+        const favListEl = document.getElementById('favList');
+        const clearFavsBtn = document.getElementById('clearFavs');
+
+        // Helpers
+        function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+        function applyFaces(level){
+            const sets=[pools[level].actions,pools[level].bodies,pools[level].manners];
+            diceEls.forEach((die,i)=>{
+                const cube=die.querySelector('.cube');
+                cube.innerHTML='';
+                const type=i===0?'action':i===1?'body':'manner';
+                const used=new Set();
+                for(let f=0;f<6;f++){
+                    let choice;
+                    do{ choice=pick(sets[i]); }while(used.has(choice));
+                    used.add(choice);
+                    const face=document.createElement('div');
+                    face.className='face '+type;
+                    face.textContent=choice;
+                    cube.appendChild(face);
+                }
+            });
+        }
+
+        function microPrompt(){
+            const prompts=[
+                'Take a slow breath together before you start.',
+                'Hold the gaze for 5 seconds.',
+                'Try it for about one minute.',
+                'End with a smile or laugh.',
+                'Whisper something you appreciate afterward.',
+                'Keep your touch steady and intentional.'
+            ];
+            return pick(prompts);
+        }
+
+        function formatSentence(action, body, manner) {
+            const a = action.toLowerCase();
+            const b = body.toLowerCase();
+            const m = manner.toLowerCase();
+
+            // Normalize body wording
+            const bodyText = 
+                (b === "whole body") ? "their whole body" :
+                (b === "genitals") ? "their intimate areas" :
+                `your partner’s ${b}`;
+
+            // ---- Gentle / Soft ----
+            if (a.includes("hold hands"))
+                return `Hold hands ${m}.`;
+
+            if (a.includes("compliment"))
+                return `Give your partner a genuine compliment ${m}.`;
+
+            if (a.includes("cuddle"))
+                return `Cuddle your partner ${m}.`;
+
+            if (a.includes("brush"))
+                return `Brush ${bodyText} ${m}.`;
+
+            if (a.includes("trace"))
+                return `Trace along ${bodyText} ${m}.`;
+
+            // ---- Kissing variations ----
+            if (a.includes("kiss deeply"))
+                return `Kiss your partner’s ${b} deeply ${m}.`;
+
+            if (a.includes("kiss firmly"))
+                return `Kiss your partner’s ${b} firmly ${m}.`;
+
+            if (a.includes("kiss"))
+                return `Kiss your partner’s ${b} ${m}.`;
+
+            // ---- Massage variations ----
+            if (a.includes("massage deeply"))
+                return `Give a deep massage to ${bodyText} ${m}.`;
+
+            if (a.includes("massage"))
+                return `Massage ${bodyText} ${m}.`;
+
+            // ---- Tongue / Oral play ----
+            if (a.includes("explore with tongue"))
+                return `Explore ${bodyText} with your tongue ${m}.`;
+
+            if (a.includes("lick"))
+                return `Lick ${bodyText} ${m}.`;
+
+            // ---- Teasing / Nibbling / Biting ----
+            if (a.includes("nibble"))
+                return `Gently nibble ${bodyText} ${m}.`;
+
+            if (a.includes("bite"))
+                return `Gently bite ${bodyText} ${m}.`;
+
+            if (a.includes("tease"))
+                return `Playfully tease ${bodyText} ${m}.`;
+
+            // ---- Whisper variations ----
+            if (a.includes("whisper something bold"))
+                return `Whisper something bold near your partner’s ${b} ${m}.`;
+
+            if (a.includes("whisper"))
+                return `Whisper near your partner’s ${b} ${m}.`;
+
+            // ---- Spank ----
+            if (a.includes("spank"))
+                return `Give a playful spank on your partner’s ${b} ${m}.`;
+
+            // ---- Pull Closer ----
+            if (a.includes("pull closer"))
+                return `Pull your partner closer ${m}.`;
+
+            // ---- Scratch ----
+            if (a.includes("scratch"))
+                return `Lightly scratch ${bodyText} ${m}.`;
+
+            // ---- General fallback ----
+            return `${action} your partner’s ${b} ${m}.`;
+        }
+
+        function realisticRoll() {
+            const level = levelSel.value;
+            applyFaces(level);
+            rollBtn.disabled = true;
+            diceEls.forEach(d => d.classList.add('rolling'));
+
+            const chosen = [];
+
+            diceEls.forEach((die, idx) => {
+                const cube = die.querySelector('.cube');
+                const faces = cube.querySelectorAll('.face');
+                const faceIndex = Math.floor(Math.random() * faces.length);
+                const chosenFace = faces[faceIndex].textContent;
+                chosen.push(chosenFace);
+
+                // determine correct final orientation for each face index
+                const faceRotations = [
+                    'rotateX(0deg) rotateY(0deg)',           // front
+                    'rotateY(-90deg)',                      // right
+                    'rotateY(-180deg)',                     // back
+                    'rotateY(90deg)',                       // left
+                    'rotateX(-90deg)',                      // top
+                    'rotateX(90deg)'                        // bottom
+                ];
+
+                // random extra spins to make it look natural
+                const extraX = 360 * (2 + Math.floor(Math.random() * 2));
+                const extraY = 360 * (2 + Math.floor(Math.random() * 2));
+
+                const finalRotation = `${faceRotations[faceIndex]} rotateX(${extraX}deg) rotateY(${extraY}deg)`;
+
+                cube.style.transition = 'transform 1.3s cubic-bezier(.2,.9,.3,1)';
+                cube.style.transform = finalRotation;
+            });
+
+            // finish roll
+            setTimeout(() => {
+                const [a, b, c] = chosen;
+                const sentence = formatSentence(a, b, c);
+                const prompt = microPrompt();
+
+                resultsEl.innerHTML = `
+                    <div class="result-card show">
+                        <div class="result-header">
+                            <span class="emoji">💋</span>
+                            <p class="result-text">${sentence}</p>
+                            <button id="saveFav" class="save-btn" title="Save this move">❤️</button>
+                        </div>
+                        <p class="result-prompt">${prompt}</p>
+                    </div>
+                `;
+
+
+                document.getElementById('saveFav').addEventListener('click', () => saveFavorite(sentence));
+
+                const joined = (a + ' ' + b + ' ' + c).toLowerCase();
+                const tips = {
+                    touch: 'Gentle physical touch releases oxytocin the bonding hormone.',
+                    kiss: 'Kissing and slow affection deepen emotional connection.',
+                    novelty: 'Doing something new together reignites spark and curiosity.',
+                    laugh: 'Shared laughter builds playfulness and trust.',
+                    gaze: 'Eye contact and presence strengthen intimacy.'
+                };
+                let chosenTip = tips.touch;
+                if (joined.includes('kiss')) chosenTip = tips.kiss;
+                else if (joined.includes('novel') || joined.includes('dance') || joined.includes('dare')) chosenTip = tips.novelty;
+                else if (joined.includes('laugh') || joined.includes('humor')) chosenTip = tips.laugh;
+                else if (joined.includes('eye') || joined.includes('gaze')) chosenTip = tips.gaze;
+                tipEl.textContent = chosenTip;
+
+                diceEls.forEach(d => d.classList.remove('rolling'));
+                rollBtn.disabled = false;
+            }, 1400);
+        }
+
+        function saveFavorite(text){
+            const list=JSON.parse(localStorage.getItem('favorites')||'[]');
+            if(!list.includes(text)){
+                list.push(text);
+                localStorage.setItem('favorites',JSON.stringify(list));
+                renderFavorites();
+            }
+        }
+
+        function renderFavorites(){
+            const list=JSON.parse(localStorage.getItem('favorites')||'[]');
+            favListEl.innerHTML=list.length
+                ? list.map(item=>`<div>💞 ${item}</div>`).join('')
+                : '<em>No favorites saved yet.</em>';
+        }
+
+        // Initialize listeners and state
+        clearFavsBtn.addEventListener('click',()=>{
+            localStorage.removeItem('favorites');
+            renderFavorites();
+        });
+
+        applyFaces(levelSel.value);
+        levelSel.addEventListener('change',()=>{
+            applyFaces(levelSel.value);
+            resultsEl.innerHTML='<div style="font-size:14px; color:var(--muted); margin-top:20px;">Pool updated. Roll when ready.</div>';
+        });
+        rollBtn.addEventListener('click',realisticRoll);
+        rollBtn.addEventListener('keydown',e=>{
+            if(e.key==='Enter'||e.key===' '){
+                e.preventDefault();
+                realisticRoll();
+            }
+        });
+        renderFavorites();
+    </script>
+</body>
+</html>
