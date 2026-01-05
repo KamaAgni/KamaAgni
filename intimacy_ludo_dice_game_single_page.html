@@ -1,273 +1,328 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Couples Ludo Game — Upgraded</title>
-<style>
-  :root{
-    --bg:#0b0710;
-    --card:#100514;
-    --accent:#ff6b81;
-    --muted:#c4b8c6;
-    --deep-plum: #3B0A45;
-    --romantic-red: #7A2048;
-    --sensual-purple: #2C1A27;
-    --panel:#160818;
-    --token-p1:#ff9aa2;
-    --token-p2:#9ad7ff;
-    --arrow-color: rgba(255,255,255,0.92);
-  }
-  *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif}
-  html,body{
-    height:100%;
-    margin:0;
-    background:linear-gradient(180deg,#07030b 0%, #13041b 40%), radial-gradient(800px 400px at 10% 10%, rgba(123,23,53,0.08), transparent 40%);
-    color:#f4e9f0;
-    -webkit-font-smoothing:antialiased;
-    -moz-osx-font-smoothing:grayscale;
-  }
-  a { color: inherit; text-decoration: none; }
-  .wrap{min-height:100vh;display:flex;flex-direction: column;align-items:center;justify-content:center;padding:6px;overflow-x: hidden;overflow-y: auto;}
-  .app{width:100%;max-width:1200px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.25));border-radius:16px;padding:14px;box-shadow:0 20px 80px rgba(11,3,18,0.75);}
-  header{display:flex;align-items:center;justify-content:space-between;gap:12px; margin-bottom: 6px;}
-  h1{margin:0;color:var(--accent);font-size:20px;letter-spacing:0.6px}
-  .nav{display:flex;gap:6px;align-items:center}
-  .btn{background:linear-gradient(90deg,var(--accent),#ff9aa2);border:none;color:white;padding:8px 12px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,129,0.08); font-size:14px;}
-  .btn[disabled]{opacity:0.5;cursor:not-allowed}
-  .secondary{background:#2a1b2a;padding:8px 12px;border-radius:10px;color:#fff;border:none; font-size:14px;}
-  .layout{display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:10px}
-  .board-wrap{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
-  .board{width:100%;max-width:780px;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:10px;background:linear-gradient(180deg, rgba(59,10,69,0.06), rgba(44,26,39,0.06));border-radius:12px}
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Couples Ludo Game — Upgraded</title>
+  <style>
+    :root{
+      --bg:#0b0710;
+      --card:#100514;
+      --accent:#ff6b81;
+      --muted:#c4b8c6;
+      --deep-plum: #3B0A45;
+      --romantic-red: #7A2048;
+      --sensual-purple: #2C1A27;
+      --panel:#160818;
+      --token-p1:#ff9aa2;
+      --token-p2:#9ad7ff;
+      --arrow-color: rgba(255,255,255,0.92);
+    }
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,Arial,Helvetica,sans-serif}
+    html,body{
+      height:100%;
+      margin:0;
+      background:linear-gradient(180deg,#07030b 0%, #13041b 40%), radial-gradient(800px 400px at 10% 10%, rgba(123,23,53,0.08), transparent 40%);
+      color:#f4e9f0;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    a { color: inherit; text-decoration: none; }
+    .wrap{min-height:100vh;display:flex;flex-direction: column;align-items:center;justify-content:center;padding:6px;overflow-x: hidden;overflow-y: auto;}
+    .app{width:100%;max-width:1200px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.25));border-radius:16px;padding:14px;box-shadow:0 20px 80px rgba(11,3,18,0.75);}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px; margin-bottom: 6px;}
+    h1{margin:0;color:var(--accent);font-size:20px;letter-spacing:0.6px}
+    .nav{display:flex;gap:6px;align-items:center}
+    .btn{background:linear-gradient(90deg,var(--accent),#ff9aa2);border:none;color:white;padding:8px 12px;border-radius:999px;font-weight:700;cursor:pointer;box-shadow:0 6px 18px rgba(255,107,129,0.08); font-size:14px;}
+    .btn[disabled]{opacity:0.5;cursor:not-allowed}
+    .secondary{background:#2a1b2a;padding:8px 12px;border-radius:10px;color:#fff;border:none; font-size:14px;}
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:16px;margin-top:10px}
+    .board-wrap{background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.04));padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    .board{width:100%;max-width:780px;aspect-ratio:1/1;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;padding:10px;background:linear-gradient(180deg, rgba(59,10,69,0.06), rgba(44,26,39,0.06));border-radius:12px}
 
-  .cell{
-    background: var(--sensual-purple);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;font-weight:700;font-size:12px;color:var(--muted);padding:6px;
-    box-shadow: inset 0 -8px 24px rgba(0,0,0,0.45), 0 6px 18px rgba(0,0,0,0.35);
-    transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
-    border: 1px solid rgba(255,255,255,0.02);min-height:0;
-  }
-  .cell.ring-3{ background: linear-gradient(135deg,#3b0a45, #52113f); }
-  .cell.ring-2{ background: linear-gradient(135deg,#4b113d, #5f163f); }
-  .cell.ring-1{ background: linear-gradient(135deg,#60143b, #68163a); }
-  .cell.ring-0{ background: linear-gradient(135deg,#6e1338, #4a0622); }
-  .cell.start{ outline: 3px dashed rgba(255,255,255,0.04); box-shadow: 0 10px 30px rgba(122,32,72,0.14); color:#fff; font-weight:900; border-color: rgba(255,255,255,0.06) }
-  .cell.finish{ background: linear-gradient(135deg,#4b0e36,#5b0f38);color:#0f0710;font-weight:900;border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 8px 28px rgba(91,15,56,0.45), inset 0 -6px 12px rgba(0,0,0,0.4); }
-  .cell.finish .win-text{ color: #0b0810;font-weight:900;font-size:14px;padding:6px 8px;background: rgba(255,255,255,0.08);border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.5); }
-  .exit-arrow{ position:absolute; bottom:6px; left:6px; font-size:18px; color:var(--arrow-color); background: rgba(255,255,255,0.04); padding:2px 6px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.5); pointer-events:none; }
+    .cell{
+      background: var(--sensual-purple);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;font-weight:700;font-size:12px;color:var(--muted);padding:6px;
+      box-shadow: inset 0 -8px 24px rgba(0,0,0,0.45), 0 6px 18px rgba(0,0,0,0.35);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s;
+      border: 1px solid rgba(255,255,255,0.02);min-height:0;
+    }
+    .cell.ring-3{ background: linear-gradient(135deg,#3b0a45, #52113f); }
+    .cell.ring-2{ background: linear-gradient(135deg,#4b113d, #5f163f); }
+    .cell.ring-1{ background: linear-gradient(135deg,#60143b, #68163a); }
+    .cell.ring-0{ background: linear-gradient(135deg,#6e1338, #4a0622); }
+    .cell.start{ outline: 3px dashed rgba(255,255,255,0.04); box-shadow: 0 10px 30px rgba(122,32,72,0.14); color:#fff; font-weight:900; border-color: rgba(255,255,255,0.06) }
+    .cell.finish{ background: linear-gradient(135deg,#4b0e36,#5b0f38);color:#0f0710;font-weight:900;border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 8px 28px rgba(91,15,56,0.45), inset 0 -6px 12px rgba(0,0,0,0.4); }
+    .cell.finish .win-text{ color: #0b0810;font-weight:900;font-size:14px;padding:6px 8px;background: rgba(255,255,255,0.08);border-radius:6px;box-shadow:0 6px 18px rgba(0,0,0,0.5); }
+    .exit-arrow{ position:absolute; bottom:6px; left:6px; font-size:18px; color:var(--arrow-color); background: rgba(255,255,255,0.04); padding:2px 6px; border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,0.5); pointer-events:none; }
 
-  .token{ width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;transform:translate(-50%,-50%);box-shadow:0 10px 30px rgba(0,0,0,0.6);overflow:visible; transition: top .16s ease, left .16s ease, transform .16s ease;background:transparent;border:0;}
-  .token svg{ width:100%; height:100%; display:block; }
+    .token{ width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;transform:translate(-50%,-50%);box-shadow:0 10px 30px rgba(0,0,0,0.6);overflow:visible; transition: top .16s ease, left .16s ease, transform .16s ease;background:transparent;border:0;}
+    .token svg{ width:100%; height:100%; display:block; }
 
-  .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));padding:10px;border-radius:12px}
-  .controls-wrap{display:flex;flex-direction:column;gap:10px;align-items:stretch}
-  .player-summary{display:flex;gap:10px;align-items:center;justify-content:space-between}
-  .muted{color:var(--muted);font-size:13px}
+    .panel{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03));padding:10px;border-radius:12px}
+    .controls-wrap{display:flex;flex-direction:column;gap:10px;align-items:stretch}
+    .player-summary{display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .muted{color:var(--muted);font-size:13px}
 
-  .dice-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .dice-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:4px;width:100%}
-  .die{width:84px;height:84px;border-radius:12px;background:linear-gradient(180deg,#120616,#0b0810);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#fff;perspective:900px;position:relative;border:1px solid rgba(255,255,255,0.03)}
-  .dice-face{font-weight:900;font-size:34px;display:block}
-  .dice-spin { animation: dice-spin 700ms cubic-bezier(.2,.9,.3,1); }
-  @keyframes dice-spin { 0% { transform: rotateX(0deg) rotateY(0deg) translateZ(0); } 60% { transform: rotateX(1080deg) rotateY(720deg) translateZ(8px) skewX(-2deg); } 100% { transform: rotateX(1260deg) rotateY(900deg) translateZ(0); } }
+    .dice-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .dice-wrap{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:4px;width:100%}
+    .die{width:84px;height:84px;border-radius:12px;background:linear-gradient(180deg,#120616,#0b0810);display:flex;align-items:center;justify-content:center;font-size:34px;font-weight:900;color:#fff;perspective:900px;position:relative;border:1px solid rgba(255,255,255,0.03)}
+    .dice-face{font-weight:900;font-size:34px;display:block}
+    .dice-spin { animation: dice-spin 700ms cubic-bezier(.2,.9,.3,1); }
+    @keyframes dice-spin { 0% { transform: rotateX(0deg) rotateY(0deg) translateZ(0); } 60% { transform: rotateX(1080deg) rotateY(720deg) translateZ(8px) skewX(-2deg); } 100% { transform: rotateX(1260deg) rotateY(900deg) translateZ(0); } }
 
-  .small{font-size:13px;color:var(--muted); margin-top: -2px;}
-  .result{margin-top:8px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;min-height:56px}
+    .small{font-size:13px;color:var(--muted); margin-top: -2px;}
+    .result{margin-top:8px;background:rgba(255,255,255,0.02);padding:10px;border-radius:8px;min-height:56px}
 
-  /* Modal */
-  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:120;backdrop-filter: blur(3px)}
-  .modal{background:linear-gradient(180deg,var(--panel), rgba(30,8,20,0.9));padding:18px;border-radius:12px;max-width:680px;width:94%;color:#fff;box-shadow:0 30px 120px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
-  .modal h3{margin-top:0;color:var(--accent)}
-  .task-btn{background:#1e1220;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:#fff;margin-bottom:6px;width:100%;text-align:left; transition: background 0.2s ease;}
-  .task-btn:hover { background: #2a1525; }
+    /* Modal */
+    .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);display:flex;align-items:center;justify-content:center;z-index:120;backdrop-filter: blur(3px)}
+    .modal{background:linear-gradient(180deg,var(--panel), rgba(30,8,20,0.9));padding:18px;border-radius:12px;max-width:680px;width:94%;color:#fff;box-shadow:0 30px 120px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.02)}
+    .modal h3{margin-top:0;color:var(--accent)}
+    .task-btn{background:#1e1220;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;color:#fff;margin-bottom:6px;width:100%;text-align:left; transition: background 0.2s ease;}
+    .task-btn:hover { background: #2a1525; }
 
-  .shock-title { font-size:20px; color: white; margin:0 0 8px 0; text-transform:uppercase; letter-spacing:1px }
-  .shock-body { font-size:16px; line-height:1.4; color:#ffeef6 }
-  .shock-cta { display:flex; gap:8px; margin-top:12px; justify-content:flex-end }
-  .btn-accept { background:linear-gradient(90deg,#ff6b81,#ff9aa2); padding:10px 14px; border-radius:10px; border:none; color:white; font-weight:800; cursor:pointer }
-  .shock-emoji { font-size:44px; display:block; text-align:center; margin-bottom:8px; }
+    .shock-title { font-size:20px; color: white; margin:0 0 8px 0; text-transform:uppercase; letter-spacing:1px }
+    .shock-body { font-size:16px; line-height:1.4; color:#ffeef6 }
+    .shock-cta { display:flex; gap:8px; margin-top:12px; justify-content:flex-end }
+    .btn-accept { background:linear-gradient(90deg,#ff6b81,#ff9aa2); padding:10px 14px; border-radius:10px; border:none; color:white; font-weight:800; cursor:pointer }
+    .shock-emoji { font-size:44px; display:block; text-align:center; margin-bottom:8px; }
 
-  .position-card { display:none; margin-top:12px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03)); border:1px solid rgba(255,255,255,0.02) }
+    .position-card { display:none; margin-top:12px; padding:12px; border-radius:8px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.03)); border:1px solid rgba(255,255,255,0.02) }
 
-  /* Animations for tile activation */
-  .pink-pulse { animation: pinkPulse 700ms ease; }
-  @keyframes pinkPulse {
-    0%{ box-shadow: 0 0 0 0 rgba(255,107,129,0.0); transform: scale(1); }
-    40%{ box-shadow: 0 0 0 12px rgba(255,107,129,0.06); transform: scale(1.02); }
-    100%{ box-shadow: 0 0 0 0 rgba(255,107,129,0.0); transform: scale(1); }
-  }
-  .blue-ripple { animation: blueRipple 800ms ease; }
-  @keyframes blueRipple {
-    0%{ box-shadow: 0 0 0 0 rgba(154,215,255,0.0); transform: scale(1); }
-    40%{ box-shadow: 0 0 0 12px rgba(154,215,255,0.06); transform: scale(1.02); }
-    100%{ box-shadow: 0 0 0 0 rgba(154,215,255,0.0); transform: scale(1); }
-  }
-  .shake { animation: shakeIt 450ms cubic-bezier(.36,.07,.19,.97); }
-  @keyframes shakeIt {
-    10%, 90% { transform: translateX(-1px); }
-    20%, 80% { transform: translateX(2px); }
-    30%, 50%, 70% { transform: translateX(-4px); }
-    40%, 60% { transform: translateX(4px); }
-  }
+    /* Animations for tile activation */
+    .pink-pulse { animation: pinkPulse 700ms ease; }
+    @keyframes pinkPulse {
+      0%{ box-shadow: 0 0 0 0 rgba(255,107,129,0.0); transform: scale(1); }
+      40%{ box-shadow: 0 0 0 12px rgba(255,107,129,0.06); transform: scale(1.02); }
+      100%{ box-shadow: 0 0 0 0 rgba(255,107,129,0.0); transform: scale(1); }
+    }
+    .blue-ripple { animation: blueRipple 800ms ease; }
+    @keyframes blueRipple {
+      0%{ box-shadow: 0 0 0 0 rgba(154,215,255,0.0); transform: scale(1); }
+      40%{ box-shadow: 0 0 0 12px rgba(154,215,255,0.06); transform: scale(1.02); }
+      100%{ box-shadow: 0 0 0 0 rgba(154,215,255,0.0); transform: scale(1); }
+    }
+    .shake { animation: shakeIt 450ms cubic-bezier(.36,.07,.19,.97); }
+    @keyframes shakeIt {
+      10%, 90% { transform: translateX(-1px); }
+      20%, 80% { transform: translateX(2px); }
+      30%, 50%, 70% { transform: translateX(-4px); }
+      40%, 60% { transform: translateX(4px); }
+    }
 
-  /* --- BOARD CENTERING & SCALING --- */
-  .board-wrapper { width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 100%; }
-  .board-container { transform: scale(0.9); transform-origin: center center; transition: transform 0.3s ease; }
+    /* --- BOARD CENTERING & SCALING --- */
+    .board-wrapper { width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; min-height: 100%; }
+    .board-container { transform: scale(0.9); transform-origin: center center; transition: transform 0.3s ease; }
 
-  /* Mobile layout */
-  @media(max-width:980px){
-    .layout{ grid-template-columns:1fr; padding-bottom:0; margin-top:4px; }
-    .board-wrap{ order:0; padding:4px; box-sizing:border-box; flex-shrink:0; }
-    .panel{ order:1; padding:8px; flex-shrink:1; min-height:fit-content; }
-    .dice-wrap{ flex-direction: row; gap: 10px; align-items: center; justify-content: space-between; margin-top: 0; }
-    .die{ width:65px;height:65px;font-size:26px;flex-shrink:0; }
-    .dice-row { flex-wrap: nowrap; gap:6px; flex-grow:1; justify-content:flex-end; }
-    .dice-row button { padding:8px 10px; font-size:13px; }
-    .result{ display:none; }
-    .player-summary strong { font-size:14px; }
-    .muted { font-size:12px; }
-    .board-wrap > div:last-child { display:none; }
+    /* Mobile layout */
+    @media(max-width:980px){
+      .layout{ grid-template-columns:1fr; padding-bottom:0; margin-top:4px; }
+      .board-wrap{ order:0; padding:4px; box-sizing:border-box; flex-shrink:0; }
+      .panel{ order:1; padding:8px; flex-shrink:1; min-height:fit-content; }
+      .dice-wrap{ flex-direction: row; gap: 10px; align-items: center; justify-content: space-between; margin-top: 0; }
+      .die{ width:65px;height:65px;font-size:26px;flex-shrink:0; }
+      .dice-row { flex-wrap: nowrap; gap:6px; flex-grow:1; justify-content:flex-end; }
+      .dice-row button { padding:8px 10px; font-size:13px; }
+      .result{ display:none; }
+      .player-summary strong { font-size:14px; }
+      .muted { font-size:12px; }
+      .board-wrap > div:last-child { display:none; }
 
-    /* show floating compact roll button */
-    .floating-roll { position:fixed; right:12px; bottom:88px; z-index:130; display:block; border-radius:999px; padding:12px; background:linear-gradient(90deg,var(--accent),#ff9aa2); box-shadow:0 10px 30px rgba(0,0,0,0.6); border:none; font-size:20px; }
-  }
+      /* show floating compact roll button */
+      .floating-roll { position:fixed; right:12px; bottom:88px; z-index:130; display:block; border-radius:999px; padding:12px; background:linear-gradient(90deg,var(--accent),#ff9aa2); box-shadow:0 10px 30px rgba(0,0,0,0.6); border:none; font-size:20px; }
+    }
 
-  /* larger screens hide floating roll */
-  .floating-roll { display:none; }
+    /* larger screens hide floating roll */
+    .floating-roll { display:none; }
 
-  /* small phone tweaks */
-  @media (max-width: 600px) {
-    .board-container { transform: scale(0.6); }
-    .die{ width:55px; height:55px; font-size:22px; }
-  }
-  @media (max-width: 450px) {
-    .app { padding:8px; }
-    .board-container { transform: scale(0.5); }
-    h1 { font-size:18px; }
-    .small { display:none; }
-    .nav { gap:4px; }
-    .btn, .secondary { padding:6px 8px; font-size:12px; }
-  }
+    /* small phone tweaks */
+    @media (max-width: 600px) {
+      .board-container { transform: scale(0.6); }
+      .die{ width:55px; height:55px; font-size:22px; }
+    }
+    @media (max-width: 450px) {
+      .app { padding:8px; }
+      .board-container { transform: scale(0.5); }
+      h1 { font-size:18px; }
+      .small { display:none; }
+      .nav { gap:4px; }
+      .btn, .secondary { padding:6px 8px; font-size:12px; }
+    }
 
-  /* minor helper */
-  .row { display:flex; gap:8px; align-items:center; }
-  .inline-muted { color:var(--muted); font-size:13px; }
-  .control-label { font-size:13px; color:var(--muted); margin-bottom:4px; display:block; }
-  .slider { width:100%; }
-</style>
+    /* minor helper */
+    .row { display:flex; gap:8px; align-items:center; }
+    .inline-muted { color:var(--muted); font-size:13px; }
+    .control-label { font-size:13px; color:var(--muted); margin-bottom:4px; display:block; }
+    .slider { width:100%; }
+
+    /* --- NEW ADDICTIVE ANIMATIONS --- */
+
+/* 1. Heartbeat Timer Effect */
+@keyframes heartbeat {
+  0% { transform: scale(1); box-shadow: inset 0 0 20px rgba(255, 0, 0, 0); }
+  50% { transform: scale(1.02); box-shadow: inset 0 0 60px rgba(255, 0, 0, 0.4); background: rgba(60, 0, 0, 0.3); }
+  100% { transform: scale(1); box-shadow: inset 0 0 20px rgba(255, 0, 0, 0); }
+}
+.timer-warning { animation: heartbeat 0.8s infinite; border: 2px solid #ff4d4d !important; }
+
+/* 2. Dice Critical Glow & Screen Flash */
+@keyframes critical-glow {
+  0% { box-shadow: 0 0 0px #ffd700; border-color: #ffd700; }
+  50% { box-shadow: 0 0 40px #ffd700; border-color: #fff; transform: scale(1.2); }
+  100% { box-shadow: 0 0 10px #ffd700; border-color: #ffd700; }
+}
+.dice-crit { animation: critical-glow 0.6s ease-in-out; color: #ffd700 !important; }
+
+@keyframes screen-flash {
+  0% { background: rgba(255,255,255,0); }
+  20% { background: rgba(255,255,255,0.4); }
+  100% { background: rgba(255,255,255,0); }
+}
+.flash-active::before {
+  content: ""; position: fixed; inset: 0; z-index: 9999; 
+  pointer-events: none; animation: screen-flash 0.4s ease-out;
+}
+
+/* 3. Tile Echo (Ripple) */
+@keyframes tile-ripple {
+  0% { transform: scale(1); opacity: 1; border: 1px solid var(--accent); }
+  100% { transform: scale(2.5); opacity: 0; border: 4px solid var(--accent); }
+}
+.echo-ring {
+  position: absolute; inset: 0; border-radius: 10px;
+  pointer-events: none; z-index: 10; animation: tile-ripple 0.6s ease-out;
+}
+
+/* 4. Progression Bloom */
+/* The brightness increases as the 'data-progress' value (0-1) increases */
+.token { filter: drop-shadow(0 0 calc(var(--bloom) * 15px) var(--token-color)); }
+
+/* 5. Enhanced Entrance & Jumps (From previous request) */
+@keyframes appEntrance {
+  0% { opacity: 0; transform: scale(0.9); filter: blur(10px); }
+  100% { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+.app { animation: appEntrance 0.8s ease-out; }
+
+@keyframes tokenJump {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, -130%) scale(1.4); }
+}
+.token-moving { animation: tokenJump 0.4s ease-in-out; }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="app" role="application" aria-label="Couples Ludo game">
-    <header>
-      <div>
-        <h1>Couples Ludo Play</h1>
-        <div class="small">Weighted dice • playful tasks</div>
-      </div>
-      <div class="nav">
-        <a href="index.html" class="btn">🏠 Home</a>
-        <button id="resetBtn" class="secondary">Reset</button>
-      </div>
-    </header>
+  <div class="wrap">
+    <div class="app" role="application" aria-label="Couples Ludo game">
+      <header>
+        <div>
+          <h1>Couples Ludo Play</h1>
+          <div class="small">Weighted dice • playful tasks</div>
+        </div>
+        <div class="nav">
+          <a href="index.html" class="btn">🏠 Home</a>
+          <button id="resetBtn" class="secondary">Reset</button>
+        </div>
+      </header>
 
-    <div class="layout">
-      <div class="board-wrapper">
-        <div class="board-container">
-          <div class="board-wrap panel">
-            <div id="board" class="board" aria-hidden="false"></div>
-            <div style="margin-top:8px;font-size:13px;color:var(--muted)">Hidden tiles shuffled each reset; they activate when stepped on.</div>
+      <div class="layout">
+        <div class="board-wrapper">
+          <div class="board-container">
+            <div class="board-wrap panel">
+              <div id="board" class="board" aria-hidden="false"></div>
+              <div style="margin-top:8px;font-size:13px;color:var(--muted)">Hidden tiles shuffled each reset; they activate when stepped on.</div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <aside class="panel">
-        <div class="controls-wrap">
-          <div class="dice-wrap">
-            <div class="die" id="die" role="img" aria-label="Dice">
-              <div class="dice-face" id="face"></div>
-            </div>
+        <aside class="panel">
+          <div class="controls-wrap">
+            <div class="dice-wrap">
+              <div class="die" id="die" role="img" aria-label="Dice">
+                <div class="dice-face" id="face"></div>
+              </div>
 
-            <div class="dice-row">
-              <button id="rollBtn" class="btn">🎲ROLL</button>
-              <button id="endTurnBtn" class="secondary">End Turn</button>
-            </div>
+              <div class="dice-row">
+                <button id="rollBtn" class="btn">🎲ROLL</button>
+                <button id="endTurnBtn" class="secondary">End Turn</button>
+              </div>
 
-            <div style="margin-top:10px">
-              <div class="control-label">Timer (minutes)</div>
-              <input id="timerSlider" class="slider" type="range" min="0" max="10" step="1" value="1" />
-              <div class="row" style="justify-content:space-between; margin-top:6px;">
-                <div class="inline-muted">Selected: <span id="timerValue">1</span> min</div>
-                <div>
-                  <button id="timerStartBtn" class="btn" style="padding:6px 10px">Start Timer</button>
-                  <button id="timerStopBtn" class="secondary" style="padding:6px 10px">Stop</button>
+              <div style="margin-top:10px">
+                <div class="control-label">Timer (minutes)</div>
+                <input id="timerSlider" class="slider" type="range" min="0" max="10" step="1" value="1" />
+                <div class="row" style="justify-content:space-between; margin-top:6px;">
+                  <div class="inline-muted">Selected: <span id="timerValue">1</span> min</div>
+                  <div>
+                    <button id="timerStartBtn" class="btn" style="padding:6px 10px">Start Timer</button>
+                    <button id="timerStopBtn" class="secondary" style="padding:6px 10px">Stop</button>
+                  </div>
+                </div>
+                <div id="timerDisplay" style="font-size:24px; margin-top:10px; text-align:center;">00:00</div>
+              </div>
+
+              <div style="margin-top:10px">
+                <div class="control-label">Sound</div>
+                <div class="row">
+                  <button id="soundToggle" class="btn" aria-pressed="true">🔊 Sound ON</button>
+                  <button id="undoBtn" class="secondary">Undo</button>
                 </div>
               </div>
-              <div id="timerDisplay" style="font-size:24px; margin-top:10px; text-align:center;">00:00</div>
-            </div>
 
-            <div style="margin-top:10px">
-              <div class="control-label">Sound</div>
-              <div class="row">
-                <button id="soundToggle" class="btn" aria-pressed="true">🔊 Sound ON</button>
-                <button id="undoBtn" class="secondary">Undo</button>
+              <div class="result" id="result">Setup required to start.</div>
+
+              <div class="position-card" id="positionCard">
+                <div style="font-weight:800;margin-bottom:8px">Pick a final position</div>
+                <div id="positionOptions"></div>
               </div>
             </div>
 
-            <div class="result" id="result">Setup required to start.</div>
-
-            <div class="position-card" id="positionCard">
-              <div style="font-weight:800;margin-bottom:8px">Pick a final position</div>
-              <div id="positionOptions"></div>
-            </div>
-          </div>
-
-          <div class="player-summary">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div style="width:36px;height:36px;border-radius:999px;overflow:hidden; display:flex; align-items:center; justify-content:center">
-                <span style="font-size:24px; line-height:1; transform:translateY(-2px)">❤️</span>
+            <div class="player-summary">
+              <div style="display:flex;gap:10px;align-items:center">
+                <div style="width:36px;height:36px;border-radius:999px;overflow:hidden; display:flex; align-items:center; justify-content:center">
+                  <span style="font-size:24px; line-height:1; transform:translateY(-2px)">❤️</span>
+                </div>
+                <strong id="p1Name">Husband</strong>
               </div>
-              <strong id="p1Name">Husband</strong>
+              <div class="muted">T:<span id="p1Tasks">0</span> • R:<span id="p1Removals">0</span></div>
             </div>
-            <div class="muted">T:<span id="p1Tasks">0</span> • R:<span id="p1Removals">0</span></div>
-          </div>
 
-          <div class="player-summary">
-            <div style="display:flex;gap:10px;align-items:center">
-              <div style="width:36px;height:36px;border-radius:999px;overflow:hidden; display:flex; align-items:center; justify-content:center">
-                <span style="font-size:24px; line-height:1; transform:translateY(-2px)">💋</span>
+            <div class="player-summary">
+              <div style="display:flex;gap:10px;align-items:center">
+                <div style="width:36px;height:36px;border-radius:999px;overflow:hidden; display:flex; align-items:center; justify-content:center">
+                  <span style="font-size:24px; line-height:1; transform:translateY(-2px)">💋</span>
+                </div>
+                <strong id="p2Name">Wife</strong>
               </div>
-              <strong id="p2Name">Wife</strong>
+              <div class="muted">T:<span id="p2Tasks">0</span> • R:<span id="p2Removals">0</span></div>
             </div>
-            <div class="muted">T:<span id="p2Tasks">0</span> • R:<span id="p2Removals">0</span></div>
-          </div>
 
-          <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
-            <button id="setupBtn" class="btn" style="flex:1">Choose Mode & Who starts</button>
-          </div>
+            <div style="display:flex;gap:8px;align-items:center;justify-content:space-between">
+              <button id="setupBtn" class="btn" style="flex:1">Choose Mode & Who starts</button>
+            </div>
 
-        </div>
-      </aside>
+          </div>
+        </aside>
+
+      </div>
 
     </div>
-
   </div>
-</div>
 
-<button class="floating-roll" id="floatingRoll" title="Roll">🎲</button>
+  <button class="floating-roll" id="floatingRoll" title="Roll">🎲</button>
 
-<div id="modalRoot" style="display:none"></div>
+  <div id="modalRoot" style="display:none"></div>
 
-<script>
-(() => {
+  <script>
+    (() => {
   // -------- CONFIG --------
-  const GRID = 7;
-  const PINK_COUNT = 8;
-  const BLUE_COUNT = 8;
-  const MIN_CLOTHING_REMOVALS_BEFORE_WIN = 4;
-  const INITIAL_REMOVALS_PER_PERSON = 0;
+      const GRID = 7;
+      const PINK_COUNT = 8;
+      const BLUE_COUNT = 8;
+      const MIN_CLOTHING_REMOVALS_BEFORE_WIN = 4;
+      const INITIAL_REMOVALS_PER_PERSON = 0;
 
   // default names
-  const DEFAULT_P1_NAME = "Husband";
-  const DEFAULT_P2_NAME = "Wife";
+      const DEFAULT_P1_NAME = "Husband";
+      const DEFAULT_P2_NAME = "Wife";
 
   // --- START AVATAR EDIT SECTION ---
   /* * TO CHANGE AVATAR ICONS:
@@ -286,392 +341,417 @@
    * t.innerHTML = '';
    * - Then, update avatarSVGByName to return the image URL instead of SVG.
    */
-  const HUSBAND_SILHOUETTE = `
+      const HUSBAND_SILHOUETTE = `
     ❤️
-  `;
-  const WIFE_SILHOUETTE = `
+      `;
+      const WIFE_SILHOUETTE = `
     💋
-  `;
+      `;
   // --- END AVATAR EDIT SECTION ---
 
   // -------- DOM --------
-  const boardEl = document.getElementById('board');
-  const resetBtn = document.getElementById('resetBtn');
-  const faceEl = document.getElementById('face');
-  const rollBtn = document.getElementById('rollBtn');
-  const endTurnBtn = document.getElementById('endTurnBtn');
-  const resultEl = document.getElementById('result');
-  const p1TasksEl = document.getElementById('p1Tasks');
-  const p2TasksEl = document.getElementById('p2Tasks');
-  const p1RemEl = document.getElementById('p1Removals');
-  const p2RemEl = document.getElementById('p2Removals');
-  const setupBtn = document.getElementById('setupBtn');
-  const modalRoot = document.getElementById('modalRoot');
-  const positionCard = document.getElementById('positionCard');
-  const positionOptions = document.getElementById('positionOptions');
-  const soundToggle = document.getElementById('soundToggle');
-  const undoBtn = document.getElementById('undoBtn');
-  const timerSlider = document.getElementById('timerSlider');
-  const timerValue = document.getElementById('timerValue');
-  const timerStartBtn = document.getElementById('timerStartBtn');
-  const timerStopBtn = document.getElementById('timerStopBtn');
-  const timerDisplay = document.getElementById('timerDisplay');
-  const floatingRoll = document.getElementById('floatingRoll');
+      const boardEl = document.getElementById('board');
+      const resetBtn = document.getElementById('resetBtn');
+      const faceEl = document.getElementById('face');
+      const rollBtn = document.getElementById('rollBtn');
+      const endTurnBtn = document.getElementById('endTurnBtn');
+      const resultEl = document.getElementById('result');
+      const p1TasksEl = document.getElementById('p1Tasks');
+      const p2TasksEl = document.getElementById('p2Tasks');
+      const p1RemEl = document.getElementById('p1Removals');
+      const p2RemEl = document.getElementById('p2Removals');
+      const setupBtn = document.getElementById('setupBtn');
+      const modalRoot = document.getElementById('modalRoot');
+      const positionCard = document.getElementById('positionCard');
+      const positionOptions = document.getElementById('positionOptions');
+      const soundToggle = document.getElementById('soundToggle');
+      const undoBtn = document.getElementById('undoBtn');
+      const timerSlider = document.getElementById('timerSlider');
+      const timerValue = document.getElementById('timerValue');
+      const timerStartBtn = document.getElementById('timerStartBtn');
+      const timerStopBtn = document.getElementById('timerStopBtn');
+      const timerDisplay = document.getElementById('timerDisplay');
+      const floatingRoll = document.getElementById('floatingRoll');
 
   // -------- state --------
-  const state = {
-    trackMap: [],
-    hiddenPink: new Set(),
-    hiddenBlue: new Set(),
-    winPositionPool: [],
-    players: [
-      { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P1_NAME, avatar: 'p1_masc' },
-      { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P2_NAME, avatar: 'p2_fem' }
-    ],
-    currentPlayer: 0,
-    running: true,
-    setupDone: false,
-    gameMode: null,
-    fullStripOccurred: false,
-    innerAttemptRemaining: 0,
-    clothingRemovalCount: 0,
-    lastMove: null,
-    soundsOn: true
-  };
+      const state = {
+        trackMap: [],
+        hiddenPink: new Set(),
+        hiddenBlue: new Set(),
+        winPositionPool: [],
+        players: [
+          { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P1_NAME, avatar: 'p1_masc' },
+          { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P2_NAME, avatar: 'p2_fem' }
+        ],
+        currentPlayer: 0,
+        running: true,
+        setupDone: false,
+        gameMode: null,
+        fullStripOccurred: false,
+        innerAttemptRemaining: 0,
+        clothingRemovalCount: 0,
+        lastMove: null,
+        soundsOn: true
+      };
 
   // -------- avatar svgs --------
-  function avatarSVGByName(name){
-    if(name === 'p1_masc') return HUSBAND_SILHOUETTE;
-    if(name === 'p2_fem') return WIFE_SILHOUETTE;
-    return '<div>?</div>';
-  }
+      function avatarSVGByName(name){
+        if(name === 'p1_masc') return HUSBAND_SILHOUETTE;
+        if(name === 'p2_fem') return WIFE_SILHOUETTE;
+        return '<div>?</div>';
+      }
 
   // -------- audio (WebAudio) --------
-  const audioCtxAvailable = !!(window.AudioContext || window.webkitAudioContext);
-  function playBeep(freq=440, len=120, type='sine'){
-    if(!state.soundsOn || !audioCtxAvailable) return;
-    try{
-      const ac = new (window.AudioContext || window.webkitAudioContext)();
-      const o = ac.createOscillator();
-      const g = ac.createGain();
-      o.type = type;
-      o.frequency.value = freq;
-      g.gain.value = 0.02;
-      o.connect(g);
-      g.connect(ac.destination);
-      o.start();
-      setTimeout(()=>{ o.stop(); ac.close(); }, len);
-    }catch(e){}
-  }
-  function playDiceSound(){ playBeep(520,120,'triangle'); }
-  function playRevealSound(){ playBeep(760,150,'sine'); }
-  function playOverlapSound(){ playBeep(220,600,'sawtooth'); }
-  function playTimerEndSound(){ playBeep(880,800,'triangle'); }
+      const audioCtxAvailable = !!(window.AudioContext || window.webkitAudioContext);
+      function playBeep(freq=440, len=120, type='sine'){
+        if(!state.soundsOn || !audioCtxAvailable) return;
+        try{
+          const ac = new (window.AudioContext || window.webkitAudioContext)();
+          const o = ac.createOscillator();
+          const g = ac.createGain();
+          o.type = type;
+          o.frequency.value = freq;
+          g.gain.value = 0.02;
+          o.connect(g);
+          g.connect(ac.destination);
+          o.start();
+          setTimeout(()=>{ o.stop(); ac.close(); }, len);
+        }catch(e){}
+      }
+      function playDiceSound(){ playBeep(520,120,'triangle'); }
+      function playRevealSound(){ playBeep(760,150,'sine'); }
+      function playOverlapSound(){ playBeep(220,600,'sawtooth'); }
+      function playTimerEndSound(){ playBeep(880,800,'triangle'); }
 
   // -------- TASK & POSITION POOLS --------
-  const tasks = {
-    soft: ['Put both hands on glutes while facing each other','Gentle 2-minute massage','Long kiss with a gentle bite on the ear','Slow close hug','Whisper a fond memory','Look into each other’s eyes for 1 minute without speaking'],
-    wild: ['Deep 3-minute chest massage','Dance slowly and hold each other close','Surprise bold touch based on consent','Focus on erogenous zones for 1 minute']
-  };
-  const hiddenPositionsPool = {
-    soft: ['Spoon cuddle','Short lap hug','Arm-around shoulder','Soft forehead kiss'],
-    wild: ['Slow steamy shower together and wash each other','Neck kiss for one minute','Light tracing of fingers over skin','Use warm oils for a few minutes','Slow 5-minute kiss without rushing']
-  };
-  const winPositionsPool = {
-    soft: ['Side-by-Side (Spooning)','Face-to-Face Lying Down','Woman-on-Top (Slow Pace)','Seated Lap Position','Butterfly Slow Variation'],
-    wild: ['Standing Positions (Against a Wall)','Reverse Sitting/Straddling Variants','Kneeling From Behind Variants','Bridge or Raised-Hips Positions','Squat-Over Variations']
-  };
+      const tasks = {
+        soft: ['Put both hands of each other’s on glutes while facing each other','Gentle 2-minute massage','Long kiss with a gentle bite on the ear','Slow close hug','Whisper a fond memory','Look into each other’s eyes for 1 minute without speaking'],
+        wild: ['Deep 3-minute chest massage','Dance slowly and hold each other close','Surprise bold touch based on consent','Focus on erogenous zones for 1 minute']
+      };
+      const hiddenPositionsPool = {
+        soft: ['Spoon cuddle','Short lap hug','Arm-around shoulder','Soft forehead kiss'],
+        wild: ['Slow steamy shower together and wash each other','Neck kiss for one minute','Light tracing of fingers over skin','Use warm oils for a few minutes','Slow 5-minute kiss without rushing']
+      };
+      const winPositionsPool = {
+        soft: ['Side-by-Side (Spooning)','Face-to-Face Lying Down','Woman-on-Top (Slow Pace)','Seated Lap Position','Butterfly Slow Variation'],
+        wild: ['Standing Positions (Against a Wall)','Reverse Sitting/Straddling Variants','Kneeling From Behind Variants','Bridge or Raised-Hips Positions','Squat-Over Variations']
+      };
 
   // -------- UTILS --------
-  const randInt = n => Math.floor(Math.random()*n);
-  function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
+      const randInt = n => Math.floor(Math.random()*n);
+      function vibrate(ms){ if(navigator.vibrate) navigator.vibrate(ms); }
 
   // -------- Board building --------
-  function buildBoard(){
-    boardEl.innerHTML = '';
-    const N = GRID;
-    const center = Math.floor(N/2);
-    for(let r=0;r<N;r++){
-      for(let c=0;c<N;c++){
-        const div = document.createElement('div');
-        div.className = 'cell';
-        div.dataset.r = r; div.dataset.c = c;
-        const ring = Math.max(Math.abs(r-center), Math.abs(c-center));
-        div.classList.add('ring-'+ring);
-        boardEl.appendChild(div);
-      }
-    }
-    function perimeterCoords(size, offset=0){
-      const coords=[]; const start=offset; const end=offset+size-1;
-      for(let c=start;c<=end;c++) coords.push([start,c]);
-      for(let r=start+1;r<=end;r++) coords.push([r,end]);
-      for(let c=end-1;c>=start;c--) coords.push([end,c]);
-      for(let r=end-1;r>start;r--) coords.push([r,start]);
-      return coords;
-    }
-    const outer = perimeterCoords(7,0);
-    const middle = perimeterCoords(5,1);
-    const inner = perimeterCoords(3,2);
-    const centerCoord = [[center,center]];
-    state.trackMap = outer.concat(middle).concat(inner).concat(centerCoord);
-    state.winPositionPool = (winPositionsPool.soft || []).slice();
+      function buildBoard(){
+        boardEl.innerHTML = '';
+        const N = GRID;
+        const center = Math.floor(N/2);
+        for(let r=0;r<N;r++){
+          for(let c=0;c<N;c++){
+            const div = document.createElement('div');
+            div.className = 'cell';
+            div.dataset.r = r; div.dataset.c = c;
+            const ring = Math.max(Math.abs(r-center), Math.abs(c-center));
+            div.classList.add('ring-'+ring);
+            boardEl.appendChild(div);
+          }
+        }
+        function perimeterCoords(size, offset=0){
+          const coords=[]; const start=offset; const end=offset+size-1;
+          for(let c=start;c<=end;c++) coords.push([start,c]);
+            for(let r=start+1;r<=end;r++) coords.push([r,end]);
+              for(let c=end-1;c>=start;c--) coords.push([end,c]);
+                for(let r=end-1;r>start;r--) coords.push([r,start]);
+                  return coords;
+              }
+              const outer = perimeterCoords(7,0);
+              const middle = perimeterCoords(5,1);
+              const inner = perimeterCoords(3,2);
+              const centerCoord = [[center,center]];
+              state.trackMap = outer.concat(middle).concat(inner).concat(centerCoord);
+              state.winPositionPool = (winPositionsPool.soft || []).slice();
 
-    state.trackMap.forEach((pos, idx)=>{
-      const cell = getCell(pos[0], pos[1]);
-      if(!cell) return;
-      cell.dataset.trackIndex = idx;
-      cell.classList.remove('start','finish');
-      if(idx===0) cell.classList.add('start');
-      if(idx===state.trackMap.length-1){
-        cell.classList.add('finish');
-        cell.innerHTML = `<div class="win-text">WIN</div>`;
-      }
-    });
+              state.trackMap.forEach((pos, idx)=>{
+                const cell = getCell(pos[0], pos[1]);
+                if(!cell) return;
+                cell.dataset.trackIndex = idx;
+                cell.classList.remove('start','finish');
+                if(idx===0) cell.classList.add('start');
+                if(idx===state.trackMap.length-1){
+                  cell.classList.add('finish');
+                  cell.innerHTML = `<div class="win-text">WIN</div>`;
+                }
+              });
 
-    const outerEndIdx = outer.length-1;
-    const middleEndIdx = outer.length + middle.length -1;
-    const innerEndIdx = outer.length + middle.length + inner.length -1;
-    addExitArrowIfNotExists(outerEndIdx,'➤');
-    addExitArrowIfNotExists(middleEndIdx,'➤');
-    addExitArrowIfNotExists(innerEndIdx,'➤➤');
+              const outerEndIdx = outer.length-1;
+              const middleEndIdx = outer.length + middle.length -1;
+              const innerEndIdx = outer.length + middle.length + inner.length -1;
+              /*addExitArrowIfNotExists(outerEndIdx,'➤');
+              addExitArrowIfNotExists(middleEndIdx,'➤');
+              addExitArrowIfNotExists(innerEndIdx,'➤➤');*/
 
-    renderTokens();
-  }
-  function getCell(r,c){ return boardEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`); }
-  function addExitArrowIfNotExists(trackIdx,label='➤'){ const pos = state.trackMap[trackIdx]; if(!pos) return; const cell=getCell(pos[0], pos[1]); if(!cell) return; if(cell.querySelector('.exit-arrow')) return; const el = document.createElement('div'); el.className='exit-arrow'; el.textContent = label; cell.appendChild(el); }
+              renderTokens();
+            }
+            function getCell(r,c){ return boardEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`); }
+            function addExitArrowIfNotExists(trackIdx,label='➤'){ const pos = state.trackMap[trackIdx]; if(!pos) return; const cell=getCell(pos[0], pos[1]); if(!cell) return; if(cell.querySelector('.exit-arrow')) return; const el = document.createElement('div'); el.className='exit-arrow'; el.textContent = label; cell.appendChild(el); }
 
-  function shuffleHidden(){
-    state.hiddenPink = new Set(); state.hiddenBlue = new Set();
-    const available = [...Array(state.trackMap.length).keys()].filter(i=>i!==0 && i!==state.trackMap.length-1);
-    for(let i=0;i<PINK_COUNT && available.length>0;i++){ const pickIdx = available.splice(randInt(available.length),1)[0]; state.hiddenPink.add(pickIdx); }
-    for(let i=0;i<BLUE_COUNT && available.length>0;i++){ const pickIdx = available.splice(randInt(available.length),1)[0]; state.hiddenBlue.add(pickIdx); }
-  }
+            function shuffleHidden(){
+              state.hiddenPink = new Set(); state.hiddenBlue = new Set();
+              const available = [...Array(state.trackMap.length).keys()].filter(i=>i!==0 && i!==state.trackMap.length-1);
+              for(let i=0;i<PINK_COUNT && available.length>0;i++){ const pickIdx = available.splice(randInt(available.length),1)[0]; state.hiddenPink.add(pickIdx); }
+                for(let i=0;i<BLUE_COUNT && available.length>0;i++){ const pickIdx = available.splice(randInt(available.length),1)[0]; state.hiddenBlue.add(pickIdx); }
+              }
 
   // -------- tokens --------
-  function renderTokens(){
-    boardEl.querySelectorAll('.token').forEach(t=>t.remove());
-    state.players.forEach((pl, idx)=>{
-      const pos = pl.pos;
-      const trackPos = state.trackMap[pos];
-      if(!trackPos) return;
-      const [r,c] = trackPos;
-      const cell = getCell(r,c);
-      if(!cell) return;
-      const t = document.createElement('div');
-      t.className = 'token ' + (idx===0 ? 'p1' : 'p2');
-      t.dataset.player = idx;
-      t.style.width='50px'; t.style.height='50px';
-      t.style.left='50%';
-      t.style.top = idx===0 ? '40%' : '60%';
-      t.innerHTML = avatarSVGByName(pl.avatar);
-      cell.appendChild(t);
-    });
-    updateUI();
-  }
+            function renderTokens(){
+              boardEl.querySelectorAll('.token').forEach(t=>t.remove());
+              state.players.forEach((pl, idx)=>{
+                const pos = pl.pos;
+                const trackPos = state.trackMap[pos];
+                if(!trackPos) return;
+                const [r,c] = trackPos;
+                const cell = getCell(r,c);
+                if(!cell) return;
+                const t = document.createElement('div');
+                t.className = 'token ' + (idx===0 ? 'p1' : 'p2');
+                t.dataset.player = idx;
+                t.style.width='50px'; t.style.height='50px';
+                t.style.left='50%';
+                t.style.top = idx===0 ? '40%' : '60%';
+                t.innerHTML = avatarSVGByName(pl.avatar);
+                cell.appendChild(t);
+              });
+              updateUI();
+            }
 
-  function updateUI(){
-    p1TasksEl.textContent = state.players[0].tasksPerformed;
-    p2TasksEl.textContent = state.players[1].tasksPerformed;
-    p1RemEl.textContent = state.players[0].removals;
-    p2RemEl.textContent = state.players[1].removals;
-    resultEl.textContent = state.setupDone ? `${state.players[state.currentPlayer].name}'s turn (Mode: ${state.gameMode})` : 'Setup required. Choose mode & who starts.';
-  }
+            function updateUI(){
+              p1TasksEl.textContent = state.players[0].tasksPerformed;
+              p2TasksEl.textContent = state.players[1].tasksPerformed;
+              p1RemEl.textContent = state.players[0].removals;
+              p2RemEl.textContent = state.players[1].removals;
+              resultEl.textContent = state.setupDone ? `${state.players[state.currentPlayer].name}'s turn (Mode: ${state.gameMode})` : 'Setup required. Choose mode & who starts.';
+            }
 
   // weighted dice pool
-  function weightedDice(){ const pool=[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,6]; return pool[Math.floor(Math.random()*pool.length)]; }
+            function weightedDice(){ const pool=[1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,6]; return pool[Math.floor(Math.random()*pool.length)]; }
 
   // dice spin visual
-  let rolling=false;
-  function spinDiceVisual(finalCallback){
-    if(rolling) return;
-    rolling=true;
-    const die = document.getElementById('die');
-    die.classList.add('dice-spin');
-    let tick=0; const maxTicks = 12 + randInt(8);
-    const it = setInterval(()=>{
-      tick++;
-      const v = 1 + randInt(6);
-      faceEl.textContent = v;
+            let rolling=false;
+            function spinDiceVisual(finalCallback){
+              if(rolling) return;
+              rolling=true;
+              const die = document.getElementById('die');
+              die.classList.add('dice-spin');
+              let tick=0; const maxTicks = 12 + randInt(8);
+              const it = setInterval(()=>{
+                tick++;
+                const v = 1 + randInt(6);
+                faceEl.textContent = v;
 // if(state.soundsOn) playDiceSound();
-      if(tick>=maxTicks){
-        clearInterval(it);
-        setTimeout(()=>{
-          die.classList.remove('dice-spin');
-          const final = weightedDice();
-          faceEl.textContent = final;
-          vibrate(40);
-          rolling=false;
-          finalCallback(final);
-        }, 140);
-      }
-    }, 60);
-  }
+                if(tick>=maxTicks){
+                  clearInterval(it);
+                  setTimeout(()=>{
+                    die.classList.remove('dice-spin');
+                    const final = weightedDice();
+                    faceEl.textContent = final;
+                    vibrate(40);
+                    rolling=false;
+                    finalCallback(final);
+                  }, 140);
+                }
+              }, 60);
+            }
 
   // -------- movement and logic --------
-  const OUTER_LEN = 24;
-  const MIDDLE_LEN = 16;
-  const INNER_LEN = 8;
+            const OUTER_LEN = 24;
+            const MIDDLE_LEN = 16;
+            const INNER_LEN = 8;
 
-  function handleMove(roll){
-    if(!state.setupDone || !state.running) return;
-    const pid = state.currentPlayer;
-    const pl = state.players[pid];
-    const from = pl.pos;
-    const lastIdx = state.trackMap.length - 1;
-    const innerStartIdx = OUTER_LEN + MIDDLE_LEN;
-    const innerEndIdx = OUTER_LEN + MIDDLE_LEN + INNER_LEN - 1;
+            function handleMove(roll){
+              if(!state.setupDone || !state.running) return;
+              const pid = state.currentPlayer;
+              const pl = state.players[pid];
+              const from = pl.pos;
+              const lastIdx = state.trackMap.length - 1;
+              const innerStartIdx = OUTER_LEN + MIDDLE_LEN;
+              const innerEndIdx = OUTER_LEN + MIDDLE_LEN + INNER_LEN - 1;
 
     // store last move for undo
-    state.lastMove = { pid, from, roll, prevState: JSON.parse(JSON.stringify(state)) };
+              state.lastMove = { pid, from, roll, prevState: JSON.parse(JSON.stringify(state)) };
 
     // inner-ring exact-match logic
-    if(pl.pos >= innerStartIdx && pl.pos <= innerEndIdx){
-      const remaining = lastIdx - pl.pos;
-      if(remaining < 5){
-        if(state.innerAttemptRemaining <= 0) state.innerAttemptRemaining = 2;
-        state.innerAttemptRemaining -= 1;
-        if(roll === remaining){
-          if(state.clothingRemovalCount < MIN_CLOTHING_REMOVALS_BEFORE_WIN){
-            state.players[pid].tasksPerformed += 1;
-            state.players[pid].removals += 1;
-            state.clothingRemovalCount += 1;
-            showModal('Win blocked', `You must perform a task before winning.` , ()=>{});
-            state.innerAttemptRemaining = 0;
-            state.currentPlayer = 1 - pid;
-            updateUI(); saveStateToStorage();
-            return;
-          }
-          animateMove(pid, from, lastIdx, ()=>{
-            pl.pos = lastIdx;
-            renderTokens();
-            state.running = false;
-            setTimeout(()=> showFinalPicker(pid), 220);
-          });
-          return;
-        } else {
-          if(state.innerAttemptRemaining > 0){
-            showModal('Exact match required', `Try again — ${state.innerAttemptRemaining} attempt(s) left this turn.`);
-            updateUI();
-            return;
-          } else {
-            state.players[pid].tasksPerformed += 1;
-            showModal('Task required', `Both attempts failed. Perform a massage of your partner's choice.`);
-            state.innerAttemptRemaining = 0;
-            state.currentPlayer = 1 - pid;
-            updateUI(); saveStateToStorage();
-            return;
-          }
-        }
-      }
-    }
+              if(pl.pos >= innerStartIdx && pl.pos <= innerEndIdx){
+                const remaining = lastIdx - pl.pos;
+                if(remaining < 5){
+                  if(state.innerAttemptRemaining <= 0) state.innerAttemptRemaining = 2;
+                  state.innerAttemptRemaining -= 1;
+                  if(roll === remaining){
+                    if(state.clothingRemovalCount < MIN_CLOTHING_REMOVALS_BEFORE_WIN){
+                      state.players[pid].tasksPerformed += 1;
+                      state.players[pid].removals += 1;
+                      state.clothingRemovalCount += 1;
+                      showModal('Win blocked', `You must perform a task before winning.` , ()=>{});
+                      state.innerAttemptRemaining = 0;
+                      state.currentPlayer = 1 - pid;
+                      updateUI(); saveStateToStorage();
+                      return;
+                    }
+                    animateMove(pid, from, lastIdx, ()=>{
+                      pl.pos = lastIdx;
+                      renderTokens();
+                      state.running = false;
+                      setTimeout(()=> showFinalPicker(pid), 220);
+                    });
+                    return;
+                  } else {
+                    if(state.innerAttemptRemaining > 0){
+                      showModal('Exact match required', `Try again — ${state.innerAttemptRemaining} attempt(s) left this turn.`);
+                      updateUI();
+                      return;
+                    } else {
+                      state.players[pid].tasksPerformed += 1;
+                      showModal('Task required', `Both attempts failed. Perform a massage of your partner's choice.`);
+                      state.innerAttemptRemaining = 0;
+                      state.currentPlayer = 1 - pid;
+                      updateUI(); saveStateToStorage();
+                      return;
+                    }
+                  }
+                }
+              }
 
     // normal movement
-    const to = Math.min(lastIdx, from + roll);
-    animateMove(pid, from, to, ()=>{
-      pl.pos = to;
-      renderTokens();
-      checkHiddenTileOnLanding(pid, to);
-      const opp = 1 - pid;
-      if(state.players[opp].pos === pl.pos){
-        if(!state.fullStripOccurred){
-          state.players[0].removals = Math.max(state.players[0].removals, 4);
-          state.players[1].removals = Math.max(state.players[1].removals, 4);
-          state.players[0].tasksPerformed += 1;
-          state.players[1].tasksPerformed += 1;
-          state.clothingRemovalCount += 4;
-          state.fullStripOccurred = true;
-          renderTokens();
-          showShockFullStrip();
-        } else {
-          state.players[pid].tasksPerformed += 1;
-          showModal('Overlap again', `You overlapped again now. Apply the agreed action.` , ()=>{});
-        }
-        updateUI(); saveStateToStorage();
-      }
-      if(state.running){
-        state.currentPlayer = 1 - pid;
-        state.innerAttemptRemaining = 0;
-        updateUI(); saveStateToStorage();
-      }
-    });
-  }
+              const to = Math.min(lastIdx, from + roll);
+              animateMove(pid, from, to, ()=>{
+                pl.pos = to;
+                renderTokens();
+                checkHiddenTileOnLanding(pid, to);
+                const opp = 1 - pid;
+                if(state.players[opp].pos === pl.pos){
+                  if(!state.fullStripOccurred){
+                    state.players[0].removals = Math.max(state.players[0].removals, 4);
+                    state.players[1].removals = Math.max(state.players[1].removals, 4);
+                    state.players[0].tasksPerformed += 1;
+                    state.players[1].tasksPerformed += 1;
+                    state.clothingRemovalCount += 4;
+                    state.fullStripOccurred = true;
+                    renderTokens();
+                    showShockFullStrip();
+                  } else {
+                    state.players[pid].tasksPerformed += 1;
+                    showModal('Overlap again', `You overlapped again now, Wife has to seat on Husband's lap for the rest of the game. if you are already seating then you have to kiss for 2 minutes. and even that is already performs you can move to the next turn.` , ()=>{});
+                  }
+                  updateUI(); saveStateToStorage();
+                }
+                if(state.running){
+                  state.currentPlayer = 1 - pid;
+                  state.innerAttemptRemaining = 0;
+                  updateUI(); saveStateToStorage();
+                }
+              });
+            }
 
-  function animateMove(pid, from, to, cb){
-    let cur = from;
-    const id = setInterval(()=>{
-      cur++;
-      state.players[pid].pos = cur;
-      renderTokens();
-      if(state.soundsOn) playBeep(320, 35, 'sine');
-      if(cur >= to){
-        clearInterval(id);
-        cb();
-      }
-    }, 160);
-  }
+            // UPDATED MOVEMENT LOGIC (Echo & Bloom)
+    function animateMove(pid, from, to, cb) {
+        let cur = from;
+        const totalSteps = state.trackMap.length;
 
-  function checkHiddenTileOnLanding(pid, idx){
-    const posCell = state.trackMap[idx] ? getCell(state.trackMap[idx][0], state.trackMap[idx][1]) : null;
-    if(state.hiddenPink.has(idx)){
-      state.hiddenPink.delete(idx);
-      const pool = tasks[state.gameMode] || tasks.soft;
-      const t = pool[Math.floor(Math.random()*pool.length)];
-      state.players[pid].tasksPerformed += 1;
-      if(posCell){ posCell.classList.add('pink-pulse'); setTimeout(()=>posCell.classList.remove('pink-pulse'), 700); }
-      if(state.soundsOn) playRevealSound();
-      showModal('Hidden Task', `You landed on a hidden task: <strong>${t}</strong>`);
-      saveStateToStorage();
-    } else if(state.hiddenBlue.has(idx)){
-      state.hiddenBlue.delete(idx);
-      if(!state.fullStripOccurred){
-        state.players[pid].removals += 1;
-        state.clothingRemovalCount += 1;
-        state.players[pid].tasksPerformed += 1;
-        updateUI();
-        if(posCell){ posCell.classList.add('blue-ripple'); setTimeout(()=>posCell.classList.remove('blue-ripple'), 800); }
-        if(state.soundsOn) playRevealSound();
-        showModal('Hidden Position', 'You landed on a hidden position: your partner will remove 1 piece of clothing.');
-        saveStateToStorage();
-      } else {
-        state.players[pid].tasksPerformed += 1;
-        updateUI();
-        const pool = hiddenPositionsPool[state.gameMode] || hiddenPositionsPool.soft;
-        const t = pool[Math.floor(Math.random()*pool.length)];
-        if(posCell){ posCell.classList.add('blue-ripple'); setTimeout(()=>posCell.classList.remove('blue-ripple'), 800); }
-        if(state.soundsOn) playRevealSound();
-        showModal('Hidden Hard Task', `You have to perform: <strong>${t}</strong>`);
-        saveStateToStorage();
-      }
+        const id = setInterval(() => {
+            cur++;
+            state.players[pid].pos = cur;
+            
+            // Calculate Bloom (0 to 1 based on closeness to center)
+            const progress = cur / totalSteps;
+            
+            renderTokens();
+            
+            const tokenEl = document.querySelector(`.token.p${pid + 1}`);
+            if (tokenEl) {
+                tokenEl.classList.add('token-moving');
+                tokenEl.style.setProperty('--bloom', progress);
+                tokenEl.style.setProperty('--token-color', pid === 0 ? 'var(--token-p1)' : 'var(--token-p2)');
+                setTimeout(() => tokenEl.classList.remove('token-moving'), 350);
+            }
+
+            // Tile Echo Ripple
+            const pos = state.trackMap[cur];
+            const cell = getCell(pos[0], pos[1]);
+            if (cell) {
+                const echo = document.createElement('div');
+                echo.className = 'echo-ring';
+                cell.appendChild(echo);
+                setTimeout(() => echo.remove(), 600);
+            }
+
+            if (state.soundsOn) playBeep(320, 35, 'sine');
+            if (cur >= to) {
+                clearInterval(id);
+                cb();
+            }
+        }, 450);
     }
-  }
+            function checkHiddenTileOnLanding(pid, idx){
+              const posCell = state.trackMap[idx] ? getCell(state.trackMap[idx][0], state.trackMap[idx][1]) : null;
+              if(state.hiddenPink.has(idx)){
+                state.hiddenPink.delete(idx);
+                const pool = tasks[state.gameMode] || tasks.soft;
+                const t = pool[Math.floor(Math.random()*pool.length)];
+                state.players[pid].tasksPerformed += 1;
+                if(posCell){ posCell.classList.add('pink-pulse'); setTimeout(()=>posCell.classList.remove('pink-pulse'), 700); }
+                if(state.soundsOn) playRevealSound();
+                showModal('Hidden Task', `You landed on a hidden task: <strong>${t}</strong>`);
+                saveStateToStorage();
+              } else if(state.hiddenBlue.has(idx)){
+                state.hiddenBlue.delete(idx);
+                if(!state.fullStripOccurred){
+                  state.players[pid].removals += 1;
+                  state.clothingRemovalCount += 1;
+                  state.players[pid].tasksPerformed += 1;
+                  updateUI();
+                  if(posCell){ posCell.classList.add('blue-ripple'); setTimeout(()=>posCell.classList.remove('blue-ripple'), 800); }
+                  if(state.soundsOn) playRevealSound();
+                  showModal('Hidden Position', 'You landed on a hidden position: your partner will remove your 1 piece of clothing using only mouth.');
+                  saveStateToStorage();
+                } else {
+                  state.players[pid].tasksPerformed += 1;
+                  updateUI();
+                  const pool = hiddenPositionsPool[state.gameMode] || hiddenPositionsPool.soft;
+                  const t = pool[Math.floor(Math.random()*pool.length)];
+                  if(posCell){ posCell.classList.add('blue-ripple'); setTimeout(()=>posCell.classList.remove('blue-ripple'), 800); }
+                  if(state.soundsOn) playRevealSound();
+                  showModal('Hidden Hard Task', `You have to perform: <strong>${t}</strong>`);
+                  saveStateToStorage();
+                }
+              }
+            }
 
   // -------- modals --------
-  function showModal(title, html, onClose){
-    modalRoot.innerHTML = '';
-    const overlay = document.createElement('div'); overlay.className='overlay';
-    const modal = document.createElement('div'); modal.className='modal';
-    modal.innerHTML = `
+            function showModal(title, html, onClose){
+              modalRoot.innerHTML = '';
+              const overlay = document.createElement('div'); overlay.className='overlay';
+              const modal = document.createElement('div'); modal.className='modal';
+              modal.innerHTML = `
       <h3>${title}</h3>
       <div class="shock-body" style="margin-top:8px">${html}</div>
       <div class="shock-cta">
         <button id="closeModal" class="btn-accept">Close</button>
       </div>
-    `;
-    overlay.appendChild(modal);
-    modalRoot.appendChild(overlay);
-    modalRoot.style.display='block';
-    document.getElementById('closeModal').onclick = ()=>{
-      modalRoot.style.display='none';
-      modalRoot.innerHTML='';
-      if(onClose) onClose();
-    };
-  }
+              `;
+              overlay.appendChild(modal);
+              modalRoot.appendChild(overlay);
+              modalRoot.style.display='block';
+              document.getElementById('closeModal').onclick = ()=>{
+                modalRoot.style.display='none';
+                modalRoot.innerHTML='';
+                if(onClose) onClose();
+              };
+            }
 
-  function showShockFullStrip(){
-    modalRoot.innerHTML = '';
-    const overlay = document.createElement('div'); overlay.className='overlay';
-    const modal = document.createElement('div'); modal.className='modal';
-    modal.innerHTML = `
+            function showShockFullStrip(){
+              modalRoot.innerHTML = '';
+              const overlay = document.createElement('div'); overlay.className='overlay';
+              const modal = document.createElement('div'); modal.className='modal';
+              modal.innerHTML = `
       <div style="text-align:center"><div class="shock-emoji">🔥</div></div>
       <div class="shock-title">PLAYFUL SHOCK: Full removal triggered</div>
       <div class="shock-body" style="margin-top:8px">
@@ -679,42 +759,42 @@
         <strong style="color:#ffd1e6">Your partner will remove every piece of clothing using only mouth, so both must be naked before the next move.</strong>
       </div>
       <div class="shock-cta"><button id="shockOk" class="btn-accept">OK</button></div>
-    `;
-    overlay.appendChild(modal);
-    modalRoot.appendChild(overlay);
-    modalRoot.style.display='block';
-    if(state.soundsOn) { playOverlapSound(); vibrate(150); }
-    document.getElementById('shockOk').onclick = ()=>{
-      modalRoot.style.display='none'; modalRoot.innerHTML=''; updateUI();
-    };
-  }
+              `;
+              overlay.appendChild(modal);
+              modalRoot.appendChild(overlay);
+              modalRoot.style.display='block';
+              if(state.soundsOn) { playOverlapSound(); vibrate(150); }
+              document.getElementById('shockOk').onclick = ()=>{
+                modalRoot.style.display='none'; modalRoot.innerHTML=''; updateUI();
+              };
+            }
 
   // -------- final picker / setup --------
-  function showFinalPicker(winnerIdx){
-    const winner = state.players[winnerIdx];
-    positionOptions.innerHTML = '';
-    const pool = winPositionsPool[state.gameMode] || winPositionsPool.soft;
-    pool.forEach(p=>{
-      const btn = document.createElement('div');
-      btn.className = 'task-btn';
-      btn.textContent = p;
-      btn.onclick = ()=>{
-        showModal('Final Selection', `<strong>${winner.name}</strong> chose: <em>${p}</em>`, ()=>{});
-        positionCard.style.display='none';
-        saveStateToStorage();
-      };
-      positionOptions.appendChild(btn);
-    });
-    positionCard.style.display='block';
-    showModal('You win!', `<strong>${winner.name}</strong> reached the center! Pick a final position from the side panel.`, ()=>{});
-  }
+            function showFinalPicker(winnerIdx){
+              const winner = state.players[winnerIdx];
+              positionOptions.innerHTML = '';
+              const pool = winPositionsPool[state.gameMode] || winPositionsPool.soft;
+              pool.forEach(p=>{
+                const btn = document.createElement('div');
+                btn.className = 'task-btn';
+                btn.textContent = p;
+                btn.onclick = ()=>{
+                  showModal('Final Selection', `<strong>${winner.name}</strong> chose: <em>${p}</em>`, ()=>{});
+                  positionCard.style.display='none';
+                  saveStateToStorage();
+                };
+                positionOptions.appendChild(btn);
+              });
+              positionCard.style.display='block';
+              showModal('You win!', `<strong>${winner.name}</strong> reached the center! Pick a final position from the side panel.`, ()=>{});
+            }
 
-  function askSetup(){
-    modalRoot.innerHTML = '';
-    const overlay = document.createElement('div'); overlay.className='overlay';
-    const modal = document.createElement('div'); modal.className='modal';
+            function askSetup(){
+              modalRoot.innerHTML = '';
+              const overlay = document.createElement('div'); overlay.className='overlay';
+              const modal = document.createElement('div'); modal.className='modal';
 
-    modal.innerHTML = `
+              modal.innerHTML = `
       <h3>Game setup</h3>
       <div class="shock-body" style="margin-top:8px">
         <div style="margin-bottom:8px"><strong>Choose mode</strong></div>
@@ -736,217 +816,230 @@
       <div class="shock-cta" style="margin-top:12px">
         <button id="submitSetup" class="btn-accept">Submit</button>
       </div>
-    `;
-    overlay.appendChild(modal); modalRoot.appendChild(overlay); modalRoot.style.display='block';
+              `;
+              overlay.appendChild(modal); modalRoot.appendChild(overlay); modalRoot.style.display='block';
 
-    document.getElementById('submitSetup').onclick = ()=>{
-      const mode = modal.querySelector('input[name="mode"]:checked').value;
-      const starter = parseInt(modal.querySelector('input[name="start"]:checked').value, 10);
-      
-      state.gameMode = mode;
-      state.currentPlayer = starter;
-      
-      state.setupDone = true;
-      modalRoot.style.display='none'; modalRoot.innerHTML='';
-      setupBtn.disabled = true;
-      updateUI();
-      saveStateToStorage();
-    };
-  }
-
+              document.getElementById('submitSetup').onclick = ()=>{
+                const mode = modal.querySelector('input[name="mode"]:checked').value;
+                const starter = parseInt(modal.querySelector('input[name="start"]:checked').value, 10);
+                
+                state.gameMode = mode;
+                state.currentPlayer = starter;
+                
+                state.setupDone = true;
+                modalRoot.style.display='none'; modalRoot.innerHTML='';
+                setupBtn.disabled = true;
+                updateUI();
+                saveStateToStorage();
+              };
+            }
+// NEW UTILITY FOR HEARTBEAT SOUND
+    function playHeartbeat() {
+        if (!state.soundsOn) return;
+        playBeep(150, 100, 'sine');
+        setTimeout(() => playBeep(120, 150, 'sine'), 150);
+    }
   // -------- reset and control handlers --------
-  function resetGame(){
-    if(!confirm('Reset game?')) return;
-    state.players = [
-      { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P1_NAME, avatar: 'p1_masc' },
-      { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P2_NAME, avatar: 'p2_fem' }
-    ];
-    state.currentPlayer = 0;
-    state.running = true;
-    state.setupDone = false;
-    state.gameMode = null;
-    state.fullStripOccurred = false;
-    state.innerAttemptRemaining = 0;
-    state.clothingRemovalCount = 0;
-    state.lastMove = null;
-    state.hiddenPink = new Set();
-    state.hiddenBlue = new Set();
-    setupBtn.disabled = false;
-    buildBoard(); shuffleHidden(); renderTokens(); updateUI();
-    faceEl.textContent = '';
-    positionCard.style.display = 'none';
-    saveStateToStorage();
-    setTimeout(()=>askSetup(), 200);
-  }
-  resetBtn.addEventListener('click', resetGame);
+            function resetGame(){
+              if(!confirm('Reset game?')) return;
+              state.players = [
+                { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P1_NAME, avatar: 'p1_masc' },
+                { pos: 0, tasksPerformed: 0, removals: INITIAL_REMOVALS_PER_PERSON, name: DEFAULT_P2_NAME, avatar: 'p2_fem' }
+              ];
+              state.currentPlayer = 0;
+              state.running = true;
+              state.setupDone = false;
+              state.gameMode = null;
+              state.fullStripOccurred = false;
+              state.innerAttemptRemaining = 0;
+              state.clothingRemovalCount = 0;
+              state.lastMove = null;
+              state.hiddenPink = new Set();
+              state.hiddenBlue = new Set();
+              setupBtn.disabled = false;
+              buildBoard(); shuffleHidden(); renderTokens(); updateUI();
+              faceEl.textContent = '';
+              positionCard.style.display = 'none';
+              saveStateToStorage();
+              setTimeout(()=>askSetup(), 200);
+            }
+            resetBtn.addEventListener('click', resetGame);
 
-  rollBtn.addEventListener('click', ()=>{
-    if(!state.setupDone) return showModal('Setup required', 'Please choose mode & who starts first.');
-    if(!state.running) return;
-    spinDiceVisual((final)=>{ if(state.soundsOn) playDiceSound(); handleMove(final); });
-  });
+            rollBtn.addEventListener('click', ()=>{
+              if(!state.setupDone) return showModal('Setup required', 'Please choose mode & who starts first.');
+              if(!state.running) return;
+              spinDiceVisual((final)=>{ if(state.soundsOn) playDiceSound(); handleMove(final); });
+            });
 
-  floatingRoll.addEventListener('click', ()=> rollBtn.click());
-  function toggleFloatingRoll(){ if(window.innerWidth <= 980) floatingRoll.style.display = 'block'; else floatingRoll.style.display = 'none'; }
-  window.addEventListener('resize', toggleFloatingRoll);
-  toggleFloatingRoll();
+            floatingRoll.addEventListener('click', ()=> rollBtn.click());
+            function toggleFloatingRoll(){ if(window.innerWidth <= 980) floatingRoll.style.display = 'block'; else floatingRoll.style.display = 'none'; }
+            window.addEventListener('resize', toggleFloatingRoll);
+            toggleFloatingRoll();
 
-  endTurnBtn.addEventListener('click', ()=>{
-    if(!state.setupDone) return;
-    if(!state.running) return;
-    state.innerAttemptRemaining = 0;
-    state.currentPlayer = 1 - state.currentPlayer;
-    updateUI(); saveStateToStorage();
-  });
+            endTurnBtn.addEventListener('click', ()=>{
+              if(!state.setupDone) return;
+              if(!state.running) return;
+              state.innerAttemptRemaining = 0;
+              state.currentPlayer = 1 - state.currentPlayer;
+              updateUI(); saveStateToStorage();
+            });
 
-  setupBtn.addEventListener('click', ()=> askSetup());
+            setupBtn.addEventListener('click', ()=> askSetup());
 
   // Undo (restore lastMove.prevState if present)
-  undoBtn.addEventListener('click', ()=>{
-    if(!state.lastMove || !state.lastMove.prevState) return alert('Nothing to undo');
-    const prev = state.lastMove.prevState;
-    
+            undoBtn.addEventListener('click', ()=>{
+              if(!state.lastMove || !state.lastMove.prevState) return alert('Nothing to undo');
+              const prev = state.lastMove.prevState;
+              
     // Copy simple properties
-    state.currentPlayer = prev.currentPlayer;
-    state.running = prev.running;
-    state.setupDone = prev.setupDone;
-    state.gameMode = prev.gameMode;
-    state.fullStripOccurred = prev.fullStripOccurred;
-    state.innerAttemptRemaining = prev.innerAttemptRemaining;
-    state.clothingRemovalCount = prev.clothingRemovalCount;
-    state.soundsOn = prev.soundsOn;
-    
+              state.currentPlayer = prev.currentPlayer;
+              state.running = prev.running;
+              state.setupDone = prev.setupDone;
+              state.gameMode = prev.gameMode;
+              state.fullStripOccurred = prev.fullStripOccurred;
+              state.innerAttemptRemaining = prev.innerAttemptRemaining;
+              state.clothingRemovalCount = prev.clothingRemovalCount;
+              state.soundsOn = prev.soundsOn;
+              
     // Copy complex properties
-    state.players = prev.players;
-    state.hiddenPink = new Set(prev.hiddenPink);
-    state.hiddenBlue = new Set(prev.hiddenBlue);
-    
+              state.players = prev.players;
+              state.hiddenPink = new Set(prev.hiddenPink);
+              state.hiddenBlue = new Set(prev.hiddenBlue);
+              
     // Clear last move to prevent double undo
-    state.lastMove = null;
+              state.lastMove = null;
 
-    renderTokens();
-    updateUI();
-    saveStateToStorage();
-  });
+              renderTokens();
+              updateUI();
+              saveStateToStorage();
+            });
 
   // sound toggle
-  soundToggle.addEventListener('click', ()=>{
-    state.soundsOn = !state.soundsOn;
-    soundToggle.textContent = state.soundsOn ? '🔊 Sound ON' : '🔈 Sound OFF';
-    soundToggle.setAttribute('aria-pressed', state.soundsOn ? 'true' : 'false');
-    saveStateToStorage();
-  });
+            soundToggle.addEventListener('click', ()=>{
+              state.soundsOn = !state.soundsOn;
+              soundToggle.textContent = state.soundsOn ? '🔊 Sound ON' : '🔈 Sound OFF';
+              soundToggle.setAttribute('aria-pressed', state.soundsOn ? 'true' : 'false');
+              saveStateToStorage();
+            });
 
   // timer slider / start / stop
-  let timerInterval = null;
-  let timeLeft = 0;
-  timerSlider.addEventListener('input', ()=> { timerValue.textContent = timerSlider.value; });
-  timerStartBtn.addEventListener('click', ()=>{
-    const minutes = parseInt(timerSlider.value,10);
-    if(minutes <= 0) { alert('Choose a timer value > 0'); return; }
-    startTimer(minutes);
-  });
-  timerStopBtn.addEventListener('click', ()=> {
-    if(timerInterval){ clearInterval(timerInterval); timerInterval = null; updateTimerDisplay(0); }
-  });
+            let timerInterval = null;
+            let timeLeft = 0;
+            timerSlider.addEventListener('input', ()=> { timerValue.textContent = timerSlider.value; });
+            timerStartBtn.addEventListener('click', ()=>{
+              const minutes = parseInt(timerSlider.value,10);
+              if(minutes <= 0) { alert('Choose a timer value > 0'); return; }
+              startTimer(minutes);
+            });
+            timerStopBtn.addEventListener('click', ()=> {
+              if(timerInterval){ clearInterval(timerInterval); timerInterval = null; updateTimerDisplay(0); }
+            });
 
-  function startTimer(minutes){
-    if(timerInterval) clearInterval(timerInterval);
-    timeLeft = minutes * 60;
-    updateTimerDisplay(timeLeft);
-    timerInterval = setInterval(()=>{
-      timeLeft--;
-      updateTimerDisplay(timeLeft);
-      if(timeLeft <= 0){
-        clearInterval(timerInterval);
-        timerInterval = null;
-        updateTimerDisplay(0);
-        if(state.soundsOn) playTimerEndSound();
-        showModal('⏳ Task time is over!', `Time's up!`);
-      }
-    }, 1000);
-  }
-  function updateTimerDisplay(seconds){
-    const mins = Math.floor(seconds / 60).toString().padStart(2,'0');
-    const secs = (seconds % 60).toString().padStart(2,'0');
-    timerDisplay.textContent = `${mins}:${secs}`;
-  }
+            function startTimer(minutes) {
+        if (timerInterval) clearInterval(timerInterval);
+        timeLeft = minutes * 60;
+        const boardContainer = document.querySelector('.board-wrap');
+        
+        updateTimerDisplay(timeLeft);
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay(timeLeft);
+
+            // Heartbeat Trigger (Last 10 Seconds)
+            if (timeLeft <= 10 && timeLeft > 0) {
+                boardContainer.classList.add('timer-warning');
+                playHeartbeat();
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                boardContainer.classList.remove('timer-warning');
+                if (state.soundsOn) playTimerEndSound();
+                showModal('⏳ Time is up!', `Task duration complete.`);
+            }
+        }, 1000);
+    }
+            function updateTimerDisplay(seconds){
+              const mins = Math.floor(seconds / 60).toString().padStart(2,'0');
+              const secs = (seconds % 60).toString().padStart(2,'0');
+              timerDisplay.textContent = `${mins}:${secs}`;
+            }
 
   // -------- storage (save/continue) --------
-  const STORAGE_KEY = 'couples_ludo_v1';
-  function saveStateToStorage(){
-    try{
-      const safe = {
-        players: state.players,
-        currentPlayer: state.currentPlayer,
-        running: state.running,
-        setupDone: state.setupDone,
-        gameMode: state.gameMode,
-        fullStripOccurred: state.fullStripOccurred,
-        innerAttemptRemaining: state.innerAttemptRemaining,
-        clothingRemovalCount: state.clothingRemovalCount,
-        hiddenPink: Array.from(state.hiddenPink),
-        hiddenBlue: Array.from(state.hiddenBlue),
-        soundsOn: state.soundsOn
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
-    }catch(e){}
-  }
-  function loadStateFromStorage(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return false;
-      const s = JSON.parse(raw);
-      
-      if(s.players) { 
-        state.players = s.players.map((p, idx)=>({ 
-          ...p, 
+            const STORAGE_KEY = 'couples_ludo_v1';
+            function saveStateToStorage(){
+              try{
+                const safe = {
+                  players: state.players,
+                  currentPlayer: state.currentPlayer,
+                  running: state.running,
+                  setupDone: state.setupDone,
+                  gameMode: state.gameMode,
+                  fullStripOccurred: state.fullStripOccurred,
+                  innerAttemptRemaining: state.innerAttemptRemaining,
+                  clothingRemovalCount: state.clothingRemovalCount,
+                  hiddenPink: Array.from(state.hiddenPink),
+                  hiddenBlue: Array.from(state.hiddenBlue),
+                  soundsOn: state.soundsOn
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(safe));
+              }catch(e){}
+            }
+            function loadStateFromStorage(){
+              try{
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if(!raw) return false;
+                const s = JSON.parse(raw);
+                
+                if(s.players) { 
+                  state.players = s.players.map((p, idx)=>({ 
+                    ...p, 
           // Re-map avatar to fixed values
-          avatar: idx === 0 ? 'p1_masc' : 'p2_fem' 
-        })); 
-      }
-      if(typeof s.currentPlayer === 'number') state.currentPlayer = s.currentPlayer;
-      if(typeof s.running === 'boolean') state.running = s.running;
-      if(typeof s.setupDone === 'boolean') state.setupDone = s.setupDone;
-      if(s.gameMode) state.gameMode = s.gameMode;
-      state.fullStripOccurred = !!s.fullStripOccurred;
-      state.innerAttemptRemaining = s.innerAttemptRemaining || 0;
-      state.clothingRemovalCount = s.clothingRemovalCount || 0;
-      state.hiddenPink = new Set((s.hiddenPink||[]));
-      state.hiddenBlue = new Set((s.hiddenBlue||[]));
-      state.soundsOn = typeof s.soundsOn === 'boolean' ? s.soundsOn : true;
-      return true;
-    }catch(e){ return false; }
-  }
+                    avatar: idx === 0 ? 'p1_masc' : 'p2_fem' 
+                  })); 
+                }
+                if(typeof s.currentPlayer === 'number') state.currentPlayer = s.currentPlayer;
+                if(typeof s.running === 'boolean') state.running = s.running;
+                if(typeof s.setupDone === 'boolean') state.setupDone = s.setupDone;
+                if(s.gameMode) state.gameMode = s.gameMode;
+                state.fullStripOccurred = !!s.fullStripOccurred;
+                state.innerAttemptRemaining = s.innerAttemptRemaining || 0;
+                state.clothingRemovalCount = s.clothingRemovalCount || 0;
+                state.hiddenPink = new Set((s.hiddenPink||[]));
+                state.hiddenBlue = new Set((s.hiddenBlue||[]));
+                state.soundsOn = typeof s.soundsOn === 'boolean' ? s.soundsOn : true;
+                return true;
+              }catch(e){ return false; }
+            }
 
 
   // -------- hidden helpers / start --------
-  function init(){
-    buildBoard();
-    shuffleHidden();
-    renderTokens();
-    updateUI();
+            function init(){
+              buildBoard();
+              shuffleHidden();
+              renderTokens();
+              updateUI();
     // Directly ask for setup on load, bypassing the save game check/prompt.
-    setTimeout(()=> askSetup(), 320); 
-    if(state.soundsOn){
-      soundToggle.textContent = '🔊 Sound ON';
-      soundToggle.setAttribute('aria-pressed', 'true');
-    } else {
-      soundToggle.textContent = '🔈 Sound OFF';
-      soundToggle.setAttribute('aria-pressed', 'false');
-    }
-  }
+              setTimeout(()=> askSetup(), 320); 
+              if(state.soundsOn){
+                soundToggle.textContent = '🔊 Sound ON';
+                soundToggle.setAttribute('aria-pressed', 'true');
+              } else {
+                soundToggle.textContent = '🔈 Sound OFF';
+                soundToggle.setAttribute('aria-pressed', 'false');
+              }
+            }
 
   // keyboard shortcut: R roll, U undo (for quick play)
-  window.addEventListener('keydown', (e)=>{
-    if(e.key.toLowerCase() === 'r') rollBtn.click();
-    if(e.key.toLowerCase() === 'u') undoBtn.click();
-  });
+            window.addEventListener('keydown', (e)=>{
+              if(e.key.toLowerCase() === 'r') rollBtn.click();
+              if(e.key.toLowerCase() === 'u') undoBtn.click();
+            });
 
   // init
-  init();
+            init();
 
-})();
-</script>
-</body>
-</html>
+          })();
+        </script>
+      </body>
+      </html>
