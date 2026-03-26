@@ -1,1538 +1,1699 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Intimacy Selector - 1000 Positions & Twist</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Intimacy Selector: 1000 Positions and Twists</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
-    <style>
-        :root {
-            --bg:#070814;
-            --card:#0b1220;
-            --accent:#ff6b81;
-            --muted:#9fb0c8;
-            --dice-size:100px;
-            --perform-color: #38c172;
-            --like-color: #ff6b81;
-        }
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────── */
+    :root {
+      --bg:        #06080f;
+      --surface:   #0d1220;
+      --surface2:  #131a2e;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #e8637a;
+      --accent2:   #f4a0ae;
+      --green:     #34c97a;
+      --muted:     #7a90b0;
+      --text:      #dce9ff;
+      --dice-size: 96px;
+      --radius:    16px;
+      --transition: 0.22s ease;
+    }
 
-        * { box-sizing: border-box; }
-        html, body { 
-            min-height: 100%;
-            margin: 0; 
-        }
-        
-        body {
-            font-family:'Inter',system-ui,Segoe UI,Roboto,Arial;
-            background:radial-gradient(1200px 600px at 10% 10%,#0f2036 0%, #071022 40%, #02040a 100%);
-            color:#e9f2ff;
-            display:flex;
-            align-items:flex-start; 
-            justify-content:center;
-            padding:20px;
-            position: relative;
-        }
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        .app {
-            width:100%;
-            max-width:1100px;
-            background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.3));
-            border-radius:18px;
-            padding:28px;
-            box-shadow:0 12px 50px rgba(2,6,23,0.7);
-        }
+    html { scroll-behavior: smooth; }
 
-        header { text-align:center; }
-        h1 { margin:0; font-size:24px; color:var(--accent); text-shadow:0 6px 20px rgba(255,107,129,0.12); }
-        p.lead { margin:8px 0 0; color:var(--muted); }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-        .controls {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            justify-content: center;
-            margin-top: 18px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
+    /* ─── Ambient BG ────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 900px 500px at 15% 0%, rgba(232,99,122,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 400px at 85% 90%, rgba(52,201,122,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
 
-        button.roll {
-            background:linear-gradient(90deg,var(--accent),#ff9aa2);
-            color:white;
-            border:none;
-            padding:14px 26px;
-            border-radius:999px;
-            font-weight:700;
-            font-size:18px;
-            cursor:pointer;
-            box-shadow:0 10px 30px rgba(255,107,129,0.18);
-        }
-        
-        button.link-btn {
-            background: rgba(255,255,255,0.1);
-            color: white;
-            border: none;
-            padding: 14px 26px;
-            border-radius: 999px;
-            font-weight: 700;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
+    /* ─── Layout ────────────────────────────────────────────── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
 
-        .game {
-            display:flex;
-            gap:15px;
-            align-items:center;
-            justify-content:center;
-            margin-top:26px;
-            flex-wrap:wrap;
-        }
+    /* ─── Toast Notification ────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
 
-        .die {
-            width:var(--dice-size);
-            height:var(--dice-size);
-            perspective:1000px;
-            position:relative;
-        }
-        
-        .cube {
-            width:100%;
-            height:100%;
-            position:absolute;
-            transform-style:preserve-3d;
-        }
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(52,201,122,0.4); color: var(--green); }
+    .toast.like    { border-color: rgba(232,99,122,0.4);  color: var(--accent2); }
+    .toast.info    { border-color: rgba(255,255,255,0.15); }
 
-        .face {
-            position:absolute;
-            width:100%;
-            height:100%;
-            backface-visibility:hidden;
-        }
+    /* ─── Top Bar ───────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-        .face:nth-child(1) { transform: rotateY(  0deg) translateZ(calc(var(--dice-size)/2)); }
-        .face:nth-child(2) { transform: rotateY( 90deg) translateZ(calc(var(--dice-size)/2)); }
-        .face:nth-child(3) { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
-        .face:nth-child(4) { transform: rotateY(-90deg) translateZ(calc(var(--dice-size)/2)); }
-        .face:nth-child(5) { transform: rotateX( 90deg) translateZ(calc(var(--dice-size)/2)); }
-        .face:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--dice-size)/2)); }
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .home-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
 
-        .face {
-            position:absolute; inset:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            border-radius:18px;
-            padding:10px;
-            text-align:center;
-            font-weight:800;
-            line-height:1;
-            backface-visibility:hidden;
-            box-shadow:0 8px 30px rgba(2,6,23,0.6);
-        }
+    /* ─── User Status ───────────────────────────────────────── */
+    #userStatus {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    #userStatus .username {
+      font-weight: 700;
+      color: var(--text);
+    }
 
-        .die[data-die-type="d10"] .face { 
-            background:linear-gradient(145deg,#b7e0ff,#dff4ff); 
-            color:#02122a; 
-            font-size: 32px; 
-        }
+    /* ─── Hero Header ───────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero .lead {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
 
-        .die[data-die-type="d6"] .face { 
-            background:linear-gradient(145deg,#fff5c7,#ffdca8); 
-            color:#1b1205; 
-            font-size: 14px;
-            font-weight: 700;
-        }
+    /* ─── Progress Bar ──────────────────────────────────────── */
+    .progress-wrap {
+      max-width: 440px;
+      margin: 18px auto 0;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      height: 5px;
+      border-radius: 999px;
+      background: var(--surface2);
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.6s ease;
+    }
 
-        .ink-wash {
-            filter: contrast(120%) brightness(110%) saturate(150%) hue-rotate(250deg) invert(100%) ;
-            object-fit: contain; 
-            width: 100%;
-            height: 100%;
-            border-radius: 8px;
-        }
-        
-        .die .shadow {
-            position:absolute; left:50%; bottom:-6px; transform:translateX(-50%);
-            width:70%; height:18px;
-            border-radius:50%;
-            filter:blur(10px);
-            background:rgba(0,0,0,0.45);
-            transition:width .7s, height .7s, opacity .7s;
-        }
+    /* ─── Controls ──────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
 
-        .die.rolling .shadow{width:95%; height:26px; opacity:0.6;}
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 24px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .results {
-            margin-top:20px;
-            text-align:center;
-            color:#f2fbff;
-            min-height:300px; 
-        }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #f4718a 100%);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(232,99,122,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 8px 36px rgba(232,99,122,0.45);
+      transform: translateY(-1px);
+    }
 
-        .result-card.show {
-            background: rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 18px 22px;
-            max-width: 800px; 
-            margin: 20px auto;
-            animation: fadeIn 0.5s ease;
-            word-break: break-word;
-            display: grid;
-            grid-template-areas: 
-            "image image" 
-            "actions actions"
-            "prompt prompt"; 
-            grid-template-columns: 1fr;
-            gap: 10px 15px;
-            align-items: center;
-        }
-        
-        .result-prompt {
-            grid-area: prompt; 
-            font-size: 18px;
-            color: #fff;
-            font-weight: 600;
-            margin-top: 0;
-            text-align: center;
-        }
-        
-        .position-image-container {
-            grid-area: image;
-            width: 100%;
-            height: 450px; 
-            background: var(--card);
-            border-radius: 10px;
-            margin: 10px 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .result-actions {
-            grid-area: actions;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-top: 10px;
-        }
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
 
-        .action-btn {
-            flex-grow: 1;
-            max-width: 250px;
-            border: none;
-            padding: 12px 16px;
-            border-radius: 999px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-        
-        #performBtn, .perform-action {
-            background: var(--perform-color);
-            color: white;
-            box-shadow: 0 6px 20px rgba(56, 193, 114, 0.25);
-        }
-        
-        #likeBtn, .like-action {
-            background: var(--like-color);
-            color: white;
-            box-shadow: 0 6px 20px rgba(255, 107, 129, 0.25);
-        }
-        
-        .data-view-container {
-            padding: 20px;
-            text-align: center;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .history-controls {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .history-controls button {
-            background: rgba(255,255,255,0.1);
-            color: var(--muted);
-            border: 1px solid rgba(255,255,255,0.2);
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: background 0.2s, color 0.2s;
-        }
-        
-        .history-controls button.active {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
+    .btn-green {
+      background: linear-gradient(135deg, #27ae60, var(--green));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(52,201,122,0.25);
+    }
+    .btn-green:hover { box-shadow: 0 6px 28px rgba(52,201,122,0.4); }
 
-        .data-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
+    .btn-rose {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(232,99,122,0.25);
+    }
 
-        .history-item, .gallery-item {
-            background: var(--card);
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            position: relative;
-            cursor: pointer;
-            min-height: 200px; 
-        }
+    .btn-danger {
+      background: rgba(192,57,43,0.18);
+      color: #e17168;
+      border: 1px solid rgba(192,57,43,0.3);
+    }
+    .btn-danger:hover { background: rgba(192,57,43,0.28); }
 
-        .history-item-image {
-            width: 100%;
-            height: 140px; 
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
 
-        .history-item-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; 
-            filter: contrast(120%) brightness(110%) saturate(150%) hue-rotate(250deg) invert(100%);
-        }
+    /* ─── Filter Toggle (styled) ────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 4px 0 12px;
+    }
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform var(--transition), background var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-track { background: rgba(232,99,122,0.3); border-color: var(--accent); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); background: var(--accent); }
 
-        .history-item-info {
-            padding: 8px;
-            text-align: left;
-            font-size: 13px;
-        }
-        
-        .history-item-info p {
-            margin: 0;
-            line-height: 1.4;
-            color: var(--muted);
-        }
+    /* ─── Dice ──────────────────────────────────────────────── */
+    .dice-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 12px 0 24px;
+    }
 
-        .history-item-number {
-            font-weight: 700;
-            color: white;
-            font-size: 16px;
-        }
-        
-        .history-tags {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            display: flex;
-            gap: 5px;
-        }
+    .die-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .history-tag {
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 5px;
-            font-weight: 700;
-            opacity: 0.8; 
-        }
+    .die-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
 
-        .tag-performed { background: var(--perform-color); color: white; }
-        .tag-liked { background: var(--like-color); color: white; }
-        .tag-count { background: rgba(255,255,255,0.1); color: var(--muted); }
-        
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            padding: 20px;
-        }
+    .die {
+      width: var(--dice-size);
+      height: var(--dice-size);
+      perspective: 1000px;
+      position: relative;
+    }
 
-        .modal-card {
-            background: var(--card);
-            border-radius: 18px;
-            padding: 25px;
-            max-width: 800px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .modal-image-container {
-            width: 100%;
-            height: 480px;
-            background: var(--bg);
-            border-radius: 10px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-        
-        .modal-details {
-            text-align: center;
-        }
-        
-        .modal-details h3 {
-            margin-top: 0;
-            color: var(--accent);
-        }
-        
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            font-size: 30px;
-            cursor: pointer;
-            color: var(--muted);
-            line-height: 1;
-        }
-        .modal-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255,255,255,0.1);
-            border: none;
-            color: white;
-            font-size: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s ease;
-            z-index: 10;
-        }
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+    }
 
-        .modal-nav:hover {
-            background: rgba(255,255,255,0.2);
-        }
+    .face {
+      position: absolute; inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      padding: 8px;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.2;
+      backface-visibility: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    }
 
-        .modal-nav.prev {
-            left: 10px;
-        }
+    .face:nth-child(1) { transform: rotateY(  0deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(2) { transform: rotateY( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(3) { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(4) { transform: rotateY(-90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(5) { transform: rotateX( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--dice-size)/2)); }
 
-        .modal-nav.next {
-            right: 10px;
-        }
+    .die[data-die-type="d10"] .face {
+      background: linear-gradient(145deg, #b7e0ff, #dff4ff);
+      color: #02122a;
+      font-size: 30px;
+    }
 
-        .modal-card {
-            position: relative;
-            touch-action: pan-y;
-        }
-        #resetDataBtn {
-            background: #a94442;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 20px;
-            font-size: 14px;
-        }
+    .die[data-die-type="d6"] .face {
+      background: linear-gradient(145deg, #fff5c7, #ffdca8);
+      color: #1b1205;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
 
-        .user-status {
-            position: absolute; 
-            top: 20px;
-            right: 20px;
-            font-size: 14px;
-            color: var(--muted);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            z-index: 50;
-        }
-        
-        .user-status span {
-            font-weight: 700;
-            color: white;
-        }
-        
-        #logoutBtn {
-            background: #a94442;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 999px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        
-        .user-auth-modal {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-            padding: 20px;
-        }
-        
-        .user-auth-card {
-            background: var(--card);
-            border-radius: 18px;
-            padding: 25px;
-            max-width: 400px;
-            width: 100%;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            animation: fadeIn 0.3s ease;
-            text-align: center;
-            position: relative;
-        }
-        
-        .user-auth-card input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
-            color: white;
-            font-size: 16px;
-        }
-        
-        .user-auth-card button {
-            width: 100%;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-            margin-top: 5px;
-        }
-        
-        #authSubmitBtn {
-            background: var(--perform-color);
-            color: white;
-            box-shadow: 0 6px 20px rgba(56, 193, 114, 0.25);
-        }
+    .die-shadow {
+      position: absolute; left: 50%; bottom: -8px;
+      transform: translateX(-50%);
+      width: 65%; height: 14px;
+      border-radius: 50%;
+      filter: blur(10px);
+      background: rgba(0,0,0,0.5);
+      transition: width 0.6s, opacity 0.6s;
+    }
 
-        @media (max-width: 720px) {
-            :root { --dice-size: 70px; }
-            .app { padding: 15px; }
-            .position-image-container { height: 400px; } 
-            .result-card.show { max-width: 100%; padding: 15px; }
-            .action-btn { font-size: 13px; padding: 8px; }
-            .data-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-            .history-item-image { height: 100px; }
-            .modal-image-container { height: 250px; }
-            .modal-card { padding: 15px; }
-            
-            .user-status {
-                position: static;
-                justify-content: center;
-                margin-top: 0px;
-                margin-bottom: -10px;
-                padding: 0 15px;
-                width: 100%;
-            }
-            .app { padding-top: 15px; }
-        }
+    .die.rolling .die-shadow { width: 90%; opacity: 0.7; }
 
-        .home-btn {
-            display:inline-block;
-            margin-top:12px;
-            padding:8px 16px;
-            background:linear-gradient(90deg,var(--accent),#ff9aa2);
-            color:#fff;
-            border-radius:999px;
-            font-weight:600;
-            text-decoration:none;
-            font-size:14px;
-            box-shadow:0 6px 20px rgba(255,107,129,0.25);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,99,122,0); }
+      50% { box-shadow: 0 0 0 8px rgba(232,99,122,0.15); }
+    }
+    .die.rolling { animation: pulse-glow 0.8s infinite; border-radius: 14px; }
 
-        .home-btn:hover {
-            transform: scale(1.05);
-            box-shadow:0 12px 35px rgba(255,107,129,0.35);
-        }
+    /* ─── Result Card ───────────────────────────────────────── */
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-        .no-filter {
-            filter: none !important;
-        }
+    #results { min-height: 80px; }
 
-        .filter-toggle-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin: 10px 0;
-            font-size: 14px;
-            color: var(--muted);
-        }
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      max-width: 760px;
+      margin: 0 auto;
+      animation: cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
 
-        body.filters-off .ink-wash,
-        body.filters-off .history-item-image img,
-        body.filters-off .position-image-container img {
-            filter: none !important;
-        }
+    .result-image-wrap {
+      width: 100%;
+      height: 420px;
+      background: var(--bg);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+    .result-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .img-fallback {
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      padding: 20px;
+    }
+
+    .result-meta {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .result-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .result-twist {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .result-twist strong { color: var(--accent2); font-style: normal; }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .result-actions .btn { flex: 1; max-width: 260px; justify-content: center; }
+
+    /* ─── Ink wash filter ───────────────────────────────────── */
+    .ink-filter { filter: contrast(120%) brightness(110%) saturate(150%) hue-rotate(250deg) invert(100%); }
+    body.filters-off .ink-filter { filter: none; }
+
+    /* ─── Consent Tip ───────────────────────────────────────── */
+    .consent-tip {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+      margin-top: 20px;
+      opacity: 0.7;
+    }
+
+    /* ─── Section Panels ────────────────────────────────────── */
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .section-header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    /* ─── Filter Tabs ───────────────────────────────────────── */
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .filter-tab {
+      padding: 7px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .filter-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(232,99,122,0.3);
+    }
+
+    /* ─── Data Grid ─────────────────────────────────────────── */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 14px;
+    }
+
+    .grid-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      position: relative;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+
+    .grid-item-img {
+      width: 100%;
+      height: 130px;
+      overflow: hidden;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .grid-item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .grid-item-body {
+      padding: 8px 10px;
+    }
+
+    .grid-item-num {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .grid-item-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .item-badges {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .badge-green { background: rgba(52,201,122,0.2); color: var(--green); border: 1px solid rgba(52,201,122,0.3); }
+    .badge-rose  { background: rgba(232,99,122,0.2); color: var(--accent2); border: 1px solid rgba(232,99,122,0.3); }
+    .badge-muted { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ─── Load More ─────────────────────────────────────────── */
+    #galleryLoadMore {
+      display: block;
+      margin: 28px auto 0;
+    }
+
+    /* ─── Empty State ───────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ─── Modal ─────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      max-width: 820px;
+      width: 100%;
+      position: relative;
+      touch-action: pan-y;
+      animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 26px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color var(--transition);
+      z-index: 2;
+    }
+    .modal-close-btn:hover { color: var(--text); }
+
+    .modal-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+      z-index: 2;
+    }
+    .modal-nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .modal-nav-btn.prev { left: -20px; }
+    .modal-nav-btn.next { right: -20px; }
+    .modal-nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    .modal-image-wrap {
+      width: 100%;
+      height: 440px;
+      background: var(--bg);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .modal-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    .modal-details { text-align: center; }
+    .modal-details h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      color: var(--accent);
+    }
+    .modal-details .modal-twist { color: var(--muted); font-size: 14px; font-style: italic; margin: 6px 0 4px; }
+    .modal-details .modal-count { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* ─── Confirm Modal ─────────────────────────────────────── */
+    .confirm-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: modalIn 0.3s ease;
+    }
+    .confirm-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 10px; }
+    .confirm-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .confirm-card .confirm-actions { display: flex; gap: 10px; }
+    .confirm-card .confirm-actions .btn { flex: 1; justify-content: center; }
+
+    /* ─── Auth Modal ────────────────────────────────────────── */
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+      animation: modalIn 0.3s ease;
+      text-align: center;
+    }
+
+    .auth-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .auth-card .auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    .auth-field {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .auth-field:focus { border-color: rgba(232,99,122,0.5); }
+    .auth-field::placeholder { color: var(--muted); }
+
+    .auth-toggle-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .auth-toggle-link:hover { text-decoration: underline; }
+
+    .auth-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 14px;
+      opacity: 0.7;
+    }
+
+    /* ─── Keyboard hint ─────────────────────────────────────── */
+    .kbd-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      opacity: 0.6;
+    }
+    .kbd { display: inline-block; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--border); font-size: 11px; }
+
+    /* ─── Divider ───────────────────────────────────────────── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .section-divider-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* ─── Responsiveness ────────────────────────────────────── */
+    @media (max-width: 640px) {
+      :root { --dice-size: 70px; }
+      .result-image-wrap { height: 300px; }
+      .modal-image-wrap  { height: 250px; }
+      .modal-nav-btn.prev { left: -8px; }
+      .modal-nav-btn.next { right: -8px; }
+      .data-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .result-actions { flex-direction: column; align-items: stretch; }
+      .result-actions .btn { max-width: 100%; }
+      .modal-actions { flex-direction: column; }
+    }
+
+    @media (max-width: 480px) {
+      .dice-area { gap: 10px; }
+      .die-label { font-size: 10px; }
+    }
+  </style>
+
+  <style id="kamaagni-responsive">
+    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
+    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
+    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+  </style>
 </head>
-
 <body>
-    <div class="app" role="application">
-        <nav>
-            <a href="Index.html" class="home-btn">🏠 Home</a>
-        </nav>
-        
-        <div class="user-status" id="userStatus">
-            <button id="authLinkBtn" class="link-btn" style="padding: 8px 15px; font-size: 14px; font-weight: 600;">Sign Up / Login</button>
+<!-- <a id="ka-back" href="index.html">← Home</a> -->
+
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<div class="app">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="Index.html" class="home-btn">← Home</a>
+    <div id="userStatus"></div>
+  </div>
+
+  <!-- ══════════════ DICE SECTION ══════════════ -->
+  <div id="diceSection" class="section-panel active">
+
+    <div class="hero">
+      <h1>1000 Positions &amp; <em>Twist</em></h1>
+      <p class="lead">Roll three dice for a unique sex position and one for a playful twist.</p>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span id="progressText">0 of 537 explored</span>
+          <span id="progressPct">0%</span>
         </div>
-        
-        <div id="diceSection">
-            <header>
-                <h1>🔥 Sex Position & Twist Selector 🔥</h1>
-                <p class="lead">Roll three for a unique Sex Positions and one for a Twist.</p>
-            </header>
-
-            <div class="filter-toggle-container">
-                <label style="cursor: pointer; font-size: 14px; color: var(--muted);">
-                    <input type="checkbox" class="filter-toggle" checked> Enable Stylized Filter
-                </label>
-            </div>
-
-            <div class="controls">
-                <button id="rollBtn" class="roll">Roll the Dice!</button>
-                <button id="historyLinkBtn" class="link-btn">My Intimacy Journey</button>
-                <button id="galleryLinkBtn" class="link-btn">Explore Positions</button>
-            </div>
-
-            <div class="game" id="game">
-                <div class="die" data-index="0" data-die-type="d10">
-                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Hundreds</p>
-                </div>
-                <div class="die" data-index="1" data-die-type="d10">
-                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Tens</p>
-                </div>
-                <div class="die" data-index="2" data-die-type="d10">
-                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">Units</p>
-                </div>
-                <div class="die" data-index="3" data-die-type="d6">
-                    <div class="cube"></div><div class="shadow"></div><p style="text-align:center;margin-top:8px">The Twist</p>
-                </div>
-            </div>
-
-            <div class="results" id="results"></div>
-
-            <div class="tip" id="tip">Communication and consent make every position the perfect position.</div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
         </div>
-
-        <div id="historySection" class="data-view-container" style="display: none;">
-            <header>
-                <h1>📜 My Intimacy Journey</h1>
-                <button id="backToRollBtnHistory" class="link-btn" style="margin-top: 15px;">Back to Roller</button>
-            </header>
-
-            <div class="filter-toggle-container">
-                <label style="cursor: pointer; font-size: 14px; color: var(--muted);">
-                    <input type="checkbox" class="filter-toggle" checked> Enable Stylized Filter
-                </label>
-            </div>
-            
-            <div class="history-controls">
-                <button data-filter="all" class="active">All</button>
-                <button data-filter="performed">Performed</button>
-                <button data-filter="liked">Liked / Saved</button>
-                <button data-filter="not_performed">Not Performed</button>
-            </div>
-
-            <div id="historyGrid" class="data-grid"></div>
-            <p id="historyEmpty" style="color: var(--muted); margin-top: 30px; display: none;">No positions rolled yet.</p>
-
-            <button id="resetDataBtn">⚠️ Clear All Saved Data</button>
-        </div>
-        
-        <div id="gallerySection" class="data-view-container" style="display: none;">
-            <header>
-                <h1>🖼️ Explore All Positions (000-999)</h1>
-                <p class="lead" style="margin-bottom: 20px;">Browse the entire catalog and mark your favorites.</p>
-                <button id="backToRollBtnGallery" class="link-btn" style="margin-top: 5px;">Back to Roller</button>
-            </header>
-
-            <div class="filter-toggle-container">
-                <label style="cursor: pointer; font-size: 14px; color: var(--muted);">
-                    <input type="checkbox" class="filter-toggle" checked> Enable Stylized Filter
-                </label>
-            </div>
-
-            <div id="galleryGrid" class="data-grid"></div>
-        </div>
-    </div>
-    
-    <div id="historyModal" class="modal-overlay">
-        <span class="modal-close" id="modalClose">&times;</span>
-        <button class="modal-nav prev" id="modalPrev">‹</button>
-        <button class="modal-nav next" id="modalNext">›</button>
-        <div class="modal-card">
-            
-            <div class="modal-image-container">
-                <img id="modalImage" class="ink-wash" src="" alt="Position Image">
-            </div>
-            <div class="modal-details">
-                <h3 id="modalTitle"></h3>
-                <p id="modalTwist" style="color:var(--muted); font-style:italic; margin-bottom: 0;"></p>
-                <p id="modalCount" style="font-size:14px; color:var(--muted); margin-top: 5px;"></p>
-            </div>
-            <div class="modal-actions">
-                <button id="modalPerformBtn" class="action-btn perform-action">Mark Performed ✅</button>
-                <button id="modalLikeBtn" class="action-btn like-action">Like / Save Position ❤️</button>
-                <div class="filter-toggle-container">
-                    <label style="cursor: pointer; font-size: 14px; color: var(--muted);">
-                        <input type="checkbox" class="filter-toggle" checked> Enable Stylized Filter
-                    </label>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    
-    <div id="userAuthModal" class="user-auth-modal">
-        <div class="user-auth-card">
-            <span class="modal-close" id="authModalClose">&times;</span>
-            <h3 id="authTitle" style="color:var(--accent); margin-bottom: 20px;">Sign Up</h3>
-            <form id="authForm">
-                <input type="email" id="authEmail" placeholder="Email (e.g., user@example.com)" required>
-                <input type="password" id="authPassword" placeholder="Password (simulated)" required>
-                <button type="submit" id="authSubmitBtn">Sign Up and Secure Data</button>
-            </form>
-            <p style="margin-top: 15px; color: var(--muted); font-size: 14px;">
-                <a href="#" id="toggleAuthMode" style="color: var(--accent); text-decoration: none;">Switch to Login</a>
-            </p>
-        </div>
+      </div>
     </div>
 
-    <script>
-        // Position Data
-        const positionData = [];
-        const baseNames = [""];
-        const baseDescriptions = [""];
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+    </div>
 
-        positionData.push({
-            id: 0,
-            number: '000',
-            name: ` (000)`,
-            description: ``
-        });
-        
-        for(let i = 1; i < 544; i++) {
-            const baseIndex = i % 10;
-            const number = i.toString().padStart(3, '0');
-            positionData.push({
-                id: i,
-                number: number,
-                name: `${baseNames[baseIndex]} (${number})`,
-                description: `This is a unique variation of the "${baseNames[baseIndex]}" position. ${baseDescriptions[baseIndex]}`
-            });
-        }
-        
-        // D6 Twist Options
-        const d6Twists = [
-            "Use only your non-dominant hand for all support/touch.",
-            "Say only kind compliments for the next minute.",
-            "Maintain soft, direct eye contact throughout.",
-            "Focus on one single, non-genital body part for 30 seconds.",
-            "Half your current speed for 10 movements.",
-            "Synchronize movement to partner's breath sound.",
-            "Only connected parts move; all hands stay still.",
-            "Introduce one contrasting element (ice, scent) to the scene.",
-            "Use only non-word sounds (moans, sighs) to communicate pleasure.",
-            "Whisper one specific thing you love that is happening now.",
-            "Pause to whisper three non-sexual reasons you love them.",
-            "Take turns whispering a playful, exciting fantasy.",
-            "Incorporate a soft garment or blindfold as a playful prop.",
-            "Intentionally touch/kiss a non-genital spot for 30 seconds."
-        ];
-        
-        const defaultTwist = "Roll to start!"; 
-        
-        // Core Elements
-        const diceEls = document.querySelectorAll('.die');
-        const rollBtn = document.getElementById('rollBtn');
-        const resultsEl = document.getElementById('results');
-        const historyLinkBtn = document.getElementById('historyLinkBtn');
-        const galleryLinkBtn = document.getElementById('galleryLinkBtn'); 
-        const backToRollBtnHistory = document.getElementById('backToRollBtnHistory');
-        const backToRollBtnGallery = document.getElementById('backToRollBtnGallery'); 
-        const diceSection = document.getElementById('diceSection');
-        const historySection = document.getElementById('historySection');
-        const gallerySection = document.getElementById('gallerySection'); 
-        const historyGrid = document.getElementById('historyGrid');
-        const galleryGrid = document.getElementById('galleryGrid'); 
-        const historyControls = document.querySelectorAll('.history-controls button');
-        const resetDataBtn = document.getElementById('resetDataBtn');
-        
-        const historyModal = document.getElementById('historyModal');
-        const modalClose = document.getElementById('modalClose');
-        const modalImage = document.getElementById('modalImage');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalTwist = document.getElementById('modalTwist');
-        const modalCount = document.getElementById('modalCount');
-        const modalPerformBtn = document.getElementById('modalPerformBtn');
-        const modalLikeBtn = document.getElementById('modalLikeBtn');
-        const modalPrev = document.getElementById('modalPrev');
-        const modalNext = document.getElementById('modalNext');
+    <div class="controls">
+      <button id="rollBtn" class="btn btn-primary">🎲 Roll the Dice</button>
+      <button id="historyLinkBtn" class="btn btn-ghost">📜 My Journey</button>
+      <button id="galleryLinkBtn" class="btn btn-ghost">🖼️ All Positions</button>
+    </div>
 
-        let currentModalItems = [];
-        let currentModalIndex = -1;
-let modalContext = 'history'; // 'history' or 'gallery'
-const d10Faces = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']; 
+    <div class="dice-area" id="game">
+      <div class="die-wrap">
+        <span class="die-label">Hundreds</span>
+        <div class="die" data-index="0" data-die-type="d10" role="img" aria-label="Hundreds die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Tens</span>
+        <div class="die" data-index="1" data-die-type="d10" role="img" aria-label="Tens die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Units</span>
+        <div class="die" data-index="2" data-die-type="d10" role="img" aria-label="Units die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Twist</span>
+        <div class="die" data-index="3" data-die-type="d6" role="img" aria-label="Twist die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+    </div>
 
-        // Authentication Constants
-const LOGGED_IN_USER_KEY = 'current_user_id';
-const ALL_USERS_KEY = 'registered_users';
-const BASE_HISTORY_KEY = 'position_roll_history_v3'; 
+    <div id="results"></div>
 
-        // Authentication Elements
+    <p class="kbd-hint">Press <kbd class="kbd">Space</kbd> or <kbd class="kbd">Enter</kbd> to roll</p>
+    <p class="consent-tip">Communication and consent make every position the perfect position. ♡</p>
+  </div>
+
+  <!-- ══════════════ HISTORY SECTION ══════════════ -->
+  <div id="historySection" class="section-panel">
+    <div class="section-header">
+      <h2>📜 My Intimacy Journey</h2>
+      <p>Every position you've rolled, right here.</p>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+    </div>
+
+    <div class="section-divider">
+      <div class="filter-tabs" id="historyFilterTabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="performed">Performed</button>
+        <button class="filter-tab" data-filter="liked">Liked ❤️</button>
+        <button class="filter-tab" data-filter="not_performed">Not Yet</button>
+      </div>
+      <div class="section-divider-actions">
+        <button id="backToRollBtnHistory" class="btn btn-ghost btn-sm">← Back</button>
+      </div>
+    </div>
+
+    <div class="data-grid" id="historyGrid"></div>
+    <div id="historyEmpty" class="empty-state" style="display:none;">
+      <div class="empty-icon">🎲</div>
+      <h3>Nothing here yet</h3>
+      <p>Roll the dice to start your journey!</p>
+    </div>
+
+    <div style="text-align:center; margin-top:32px;">
+      <button id="resetDataBtn" class="btn btn-danger btn-sm">⚠️ Clear All Data</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ GALLERY SECTION ══════════════ -->
+  <div id="gallerySection" class="section-panel">
+    <div class="section-header">
+      <h2>🖼️ Explore All Positions</h2>
+      <p>Browse the full catalog and mark your favorites along the way.</p>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+    </div>
+
+    <div style="text-align:right; margin-bottom:16px;">
+      <button id="backToRollBtnGallery" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+
+    <div class="data-grid" id="galleryGrid"></div>
+    <button id="galleryLoadMore" class="btn btn-ghost" style="display:none;">Load More</button>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- ══════════════ POSITION DETAIL MODAL ══════════════ -->
+<div id="historyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <button class="modal-nav-btn prev" id="modalPrev" aria-label="Previous">&#8249;</button>
+  <div class="modal-card">
+    <button class="modal-close-btn" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-image-wrap">
+      <img id="modalImage" class="ink-filter" src="" alt="Position illustration" loading="lazy">
+    </div>
+    <div class="modal-details">
+      <h3 id="modalTitle"></h3>
+      <p class="modal-twist" id="modalTwist"></p>
+      <p class="modal-count" id="modalCount"></p>
+    </div>
+    <div class="modal-actions">
+      <button id="modalPerformBtn" class="btn btn-green">Mark Performed ✅</button>
+      <button id="modalLikeBtn" class="btn btn-rose">Like / Save ❤️</button>
+    </div>
+    <div class="toggle-row" style="margin-top:16px; margin-bottom:0;">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+    </div>
+  </div>
+  <button class="modal-nav-btn next" id="modalNext" aria-label="Next">&#8250;</button>
+</div>
+
+<!-- ══════════════ CONFIRM DELETE MODAL ══════════════ -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="confirm-card">
+    <h3>Clear All Data?</h3>
+    <p>This will permanently delete all saved positions, likes, and history for your account. This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button id="confirmCancel" class="btn btn-ghost">Cancel</button>
+      <button id="confirmDelete" class="btn btn-danger">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ AUTH MODAL ══════════════ -->
+<div id="userAuthModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="auth-card">
+    <button class="modal-close-btn" id="authModalClose">&times;</button>
+    <h3 id="authTitle">Sign Up</h3>
+    <p class="auth-subtitle">Keep your journey private and synced across visits.</p>
+    <form id="authForm" novalidate>
+      <input type="email" id="authEmail" class="auth-field" placeholder="Email address" autocomplete="email" required>
+      <input type="password" id="authPassword" class="auth-field" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit" id="authSubmitBtn" class="btn btn-green" style="width:100%; justify-content:center;">Sign Up</button>
+    </form>
+    <a class="auth-toggle-link" id="toggleAuthMode">Switch to Login</a>
+    <p class="auth-note">⚠️ Demo mode only. Data is stored locally in your browser.</p>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════ */
+const positionData = [];
+for (let i = 0; i < 537; i++) {
+  positionData.push({
+    id: i,
+    number: i.toString().padStart(3, '0')
+  });
+}
+
+const d6Twists = [
+  "Use only your non-dominant hand for all support and touch.",
+  "Maintain soft, direct eye contact throughout.",
+  "Focus on one single non-genital body part for 30 seconds.",
+  "Half your current speed for the next 10 movements.",
+  "Synchronize all movement to your partner's breath.",
+  "Whisper one specific thing you love that is happening right now.",
+  "Say only kind compliments for the next full minute.",
+  "Pause to share three non-sexual reasons you appreciate them.",
+  "Introduce one contrasting element: ice, warmth or scent.",
+  "Use only non-word sounds to communicate pleasure.",
+  "Only connected parts move; all hands stay completely still.",
+  "Incorporate a soft garment or blindfold as a playful prop.",
+  "Take turns whispering a playful, exciting shared fantasy.",
+  "Intentionally kiss a non-genital spot tenderly for 30 seconds.",
+  "Begin at half speed and only increase when they ask you to.",
+  "Hold eye contact for the first 30 seconds with no looking away.",
+  "The receiving partner controls all rhythm and pace throughout.",
+  "Pause completely every 60 seconds for a 10-second whisper.",
+  "Every touch must be accompanied by a quiet sound of pleasure.",
+  "Begin clothed and remove one item only when you both agree.",
+  "No hands. Support yourselves using only body weight and embrace.",
+  "One partner describes what they feel while it is happening.",
+  "Forehead or lips must remain in contact with your partner at all times.",
+  "Use a scarf or tie to lightly restrain one partner's wrists, with full consent.",
+  "Both partners close their eyes for the first full minute.",
+  "Breathe together, inhale as one and exhale as one throughout.",
+  "One partner gives three instructions before you begin. Follow all three.",
+  "Move only when music plays and freeze when it stops.",
+  "The leading partner must narrate every movement as it happens.",
+  "Switch who leads control halfway through.",
+  "Hold hands throughout. Neither can let go until the end.",
+  "Begin with 30 seconds of complete stillness, no movement, just presence.",
+  "One partner wears a blindfold for the entire time.",
+  "Say one genuine compliment about this moment before you begin."
+];
+
+const defaultTwist = "Roll to start!";
+const ROLL_DURATION = 3500;
+const DEFAULT_D10_FACE = '·';
+const PAGE_SIZE = 48;
+
+/* ══════════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════════ */
+const LOGGED_IN_KEY = 'intimacy_general_current_user';
+const ALL_USERS_KEY = 'intimacy_general_users';
+const BASE_HISTORY_KEY = 'intimacy_general_history_v1';
+
+function getCurrentUser() {
+  const uid = localStorage.getItem(LOGGED_IN_KEY);
+  if (!uid) return null;
+  const users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
+  return users[uid] || null;
+}
+
+function getHistoryKey() {
+  const u = getCurrentUser();
+  return u ? `${BASE_HISTORY_KEY}_${u.id}` : BASE_HISTORY_KEY;
+}
+
+function migrateGuestHistory(uid) {
+  const guest = localStorage.getItem(BASE_HISTORY_KEY);
+  if (!guest) return;
+  const userKey = `${BASE_HISTORY_KEY}_${uid}`;
+  if (!localStorage.getItem(userKey)) localStorage.setItem(userKey, guest);
+  localStorage.removeItem(BASE_HISTORY_KEY);
+}
+
+/* ══════════════════════════════════════════════════════
+   HISTORY STATE
+══════════════════════════════════════════════════════ */
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(getHistoryKey()) || '[]'); }
+  catch { return []; }
+}
+function saveHistory(h) { localStorage.setItem(getHistoryKey(), JSON.stringify(h)); }
+
+function findOrCreateItem(posId, twist = defaultTwist) {
+  let history = getHistory();
+  let idx = history.findIndex(x => x.id === posId && x.twist === twist);
+  if (idx === -1) {
+    const pos = positionData.find(p => p.id === posId);
+    if (!pos) return null;
+    const item = { id: posId, number: pos.number, twist, isLiked: false, performedCount: 0, timestamp: twist === defaultTwist ? 0 : Date.now() };
+    history.push(item);
+    saveHistory(history);
+    idx = history.length - 1;
+  }
+  return { item: history[idx], index: idx, history };
+}
+
+function updateHistory(posId, twist, action) {
+  const data = findOrCreateItem(posId, twist);
+  if (!data) return null;
+  let { item, index, history } = data;
+  if (action === 'like') item.isLiked = !item.isLiked;
+  else if (action === 'perform') item.performedCount = (item.performedCount || 0) + 1;
+  if (twist !== defaultTwist) item.timestamp = Date.now();
+  history[index] = item;
+  saveHistory(history);
+  refreshActiveView();
+  return item;
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+function showToast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('show')); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 320);
+  }, 3000);
+}
+
+/* ══════════════════════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════════════════════ */
+function updateProgress() {
+  const history = getHistory();
+  const rolled = new Set(history.filter(x => x.twist !== defaultTwist).map(x => x.id));
+  const pct = Math.round((rolled.size / positionData.length) * 100);
+  document.getElementById('progressText').textContent = `${rolled.size} of ${positionData.length} explored`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+/* ══════════════════════════════════════════════════════
+   USER UI
+══════════════════════════════════════════════════════ */
+function renderUserUI() {
+  const u = getCurrentUser();
+  const el = document.getElementById('userStatus');
+  if (u) {
+    el.innerHTML = `<span class="username">${u.email.split('@')[0]}</span><button id="logoutBtn" class="btn btn-ghost btn-sm">Logout</button>`;
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem(LOGGED_IN_KEY);
+      showToast('Logged out successfully.', 'info');
+      setTimeout(() => location.reload(), 800);
+    });
+  } else {
+    el.innerHTML = `<button id="authLinkBtn" class="btn btn-ghost btn-sm">Sign Up / Login</button>`;
+    document.getElementById('authLinkBtn').addEventListener('click', openAuthModal);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════════════════════ */
 const userAuthModal = document.getElementById('userAuthModal');
-const authModalClose = document.getElementById('authModalClose');
-const authLinkBtn = document.getElementById('authLinkBtn');
-const userStatusEl = document.getElementById('userStatus');
-const authForm = document.getElementById('authForm');
 const authTitle = document.getElementById('authTitle');
 const authSubmitBtn = document.getElementById('authSubmitBtn');
 const toggleAuthMode = document.getElementById('toggleAuthMode');
 const authEmail = document.getElementById('authEmail');
 const authPassword = document.getElementById('authPassword');
-
 let isLoginMode = false;
 
-        // Authentication Functions
-function getCurrentUser() {
-    const userId = localStorage.getItem(LOGGED_IN_USER_KEY);
-    if (!userId) return null;
-    
-    const allUsers = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
-    return allUsers[userId];
+function openAuthModal() { userAuthModal.classList.add('open'); isLoginMode = false; syncAuthMode(); }
+function closeAuthModal() { userAuthModal.classList.remove('open'); authEmail.value = ''; authPassword.value = ''; }
+
+function syncAuthMode() {
+  authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
+  authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
+  toggleAuthMode.textContent = isLoginMode ? 'Switch to Sign Up' : 'Switch to Login';
 }
 
-function renderUserUI() {
-    const user = getCurrentUser();
-    if (user) {
-        userStatusEl.innerHTML = `
-                    <span>Welcome, ${user.email.split('@')[0]}!</span>
-                    <button id="logoutBtn">Logout</button>
-        `;
-        document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+document.getElementById('authForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  let users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
+  const uid = btoa(email);
+
+  if (isLoginMode) {
+    if (users[uid] && users[uid].password === password) {
+      localStorage.setItem(LOGGED_IN_KEY, uid);
+      migrateGuestHistory(uid);
+      closeAuthModal();
+      renderUserUI();
+      showToast(`Welcome back, ${email.split('@')[0]}!`, 'success');
     } else {
-        userStatusEl.innerHTML = `
-                    <button id="authLinkBtn" class="link-btn" style="padding: 8px 15px; font-size: 14px; font-weight: 600;">Sign Up / Login</button>
-        `;
-        document.getElementById('authLinkBtn').addEventListener('click', openAuthModal);
+      showToast('Login failed. Please check your email and password.', 'info');
     }
-}
-
-function openAuthModal() {
-    userAuthModal.style.display = 'flex';
-    isLoginMode = false;
-    toggleAuthModeDisplay();
-}
-
-function closeAuthModal() {
-    userAuthModal.style.display = 'none';
-}
-
-function toggleAuthModeDisplay() {
-    authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
-    authSubmitBtn.textContent = isLoginMode ? 'Login and Access Data' : 'Sign Up and Secure Data';
-    toggleAuthMode.textContent = isLoginMode ? 'Switch to Sign Up' : 'Switch to Login';
-}
-
-function authHandler(event) {
-    event.preventDefault();
-    const email = authEmail.value;
-    const password = authPassword.value;
-    
-    let allUsers = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
-    const userId = btoa(email);
-    
-    if (isLoginMode) {
-        if (allUsers[userId] && allUsers[userId].password === password) {
-            localStorage.setItem(LOGGED_IN_USER_KEY, userId);
-            alert('Login successful! Welcome back.');
-            migrateGuestHistory(userId); 
-            closeAuthModal();
-            renderUserUI();
-        } else {
-            alert('Login failed. Check email and password (or try signing up).');
-        }
+  } else {
+    if (users[uid]) {
+      showToast('Email already registered. Please login.', 'info');
     } else {
-        if (allUsers[userId]) {
-            alert('Email already registered. Please login.');
-        } else {
-            allUsers[userId] = { email, password, id: userId };
-            localStorage.setItem(ALL_USERS_KEY, JSON.stringify(allUsers));
-            localStorage.setItem(LOGGED_IN_USER_KEY, userId);
-            alert('Sign up successful! Your data is now secure.');
-            migrateGuestHistory(userId); 
-            closeAuthModal();
-            renderUserUI();
-        }
+      users[uid] = { email, password, id: uid };
+      localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users));
+      localStorage.setItem(LOGGED_IN_KEY, uid);
+      migrateGuestHistory(uid);
+      closeAuthModal();
+      renderUserUI();
+      showToast('Account created! Your journey is now saved.', 'success');
     }
-    authEmail.value = '';
-    authPassword.value = '';
-}
+  }
+});
 
-function logoutUser() {
-    localStorage.removeItem(LOGGED_IN_USER_KEY);
-    alert('Logged out. Your current data is now stored under your account for next login.');
-    window.location.reload(); 
-}
+document.getElementById('authModalClose').addEventListener('click', closeAuthModal);
+toggleAuthMode.addEventListener('click', (e) => { e.preventDefault(); isLoginMode = !isLoginMode; syncAuthMode(); });
+userAuthModal.addEventListener('click', (e) => { if (e.target === userAuthModal) closeAuthModal(); });
 
-function getHistoryKey() {
-    const user = getCurrentUser();
-    return user ? `${BASE_HISTORY_KEY}_${user.id}` : BASE_HISTORY_KEY;
-}
+/* ══════════════════════════════════════════════════════
+   DICE
+══════════════════════════════════════════════════════ */
+const diceEls = document.querySelectorAll('.die');
+const rollBtn = document.getElementById('rollBtn');
+const resultsEl = document.getElementById('results');
+const d10Faces = ['0','1','2','3','4','5','6','7','8','9'];
 
-function migrateGuestHistory(newUserId) {
-    const guestHistory = localStorage.getItem(BASE_HISTORY_KEY);
-    if (guestHistory) {
-        const userHistoryKey = `${BASE_HISTORY_KEY}_${newUserId}`;
-        const userHistory = localStorage.getItem(userHistoryKey);
-
-        if (!userHistory) {
-            localStorage.setItem(userHistoryKey, guestHistory);
-            localStorage.removeItem(BASE_HISTORY_KEY);
-            console.log("Migrated guest history to new user account.");
-        } else {
-            localStorage.removeItem(BASE_HISTORY_KEY);
-            console.log("Existing user history found. Cleared temporary guest history.");
-        }
+function applyFaces() {
+  diceEls.forEach(die => {
+    const cube = die.querySelector('.cube');
+    cube.style.transition = 'none';
+    cube.innerHTML = '';
+    const type = die.getAttribute('data-die-type');
+    const defaultText = type === 'd10' ? DEFAULT_D10_FACE : defaultTwist;
+    for (let f = 0; f < 6; f++) {
+      const face = document.createElement('div');
+      face.className = 'face';
+      face.textContent = f === 0 ? defaultText : (type === 'd10' ? d10Faces[f] : d6Twists[f]);
+      cube.appendChild(face);
     }
-}
-
-        // State Management
-const ROLL_DURATION = 3500;
-const DEFAULT_D10_FACE = '---'; 
-
-function getHistory() {
-    try {
-        const key = getHistoryKey();
-        return JSON.parse(localStorage.getItem(key) || '[]');
-    } catch (e) {
-        console.error("Error parsing history from localStorage", e);
-        return [];
-    }
-}
-
-function saveHistory(history) {
-    const key = getHistoryKey();
-    localStorage.setItem(key, JSON.stringify(history));
-}
-
-function findOrCreateItem(posId, twist = defaultTwist) {
-    let history = getHistory();
-    const searchTwist = twist === defaultTwist ? defaultTwist : twist; 
-    let index = history.findIndex(item => item.id === posId && item.twist === searchTwist);
-    
-    const position = positionData.find(p => p.id === posId);
-    if (!position) return null;
-
-    if (index === -1) {
-        if (twist === defaultTwist && history.some(item => item.id === posId && item.twist === defaultTwist)) {
-           index = history.findIndex(item => item.id === posId && item.twist === defaultTwist);
-       } else {
-           const newItem = {
-            id: posId,
-            number: position.number,
-            twist: searchTwist,
-            isLiked: false,
-            performedCount: 0,
-            timestamp: searchTwist === defaultTwist ? 0 : Date.now() 
-        };
-        history.push(newItem);
-        saveHistory(history);
-        index = history.length - 1;
-    }
-}
-return {item: history[index], index, history};
-}
-
-function updateHistory(posId, twist, action) {
-    const data = findOrCreateItem(posId, twist);
-    if (!data) return;
-
-    let {item, index, history} = data;
-
-    if (action === 'like') {
-        item.isLiked = !item.isLiked; 
-    } else if (action === 'perform') {
-        item.performedCount = (item.performedCount || 0) + 1;
-    }
-    
-    if (twist !== defaultTwist) {
-       item.timestamp = Date.now();
-   }
-   history[index] = item;
-   
-   saveHistory(history);
-   
-   if (historySection.style.display !== 'none') {
-       const activeFilter = document.querySelector('.history-controls button.active').getAttribute('data-filter');
-       renderHistory(activeFilter);
-   }
-   
-   if (gallerySection.style.display !== 'none') {
-       renderGallery();
-   }
-   
-   return item;
-}
-
-        // Dice Functions
-function applyFaces(){
-    diceEls.forEach((die) => {
-        const cube = die.querySelector('.cube');
-        cube.style.transition = 'none'; 
-        cube.innerHTML = '';
-        const dieType = die.getAttribute('data-die-type');
-        
-        const defaultText = dieType === 'd10' ? DEFAULT_D10_FACE : defaultTwist;
-        
-        for(let f=0; f<6; f++) {
-            const face = document.createElement('div');
-            face.className = 'face';
-            face.textContent = f === 0 ? defaultText : (dieType === 'd10' ? d10Faces[f] : d6Twists[f]);
-            cube.appendChild(face);
-        }
-    });
+  });
 }
 
 function realisticRoll() {
-    if (rollBtn.classList.contains('rolling-lock')) return;
-    rollBtn.classList.add('rolling-lock');
-    
-    resultsEl.innerHTML = '';
-    
-    applyFaces();
-    diceEls.forEach(d => d.classList.add('rolling'));
+  if (rollBtn.disabled) return;
+  rollBtn.disabled = true;
+  resultsEl.innerHTML = '';
+  applyFaces();
+  diceEls.forEach(d => d.classList.add('rolling'));
 
-    let positionDigits = [];
-    let twistText = '';
-    
-    const finalFaceEls = {}; 
+  const posDigits = [];
+  let twistText = '';
+  const finalFace = {};
 
-    diceEls.forEach((die, index) => {
-        const cube = die.querySelector('.cube');
-        const faces = cube.querySelectorAll('.face');
-        
-        let actualRollValue;
-        let faceIndex;
+  diceEls.forEach((die, index) => {
+    const cube = die.querySelector('.cube');
+    const faces = cube.querySelectorAll('.face');
+    const type = die.getAttribute('data-die-type');
+    let rollValue, faceIndex;
 
-        if (die.getAttribute('data-die-type') === 'd10') {
-            let rollValue = Math.floor(Math.random() * 10);
-            const dieIndex = index;
-            const maxRoll = 542; 
-
-            if (dieIndex === 0) {
-                rollValue = Math.floor(Math.random() * 6); 
-            }
-
-            if (dieIndex === 1) {
-                const hundreds = positionDigits[0];
-                if (hundreds === Math.floor(maxRoll / 100)) {
-                    const maxTens = Math.floor((maxRoll % 100) / 10);
-                    rollValue = Math.floor(Math.random() * (maxTens + 1));
-                }
-            }
-
-            if (dieIndex === 2) {
-                const hundreds = positionDigits[0];
-                const tens = positionDigits[1];
-                const maxTens = Math.floor((maxRoll % 100) / 10);
-                
-                if (hundreds === Math.floor(maxRoll / 100) && tens === maxTens) {
-                    const maxUnits = maxRoll % 10;
-                    rollValue = Math.floor(Math.random() * (maxUnits + 1));
-                }
-            }
-
-            actualRollValue = rollValue;
-            positionDigits.push(actualRollValue);
-            faceIndex = actualRollValue % 6;
-            finalFaceEls[index] = {el: faces[faceIndex], value: actualRollValue};
-
-        } else if (die.getAttribute('data-die-type') === 'd6') {
-            actualRollValue = Math.floor(Math.random() * 6);
-            twistText = d6Twists[actualRollValue];
-            faceIndex = actualRollValue;
-            finalFaceEls[index] = {el: faces[faceIndex], value: twistText};
-        }
-
-        const faceRotations = [
-            'rotateX(0deg) rotateY(0deg)', 'rotateY(-90deg)', 'rotateY(-180deg)', 
-            'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'
-        ];
-
-        const extraX = 360 * (3 + Math.floor(Math.random() * 3));
-        const extraY = 360 * (3 + Math.floor(Math.random() * 3));
-        const finalRotation = `${faceRotations[faceIndex]} rotateX(${extraX}deg) rotateY(${extraY}deg)`;
-
-        cube.style.transition = `transform ${ROLL_DURATION}ms cubic-bezier(.2,.9,.3,1)`;
-        cube.style.transform = finalRotation;
-        
-        setTimeout(() => {
-            faces[faceIndex].textContent = die.getAttribute('data-die-type') === 'd10' ? actualRollValue : actualRollValue + 1; 
-        }, 500); 
-    });
-
-    setTimeout(() => {
-        const posIndex = (positionDigits[0] * 100) + (positionDigits[1] * 10) + positionDigits[2];
-        const pos = positionData.find(p => p.id === posIndex);
-        const currentTwist = twistText;
-        
-        diceEls.forEach(d => {
-            const cube = d.querySelector('.cube');
-            cube.style.transition = 'none';
-            d.classList.remove('rolling');
-        });
-        
-        if(finalFaceEls[0]) finalFaceEls[0].el.textContent = finalFaceEls[0].value;
-        if(finalFaceEls[1]) finalFaceEls[1].el.textContent = finalFaceEls[1].value;
-        if(finalFaceEls[2]) finalFaceEls[2].el.textContent = finalFaceEls[2].value;
-        if(finalFaceEls[3]) finalFaceEls[3].el.textContent = finalFaceEls[3].value;
-
-        if (!pos) {
-            resultsEl.innerHTML = '<div style="color:var(--accent); margin-top:20px;">Error: Position data missing.</div>';
-            rollBtn.classList.remove('rolling-lock');
-            return;
-        }
-
-        const rolledItem = updateHistory(pos.id, currentTwist, 'roll');
-        const isLiked = rolledItem ? rolledItem.isLiked : false;
-        const likedText = isLiked ? 'Liked / Saved ❤️' : 'Like / Save Position';
-        
-        const fileIndex = pos.id + 1;
-        const imagePath = `Sex Position/Sex Position (${fileIndex}).jpg`;
-        
-        const positionImageElement = `
-                    <img src="${imagePath}" 
-                            alt="Position ${pos.number}" 
-                            class="ink-wash" 
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                            style="object-fit: contain;"
-                    >
-                    <div style="display:none; color:var(--muted); text-align:center;">
-                        Image not found for position #${pos.number}. 
-                    </div>
-        `;
-        
-        resultsEl.innerHTML = `
-                    <div class="result-card show" data-pos-id="${pos.id}" data-twist="${currentTwist}">
-                        <div class="position-image-container">
-                            ${positionImageElement}
-                        </div>
-                        <div class="result-actions">
-                            <button id="performBtn" class="action-btn perform-action">Performed ✅</button>
-                            <button id="likeBtn" class="action-btn like-action" data-liked="${isLiked}">${likedText}</button>
-                        </div>
-                        <p class="result-prompt">
-                            Sex Positions #${pos.number}
-                            <br>
-                            The Twist: ${currentTwist}
-                        </p>
-                    </div>
-        `;
-
-        document.getElementById('performBtn').addEventListener('click', () => {
-            updateHistory(pos.id, currentTwist, 'perform');
-            alert(`Position #${pos.number} marked as Performed!`);
-        });
-
-        const likeBtnEl = document.getElementById('likeBtn');
-        likeBtnEl.addEventListener('click', () => {
-            const updatedItem = updateHistory(pos.id, currentTwist, 'like');
-            const newIsLiked = updatedItem ? updatedItem.isLiked : false;
-            likeBtnEl.textContent = newIsLiked ? 'Liked / Saved ❤️' : 'Like / Save Position';
-        });
-
-        rollBtn.classList.remove('rolling-lock'); 
-    }, ROLL_DURATION);
-}
-
-        // History & Gallery Functions
-function getTags(item) {
-    const tags = [];
-    if (item.isLiked) tags.push('<span class="history-tag tag-liked">❤️</span>');
-    if (item.performedCount > 0) tags.push('<span class="history-tag tag-performed">✅</span>');
-    if (item.performedCount > 1) tags.push(`<span class="history-tag tag-count">x${item.performedCount}</span>`);
-    return tags.join('');
-}
-
-function createItemHtml(item, isGallery = false) {
-    const fileIndex = item.id + 1;
-    const imagePath = `Sex Position/Sex Position (${fileIndex}).jpg`;
-    const position = positionData.find(p => p.id === item.id);
-    const posName = position ? position.name.split(' (')[0] : 'Unknown Position';
-
-    const itemTwist = item.twist || defaultTwist;
-
-    const infoText = isGallery 
-    ? posName
-    : (itemTwist !== defaultTwist ? (itemTwist.substring(0, 30) + (itemTwist.length > 30 ? '...' : '')) : posName);
-
-    return `
-                <div class="${isGallery ? 'gallery-item' : 'history-item'}" data-id="${item.id}" data-twist="${itemTwist}">
-                    <div class="history-item-image">
-                        <img src="${imagePath}" 
-                            alt="Position ${item.number}" 
-                            onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
-                        >
-                        <div style="display:none; color:var(--muted); text-align:center;">
-                            No Image
-                        </div>
-                    </div>
-                    <div class="history-tags">${getTags(item)}</div>
-                    <div class="history-item-info">
-                        <p class="history-item-number">#${item.number}</p>
-                        
-                    </div>
-                </div>
-    `;
-}
-
-function renderHistory(filter) {
-    const history = getHistory();
-    let rolledHistory = history.filter(item => item.twist !== defaultTwist);
-
-    if (rolledHistory.length === 0) {
-        historyGrid.innerHTML = '';
-        document.getElementById('historyEmpty').style.display = 'block';
-        return;
-    }
-
-    document.getElementById('historyEmpty').style.display = 'none';
-
-    let filteredHistory = rolledHistory;
-
-    if (filter === 'performed') {
-        filteredHistory = rolledHistory.filter(item => item.performedCount > 0);
-    } else if (filter === 'liked') {
-        filteredHistory = rolledHistory.filter(item => item.isLiked);
-    } else if (filter === 'not_performed') {
-        filteredHistory = rolledHistory.filter(item => item.performedCount === 0);
-    }
-
-    filteredHistory.sort((a, b) => b.timestamp - a.timestamp); 
-
-    historyGrid.innerHTML = filteredHistory.map(item => createItemHtml(item, false)).join('');
-
-    document.querySelectorAll('.history-item').forEach(itemEl => {
-        itemEl.addEventListener('click', openModal);
-    });
-}
-
-function renderGallery() {
-    const allPositions = positionData.map(pos => {
-        const data = findOrCreateItem(pos.id, defaultTwist); 
-        return data ? data.item : null; 
-    }).filter(item => item !== null);
-
-    allPositions.sort((a, b) => a.id - b.id);
-
-    galleryGrid.innerHTML = allPositions.map(item => createItemHtml(item, true)).join('');
-
-    document.querySelectorAll('.gallery-item').forEach(itemEl => {
-        itemEl.addEventListener('click', openModal);
-    });
-}
-
-        // Modal Functions
-function openModal(event) {
-    const itemEl = event.currentTarget;
-    const posId = parseInt(itemEl.getAttribute('data-id'));
-    let twist = itemEl.getAttribute('data-twist');
-    
-    // Determine context and build items array
-    if (gallerySection.style.display !== 'none') {
-        modalContext = 'gallery';
-        currentModalItems = positionData.map(pos => {
-            const data = findOrCreateItem(pos.id, defaultTwist);
-            return data ? data.item : null;
-        }).filter(item => item !== null);
-        currentModalItems.sort((a, b) => a.id - b.id);
+    if (type === 'd10') {
+      const maxRoll = positionData.length - 1; // 83
+      rollValue = Math.floor(Math.random() * 10);
+      if (index === 0) rollValue = Math.floor(Math.random() * (Math.floor(maxRoll / 100) + 1));
+      if (index === 1) {
+        const h = posDigits[0];
+        if (h === Math.floor(maxRoll / 100)) rollValue = Math.floor(Math.random() * (Math.floor((maxRoll % 100) / 10) + 1));
+      }
+      if (index === 2) {
+        const h = posDigits[0], t = posDigits[1];
+        if (h === Math.floor(maxRoll / 100) && t === Math.floor((maxRoll % 100) / 10))
+          rollValue = Math.floor(Math.random() * ((maxRoll % 10) + 1));
+      }
+      posDigits.push(rollValue);
+      faceIndex = rollValue % 6;
+      finalFace[index] = { el: faces[faceIndex], value: rollValue };
     } else {
-        modalContext = 'history';
-        const history = getHistory();
-        currentModalItems = history.filter(item => item.twist !== defaultTwist);
-        const activeFilter = document.querySelector('.history-controls button.active')?.getAttribute('data-filter') || 'all';
-        
-        if (activeFilter === 'performed') {
-            currentModalItems = currentModalItems.filter(item => item.performedCount > 0);
-        } else if (activeFilter === 'liked') {
-            currentModalItems = currentModalItems.filter(item => item.isLiked);
-        } else if (activeFilter === 'not_performed') {
-            currentModalItems = currentModalItems.filter(item => item.performedCount === 0);
-        }
-        
-        currentModalItems.sort((a, b) => b.timestamp - a.timestamp);
+      rollValue = Math.floor(Math.random() * 6);
+      twistText = d6Twists[rollValue];
+      faceIndex = rollValue;
+      finalFace[index] = { el: faces[faceIndex], value: twistText };
     }
-    
-    // Find current index
-    currentModalIndex = currentModalItems.findIndex(item => 
-        item.id === posId && item.twist === twist
-        );
-    
-    if (currentModalIndex === -1) currentModalIndex = 0;
-    
-    displayModalContent(currentModalIndex);
-    historyModal.style.display = 'flex';
-}
-function displayModalContent(index) {
-    if (index < 0 || index >= currentModalItems.length) return;
-    
-    currentModalIndex = index;
-    const item = currentModalItems[index];
-    
-    const position = positionData.find(p => p.id === item.id);
-    const posName = position ? position.name.split(' (')[0] : 'Unknown Position';
 
-    const fileIndex = item.id + 1;
-    const imagePath = `Sex Position/Sex Position (${fileIndex}).jpg`;
+    const faceRotations = [
+      'rotateX(0deg) rotateY(0deg)', 'rotateY(-90deg)', 'rotateY(-180deg)',
+      'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'
+    ];
+    const extraX = 360 * (3 + Math.floor(Math.random() * 3));
+    const extraY = 360 * (3 + Math.floor(Math.random() * 3));
+    cube.style.transition = `transform ${ROLL_DURATION}ms cubic-bezier(.2,.9,.3,1)`;
+    cube.style.transform = `${faceRotations[faceIndex]} rotateX(${extraX}deg) rotateY(${extraY}deg)`;
+    setTimeout(() => { faces[faceIndex].textContent = type === 'd10' ? rollValue : twistText; }, 400);
+  });
 
-    modalImage.src = imagePath;
-    modalTitle.textContent = `#${item.number} ${posName}`;
-    
-    if (item.twist === defaultTwist) {
-        modalTwist.textContent = "Base Position (Roll the dice for a specific twist!)";
-        modalTwist.style.fontStyle = 'normal';
-    } else {
-        modalTwist.textContent = `Rolled Twist: ${item.twist}`;
-        modalTwist.style.fontStyle = 'italic';
-    }
-    
-    modalCount.textContent = item.performedCount > 0 
-    ? `Performed ${item.performedCount} time(s)` 
-    : 'Not performed yet.';
-    
-    modalLikeBtn.textContent = item.isLiked ? 'Saved / Liked ❤️' : 'Like / Save Position';
-    
-    modalPerformBtn.setAttribute('data-id', item.id);
-    modalPerformBtn.setAttribute('data-twist', item.twist);
-    modalLikeBtn.setAttribute('data-id', item.id);
-    modalLikeBtn.setAttribute('data-twist', item.twist);
-    
-    // Update navigation button states
-    modalPrev.style.opacity = index > 0 ? '1' : '0.3';
-    modalPrev.style.cursor = index > 0 ? 'pointer' : 'not-allowed';
-    modalNext.style.opacity = index < currentModalItems.length - 1 ? '1' : '0.3';
-    modalNext.style.cursor = index < currentModalItems.length - 1 ? 'pointer' : 'not-allowed';
-}
+  setTimeout(() => {
+    diceEls.forEach(d => { d.querySelector('.cube').style.transition = 'none'; d.classList.remove('rolling'); });
+    [0,1,2,3].forEach(i => { if (finalFace[i]) finalFace[i].el.textContent = finalFace[i].value; });
 
-function navigateModal(direction) {
-    const newIndex = currentModalIndex + direction;
-    if (newIndex >= 0 && newIndex < currentModalItems.length) {
-        displayModalContent(newIndex);
-    }
-}
+    const posIndex = (posDigits[0] * 100) + (posDigits[1] * 10) + posDigits[2];
+    const pos = positionData.find(p => p.id === posIndex);
+    if (!pos) { rollBtn.disabled = false; return; }
 
-function closeModal() {
-    historyModal.style.display = 'none';
-    currentModalItems = [];
-    currentModalIndex = -1;
+    const rolledItem = updateHistory(pos.id, twistText, 'roll');
+    const isLiked = rolledItem ? rolledItem.isLiked : false;
+    const imgPath = `Sex Position/Sex Position (${pos.id + 1}).jpg`;
+
+    resultsEl.innerHTML = `
+      <div class="result-card">
+        <div class="result-image-wrap">
+          <img src="${imgPath}" alt="Position ${pos.number}" class="ink-filter" loading="lazy">
+          <div class="img-fallback" style="display:none;">No image for #${pos.number}</div>
+        </div>
+        <div class="result-meta">
+          <div class="result-number">Position #${pos.number}</div>
+          <div class="result-twist">Twist: <strong>${twistText}</strong></div>
+        </div>
+        <div class="result-actions">
+          <button id="performBtn" class="btn btn-green">Performed ✅</button>
+          <button id="likeBtn" class="btn btn-rose">${isLiked ? 'Liked ❤️' : 'Like / Save ❤️'}</button>
+        </div>
+      </div>`;
+
+    // Image error fallback
+    const img = resultsEl.querySelector('img');
+    img.addEventListener('error', () => { img.style.display = 'none'; img.nextElementSibling.style.display = 'block'; });
+
+    document.getElementById('performBtn').addEventListener('click', () => {
+      updateHistory(pos.id, twistText, 'perform');
+      showToast(`Position #${pos.number} marked as performed! ✅`, 'success');
+      updateProgress();
+    });
+
+    document.getElementById('likeBtn').addEventListener('click', function () {
+      const updated = updateHistory(pos.id, twistText, 'like');
+      this.textContent = updated.isLiked ? 'Liked ❤️' : 'Like / Save ❤️';
+      showToast(updated.isLiked ? 'Saved to your likes! ❤️' : 'Removed from likes.', 'like');
+    });
+
+    updateProgress();
+    rollBtn.disabled = false;
+  }, ROLL_DURATION);
 }
 
-        // View Switching
-function switchView(view) {
-    diceSection.style.display = 'none';
-    historySection.style.display = 'none';
-    gallerySection.style.display = 'none';
-    
-    if (view === 'dice') {
-        diceSection.style.display = 'block';
-        resultsEl.innerHTML = '';
-    } else if (view === 'history') {
-        historySection.style.display = 'block';
-        historyControls.forEach(btn => btn.classList.remove('active'));
-        document.querySelector('.history-controls button[data-filter="all"]').classList.add('active');
-        renderHistory('all'); 
-    } else if (view === 'gallery') {
-       gallerySection.style.display = 'block';
-       renderGallery();
-   }
-}
-
-function clearAllData() {
-    if (confirm("Are you sure you want to permanently delete ALL saved positions, likes, and performance history for the current user/guest? This cannot be undone.")) {
-        localStorage.removeItem(getHistoryKey());
-        alert("All saved data has been cleared. Restarting...");
-        window.location.reload(); 
-    }
-}
-
-        // Initialization
-applyFaces();
 rollBtn.addEventListener('click', realisticRoll);
-rollBtn.addEventListener('keydown',e=>{
-    if(e.key==='Enter'||e.key===' '){
-        e.preventDefault();
-        realisticRoll();
-    }
-});
-
-historyLinkBtn.addEventListener('click', () => switchView('history'));
-galleryLinkBtn.addEventListener('click', () => switchView('gallery')); 
-backToRollBtnHistory.addEventListener('click', () => switchView('dice'));
-backToRollBtnGallery.addEventListener('click', () => switchView('dice')); 
-
-resetDataBtn.addEventListener('click', clearAllData);
-
-historyControls.forEach(button => {
-    button.addEventListener('click', function() {
-        historyControls.forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-        renderHistory(this.getAttribute('data-filter'));
-    });
-});
-
-modalClose.addEventListener('click', closeModal);
-historyModal.addEventListener('click', (e) => {
-    if (e.target.id === 'historyModal') {
-        closeModal(); 
-    }
-});
-modalPrev.addEventListener('click', (e) => {
-    e.stopPropagation();
-    navigateModal(-1);
-});
-
-modalNext.addEventListener('click', (e) => {
-    e.stopPropagation();
-    navigateModal(1);
-});
-
-// Swipe gesture support
-let touchStartX = 0;
-let touchEndX = 0;
-
-const modalCard = document.querySelector('.modal-card');
-
-modalCard.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-}, { passive: true });
-
-modalCard.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-}, { passive: true });
-
-function handleSwipe() {
-    const swipeThreshold = 50;
-    const diff = touchStartX - touchEndX;
-    
-    if (Math.abs(diff) > swipeThreshold) {
-        if (diff > 0) {
-            // Swiped left - go to next
-            navigateModal(1);
-        } else {
-            // Swiped right - go to previous
-            navigateModal(-1);
-        }
-    }
-}
-
-// Keyboard navigation
 document.addEventListener('keydown', (e) => {
-    if (historyModal.style.display === 'flex') {
-        if (e.key === 'ArrowLeft') {
-            navigateModal(-1);
-        } else if (e.key === 'ArrowRight') {
-            navigateModal(1);
-        } else if (e.key === 'Escape') {
-            closeModal();
-        }
-    }
+  const inModal = document.querySelector('.modal-overlay.open');
+  if (!inModal && (e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) {
+    e.preventDefault(); realisticRoll();
+  }
 });
 
-modalPerformBtn.addEventListener('click', function() {
-    const posId = parseInt(this.getAttribute('data-id'));
-    const twist = this.getAttribute('data-twist');
-    updateHistory(posId, twist, 'perform');
-    alert(`Position #${posId.toString().padStart(3, '0')} marked as Performed!`);
-    closeModal();
-});
-
-modalLikeBtn.addEventListener('click', function() {
-    const posId = parseInt(this.getAttribute('data-id'));
-    const twist = this.getAttribute('data-twist');
-    const updatedItem = updateHistory(posId, twist, 'like');
-    this.textContent = updatedItem.isLiked ? 'Saved / Liked ❤️' : 'Like / Save Position';
-});
-
-authForm.addEventListener('submit', authHandler);
-authModalClose.addEventListener('click', closeAuthModal);
-
-userStatusEl.addEventListener('click', (e) => {
-    if (e.target.id === 'authLinkBtn') {
-        openAuthModal();
-    }
-}); 
-
-toggleAuthMode.addEventListener('click', (e) => {
-    e.preventDefault();
-    isLoginMode = !isLoginMode;
-    toggleAuthModeDisplay();
-});
-
-userAuthModal.addEventListener('click', (e) => {
-    if (e.target.id === 'userAuthModal') {
-        closeAuthModal(); 
-    }
-});
-
-        // Filter Toggle Functionality
-const allToggles = document.querySelectorAll('.filter-toggle');
-
-function handleToggle(isEnabled) {
-    if (isEnabled) {
-        document.body.classList.remove('filters-off');
-    } else {
-        document.body.classList.add('filters-off');
-    }
-    
-    allToggles.forEach(t => t.checked = isEnabled);
-    localStorage.setItem('filterPreference', isEnabled);
+/* ══════════════════════════════════════════════════════
+   GRID ITEMS
+══════════════════════════════════════════════════════ */
+function getItemBadges(item) {
+  let b = '';
+  if (item.isLiked) b += `<span class="badge badge-rose">❤️</span>`;
+  if (item.performedCount > 0) b += `<span class="badge badge-green">✅</span>`;
+  if (item.performedCount > 1) b += `<span class="badge badge-muted">×${item.performedCount}</span>`;
+  return b;
 }
 
-document.addEventListener('change', (e) => {
-    if (e.target.classList.contains('filter-toggle')) {
-        handleToggle(e.target.checked);
-    }
-});
+function createGridItem(item, isGallery) {
+  const imgPath = `Sex Position/Sex Position (${item.id + 1}).jpg`;
+  const twist = item.twist || defaultTwist;
+  const subLabel = isGallery
+    ? `#${item.number}`
+    : (twist !== defaultTwist ? twist.substring(0, 28) + (twist.length > 28 ? '…' : '') : `#${item.number}`);
 
-const savedPreference = localStorage.getItem('filterPreference');
-if (savedPreference !== null) {
-    handleToggle(savedPreference === 'true');
+  const div = document.createElement('div');
+  div.className = 'grid-item';
+  div.setAttribute('data-id', item.id);
+  div.setAttribute('data-twist', twist);
+  div.innerHTML = `
+    <div class="grid-item-img">
+      <img src="${imgPath}" alt="Position ${item.number}" loading="lazy" class="ink-filter">
+    </div>
+    <div class="item-badges">${getItemBadges(item)}</div>
+    <div class="grid-item-body">
+      <div class="grid-item-num">#${item.number}</div>
+      <div class="grid-item-sub" title="${twist}">${subLabel}</div>
+    </div>`;
+
+  const img = div.querySelector('img');
+  img.addEventListener('error', () => { img.parentElement.innerHTML = '<div class="img-fallback">No image</div>'; });
+  div.addEventListener('click', openModal);
+  return div;
 }
 
+/* ══════════════════════════════════════════════════════
+   RENDER HISTORY
+══════════════════════════════════════════════════════ */
+function renderHistory(filter) {
+  const history = getHistory();
+  let items = history.filter(x => x.twist !== defaultTwist);
+  if (filter === 'performed') items = items.filter(x => x.performedCount > 0);
+  else if (filter === 'liked')   items = items.filter(x => x.isLiked);
+  else if (filter === 'not_performed') items = items.filter(x => x.performedCount === 0);
+  items.sort((a, b) => b.timestamp - a.timestamp);
+
+  const grid = document.getElementById('historyGrid');
+  const empty = document.getElementById('historyEmpty');
+  grid.innerHTML = '';
+  if (items.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  items.forEach(item => grid.appendChild(createGridItem(item, false)));
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER GALLERY (paginated)
+══════════════════════════════════════════════════════ */
+let galleryPage = 0;
+
+function renderGallery(reset = true) {
+  const grid = document.getElementById('galleryGrid');
+  const loadMoreBtn = document.getElementById('galleryLoadMore');
+  if (reset) { grid.innerHTML = ''; galleryPage = 0; }
+
+  const history = getHistory();
+  const start = galleryPage * PAGE_SIZE;
+  const slice = positionData.slice(start, start + PAGE_SIZE);
+
+  slice.forEach(pos => {
+    const histItem = history.find(x => x.id === pos.id && x.twist === defaultTwist);
+    const item = histItem || { id: pos.id, number: pos.number, twist: defaultTwist, isLiked: false, performedCount: 0 };
+    grid.appendChild(createGridItem(item, true));
+  });
+
+  galleryPage++;
+  loadMoreBtn.style.display = galleryPage * PAGE_SIZE < positionData.length ? 'block' : 'none';
+}
+
+document.getElementById('galleryLoadMore').addEventListener('click', () => renderGallery(false));
+
+/* ══════════════════════════════════════════════════════
+   VIEW SWITCHING
+══════════════════════════════════════════════════════ */
+function switchView(view) {
+  ['diceSection', 'historySection', 'gallerySection'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById(view + 'Section').classList.add('active');
+
+  if (view === 'history') {
+    document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(b => b.classList.remove('active'));
+    document.querySelector('#historyFilterTabs [data-filter="all"]').classList.add('active');
+    renderHistory('all');
+  } else if (view === 'gallery') {
+    renderGallery(true);
+  }
+}
+
+function refreshActiveView() {
+  if (document.getElementById('historySection').classList.contains('active')) {
+    const active = document.querySelector('#historyFilterTabs .filter-tab.active');
+    renderHistory(active ? active.getAttribute('data-filter') : 'all');
+  } else if (document.getElementById('gallerySection').classList.contains('active')) {
+    renderGallery(true);
+  }
+}
+
+document.getElementById('historyLinkBtn').addEventListener('click', () => switchView('history'));
+document.getElementById('galleryLinkBtn').addEventListener('click', () => switchView('gallery'));
+document.getElementById('backToRollBtnHistory').addEventListener('click', () => switchView('dice'));
+document.getElementById('backToRollBtnGallery').addEventListener('click', () => switchView('dice'));
+
+document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderHistory(this.getAttribute('data-filter'));
+  });
+});
+
+/* ══════════════════════════════════════════════════════
+   CONFIRM DELETE MODAL
+══════════════════════════════════════════════════════ */
+const confirmModal = document.getElementById('confirmModal');
+document.getElementById('resetDataBtn').addEventListener('click', () => confirmModal.classList.add('open'));
+document.getElementById('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('open'));
+document.getElementById('confirmDelete').addEventListener('click', () => {
+  localStorage.removeItem(getHistoryKey());
+  confirmModal.classList.remove('open');
+  showToast('All data cleared.', 'info');
+  setTimeout(() => location.reload(), 900);
+});
+confirmModal.addEventListener('click', e => { if (e.target === confirmModal) confirmModal.classList.remove('open'); });
+
+/* ══════════════════════════════════════════════════════
+   POSITION DETAIL MODAL
+══════════════════════════════════════════════════════ */
+const historyModal = document.getElementById('historyModal');
+const modalImage = document.getElementById('modalImage');
+const modalTitle = document.getElementById('modalTitle');
+const modalTwist = document.getElementById('modalTwist');
+const modalCount = document.getElementById('modalCount');
+const modalPerformBtn = document.getElementById('modalPerformBtn');
+const modalLikeBtn = document.getElementById('modalLikeBtn');
+const modalPrev = document.getElementById('modalPrev');
+const modalNext = document.getElementById('modalNext');
+
+let currentModalItems = [];
+let currentModalIndex = -1;
+let modalContext = 'history';
+
+function openModal(e) {
+  const el = e.currentTarget;
+  const posId = parseInt(el.getAttribute('data-id'));
+  const twist = el.getAttribute('data-twist');
+
+  if (document.getElementById('gallerySection').classList.contains('active')) {
+    modalContext = 'gallery';
+    const history = getHistory();
+    currentModalItems = positionData.map(pos => {
+      const h = history.find(x => x.id === pos.id && x.twist === defaultTwist);
+      return h || { id: pos.id, number: pos.number, twist: defaultTwist, isLiked: false, performedCount: 0 };
+    });
+    currentModalItems.sort((a, b) => a.id - b.id);
+  } else {
+    modalContext = 'history';
+    const history = getHistory();
+    let items = history.filter(x => x.twist !== defaultTwist);
+    const activeFilter = document.querySelector('#historyFilterTabs .filter-tab.active')?.getAttribute('data-filter') || 'all';
+    if (activeFilter === 'performed') items = items.filter(x => x.performedCount > 0);
+    else if (activeFilter === 'liked') items = items.filter(x => x.isLiked);
+    else if (activeFilter === 'not_performed') items = items.filter(x => x.performedCount === 0);
+    items.sort((a, b) => b.timestamp - a.timestamp);
+    currentModalItems = items;
+  }
+
+  currentModalIndex = currentModalItems.findIndex(x => x.id === posId && x.twist === twist);
+  if (currentModalIndex === -1) currentModalIndex = 0;
+  displayModalContent(currentModalIndex);
+  historyModal.classList.add('open');
+  // Focus trap
+  setTimeout(() => document.getElementById('modalClose').focus(), 50);
+}
+
+function displayModalContent(index) {
+  if (index < 0 || index >= currentModalItems.length) return;
+  currentModalIndex = index;
+  const item = currentModalItems[index];
+  const imgPath = `Sex Position/Sex Position (${item.id + 1}).jpg`;
+
+  modalImage.src = imgPath;
+  modalImage.onerror = () => { modalImage.style.display = 'none'; };
+  modalImage.onload  = () => { modalImage.style.display = 'block'; };
+  modalTitle.textContent = `Position #${item.number}`;
+  modalTwist.textContent = item.twist === defaultTwist ? 'Base Position' : `Twist: ${item.twist}`;
+  modalCount.textContent = item.performedCount > 0 ? `Performed ${item.performedCount} time(s)` : 'Not performed yet.';
+  modalLikeBtn.textContent = item.isLiked ? 'Liked ❤️' : 'Like / Save ❤️';
+  modalPerformBtn.setAttribute('data-id', item.id);
+  modalPerformBtn.setAttribute('data-twist', item.twist);
+  modalLikeBtn.setAttribute('data-id', item.id);
+  modalLikeBtn.setAttribute('data-twist', item.twist);
+  modalPrev.disabled = index === 0;
+  modalNext.disabled = index === currentModalItems.length - 1;
+}
+
+function navigateModal(dir) {
+  const next = currentModalIndex + dir;
+  if (next >= 0 && next < currentModalItems.length) displayModalContent(next);
+}
+
+function closeModal() { historyModal.classList.remove('open'); currentModalItems = []; currentModalIndex = -1; }
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+historyModal.addEventListener('click', e => { if (e.target === historyModal) closeModal(); });
+modalPrev.addEventListener('click', e => { e.stopPropagation(); navigateModal(-1); });
+modalNext.addEventListener('click', e => { e.stopPropagation(); navigateModal(1); });
+
+modalPerformBtn.addEventListener('click', function () {
+  const posId = parseInt(this.getAttribute('data-id'));
+  const twist = this.getAttribute('data-twist');
+  updateHistory(posId, twist, 'perform');
+  const item = currentModalItems[currentModalIndex];
+  if (item) { item.performedCount = (item.performedCount || 0) + 1; displayModalContent(currentModalIndex); }
+  showToast(`Position #${posId.toString().padStart(3,'0')} marked as performed! ✅`, 'success');
+  updateProgress();
+});
+
+modalLikeBtn.addEventListener('click', function () {
+  const posId = parseInt(this.getAttribute('data-id'));
+  const twist = this.getAttribute('data-twist');
+  const updated = updateHistory(posId, twist, 'like');
+  const item = currentModalItems[currentModalIndex];
+  if (item) { item.isLiked = updated.isLiked; displayModalContent(currentModalIndex); }
+  showToast(updated.isLiked ? 'Saved to your likes! ❤️' : 'Removed from likes.', 'like');
+});
+
+// Swipe
+let touchStartX = 0;
+document.querySelector('.modal-card').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.querySelector('.modal-card').addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) navigateModal(diff > 0 ? 1 : -1);
+}, { passive: true });
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (historyModal.classList.contains('open')) {
+    if (e.key === 'ArrowLeft') navigateModal(-1);
+    else if (e.key === 'ArrowRight') navigateModal(1);
+    else if (e.key === 'Escape') closeModal();
+  }
+  if (confirmModal.classList.contains('open') && e.key === 'Escape') confirmModal.classList.remove('open');
+  if (userAuthModal.classList.contains('open') && e.key === 'Escape') closeAuthModal();
+});
+
+/* ══════════════════════════════════════════════════════
+   FILTER TOGGLE (ink wash)
+══════════════════════════════════════════════════════ */
+function applyFilterPref(enabled) {
+  document.body.classList.toggle('filters-off', !enabled);
+  document.querySelectorAll('.filter-toggle').forEach(t => t.checked = enabled);
+  localStorage.setItem('intimacy_general_filterPref', enabled);
+}
+
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('filter-toggle')) applyFilterPref(e.target.checked);
+});
+
+const savedPref = localStorage.getItem('intimacy_general_filterPref');
+if (savedPref !== null) applyFilterPref(savedPref === 'true');
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+applyFaces();
 renderUserUI();
+updateProgress();
 switchView('dice');
 </script>
+
+<!-- ROSE PETAL SCROLL ANIMATION -->
+<canvas id="petal-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
+<script>
+(function(){
+  const cv=document.getElementById("petal-canvas");
+  const ctx=cv.getContext("2d");
+  let W,H,scrollV=0,lastScroll=0,t=0;
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  window.addEventListener("scroll",()=>{scrollV=Math.abs(window.scrollY-lastScroll);lastScroll=window.scrollY;},{passive:true});
+  const petals=Array.from({length:28},()=>({
+    x:Math.random()*1200,y:Math.random()*900-200,
+    vx:(Math.random()-.5)*0.5,vy:0.4+Math.random()*0.7,
+    rot:Math.random()*Math.PI*2,vr:(Math.random()-.5)*0.022,
+    w:5+Math.random()*9,h:8+Math.random()*14,a:0.35+Math.random()*0.45
+  }));
+  function drawPetal(p){
+    ctx.save();ctx.translate(p.x*(W/1200),p.y);ctx.rotate(p.rot);ctx.globalAlpha=p.a;
+    const g=ctx.createRadialGradient(0,-p.h*0.3,0,0,0,p.h);
+    g.addColorStop(0,"rgba(255,190,200,0.95)");g.addColorStop(0.5,"rgba(220,80,120,0.7)");g.addColorStop(1,"rgba(180,40,90,0.15)");
+    ctx.beginPath();ctx.ellipse(0,0,p.w*0.45,p.h,0,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.restore();
+  }
+  function frame(){
+    requestAnimationFrame(frame);
+    ctx.clearRect(0,0,W,H);
+    t+=0.01;
+    const boost=Math.min(scrollV*0.4,2.5);
+    scrollV*=0.85;
+    petals.forEach(p=>{
+      p.x+=(p.vx+Math.sin(t+p.rot)*0.3)*1200/W;p.y+=p.vy+boost;p.rot+=p.vr;
+      if(p.y>H+30){p.y=-30;p.x=Math.random()*1200;}
+      if(p.x<-20)p.x=1220;if(p.x>1220)p.x=-20;
+      drawPetal(p);
+    });
+  }
+  frame();
+})();
+</script>
+<script src="ka-features.js"></script>
 </body>
 </html>
