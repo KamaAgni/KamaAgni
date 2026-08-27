@@ -288,10 +288,10 @@ function renderFestBanner() {
 
 /* ─── Mood picker ────────────────────────────────────── */
 const MOOD_GAMES = [
-  ['intimacy_dice_game_single_page.html','intimacy_cards_game_single_page.html'],
-  ['intimacy_dice_game_single_page.html','intimacy_ludo_dice_game_single_page.html'],
-  ['intimacy_Position_Selector_page.html','intimacy_Oral_Position_Selector_page.html','intimacy_ludo_dice_game_single_page.html'],
-  ['intimacy_cards_game_single_page.html','intimacy_dice_game_single_page.html'],
+  ['games/intimacy_dice_game_single_page.html','games/intimacy_cards_game_single_page.html'],
+  ['games/intimacy_dice_game_single_page.html','games/intimacy_ludo_dice_game_single_page.html'],
+  ['games/intimacy_Position_Selector_page.html','games/intimacy_Oral_Position_Selector_page.html','games/intimacy_ludo_dice_game_single_page.html'],
+  ['games/intimacy_cards_game_single_page.html','games/intimacy_dice_game_single_page.html'],
 ];
 const MOODS = ['Romantic 🌹','Playful 😜','Adventurous 🔥','Tired but Trying 😴'];
 
@@ -343,11 +343,11 @@ function openFavHub() {
 
 /* ─── Surprise Me ────────────────────────────────────── */
 const ALL_GAMES = [
-  'intimacy_dice_game_single_page.html',
-  'intimacy_cards_game_single_page.html',
-  'intimacy_ludo_dice_game_single_page.html',
-  'intimacy_Position_Selector_page.html',
-  'intimacy_Oral_Position_Selector_page.html',
+  'games/intimacy_dice_game_single_page.html',
+  'games/intimacy_cards_game_single_page.html',
+  'games/intimacy_ludo_dice_game_single_page.html',
+  'games/intimacy_Position_Selector_page.html',
+  'games/intimacy_Oral_Position_Selector_page.html',
 ];
 function surpriseMe() {
   window.location.href = ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)];
