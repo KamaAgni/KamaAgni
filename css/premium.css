@@ -13,7 +13,7 @@ button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.55;transform:
 img,svg,canvas{max-width:100%}
 ::selection{background:rgba(232,99,122,.36);color:#fff}
 ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#070914}::-webkit-scrollbar-thumb{background:linear-gradient(#3b3155,#6b4055);border:2px solid #070914;border-radius:999px}
-.card,.panel,.game-card,.selector-card,.modal,.ka-modal,.topbar,.header-card{box-shadow:var(--ka-shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px)}
+.card,.panel,.game-card,.selector-card,.modal,.ka-modal,.topbar;-webkit-backdrop-filter:blur(18px)}
 .card,.panel,.game-card,.selector-card,.header-card{border-color:var(--ka-line)!important}
 button,.btn,.card-cta,.home-btn{transition:transform .18s cubic-bezier(.22,1,.36,1),box-shadow .18s ease,border-color .18s ease,background .18s ease,color .18s ease}
 button:hover,.btn:hover,.card-cta:hover,.home-btn:hover{transform:translateY(-2px)}
