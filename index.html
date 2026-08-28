@@ -3,7 +3,7 @@
 <head>
   <link rel="stylesheet" href="css/fonts.css"/>
   <link rel="stylesheet" href="css/premium.css"/>
-  <link rel="manifest" href="js/manifest.json"/>
+  <link rel="manifest" href="manifest.json"/>
   <meta name="theme-color" content="#05060f"/>
   <meta name="apple-mobile-web-app-capable" content="yes"/>
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -315,6 +315,17 @@ a { text-decoration:none; color:inherit; }
   opacity:1;
   transform:translateY(0);
   pointer-events:all;
+}
+
+#star-canvas {
+  position:fixed;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:0;
+  opacity:0;
+  transition:opacity 1.2s ease;
+  pointer-events:none;
 }
 
 /* ════════════════════════════════════════
@@ -733,7 +744,7 @@ body::after {
           <div class="card-title">Oral Position Selector</div>
           <p class="card-desc">Roll three dice to land on one of many unique positions, then add your own playful twist.</p>
         </div>
-        <a href="games/intimacy_Oral_Position_Selector_page_Alt.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+        <a href="games/intimacy_Oral_Position_Selector_page.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
       </div>
 
       <div class="game-card">
@@ -744,7 +755,29 @@ body::after {
           <div class="card-title">Position Selector</div>
           <p class="card-desc">Explore your full catalog of positions with a twist. Roll the dice and discover something new.</p>
         </div>
-        <a href="games/intimacy_Position_Selector_page_Alt.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
+        <a href="games/intimacy_Position_Selector_page.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🔴</div>
+        <div>
+          <span class="card-tag gold">Board Game</span>
+          <div class="card-title">Connect Foreplay</div>
+          <p class="card-desc">A Connect-Four showdown with a heated twist, three rising rounds of Spark, Blaze and Inferno.</p>
+        </div>
+        <a href="games/kamaagni-connect-foreplay.html" class="card-cta gold">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">♠️</div>
+        <div>
+          <span class="card-tag rose">Cards</span>
+          <div class="card-title">Poker for Couples</div>
+          <p class="card-desc">A quick, playful poker variant where every hand you lose costs you something to take off.</p>
+        </div>
+        <a href="games/kamaagni-poker-quick.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
       </div>
 
     </div>

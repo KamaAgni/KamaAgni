@@ -90,8 +90,8 @@
       transform: translateY(12px);
       transition: opacity 0.3s ease, transform 0.3s ease;
       white-space: nowrap;
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      /*backdrop-filter: blur(12px);*/
+      /*box-shadow: 0 8px 32px rgba(0,0,0,0.4);*/
     }
     .toast.show { opacity: 1; transform: translateY(0); }
     .toast.success { border-color: rgba(52,201,122,0.4); color: var(--green); }
@@ -262,6 +262,13 @@
       font-size: 13px;
       color: var(--muted);
       margin: 4px 0 12px;
+      flex-wrap: wrap;
+    }
+    .toggle-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      margin: 0 4px;
     }
     .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
     .toggle-switch input { opacity: 0; width: 0; height: 0; }
@@ -285,6 +292,10 @@
     }
     .toggle-switch input:checked + .toggle-track { background: rgba(232,99,122,0.3); border-color: var(--accent); }
     .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); background: var(--accent); }
+
+    /* Folder toggle uses green accent to visually distinguish from ink filter toggle */
+    .toggle-switch input.folder-toggle:checked + .toggle-track { background: rgba(52,201,122,0.3); border-color: var(--green); }
+    .toggle-switch input.folder-toggle:checked + .toggle-track::after { background: var(--green); }
 
     /* ─── Dice ──────────────────────────────────────────────── */
     .dice-area {
@@ -823,7 +834,7 @@
   </style>
 </head>
 <body>
-<!-- <a id="ka-back" href="index.html">← Home</a> -->
+<!-- <a id="ka-back" href="../index.html">← Home</a> -->
 
 
 <!-- Toast Container -->
@@ -861,6 +872,12 @@
         <span class="toggle-track"></span>
       </label>
       <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
     </div>
 
     <div class="controls">
@@ -919,6 +936,12 @@
         <span class="toggle-track"></span>
       </label>
       <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
     </div>
 
     <div class="section-divider">
@@ -958,6 +981,12 @@
         <span class="toggle-track"></span>
       </label>
       <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
     </div>
 
     <div style="text-align:right; margin-bottom:16px;">
@@ -993,6 +1022,12 @@
         <span class="toggle-track"></span>
       </label>
       <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
     </div>
   </div>
   <button class="modal-nav-btn next" id="modalNext" aria-label="Next">&#8250;</button>
@@ -1079,6 +1114,24 @@ const defaultTwist = "Roll to start!";
 const ROLL_DURATION = 3500;
 const DEFAULT_D10_FACE = '·';
 const PAGE_SIZE = 48;
+
+/* ══════════════════════════════════════════════════════
+   IMAGE FOLDER SOURCE
+   Rename ALT_FOLDER below to match your actual alternate
+   image folder name. Both folders are expected to contain
+   files named the same way: "Sex Position (N).jpg"
+══════════════════════════════════════════════════════ */
+const BASE_FOLDER = '../assets/images/Sex Position';
+const ALT_FOLDER = '../assets/images/Sex Position Alt';
+const FOLDER_PREF_KEY = 'intimacy_general_folderPref';
+
+function getImageFolder() {
+  return document.body.classList.contains('alt-images') ? ALT_FOLDER : BASE_FOLDER;
+}
+
+function imagePathFor(posId) {
+  return `${getImageFolder()}/Sex Position (${posId + 1}).jpg`;
+}
 
 /* ══════════════════════════════════════════════════════
    AUTH
@@ -1330,12 +1383,12 @@ function realisticRoll() {
 
     const rolledItem = updateHistory(pos.id, twistText, 'roll');
     const isLiked = rolledItem ? rolledItem.isLiked : false;
-    const imgPath = `../assets/images/Sex Position/Sex Position (${pos.id + 1}).jpg`;
+    const imgPath = imagePathFor(pos.id);
 
     resultsEl.innerHTML = `
       <div class="result-card">
         <div class="result-image-wrap">
-          <img src="${imgPath}" alt="Position ${pos.number}" class="ink-filter" loading="lazy">
+          <img src="${imgPath}" alt="Position ${pos.number}" class="ink-filter" loading="lazy" data-pos-id="${pos.id}">
           <div class="img-fallback" style="display:none;">No image for #${pos.number}</div>
         </div>
         <div class="result-meta">
@@ -1389,7 +1442,7 @@ function getItemBadges(item) {
 }
 
 function createGridItem(item, isGallery) {
-  const imgPath = `../assets/images/Sex Position/Sex Position (${item.id + 1}).jpg`;
+  const imgPath = imagePathFor(item.id);
   const twist = item.twist || defaultTwist;
   const subLabel = isGallery
     ? `#${item.number}`
@@ -1401,7 +1454,7 @@ function createGridItem(item, isGallery) {
   div.setAttribute('data-twist', twist);
   div.innerHTML = `
     <div class="grid-item-img">
-      <img src="${imgPath}" alt="Position ${item.number}" loading="lazy" class="ink-filter">
+      <img src="${imgPath}" alt="Position ${item.number}" loading="lazy" class="ink-filter" data-pos-id="${item.id}">
     </div>
     <div class="item-badges">${getItemBadges(item)}</div>
     <div class="grid-item-body">
@@ -1568,9 +1621,10 @@ function displayModalContent(index) {
   if (index < 0 || index >= currentModalItems.length) return;
   currentModalIndex = index;
   const item = currentModalItems[index];
-  const imgPath = `assets/images/Sex Position/Sex Position (${item.id + 1}).jpg`;
+  const imgPath = imagePathFor(item.id);
 
   modalImage.src = imgPath;
+  modalImage.setAttribute('data-pos-id', item.id);
   modalImage.onerror = () => { modalImage.style.display = 'none'; };
   modalImage.onload  = () => { modalImage.style.display = 'block'; };
   modalTitle.textContent = `Position #${item.number}`;
@@ -1644,12 +1698,46 @@ function applyFilterPref(enabled) {
   localStorage.setItem('intimacy_general_filterPref', enabled);
 }
 
+/* ══════════════════════════════════════════════════════
+   FOLDER TOGGLE (alt image set)
+══════════════════════════════════════════════════════ */
+function applyFolderPref(enabled) {
+  document.body.classList.toggle('alt-images', enabled);
+  document.querySelectorAll('.folder-toggle').forEach(t => t.checked = enabled);
+  localStorage.setItem(FOLDER_PREF_KEY, enabled);
+  refreshImageSources();
+}
+
+function refreshImageSources() {
+  // Update the currently displayed roll result image, if any
+  const resultImg = resultsEl.querySelector('img[data-pos-id]');
+  if (resultImg) {
+    const id = parseInt(resultImg.getAttribute('data-pos-id'), 10);
+    if (!isNaN(id)) {
+      resultImg.style.display = '';
+      resultImg.src = imagePathFor(id);
+      const fallback = resultImg.nextElementSibling;
+      if (fallback) fallback.style.display = 'none';
+    }
+  }
+  // Re-render whichever grid view is active
+  refreshActiveView();
+  // Update the detail modal image if it's open
+  if (historyModal.classList.contains('open') && currentModalIndex > -1) {
+    displayModalContent(currentModalIndex);
+  }
+}
+
 document.addEventListener('change', e => {
   if (e.target.classList.contains('filter-toggle')) applyFilterPref(e.target.checked);
+  if (e.target.classList.contains('folder-toggle')) applyFolderPref(e.target.checked);
 });
 
 const savedPref = localStorage.getItem('intimacy_general_filterPref');
 if (savedPref !== null) applyFilterPref(savedPref === 'true');
+
+const savedFolderPref = localStorage.getItem(FOLDER_PREF_KEY);
+if (savedFolderPref !== null) applyFolderPref(savedFolderPref === 'true');
 
 /* ══════════════════════════════════════════════════════
    INIT

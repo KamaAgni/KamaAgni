@@ -287,11 +287,23 @@ function renderFestBanner() {
 }
 
 /* ─── Mood picker ────────────────────────────────────── */
+/* This script is loaded from both the site root (index.html) and from
+   pages inside /games/, so a plain relative path like "games/x.html"
+   would resolve incorrectly (to games/games/x.html) when navigating
+   from within a game page. Resolve every game path against the real
+   site root instead — computed from this script's own URL, since it
+   always lives in /js/ one folder below the root. */
+const SITE_ROOT = (() => {
+  const src = document.currentScript && document.currentScript.src;
+  return src ? new URL('../', src).href : './';
+})();
+const GAME = (name) => SITE_ROOT + 'games/' + name;
+
 const MOOD_GAMES = [
-  ['games/intimacy_dice_game_single_page.html','games/intimacy_cards_game_single_page.html'],
-  ['games/intimacy_dice_game_single_page.html','games/intimacy_ludo_dice_game_single_page.html'],
-  ['games/intimacy_Position_Selector_page.html','games/intimacy_Oral_Position_Selector_page.html','games/intimacy_ludo_dice_game_single_page.html'],
-  ['games/intimacy_cards_game_single_page.html','games/intimacy_dice_game_single_page.html'],
+  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_cards_game_single_page.html')],
+  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_ludo_dice_game_single_page.html'), GAME('kamaagni-connect-foreplay.html')],
+  [GAME('intimacy_Position_Selector_page.html'), GAME('intimacy_Oral_Position_Selector_page.html'), GAME('intimacy_ludo_dice_game_single_page.html')],
+  [GAME('intimacy_cards_game_single_page.html'), GAME('intimacy_dice_game_single_page.html'), GAME('kamaagni-poker-quick.html')],
 ];
 const MOODS = ['Romantic 🌹','Playful 😜','Adventurous 🔥','Tired but Trying 😴'];
 
@@ -343,11 +355,13 @@ function openFavHub() {
 
 /* ─── Surprise Me ────────────────────────────────────── */
 const ALL_GAMES = [
-  'games/intimacy_dice_game_single_page.html',
-  'games/intimacy_cards_game_single_page.html',
-  'games/intimacy_ludo_dice_game_single_page.html',
-  'games/intimacy_Position_Selector_page.html',
-  'games/intimacy_Oral_Position_Selector_page.html',
+  GAME('intimacy_dice_game_single_page.html'),
+  GAME('intimacy_cards_game_single_page.html'),
+  GAME('intimacy_ludo_dice_game_single_page.html'),
+  GAME('intimacy_Position_Selector_page.html'),
+  GAME('intimacy_Oral_Position_Selector_page.html'),
+  GAME('kamaagni-connect-foreplay.html'),
+  GAME('kamaagni-poker-quick.html'),
 ];
 function surpriseMe() {
   window.location.href = ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)];

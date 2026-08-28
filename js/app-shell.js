@@ -67,6 +67,11 @@
   addEventListener('unhandledrejection', e => console.error('[KamaAgni promise]', e.reason));
 
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-    addEventListener('load', () => navigator.serviceWorker.register('./sw.js', {scope:'./'}).catch(console.warn), {once:true});
+    // app-shell.js always lives in /js/, one folder below the site root,
+    // regardless of which page (root or /games/*) included it — so the
+    // root is always "one directory up" from this script's own URL.
+    const scriptURL = doc.currentScript && doc.currentScript.src;
+    const siteRoot = scriptURL ? new URL('../', scriptURL).href : './';
+    addEventListener('load', () => navigator.serviceWorker.register(siteRoot + 'sw.js', {scope: siteRoot}).catch(console.warn), {once:true});
   }
 })();
