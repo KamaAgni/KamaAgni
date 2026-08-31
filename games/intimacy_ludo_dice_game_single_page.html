@@ -1,0 +1,1679 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="../css/fonts.css"/>
+  <link rel="stylesheet" href="../css/premium.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#05060f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Couples Ludo: Intimacy Game</title>
+
+  <style>
+/* ═══════════════════════════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════════════════════════ */
+:root {
+  --bg:         #05060f;
+  --surface:    #0c0e1c;
+  --surface2:   #12152a;
+  --border:     rgba(255,255,255,0.07);
+  --border2:    rgba(255,255,255,0.12);
+
+  /* Accent palette — warm rose × electric indigo */
+  --rose:       #e8637a;
+  --rose2:      #f4a0ae;
+  --indigo:     #6c7ef8;
+  --indigo2:    #a5aeff;
+  --gold:       #f5c842;
+
+  --p1:         #f4a0ae;   /* rose  — player 1 */
+  --p2:         #a5aeff;   /* indigo — player 2 */
+
+  --muted:      #7a8aab;
+  --text:       #dce9ff;
+  --text2:      #a8bcd8;
+
+  --cell-outer: #0f1428;
+  --cell-mid:   #121830;
+  --cell-inner: #181f3a;
+  --cell-core:  #1e2645;
+
+  --radius:     14px;
+  --tr:         0.2s ease;
+
+  /* cube face backgrounds */
+  --f1: linear-gradient(145deg,#1a1340,#0d0d28);
+  --f2: linear-gradient(145deg,#0d2040,#091628);
+  --f3: linear-gradient(145deg,#1a0d3a,#100828);
+  --f4: linear-gradient(145deg,#200d3a,#130828);
+  --f5: linear-gradient(145deg,#1a1835,#0e0d2a);
+  --f6: linear-gradient(145deg,#280d28,#1a0820);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════════ */
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html { scroll-behavior:smooth; }
+body {
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+a { color:inherit; text-decoration:none; }
+
+/* Ambient glow background */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(ellipse 1000px 500px at 20% -5%,  rgba(108,126,248,0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 700px 400px at 85% 100%, rgba(232,99,122,0.07) 0%, transparent 65%);
+  pointer-events:none; z-index:0;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LAYOUT SHELL
+═══════════════════════════════════════════════════════════ */
+.page { position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:10px 14px 20px; }
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+#toast-wrap {
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  z-index:9999; pointer-events:none;
+}
+.toast {
+  background:var(--surface2); border:1px solid var(--border2);
+  color:var(--text); padding:11px 22px; border-radius:999px;
+  font-size:14px; font-weight:600;
+  opacity:0; transform:translateY(10px);
+  transition:opacity .28s ease,transform .28s ease;
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 28px rgba(0,0,0,0.45);
+  white-space:nowrap;
+}
+.toast.show { opacity:1; transform:translateY(0); }
+.toast.success { border-color:rgba(108,126,248,0.4); color:var(--indigo2); }
+.toast.warn    { border-color:rgba(245,200,66,0.4);  color:var(--gold); }
+.toast.info    { border-color:var(--border2); }
+
+/* ═══════════════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════════════ */
+.topbar {
+  display:flex; align-items:center; justify-content:space-between;
+  gap:8px; flex-wrap:wrap; margin-bottom:10px;
+}
+.topbar-left { display:flex; align-items:center; gap:14px; }
+.topbar-right { display:flex; align-items:center; gap:10px; }
+
+.home-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 18px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); font-size:13px; font-weight:600;
+  transition:color var(--tr),border-color var(--tr);
+}
+.home-btn:hover { color:var(--text); border-color:var(--border2); }
+
+.game-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(17px,2.2vw,24px); font-weight:700;
+  color:var(--text); letter-spacing:-0.01em;
+}
+.game-title em { font-style:italic; color:var(--rose); }
+
+.mode-badge {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:4px 12px; border-radius:999px;
+  font-size:12px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase;
+  border:1px solid var(--border); color:var(--muted);
+  transition:all var(--tr);
+}
+.mode-badge.soft  { background:rgba(108,126,248,0.12); color:var(--indigo2); border-color:rgba(108,126,248,0.3); }
+.mode-badge.wild  { background:rgba(232,99,122,0.12);  color:var(--rose2);   border-color:rgba(232,99,122,0.3); }
+
+/* ═══════════════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════════════ */
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding:8px 16px; border-radius:999px; border:none; cursor:pointer;
+  font-family:'DM Sans',sans-serif; font-weight:700; font-size:13px;
+  transition:transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+  white-space:nowrap;
+}
+.btn:active { transform:scale(0.95); }
+.btn:disabled { opacity:0.38; cursor:not-allowed; pointer-events:none; }
+
+.btn-primary {
+  background:linear-gradient(135deg,var(--rose),#f0718a);
+  color:#fff; box-shadow:0 4px 20px rgba(232,99,122,0.28);
+}
+.btn-primary:hover:not(:disabled) { box-shadow:0 6px 28px rgba(232,99,122,0.42); transform:translateY(-1px); }
+
+.btn-indigo {
+  background:linear-gradient(135deg,var(--indigo),#8491ff);
+  color:#fff; box-shadow:0 4px 20px rgba(108,126,248,0.28);
+}
+.btn-indigo:hover:not(:disabled) { box-shadow:0 6px 28px rgba(108,126,248,0.42); transform:translateY(-1px); }
+
+.btn-ghost {
+  background:var(--surface); color:var(--muted);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover:not(:disabled) { color:var(--text); border-color:var(--border2); }
+
+.btn-danger {
+  background:rgba(180,50,40,0.15); color:#e17168;
+  border:1px solid rgba(180,50,40,0.3);
+}
+.btn-danger:hover:not(:disabled) { background:rgba(180,50,40,0.25); }
+
+.btn-gold {
+  background:linear-gradient(135deg,#c9922a,var(--gold));
+  color:#1a0d00; box-shadow:0 4px 20px rgba(245,200,66,0.25);
+}
+
+.btn-sm { padding:7px 14px; font-size:13px; }
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN GAME LAYOUT
+═══════════════════════════════════════════════════════════ */
+.game-layout {
+  display:grid;
+  grid-template-columns:auto 290px;
+  gap:12px;
+  align-items:start;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOARD
+═══════════════════════════════════════════════════════════ */
+.board-panel {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:8px;
+  /* Cap board so it never exceeds viewport height minus topbar */
+  width: min(calc(100vh - 90px), 100%);
+  max-width: 560px;
+}
+.board-hint {
+  font-size:11px; color:var(--muted); text-align:center;
+  margin-top:5px; font-style:italic; opacity:0.7;
+}
+
+/* Fluid board — no fixed scale transforms */
+#board {
+  width:100%; aspect-ratio:1/1;
+  display:grid; grid-template-columns:repeat(7,1fr);
+  gap:3px; padding:5px;
+  border-radius:10px;
+  background:rgba(108,126,248,0.03);
+  position:relative;
+}
+
+.cell {
+  background:var(--cell-outer);
+  border-radius:7px;
+  display:flex; align-items:center; justify-content:center;
+  position:relative; overflow:visible;
+  font-weight:700; font-size:10px; color:var(--muted);
+  padding:3px; min-height:0;
+  border:1px solid rgba(255,255,255,0.03);
+  box-shadow:inset 0 -4px 12px rgba(0,0,0,0.4), 0 3px 8px rgba(0,0,0,0.25);
+  transition:transform var(--tr), box-shadow var(--tr);
+}
+.cell.ring-3 { background:var(--cell-outer); }
+.cell.ring-2 { background:var(--cell-mid); }
+.cell.ring-1 { background:var(--cell-inner); }
+.cell.ring-0 { background:var(--cell-core); }
+
+.cell.start {
+  outline:2px dashed rgba(108,126,248,0.25);
+  color:var(--indigo2); font-weight:900;
+  box-shadow:0 0 20px rgba(108,126,248,0.08), inset 0 -6px 18px rgba(0,0,0,0.4);
+}
+.cell.finish {
+  background:linear-gradient(135deg,rgba(232,99,122,0.18),rgba(108,126,248,0.18));
+  border:1px solid rgba(232,99,122,0.25);
+  box-shadow:0 0 30px rgba(232,99,122,0.15), inset 0 -6px 14px rgba(0,0,0,0.4);
+}
+.win-text {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(9px,1.4vw,16px);
+  font-weight:700; letter-spacing:0.05em;
+  background:linear-gradient(135deg,var(--rose),var(--indigo2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+/* Token */
+.token {
+  width:clamp(20px,3vw,36px); height:clamp(20px,3vw,36px);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  position:absolute; left:50%; top:50%;
+  z-index:60; pointer-events:none;
+  transition:left .18s ease, top .18s ease;
+  filter:drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+}
+.token.p1 { transform:translate(-65%,-65%); }
+.token.p2 { transform:translate(-35%,-35%); }
+.token-emoji { font-size:clamp(13px,2vw,24px); line-height:1; }
+
+/* Board tile animations */
+@keyframes pinkPulse {
+  0%   { box-shadow:0 0 0 0 rgba(232,99,122,0); }
+  40%  { box-shadow:0 0 0 10px rgba(232,99,122,0.18); transform:scale(1.03); }
+  100% { box-shadow:0 0 0 0 rgba(232,99,122,0); transform:scale(1); }
+}
+@keyframes indigoPulse {
+  0%   { box-shadow:0 0 0 0 rgba(108,126,248,0); }
+  40%  { box-shadow:0 0 0 10px rgba(108,126,248,0.18); transform:scale(1.03); }
+  100% { box-shadow:0 0 0 0 rgba(108,126,248,0); transform:scale(1); }
+}
+.pink-pulse  { animation:pinkPulse  .7s ease; }
+.blue-ripple { animation:indigoPulse .8s ease; }
+
+@keyframes shakeIt {
+  10%,90% { transform:translateX(-1px); }
+  20%,80% { transform:translateX(2px); }
+  30%,50%,70% { transform:translateX(-3px); }
+  40%,60% { transform:translateX(3px); }
+}
+.shake { animation:shakeIt .45s cubic-bezier(.36,.07,.19,.97); }
+
+/* Echo ring on move */
+.echo-ring {
+  position:absolute; inset:0; border-radius:10px;
+  pointer-events:none; z-index:10;
+  animation:tileRipple .6s ease-out forwards;
+}
+@keyframes tileRipple {
+  0%   { transform:scale(1); opacity:0.8; box-shadow:0 0 0 0 rgba(165,174,255,0.4); }
+  100% { transform:scale(2.2); opacity:0; box-shadow:0 0 0 10px rgba(165,174,255,0); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SIDE PANEL
+═══════════════════════════════════════════════════════════ */
+.side-panel {
+  display:flex; flex-direction:column; gap:8px;
+}
+
+.panel-card {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:var(--radius); padding:11px 12px;
+}
+
+.panel-label {
+  font-size:10px; font-weight:700; letter-spacing:0.08em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:8px;
+}
+
+/* ─── Turn indicator ─── */
+.turn-cards { display:flex; flex-direction:column; gap:6px; }
+
+.player-card {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:7px 10px; border-radius:8px;
+  border:1px solid var(--border);
+  background:var(--surface2);
+  transition:all var(--tr);
+}
+.player-card.active-turn {
+  border-color:rgba(232,99,122,0.45);
+  background:rgba(232,99,122,0.07);
+  box-shadow:0 0 0 1px rgba(232,99,122,0.2), 0 4px 16px rgba(232,99,122,0.1);
+}
+.player-card.active-turn.p2-active {
+  border-color:rgba(108,126,248,0.45);
+  background:rgba(108,126,248,0.07);
+  box-shadow:0 0 0 1px rgba(108,126,248,0.2), 0 4px 16px rgba(108,126,248,0.1);
+}
+
+.player-card-left { display:flex; align-items:center; gap:8px; }
+.player-token-dot {
+  width:26px; height:26px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:15px; line-height:1;
+  background:rgba(255,255,255,0.05);
+}
+.player-name { font-weight:700; font-size:13px; }
+.player-turn-label { font-size:10px; color:var(--rose2); font-weight:600; margin-top:1px; }
+.p2-active .player-turn-label { color:var(--indigo2); }
+
+.player-stats { text-align:right; }
+.stat-val { font-size:13px; font-weight:700; }
+.stat-label { font-size:10px; color:var(--muted); }
+
+/* ─── Dice area ─── */
+.dice-section { display:flex; flex-direction:column; align-items:center; gap:8px; }
+
+/* 3D cube */
+.cube-wrap {
+  perspective:900px;
+  width:70px; height:70px;
+  display:flex; align-items:center; justify-content:center;
+}
+#cube {
+  width:70px; height:70px;
+  position:relative; transform-style:preserve-3d;
+  transition:transform 1800ms cubic-bezier(.18,.8,.2,1);
+}
+.cube-face {
+  position:absolute; width:70px; height:70px;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:11px; backface-visibility:hidden;
+  box-shadow:inset 0 -5px 14px rgba(0,0,0,0.55), 0 5px 14px rgba(0,0,0,0.3);
+}
+/* Pip faces */
+.cube-face .pips { display:grid; gap:4px; padding:10px; width:100%; height:100%; }
+.pip {
+  width:8px; height:8px; border-radius:50%;
+  background:rgba(255,255,255,0.88);
+  box-shadow:0 0 5px rgba(255,255,255,0.4);
+  justify-self:center; align-self:center;
+}
+.face-1 { background:var(--f1); transform:rotateY(0deg)   translateZ(35px); }
+.face-2 { background:var(--f2); transform:rotateY(90deg)  translateZ(35px); }
+.face-3 { background:var(--f3); transform:rotateY(180deg) translateZ(35px); }
+.face-4 { background:var(--f4); transform:rotateY(-90deg) translateZ(35px); }
+.face-5 { background:var(--f5); transform:rotateX(90deg)  translateZ(35px); }
+.face-6 { background:var(--f6); transform:rotateX(-90deg) translateZ(35px); }
+
+.dice-crit { box-shadow:0 0 0 4px rgba(245,200,66,0.5), 0 0 40px rgba(245,200,66,0.25) !important; }
+
+@keyframes critFlash {
+  0%,100% { background:var(--bg); }
+  50% { background:rgba(245,200,66,0.05); }
+}
+body.flash-active { animation:critFlash .3s ease 2; }
+
+.dice-roll-btns { display:flex; gap:8px; width:100%; }
+.dice-roll-btns .btn { flex:1; }
+
+/* ─── Timer card ─── */
+.timer-display-wrap { position:relative; width:72px; height:72px; margin:0 auto 6px; }
+.timer-svg { width:100%; height:100%; transform:rotate(-90deg); }
+.timer-track { stroke:rgba(255,255,255,0.07); }
+.timer-fill  { stroke:var(--indigo); transition:stroke-dashoffset 1s linear; stroke-linecap:round; }
+.timer-text-center {
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px; font-weight:700; color:var(--text);
+}
+@keyframes timerWarn {
+  0%,100% { color:var(--text); }
+  50% { color:var(--rose); }
+}
+.timer-text-center.warning { animation:timerWarn .8s ease infinite; }
+
+.timer-controls {
+  display:grid; grid-template-columns:1fr auto auto; gap:8px; align-items:center;
+}
+.timer-slider-wrap { display:flex; flex-direction:column; gap:4px; }
+.slider-label { font-size:11px; color:var(--muted); }
+input[type=range] {
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:4px; border-radius:999px;
+  background:var(--surface2); outline:none; cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance:none; appearance:none;
+  width:14px; height:14px; border-radius:50%;
+  background:var(--indigo); cursor:pointer;
+  box-shadow:0 0 8px rgba(108,126,248,0.5);
+}
+
+/* ─── Sound & Undo row ─── */
+.util-row { display:flex; gap:8px; }
+.util-row .btn { flex:1; }
+
+/* Sound toggle pill */
+.sound-pill {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px; border-radius:999px;
+  border:1px solid var(--border); background:var(--surface2);
+  font-size:13px; font-weight:600; color:var(--muted);
+  cursor:pointer; transition:all var(--tr); flex:1;
+  justify-content:center;
+}
+.sound-pill.on { border-color:rgba(108,126,248,0.4); color:var(--indigo2); background:rgba(108,126,248,0.08); }
+
+/* ─── Result / status ─── */
+.result-card {
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:9px 12px;
+  font-size:12px; color:var(--muted); line-height:1.5;
+  min-height:40px;
+}
+.result-card strong { color:var(--text); }
+
+/* ─── Setup / action btn ─── */
+.setup-row { display:flex; gap:8px; }
+.setup-row .btn { flex:1; }
+
+/* keyboard hint */
+.kbd-hint { text-align:center; font-size:11px; color:var(--muted); opacity:.55; margin-top:6px; }
+.kbd { display:inline-block; padding:1px 6px; border-radius:4px; border:1px solid var(--border); font-size:10px; }
+
+/* ═══════════════════════════════════════════════════════════
+   FLOATING ROLL (mobile)
+═══════════════════════════════════════════════════════════ */
+#floatingRoll {
+  display:none;
+  position:fixed; right:14px; bottom:80px; z-index:130;
+  width:58px; height:58px; border-radius:50%;
+  background:linear-gradient(135deg,var(--rose),#f07090);
+  border:none; font-size:24px; cursor:pointer;
+  box-shadow:0 8px 28px rgba(232,99,122,0.45);
+  align-items:center; justify-content:center;
+  transition:transform var(--tr), opacity var(--tr);
+}
+#floatingRoll:disabled { opacity:.35; pointer-events:none; }
+#floatingRoll:active { transform:scale(0.93); }
+
+/* ═══════════════════════════════════════════════════════════
+   MODALS
+═══════════════════════════════════════════════════════════ */
+.modal-overlay {
+  position:fixed; inset:0;
+  background:rgba(0,0,0,0.85);
+  display:none; align-items:center; justify-content:center;
+  z-index:200; padding:20px;
+  backdrop-filter:blur(4px);
+}
+.modal-overlay.open { display:flex; }
+
+@keyframes modalIn {
+  from { opacity:0; transform:scale(0.94) translateY(12px); }
+  to   { opacity:1; transform:scale(1)    translateY(0); }
+}
+.modal-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:20px; padding:26px;
+  max-width:600px; width:100%;
+  box-shadow:0 30px 100px rgba(0,0,0,0.7);
+  animation:modalIn .3s cubic-bezier(.22,1,.36,1);
+  position:relative;
+  max-height:90vh; overflow-y:auto;
+}
+.modal-emoji { font-size:48px; text-align:center; display:block; margin-bottom:12px; }
+.modal-title {
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px; font-weight:700; color:var(--rose);
+  margin-bottom:10px;
+}
+.modal-body {
+  font-size:15px; line-height:1.6; color:var(--text2);
+  margin-bottom:20px;
+}
+.modal-body strong { color:var(--text); }
+.modal-actions { display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap; }
+.modal-actions .btn { min-width:100px; }
+
+/* Turn banner inside modal */
+.modal-turn-banner {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:5px 14px; border-radius:999px;
+  font-size:12px; font-weight:700;
+  margin-bottom:14px;
+  border:1px solid;
+}
+.modal-turn-banner.p1-turn {
+  background:rgba(244,160,174,0.12); color:var(--rose2);
+  border-color:rgba(244,160,174,0.3);
+}
+.modal-turn-banner.p2-turn {
+  background:rgba(165,174,255,0.12); color:var(--indigo2);
+  border-color:rgba(165,174,255,0.3);
+}
+
+/* Setup modal specifics */
+.setup-section { margin-bottom:18px; }
+.setup-section-title { font-size:13px; font-weight:700; color:var(--muted); margin-bottom:10px; letter-spacing:0.05em; text-transform:uppercase; }
+.mode-options { display:flex; gap:10px; }
+.mode-opt {
+  flex:1; padding:12px 10px; border-radius:10px;
+  border:2px solid var(--border); background:var(--surface2);
+  cursor:pointer; text-align:center;
+  transition:all var(--tr);
+}
+.mode-opt:hover { border-color:var(--border2); }
+.mode-opt input[type=radio] { display:none; }
+.mode-opt.selected-soft { border-color:rgba(108,126,248,0.6); background:rgba(108,126,248,0.1); }
+.mode-opt.selected-wild { border-color:rgba(232,99,122,0.6); background:rgba(232,99,122,0.1); }
+.mode-opt-icon { font-size:28px; display:block; margin-bottom:6px; }
+.mode-opt-label { font-size:14px; font-weight:700; }
+.mode-opt-desc { font-size:12px; color:var(--muted); margin-top:3px; }
+
+.start-options { display:flex; gap:10px; }
+.start-opt {
+  flex:1; padding:10px; border-radius:10px;
+  border:2px solid var(--border); background:var(--surface2);
+  cursor:pointer; text-align:center;
+  transition:all var(--tr);
+}
+.start-opt:hover { border-color:var(--border2); }
+.start-opt input[type=radio] { display:none; }
+.start-opt.selected-p1 { border-color:rgba(244,160,174,0.6); background:rgba(244,160,174,0.08); }
+.start-opt.selected-p2 { border-color:rgba(165,174,255,0.6); background:rgba(165,174,255,0.08); }
+.start-opt-name { font-size:14px; font-weight:700; }
+
+.setup-note {
+  font-size:12px; color:var(--muted); padding:10px 12px;
+  background:var(--surface2); border-radius:8px; line-height:1.5;
+  border:1px solid var(--border);
+}
+
+/* Confirm modal */
+.confirm-card {
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:20px; padding:28px;
+  max-width:380px; width:100%;
+  text-align:center;
+  animation:modalIn .3s ease;
+}
+.confirm-card h3 { font-family:'Cormorant Garamond',serif; font-size:24px; margin-bottom:10px; }
+.confirm-card p { color:var(--muted); font-size:14px; margin-bottom:22px; line-height:1.5; }
+.confirm-actions { display:flex; gap:10px; }
+.confirm-actions .btn { flex:1; justify-content:center; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════════════ */
+@media (max-width:960px) {
+  .game-layout { grid-template-columns:1fr; }
+  .side-panel { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  #floatingRoll { display:flex; }
+  .result-card { display:none; } /* shown inline in side panel instead */
+}
+
+@media (max-width:640px) {
+  .side-panel { grid-template-columns:1fr; }
+  .dice-roll-btns { flex-direction:column; }
+  .topbar { flex-direction:column; align-items:flex-start; }
+  .timer-controls { grid-template-columns:1fr 1fr; grid-template-rows:auto auto; }
+  .timer-controls .timer-slider-wrap { grid-column:1/-1; }
+}
+
+@media (max-width:420px) {
+  .page { padding:12px 10px 70px; }
+  .mode-options { flex-direction:column; }
+  .start-options { flex-direction:column; }
+}
+  </style>
+
+  <style id="kamaagni-responsive">
+    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
+    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
+    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+  </style>
+</head>
+<body>
+<!-- <a id="ka-back" href="../index.html">← Home</a> -->
+
+
+<!-- Toast -->
+<div id="toast-wrap"></div>
+
+<!-- Floating Roll (mobile) -->
+<button id="floatingRoll" title="Roll Dice" aria-label="Roll dice">🎲</button>
+
+<!-- Modal Root -->
+<div id="modalRoot"></div>
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="confirm-card">
+    <h3>Reset Game?</h3>
+    <p>This will clear all progress and shuffle hidden tiles. A new game setup will begin.</p>
+    <div class="confirm-actions">
+      <button id="confirmCancel" class="btn btn-ghost">Cancel</button>
+      <button id="confirmReset"  class="btn btn-danger">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- Aria live region -->
+<div id="ariaAnnounce" aria-live="polite" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden"></div>
+
+<div class="page">
+
+  <!-- ── Topbar ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <a href="../index.html" class="home-btn">← Home</a>
+      <div class="game-title">Couples <em>Ludo</em></div>
+      <div class="mode-badge" id="modeBadge">No Mode</div>
+    </div>
+    <div class="topbar-right">
+      <button id="resetBtn" class="btn btn-ghost btn-sm">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- ── Game Layout ── -->
+  <div class="game-layout">
+
+    <!-- Board -->
+    <div class="board-panel">
+      <div id="board" aria-label="Game board" role="img"></div>
+      <p class="board-hint">Hidden tiles shuffle each reset and activate when stepped on.</p>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="side-panel">
+
+      <!-- Player Cards -->
+      <div class="panel-card">
+        <div class="panel-label">Players</div>
+        <div class="turn-cards">
+          <div class="player-card active-turn" id="p1Card">
+            <div class="player-card-left">
+              <div class="player-token-dot">❤️</div>
+              <div>
+                <div class="player-name" id="p1Name">Husband</div>
+                <div class="player-turn-label" id="p1TurnLabel">Your Turn</div>
+              </div>
+            </div>
+            <div class="player-stats">
+              <div class="stat-val" id="p1Tasks">0</div>
+              <div class="stat-label">Tasks</div>
+            </div>
+          </div>
+
+          <div class="player-card" id="p2Card">
+            <div class="player-card-left">
+              <div class="player-token-dot">💋</div>
+              <div>
+                <div class="player-name" id="p2Name">Wife</div>
+                <div class="player-turn-label" id="p2TurnLabel" style="color:var(--indigo2)">Waiting</div>
+              </div>
+            </div>
+            <div class="player-stats">
+              <div class="stat-val" id="p2Tasks">0</div>
+              <div class="stat-label">Tasks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dice + Roll -->
+      <div class="panel-card">
+        <div class="panel-label">Dice</div>
+        <div class="dice-section">
+          <div class="cube-wrap">
+            <div id="cube" role="img" aria-label="Game die">
+              <!-- Face 1: single pip center -->
+              <div class="cube-face face-1">
+                <div class="pips" style="grid-template-columns:1fr;grid-template-rows:1fr;">
+                  <div class="pip"></div>
+                </div>
+              </div>
+              <!-- Face 2 -->
+              <div class="cube-face face-2">
+                <div class="pips" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;">
+                  <div class="pip" style="grid-column:1;grid-row:1"></div>
+                  <div class="pip" style="grid-column:2;grid-row:2"></div>
+                </div>
+              </div>
+              <!-- Face 3 -->
+              <div class="cube-face face-3">
+                <div class="pips" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr;">
+                  <div class="pip" style="grid-column:1;grid-row:1"></div>
+                  <div class="pip" style="grid-column:1;grid-row:2;justify-self:center;grid-column:1/-1"></div>
+                  <div class="pip" style="grid-column:2;grid-row:3"></div>
+                </div>
+              </div>
+              <!-- Face 4 -->
+              <div class="cube-face face-4">
+                <div class="pips" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;">
+                  <div class="pip"></div><div class="pip"></div>
+                  <div class="pip"></div><div class="pip"></div>
+                </div>
+              </div>
+              <!-- Face 5 -->
+              <div class="cube-face face-5">
+                <div class="pips" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr;">
+                  <div class="pip"></div><div class="pip"></div>
+                  <div class="pip" style="grid-column:1/-1;justify-self:center"></div>
+                  <div class="pip"></div><div class="pip"></div>
+                </div>
+              </div>
+              <!-- Face 6 -->
+              <div class="cube-face face-6">
+                <div class="pips" style="grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr 1fr;">
+                  <div class="pip"></div><div class="pip"></div>
+                  <div class="pip"></div><div class="pip"></div>
+                  <div class="pip"></div><div class="pip"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dice-roll-btns">
+            <button id="rollBtn" class="btn btn-primary">🎲 Roll</button>
+            <button id="endTurnBtn" class="btn btn-ghost">End Turn</button>
+          </div>
+          <p class="kbd-hint">Press <kbd class="kbd">R</kbd> to roll · <kbd class="kbd">U</kbd> undo</p>
+        </div>
+      </div>
+
+      <!-- Timer -->
+      <div class="panel-card">
+        <div class="panel-label">Task Timer</div>
+        <div class="timer-display-wrap">
+          <svg class="timer-svg" viewBox="0 0 100 100">
+            <circle class="timer-track" cx="50" cy="50" r="42" fill="none" stroke-width="6"/>
+            <circle class="timer-fill" id="timerRing" cx="50" cy="50" r="42" fill="none" stroke-width="6"
+              stroke-dasharray="263.9" stroke-dashoffset="263.9"/>
+          </svg>
+          <div class="timer-text-center" id="timerDisplay">00:00</div>
+        </div>
+        <div class="timer-controls">
+          <div class="timer-slider-wrap">
+            <div class="slider-label">Duration: <span id="timerValue">1</span> min</div>
+            <input id="timerSlider" type="range" min="0" max="10" step="1" value="1"/>
+          </div>
+          <button id="timerStartBtn" class="btn btn-indigo btn-sm">▶ Start</button>
+          <button id="timerStopBtn" class="btn btn-ghost btn-sm">■ Stop</button>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="panel-card">
+        <div class="panel-label">Controls</div>
+        <div class="util-row" style="margin-bottom:10px">
+          <button id="soundToggle" class="sound-pill on" aria-pressed="true">🔊 Sound ON</button>
+          <button id="undoBtn" class="btn btn-ghost btn-sm" style="flex:1">↩ Undo</button>
+        </div>
+        <div class="setup-row">
+          <button id="setupBtn" class="btn btn-indigo" style="flex:1">⚙️ Setup / Mode</button>
+        </div>
+        <div class="result-card" id="result" style="margin-top:10px">Setup required to start.</div>
+      </div>
+
+    </div><!-- /.side-panel -->
+  </div><!-- /.game-layout -->
+</div><!-- /.page -->
+
+<script>
+(() => {
+/* ════════════════════════════════════════════════════
+   CONFIG
+════════════════════════════════════════════════════ */
+const GRID      = 7;
+const PINK_COUNT = 8;
+const BLUE_COUNT = 8;
+const MIN_CLOTHING_REMOVALS_BEFORE_WIN = 4;
+const INITIAL_REMOVALS_PER_PERSON = 0;
+const DEFAULT_P1_NAME = 'Husband';
+const DEFAULT_P2_NAME = 'Wife';
+const STORAGE_KEY = 'ludo_intimacy_game_v1';
+
+/* ════════════════════════════════════════════════════
+   DOM
+════════════════════════════════════════════════════ */
+const boardEl      = document.getElementById('board');
+const resetBtn     = document.getElementById('resetBtn');
+const rollBtn      = document.getElementById('rollBtn');
+const endTurnBtn   = document.getElementById('endTurnBtn');
+const resultEl     = document.getElementById('result');
+const p1TasksEl    = document.getElementById('p1Tasks');
+const p2TasksEl    = document.getElementById('p2Tasks');
+const setupBtn     = document.getElementById('setupBtn');
+const modalRoot    = document.getElementById('modalRoot');
+const soundToggle  = document.getElementById('soundToggle');
+const undoBtn      = document.getElementById('undoBtn');
+const timerSlider  = document.getElementById('timerSlider');
+const timerValue   = document.getElementById('timerValue');
+const timerStartBtn= document.getElementById('timerStartBtn');
+const timerStopBtn = document.getElementById('timerStopBtn');
+const timerDisplay = document.getElementById('timerDisplay');
+const timerRing    = document.getElementById('timerRing');
+const floatingRoll = document.getElementById('floatingRoll');
+const ariaAnnounce = document.getElementById('ariaAnnounce');
+const cube         = document.getElementById('cube');
+const p1Card       = document.getElementById('p1Card');
+const p2Card       = document.getElementById('p2Card');
+const p1TurnLabel  = document.getElementById('p1TurnLabel');
+const p2TurnLabel  = document.getElementById('p2TurnLabel');
+const modeBadge    = document.getElementById('modeBadge');
+const confirmModal = document.getElementById('confirmModal');
+
+/* ════════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════════ */
+function showToast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 320); }, 3200);
+}
+
+/* ════════════════════════════════════════════════════
+   AUDIO
+════════════════════════════════════════════════════ */
+const AC = (window.AudioContext || window.webkitAudioContext) ? new (window.AudioContext || window.webkitAudioContext)() : null;
+let audioUnlocked = false;
+function ensureAudio() {
+  if (!AC || audioUnlocked) return;
+  if (AC.state === 'suspended') AC.resume().then(() => { audioUnlocked = true; }).catch(() => {});
+  else audioUnlocked = true;
+}
+function playBeep(freq=440, len=120, type='sine') {
+  if (!state.soundsOn || !AC) return;
+  ensureAudio();
+  if (AC.state === 'suspended') return;
+  try {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, AC.currentTime);
+    g.gain.linearRampToValueAtTime(0.025, AC.currentTime + 0.01);
+    o.connect(g); g.connect(AC.destination); o.start();
+    setTimeout(() => { try { g.gain.linearRampToValueAtTime(0.0001, AC.currentTime + 0.02); o.stop(); } catch(e){} }, len);
+  } catch(e){}
+}
+const playDiceSound      = () => playBeep(520,120,'triangle');
+const playRevealPink     = () => playBeep(880,140,'sine');
+const playRevealBlue     = () => playBeep(720,160,'sawtooth');
+const playOverlapSound   = () => playBeep(220,420,'sawtooth');
+const playTimerEndSound  = () => playBeep(880,800,'triangle');
+const playWinSound       = () => playBeep(1080,600,'triangle');
+function playHeartbeat() { playBeep(150,100,'sine'); setTimeout(() => playBeep(120,150,'sine'), 150); }
+
+/* ════════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════════ */
+const state = {
+  trackMap: [], hiddenPink: new Set(), hiddenBlue: new Set(), winPositionPool: [],
+  players: [
+    { pos:0, tasksPerformed:0, removals:INITIAL_REMOVALS_PER_PERSON, name:DEFAULT_P1_NAME, avatar:'p1_masc' },
+    { pos:0, tasksPerformed:0, removals:INITIAL_REMOVALS_PER_PERSON, name:DEFAULT_P2_NAME, avatar:'p2_fem' }
+  ],
+  currentPlayer:0, running:true, setupDone:false, gameMode:null,
+  fullStripOccurred:false, innerAttemptRemaining:0, clothingRemovalCount:0,
+  lastMove:null, soundsOn:true
+};
+
+/* ════════════════════════════════════════════════════
+   TASK & POSITION POOLS
+════════════════════════════════════════════════════ */
+const tasks = {
+  soft: [
+    'Put both hands on each other\'s glutes while facing each other',
+    'Gentle 2-minute massage',
+    'Long kiss with a gentle bite on the ear',
+    'Slow close hug',
+    'Whisper a fond memory',
+    'Look into each other\'s eyes for 1 minute without speaking',
+    'Give a 3-minute scalp massage while they close their eyes and breathe',
+    'Take turns writing one word on each other\'s back to build a secret sentence together',
+    'Hold each other\'s face and describe what you see in their eyes for 30 seconds',
+    'One partner hums their favourite song while the other tries to guess it through touch only',
+    'Each name one thing the other did this week that made them feel truly seen',
+    'Slow dance for one full song with no phones, no talking, just swaying together',
+    'Take turns pressing your lips to one spot on their face without speaking',
+    'One partner breathes in as the other breathes out, synchronising 10 times'
+  ],
+  wild: [
+    'Deep 3-minute chest massage',
+    'Dance slowly and hold each other close',
+    'Surprise bold touch based on consent',
+    'Focus on erogenous zones for 1 minute',
+    'One partner is completely passive for 2 minutes while the other explores freely',
+    'Whisper the most vivid fantasy you have never said out loud. No judgement, just desire.',
+    'Remove one item of clothing from your partner using only your teeth',
+    'Trace an ice cube from their collarbone to their hip bone, then warm it back up with your mouth',
+    'Take turns giving one instruction and the other must follow it exactly for 30 seconds',
+    'One partner is blindfolded, the other touches 5 different spots in silence. Guess every one.',
+    'Kiss for 2 full minutes without using hands anywhere except each other\'s hair'
+  ]
+};
+const hiddenPositionsPool = {
+  soft: [
+    'Spoon cuddle',
+    'Short lap hug',
+    'Arm-around shoulder',
+    'Soft forehead kiss',
+    'Cradle Hold: one partner lies across the other\'s lap',
+    'Back-to-Back Breathing: sit back-to-back and feel each other breathe for 1 minute',
+    'Nuzzle: press nose to neck and stay still like two animals resting',
+    'Piggyback Hold: one carries the other around the room slowly'
+  ],
+  wild: [
+    'Slow steamy shower together and wash each other',
+    'Neck kiss for one minute',
+    'Light tracing of fingers over skin',
+    'Use warm oils for a few minutes',
+    'Slow 5-minute kiss without rushing'
+  ]
+};
+const winPositionsPool = {
+  soft: [
+    'Side-by-Side (Spooning)',
+    'Face-to-Face Lying Down',
+    'Woman-on-Top (Slow Pace)',
+    'Seated Lap Position',
+    'Butterfly Slow Variation',
+    'The Lotus: seated face-to-face, legs wrapped, foreheads touching',
+    'Slow Missionary with forehead kiss held throughout'
+  ],
+  wild: [
+    'Standing Positions (Against a Wall)',
+    'Reverse Sitting/Straddling Variants',
+    'Kneeling From Behind Variants',
+    'Bridge or Raised-Hips Positions',
+    'Squat-Over Variations',
+    'Standing Against Wall: lifted, held, eye contact locked',
+    'Seated Straddle: face-to-face, full control from above, slow pace'
+  ]
+};
+
+/* ════════════════════════════════════════════════════
+   UTILS
+════════════════════════════════════════════════════ */
+const randInt  = n => Math.floor(Math.random() * n);
+const vibrate  = ms => { if (navigator.vibrate) navigator.vibrate(ms); };
+const announce = text => { if (ariaAnnounce) ariaAnnounce.textContent = text; };
+
+/* ════════════════════════════════════════════════════
+   BOARD BUILD
+════════════════════════════════════════════════════ */
+function buildBoard() {
+  boardEl.innerHTML = '';
+  const N = GRID, center = Math.floor(N / 2);
+  for (let r = 0; r < N; r++) {
+    for (let c = 0; c < N; c++) {
+      const div = document.createElement('div');
+      div.className = 'cell';
+      div.dataset.r = r; div.dataset.c = c;
+      const ring = Math.max(Math.abs(r - center), Math.abs(c - center));
+      div.classList.add('ring-' + ring);
+      boardEl.appendChild(div);
+    }
+  }
+  function perimeterCoords(size, offset = 0) {
+    const coords = [], s = offset, e = offset + size - 1;
+    for (let c = s; c <= e; c++) coords.push([s, c]);
+    for (let r = s+1; r <= e; r++) coords.push([r, e]);
+    for (let c = e-1; c >= s; c--) coords.push([e, c]);
+    for (let r = e-1; r > s; r--) coords.push([r, s]);
+    return coords;
+  }
+  const outer = perimeterCoords(7, 0);
+  const middle = perimeterCoords(5, 1);
+  const inner  = perimeterCoords(3, 2);
+  state.trackMap = outer.concat(middle).concat(inner).concat([[center, center]]);
+  state.winPositionPool = (winPositionsPool.soft || []).slice();
+
+  state.trackMap.forEach((pos, idx) => {
+    const cell = getCell(pos[0], pos[1]);
+    if (!cell) return;
+    cell.dataset.trackIndex = idx;
+    cell.classList.remove('start', 'finish');
+    if (idx === 0) cell.classList.add('start');
+    if (idx === state.trackMap.length - 1) {
+      cell.classList.add('finish');
+      cell.innerHTML = `<div class="win-text">WIN</div>`;
+    }
+  });
+  renderTokens();
+}
+
+function getCell(r, c) { return boardEl.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`); }
+
+function shuffleHidden() {
+  state.hiddenPink = new Set(); state.hiddenBlue = new Set();
+  const available = [...Array(state.trackMap.length).keys()].filter(i => i !== 0 && i !== state.trackMap.length - 1);
+  for (let i = 0; i < PINK_COUNT && available.length > 0; i++) state.hiddenPink.add(available.splice(randInt(available.length), 1)[0]);
+  for (let i = 0; i < BLUE_COUNT && available.length > 0; i++) state.hiddenBlue.add(available.splice(randInt(available.length), 1)[0]);
+}
+
+/* ════════════════════════════════════════════════════
+   TOKENS
+════════════════════════════════════════════════════ */
+function renderTokens() {
+  boardEl.querySelectorAll('.token').forEach(t => t.remove());
+  state.players.forEach((pl, idx) => {
+    const tp = state.trackMap[pl.pos]; if (!tp) return;
+    const cell = getCell(tp[0], tp[1]); if (!cell) return;
+    const t = document.createElement('div');
+    t.className = `token ${idx === 0 ? 'p1' : 'p2'}`;
+    t.dataset.player = idx;
+    t.innerHTML = `<span class="token-emoji">${idx === 0 ? '❤️' : '💋'}</span>`;
+    cell.appendChild(t);
+  });
+  updateUI();
+}
+
+/* ════════════════════════════════════════════════════
+   UI UPDATE
+════════════════════════════════════════════════════ */
+function updateUI() {
+  p1TasksEl.textContent = state.players[0].tasksPerformed;
+  p2TasksEl.textContent = state.players[1].tasksPerformed;
+
+  const cp = state.currentPlayer;
+  const modeName = state.gameMode ? (state.gameMode === 'soft' ? '🌙 Soft Mode' : '🔥 Wild Mode') : '';
+
+  // Turn cards
+  p1Card.classList.toggle('active-turn', cp === 0 && state.setupDone);
+  p1Card.classList.remove('p2-active');
+  p2Card.classList.remove('active-turn', 'p2-active');
+  if (cp === 1 && state.setupDone) { p2Card.classList.add('active-turn', 'p2-active'); }
+
+  p1TurnLabel.textContent = (cp === 0 && state.setupDone) ? 'Your Turn' : 'Waiting';
+  p2TurnLabel.textContent = (cp === 1 && state.setupDone) ? 'Your Turn' : 'Waiting';
+  p1TurnLabel.style.color = 'var(--rose2)';
+  p2TurnLabel.style.color = 'var(--indigo2)';
+
+  // Mode badge
+  modeBadge.textContent = state.gameMode ? (state.gameMode === 'soft' ? '🌙 Soft' : '🔥 Wild') : 'No Mode';
+  modeBadge.className = `mode-badge ${state.gameMode || ''}`;
+
+  // Result
+  resultEl.innerHTML = state.setupDone
+    ? `<strong>${state.players[cp].name}</strong>'s turn &nbsp;·&nbsp; ${modeName}`
+    : 'Setup required. Choose mode &amp; who starts.';
+}
+
+/* ════════════════════════════════════════════════════
+   WEIGHTED DICE
+════════════════════════════════════════════════════ */
+function weightedDice() {
+  const pool = [1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,6];
+  return pool[randInt(pool.length)];
+}
+
+/* ════════════════════════════════════════════════════
+   CUBE ANIMATION
+════════════════════════════════════════════════════ */
+let rolling = false;
+const faceRot = { 1:{x:0,y:0}, 2:{x:0,y:-90}, 3:{x:0,y:180}, 4:{x:0,y:90}, 5:{x:90,y:0}, 6:{x:-90,y:0} };
+
+function rollCubeAndReveal(final, onComplete) {
+  if (rolling) return; rolling = true;
+  ensureAudio();
+  const spins = 2 + randInt(3);
+  const target = faceRot[final] || faceRot[1];
+  const finalX = 360 * spins + target.x + (randInt(3) - 1) * 20;
+  const finalY = 360 * spins + target.y + (randInt(3) - 1) * 20;
+  cube.style.transition = 'transform 220ms ease-out';
+  cube.style.transform = `rotateX(${randInt(360)}deg) rotateY(${randInt(360)}deg)`;
+
+  setTimeout(() => {
+    cube.style.transition = 'transform 1800ms cubic-bezier(.18,.8,.2,1)';
+    cube.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
+    if (final === 6) { cube.classList.add('dice-crit'); document.body.classList.add('flash-active'); }
+  }, 220);
+
+  const onEnd = () => {
+    cube.removeEventListener('transitionend', onEnd);
+    setTimeout(() => {
+      cube.classList.remove('dice-crit'); document.body.classList.remove('flash-active');
+      cube.style.transition = 'none';
+      cube.style.transform = `rotateX(${target.x}deg) rotateY(${target.y}deg)`;
+      rolling = false;
+      if (typeof onComplete === 'function') onComplete(final);
+    }, 140);
+  };
+  cube.addEventListener('transitionend', onEnd);
+}
+
+function spinDiceVisual(finalCallback) {
+  if (rolling) return;
+  const final = weightedDice();
+  rollCubeAndReveal(final, f => {
+    if (state.soundsOn) { f === 6 ? playBeep(920, 220, 'square') : playBeep(520, 120, 'triangle'); }
+    announce(`${state.players[state.currentPlayer].name} rolled ${f}.`);
+    if (typeof finalCallback === 'function') finalCallback(f);
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   CONTROLS
+════════════════════════════════════════════════════ */
+const OUTER_LEN  = 24;
+const MIDDLE_LEN = 16;
+const INNER_LEN  = 8;
+
+function setControlsEnabled(enabled) {
+  const allow = enabled && state.running && state.setupDone && !rolling;
+  rollBtn.disabled = !allow;
+  endTurnBtn.disabled = !allow;
+  floatingRoll.disabled = !allow;
+  undoBtn.disabled = !enabled;
+}
+
+/* ════════════════════════════════════════════════════
+   MOVE LOGIC (unchanged rules)
+════════════════════════════════════════════════════ */
+function handleMove(roll) {
+  if (!state.setupDone || !state.running) return setControlsEnabled(state.running);
+  const pid = state.currentPlayer, pl = state.players[pid];
+  const from = pl.pos, lastIdx = state.trackMap.length - 1;
+  const innerStartIdx = OUTER_LEN + MIDDLE_LEN;
+
+  state.lastMove = {
+    pid, from, roll,
+    prevSnapshot: {
+      players: state.players.map(p => ({ ...p })),
+      hiddenPink: Array.from(state.hiddenPink), hiddenBlue: Array.from(state.hiddenBlue),
+      currentPlayer: state.currentPlayer, running: state.running, setupDone: state.setupDone,
+      gameMode: state.gameMode, fullStripOccurred: state.fullStripOccurred,
+      innerAttemptRemaining: state.innerAttemptRemaining, clothingRemovalCount: state.clothingRemovalCount,
+      soundsOn: state.soundsOn
+    }
+  };
+
+  if (pl.pos >= innerStartIdx && pl.pos <= lastIdx - 1) {
+    const remaining = lastIdx - pl.pos;
+    if (remaining < 5) {
+      if (state.innerAttemptRemaining <= 0) state.innerAttemptRemaining = 2;
+      state.innerAttemptRemaining -= 1;
+      if (roll === remaining) {
+        if (state.clothingRemovalCount < MIN_CLOTHING_REMOVALS_BEFORE_WIN) {
+          state.players[pid].tasksPerformed++;
+          state.players[pid].removals++;
+          state.clothingRemovalCount++;
+          showModal('Win blocked ⛔', 'You must perform a task before winning.', () => setControlsEnabled(state.running), state.players[pid].name);
+          state.innerAttemptRemaining = 0; state.currentPlayer = 1 - pid;
+          updateUI(); saveState(); return;
+        }
+        setControlsEnabled(false);
+        animateMove(pid, from, lastIdx, () => {
+          pl.pos = lastIdx; renderTokens(); state.running = false; saveState();
+          setTimeout(() => showFinalPicker(pid), 220);
+        }); return;
+      } else {
+        if (state.innerAttemptRemaining > 0) {
+          showModal('Exact match needed 🎯', `Try again. <strong>${state.innerAttemptRemaining}</strong> attempt(s) left this turn.`, () => setControlsEnabled(state.running), state.players[pid].name);
+          updateUI(); return;
+        } else {
+          state.players[pid].tasksPerformed++;
+          showModal('Task required 💆', 'Both attempts failed. Perform a massage of your partner\'s choice.', () => setControlsEnabled(state.running), state.players[pid].name);
+          state.innerAttemptRemaining = 0; state.currentPlayer = 1 - pid;
+          updateUI(); saveState(); return;
+        }
+      }
+    }
+  }
+
+  let newPos = Math.min(pl.pos + roll, lastIdx - 1);
+  setControlsEnabled(false);
+  animateMove(pid, from, newPos, () => {
+    pl.pos = newPos; renderTokens();
+    const otherPid = 1 - pid, otherPl = state.players[otherPid];
+    if (otherPl.pos === newPos && newPos !== 0 && newPos !== lastIdx) {
+      if (!state.fullStripOccurred) {
+        state.players[0].removals = Math.max(state.players[0].removals, 4);
+        state.players[1].removals = Math.max(state.players[1].removals, 4);
+        state.players[pid].tasksPerformed++; state.players[otherPid].tasksPerformed++;
+        state.clothingRemovalCount += 4; state.fullStripOccurred = true;
+        renderTokens(); showShockFullStrip(); playOverlapSound(); vibrate(160);
+      } else {
+        state.players[pid].tasksPerformed++;
+        showModal('Overlap again 💋', `You overlapped again.<br><br>Now the wife must sit on her husband's lap, facing him, for the rest of the game. If already sitting that way, seal it with a slow, passionate two-minute kiss.`, () => setControlsEnabled(state.running), state.players[pid].name);
+      }
+      updateUI(); saveState();
+    }
+    checkHiddenTile(pid, newPos);
+    if (state.running) { state.currentPlayer = 1 - pid; state.innerAttemptRemaining = 0; updateUI(); saveState(); }
+  });
+}
+
+/* ════════════════════════════════════════════════════
+   ANIMATE MOVE
+════════════════════════════════════════════════════ */
+function animateMove(pid, from, to, cb) {
+  if (to <= from) { cb(); setControlsEnabled(state.running); return; }
+  let cur = from;
+  const stepDuration = 200;
+  let lastTime = null, acc = 0;
+
+  function stepFn(ts) {
+    if (!lastTime) lastTime = ts;
+    acc += ts - lastTime; lastTime = ts;
+    while (acc >= stepDuration && cur < to) {
+      acc -= stepDuration; cur++;
+      state.players[pid].pos = cur; renderTokens();
+      const pos = state.trackMap[cur];
+      const cell = getCell(pos[0], pos[1]);
+      if (cell) { const echo = document.createElement('div'); echo.className = 'echo-ring'; cell.appendChild(echo); setTimeout(() => echo.remove(), 600); }
+      if (state.soundsOn) playBeep(300 + (cur % 4) * 30, 35, 'sine');
+    }
+    if (cur >= to) { cb(); setControlsEnabled(state.running); }
+    else requestAnimationFrame(stepFn);
+  }
+  requestAnimationFrame(stepFn);
+}
+
+/* ════════════════════════════════════════════════════
+   HIDDEN TILES
+════════════════════════════════════════════════════ */
+function checkHiddenTile(pid, idx) {
+  const tp = state.trackMap[idx];
+  const cell = tp ? getCell(tp[0], tp[1]) : null;
+  if (state.hiddenPink.has(idx)) {
+    state.hiddenPink.delete(idx);
+    const pool = tasks[state.gameMode] || tasks.soft;
+    const t = pool[randInt(pool.length)];
+    state.players[pid].tasksPerformed++;
+    if (cell) { cell.classList.add('pink-pulse'); setTimeout(() => cell.classList.remove('pink-pulse'), 700); }
+    if (state.soundsOn) { playRevealPink(); vibrate(80); }
+    showModal('Hidden Task 🌸', `You landed on a hidden tile!<br><br><strong>${t}</strong>`, () => setControlsEnabled(state.running), state.players[pid].name);
+    saveState();
+  } else if (state.hiddenBlue.has(idx)) {
+    state.hiddenBlue.delete(idx);
+    if (!state.fullStripOccurred) {
+      state.players[pid].removals++; state.clothingRemovalCount++; state.players[pid].tasksPerformed++;
+      updateUI();
+      if (cell) { cell.classList.add('blue-ripple'); setTimeout(() => cell.classList.remove('blue-ripple'), 800); }
+      if (state.soundsOn) { playRevealBlue(); vibrate(120); }
+      showModal('Hidden Position 💫', 'You landed on a hidden tile.<br><br><strong>Your partner will remove one piece of clothing using only their mouth.</strong>', () => setControlsEnabled(state.running), state.players[pid].name);
+      saveState();
+    } else {
+      state.players[pid].tasksPerformed++; updateUI();
+      const pool = hiddenPositionsPool[state.gameMode] || hiddenPositionsPool.soft;
+      const t = pool[randInt(pool.length)];
+      if (cell) { cell.classList.add('blue-ripple'); setTimeout(() => cell.classList.remove('blue-ripple'), 800); }
+      if (state.soundsOn) { playRevealBlue(); vibrate(100); }
+      showModal('Hidden Challenge 💜', `You must perform:<br><br><strong>${t}</strong>`, () => setControlsEnabled(state.running), state.players[pid].name);
+      saveState();
+    }
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   MODALS
+════════════════════════════════════════════════════ */
+function showModal(title, html, onClose) {
+  modalRoot.innerHTML = '';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay open';
+  const card = document.createElement('div'); card.className = 'modal-card';
+  const cp = state.currentPlayer;
+  const isP2 = cp === 1;
+  const playerName = state.players[cp]?.name;
+  const turnBanner = state.setupDone && playerName
+    ? `<div class="modal-turn-banner ${isP2 ? 'p2-turn' : 'p1-turn'}">
+        ${isP2 ? '💋' : '❤️'} ${playerName}'s turn
+       </div>`
+    : '';
+  card.innerHTML = `
+    ${turnBanner}
+    <div class="modal-title">${title}</div>
+    <div class="modal-body">${html}</div>
+    <div class="modal-actions">
+      <button id="closeModal" class="btn btn-primary">Got it</button>
+    </div>`;
+  overlay.appendChild(card); modalRoot.appendChild(overlay);
+  const closeBtn = card.querySelector('#closeModal');
+  closeBtn.focus();
+  const close = () => { overlay.classList.remove('open'); modalRoot.innerHTML = ''; if (onClose) onClose(); };
+  closeBtn.onclick = close;
+  overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
+  document.addEventListener('keydown', function esc(e) { if (e.key === 'Escape') { close(); document.removeEventListener('keydown', esc); } }, { once: true });
+}
+
+function showShockFullStrip() {
+  modalRoot.innerHTML = '';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay open';
+  const card = document.createElement('div'); card.className = 'modal-card';
+  card.innerHTML = `
+    <div class="modal-turn-banner p1" style="margin-bottom:14px;">
+      <span class="modal-turn-dot">❤️💋</span>
+      <span>Both Players</span>
+    </div>
+    <div class="modal-emoji">🔥</div>
+    <div class="modal-title" style="color:var(--rose)">Playful Shock!</div>
+    <div class="modal-body">
+      The overlap triggered a <strong>full removal event</strong> for both players.<br><br>
+      <strong>Your partner will remove every piece of clothing using only their mouth. Both must be completely undressed before the next move.</strong>
+    </div>
+    <div class="modal-actions"><button id="shockOk" class="btn btn-primary">OK!</button></div>`;
+  overlay.appendChild(card); modalRoot.appendChild(overlay);
+  if (state.soundsOn) { playOverlapSound(); vibrate(150); }
+  const ok = card.querySelector('#shockOk'); ok.focus();
+  ok.onclick = () => { overlay.classList.remove('open'); modalRoot.innerHTML = ''; updateUI(); setControlsEnabled(state.running); };
+}
+
+function showFinalPicker(winnerIdx) {
+  const winner = state.players[winnerIdx];
+  showModal(
+    `🏆 ${winner.name} wins!`,
+    `<strong>${winner.name}</strong> reached the center!<br><br>
+    Choose your final position: <a href="intimacy_Position_Selector_page.html" target="_blank" rel="noopener" style="color:var(--indigo2);font-weight:700;">Open Position Selector ↗</a>`,
+    () => {}
+  );
+  if (state.soundsOn) playWinSound();
+  vibrate(200);
+  showToast(`🏆 ${winner.name} wins the game!`, 'success');
+}
+
+/* ════════════════════════════════════════════════════
+   SETUP MODAL
+════════════════════════════════════════════════════ */
+function askSetup() {
+  modalRoot.innerHTML = '';
+  const overlay = document.createElement('div'); overlay.className = 'modal-overlay open';
+  const card = document.createElement('div'); card.className = 'modal-card';
+
+  card.innerHTML = `
+    <div class="modal-title">Game Setup ⚙️</div>
+    <div class="setup-section">
+      <div class="setup-section-title">Choose Mode</div>
+      <div class="mode-options">
+        <label class="mode-opt selected-soft" id="optSoft">
+          <input type="radio" name="mode" value="soft" checked>
+          <span class="mode-opt-icon">🌙</span>
+          <div class="mode-opt-label">Soft</div>
+          <div class="mode-opt-desc">Gentle & romantic</div>
+        </label>
+        <label class="mode-opt" id="optWild">
+          <input type="radio" name="mode" value="wild">
+          <span class="mode-opt-icon">🔥</span>
+          <div class="mode-opt-label">Wild</div>
+          <div class="mode-opt-desc">Bold & adventurous</div>
+        </label>
+      </div>
+    </div>
+    <div class="setup-section">
+      <div class="setup-section-title">Who Starts?</div>
+      <div class="start-options">
+        <label class="start-opt selected-p1" id="optP1">
+          <input type="radio" name="start" value="0" checked>
+          <div style="font-size:22px;margin-bottom:4px">❤️</div>
+          <div class="start-opt-name">${state.players[0].name}</div>
+        </label>
+        <label class="start-opt" id="optP2">
+          <input type="radio" name="start" value="1">
+          <div style="font-size:22px;margin-bottom:4px">💋</div>
+          <div class="start-opt-name">${state.players[1].name}</div>
+        </label>
+      </div>
+    </div>
+    <div class="setup-note">🎲 Dice 6 is rare. In the inner ring (&lt;6 steps from WIN) you get 2 attempts per turn to roll the exact number needed.</div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button id="submitSetup" class="btn btn-indigo">Start Game</button>
+    </div>`;
+
+  overlay.appendChild(card); modalRoot.appendChild(overlay);
+
+  // Mode toggle visual
+  const softOpt = card.querySelector('#optSoft');
+  const wildOpt = card.querySelector('#optWild');
+  [softOpt, wildOpt].forEach(opt => {
+    opt.addEventListener('click', () => {
+      softOpt.classList.remove('selected-soft'); wildOpt.classList.remove('selected-wild');
+      if (opt === softOpt) softOpt.classList.add('selected-soft');
+      else wildOpt.classList.add('selected-wild');
+    });
+  });
+
+  const p1Opt = card.querySelector('#optP1');
+  const p2Opt = card.querySelector('#optP2');
+  [p1Opt, p2Opt].forEach(opt => {
+    opt.addEventListener('click', () => {
+      p1Opt.classList.remove('selected-p1'); p2Opt.classList.remove('selected-p2');
+      if (opt === p1Opt) p1Opt.classList.add('selected-p1');
+      else p2Opt.classList.add('selected-p2');
+    });
+  });
+
+  card.querySelector('#submitSetup').onclick = () => {
+    const mode    = card.querySelector('input[name="mode"]:checked').value;
+    const starter = parseInt(card.querySelector('input[name="start"]:checked').value, 10);
+    state.gameMode = mode; state.currentPlayer = starter; state.setupDone = true;
+    overlay.classList.remove('open'); modalRoot.innerHTML = '';
+    setupBtn.disabled = true; updateUI(); saveState(); setControlsEnabled(true);
+    showToast(`Game started in ${mode === 'soft' ? '🌙 Soft' : '🔥 Wild'} mode. ${state.players[starter].name} goes first!`, 'success');
+  };
+}
+
+/* ════════════════════════════════════════════════════
+   TIMER (circular)
+════════════════════════════════════════════════════ */
+let timerInterval = null, timeLeft = 0, timerTotal = 60;
+const CIRCUMFERENCE = 263.9;
+
+function updateTimerDisplay(s) {
+  const m = Math.floor(s / 60).toString().padStart(2, '0');
+  const sec = (s % 60).toString().padStart(2, '0');
+  timerDisplay.textContent = `${m}:${sec}`;
+  const progress = timerTotal > 0 ? (s / timerTotal) : 0;
+  timerRing.style.strokeDashoffset = CIRCUMFERENCE * (1 - progress);
+  // colour shifts red in last 10s
+  timerRing.style.stroke = s <= 10 && s > 0 ? 'var(--rose)' : 'var(--indigo)';
+  timerDisplay.classList.toggle('warning', s <= 10 && s > 0);
+}
+
+function startTimerFromSeconds(secs) {
+  if (timerInterval) clearInterval(timerInterval);
+  timeLeft = Math.max(0, Math.floor(secs)); timerTotal = timeLeft;
+  const expiresAt = Date.now() + timeLeft * 1000;
+  localStorage.setItem(STORAGE_KEY + '_timer', String(expiresAt));
+  updateTimerDisplay(timeLeft);
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay(timeLeft);
+    if (timeLeft <= 10 && timeLeft > 0) playHeartbeat();
+    if (timeLeft <= 0) {
+      clearInterval(timerInterval); timerInterval = null;
+      localStorage.removeItem(STORAGE_KEY + '_timer');
+      if (state.soundsOn) playTimerEndSound();
+      showModal('⏳ Time\'s Up!', 'Task duration complete!', () => setControlsEnabled(state.running), state.players[state.currentPlayer].name);
+      showToast('⏳ Timer finished!', 'warn');
+    }
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  updateTimerDisplay(0); localStorage.removeItem(STORAGE_KEY + '_timer');
+}
+
+timerSlider.addEventListener('input', () => timerValue.textContent = timerSlider.value);
+timerStartBtn.addEventListener('click', () => {
+  const min = parseInt(timerSlider.value, 10);
+  if (min <= 0) { showToast('Choose a duration greater than 0 min', 'warn'); return; }
+  startTimerFromSeconds(min * 60);
+  showToast(`Timer started: ${min} minute${min > 1 ? 's' : ''}`, 'info');
+});
+timerStopBtn.addEventListener('click', () => { stopTimer(); showToast('Timer stopped.', 'info'); });
+
+/* ════════════════════════════════════════════════════
+   STORAGE
+════════════════════════════════════════════════════ */
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      players: state.players, currentPlayer: state.currentPlayer, running: state.running,
+      setupDone: state.setupDone, gameMode: state.gameMode, fullStripOccurred: state.fullStripOccurred,
+      innerAttemptRemaining: state.innerAttemptRemaining, clothingRemovalCount: state.clothingRemovalCount,
+      hiddenPink: Array.from(state.hiddenPink), hiddenBlue: Array.from(state.hiddenBlue), soundsOn: state.soundsOn
+    }));
+  } catch(e) {}
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (s.players) state.players = s.players.map((p, i) => ({ ...p, avatar: i === 0 ? 'p1_masc' : 'p2_fem' }));
+      if (typeof s.currentPlayer === 'number') state.currentPlayer = s.currentPlayer;
+      if (typeof s.running === 'boolean') state.running = s.running;
+      if (typeof s.setupDone === 'boolean') state.setupDone = s.setupDone;
+      if (s.gameMode) state.gameMode = s.gameMode;
+      state.fullStripOccurred = !!s.fullStripOccurred;
+      state.innerAttemptRemaining = s.innerAttemptRemaining || 0;
+      state.clothingRemovalCount = s.clothingRemovalCount || 0;
+      state.hiddenPink = new Set(s.hiddenPink || []);
+      state.hiddenBlue = new Set(s.hiddenBlue || []);
+      state.soundsOn = typeof s.soundsOn === 'boolean' ? s.soundsOn : true;
+    }
+    const tRaw = localStorage.getItem(STORAGE_KEY + '_timer');
+    if (tRaw) {
+      const remaining = Math.floor((parseInt(tRaw, 10) - Date.now()) / 1000);
+      if (remaining > 0) startTimerFromSeconds(remaining);
+      else localStorage.removeItem(STORAGE_KEY + '_timer');
+    }
+    return true;
+  } catch(e) { return false; }
+}
+
+/* ════════════════════════════════════════════════════
+   EVENT HANDLERS
+════════════════════════════════════════════════════ */
+resetBtn.addEventListener('click', () => confirmModal.classList.add('open'));
+document.getElementById('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('open'));
+document.getElementById('confirmReset').addEventListener('click', () => {
+  confirmModal.classList.remove('open');
+  state.players = [
+    { pos:0, tasksPerformed:0, removals:INITIAL_REMOVALS_PER_PERSON, name:DEFAULT_P1_NAME, avatar:'p1_masc' },
+    { pos:0, tasksPerformed:0, removals:INITIAL_REMOVALS_PER_PERSON, name:DEFAULT_P2_NAME, avatar:'p2_fem' }
+  ];
+  Object.assign(state, { currentPlayer:0, running:true, setupDone:false, gameMode:null, fullStripOccurred:false, innerAttemptRemaining:0, clothingRemovalCount:0, lastMove:null });
+  state.hiddenPink = new Set(); state.hiddenBlue = new Set();
+  setupBtn.disabled = false;
+  localStorage.removeItem(STORAGE_KEY + '_timer');
+  stopTimer(); buildBoard(); shuffleHidden(); renderTokens(); updateUI();
+  setControlsEnabled(false); saveState();
+  setTimeout(() => askSetup(), 200);
+  showToast('Game reset. Starting fresh!', 'info');
+});
+
+rollBtn.addEventListener('click', () => {
+  ensureAudio();
+  if (!state.setupDone) return showModal('Setup Required', 'Please choose mode & who starts first.', () => {});
+  if (!state.running || rolling) return;
+  setControlsEnabled(false);
+  spinDiceVisual(final => { if (state.soundsOn) playDiceSound(); handleMove(final); });
+});
+floatingRoll.addEventListener('click', () => rollBtn.click());
+
+endTurnBtn.addEventListener('click', () => {
+  if (!state.setupDone || !state.running) return;
+  state.innerAttemptRemaining = 0; state.currentPlayer = 1 - state.currentPlayer;
+  updateUI(); saveState();
+  showToast(`${state.players[state.currentPlayer].name}'s turn now.`, 'info');
+});
+
+setupBtn.addEventListener('click', () => askSetup());
+
+undoBtn.addEventListener('click', () => {
+  if (!state.lastMove?.prevSnapshot) { showToast('Nothing to undo.', 'warn'); return; }
+  const prev = state.lastMove.prevSnapshot;
+  Object.assign(state, {
+    currentPlayer: prev.currentPlayer, running: prev.running, setupDone: prev.setupDone,
+    gameMode: prev.gameMode, fullStripOccurred: prev.fullStripOccurred,
+    innerAttemptRemaining: prev.innerAttemptRemaining, clothingRemovalCount: prev.clothingRemovalCount,
+    soundsOn: prev.soundsOn
+  });
+  state.players = prev.players.map(p => ({ ...p }));
+  state.hiddenPink = new Set(prev.hiddenPink || []);
+  state.hiddenBlue = new Set(prev.hiddenBlue || []);
+  state.lastMove = null;
+  renderTokens(); updateUI(); saveState();
+  showToast('Last move undone.', 'info');
+});
+
+soundToggle.addEventListener('click', () => {
+  state.soundsOn = !state.soundsOn;
+  soundToggle.textContent = state.soundsOn ? '🔊 Sound ON' : '🔈 Sound OFF';
+  soundToggle.className = `sound-pill ${state.soundsOn ? 'on' : ''}`;
+  soundToggle.setAttribute('aria-pressed', state.soundsOn ? 'true' : 'false');
+  if (state.soundsOn) ensureAudio();
+  saveState();
+});
+
+// Floating roll visibility
+function syncFloating() { floatingRoll.style.display = window.innerWidth <= 960 ? 'flex' : 'none'; }
+window.addEventListener('resize', syncFloating);
+
+// Keyboard shortcuts
+window.addEventListener('keydown', e => {
+  if (document.querySelector('.modal-overlay.open')) return;
+  if (e.key.toLowerCase() === 'r') rollBtn.click();
+  if (e.key.toLowerCase() === 'u') undoBtn.click();
+});
+
+// Confirm modal close on escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && confirmModal.classList.contains('open')) confirmModal.classList.remove('open');
+});
+confirmModal.addEventListener('click', e => { if (e.target === confirmModal) confirmModal.classList.remove('open'); });
+
+/* ════════════════════════════════════════════════════
+   INIT
+════════════════════════════════════════════════════ */
+function init() {
+  buildBoard(); shuffleHidden(); loadState(); renderTokens(); updateUI();
+  setControlsEnabled(false);
+  syncFloating();
+  soundToggle.textContent = state.soundsOn ? '🔊 Sound ON' : '🔈 Sound OFF';
+  soundToggle.className = `sound-pill ${state.soundsOn ? 'on' : ''}`;
+  soundToggle.setAttribute('aria-pressed', state.soundsOn ? 'true' : 'false');
+  setControlsEnabled(state.running && state.setupDone);
+  setTimeout(() => askSetup(), 180);
+}
+init();
+
+})();
+</script>
+
+<!-- CANDLE GLOW ANIMATION -->
+<canvas id="candle-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.75"></canvas>
+<script>
+(function(){
+  const cv=document.getElementById("candle-canvas");
+  const ctx=cv.getContext("2d");
+  let W,H,t=0,scrollY=0;
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  window.addEventListener("scroll",()=>{scrollY=window.scrollY;},{passive:true});
+  function drawFlame(x,baseY,t,seed,scale){
+    const flick=(Math.sin(t*3.1+seed)*0.6+Math.sin(t*5.3+seed*2)*0.3)*scale;
+    const fw=(10+Math.sin(t*2+seed)*1.2)*scale,fh=(28+Math.sin(t*2.7+seed)*4)*scale;
+    const g=ctx.createRadialGradient(x+flick,baseY-fh*0.4,0,x+flick,baseY-fh*0.4,60*scale);
+    g.addColorStop(0,"rgba(255,150,50,0.2)");g.addColorStop(1,"rgba(255,80,20,0)");
+    ctx.beginPath();ctx.arc(x+flick,baseY-fh*0.4,60*scale,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();
+    ctx.save();ctx.translate(x+flick,baseY);
+    const fg=ctx.createRadialGradient(0,-fh*0.3,0,0,-fh*0.5,fw);
+    fg.addColorStop(0,"rgba(255,245,180,0.95)");fg.addColorStop(0.4,"rgba(255,120,40,0.85)");fg.addColorStop(1,"rgba(200,40,0,0)");
+    ctx.beginPath();ctx.moveTo(0,0);ctx.bezierCurveTo(fw*0.55,-fh*0.3,fw*0.4,-fh*0.7,0,-fh);ctx.bezierCurveTo(-fw*0.4,-fh*0.7,-fw*0.55,-fh*0.3,0,0);ctx.fillStyle=fg;ctx.fill();ctx.restore();
+    ctx.fillStyle="rgba(210,175,70,0.35)";ctx.fillRect(x-6*scale,baseY,12*scale,40*scale);
+  }
+  function frame(){
+    requestAnimationFrame(frame);
+    ctx.clearRect(0,0,W,H);
+    t+=0.016;
+    const intensity=0.6+Math.min(scrollY/400,1)*0.4;
+    ctx.globalAlpha=intensity;
+    drawFlame(28,H*0.35,t,1.0,0.85);drawFlame(52,H*0.65,t,2.5,0.7);drawFlame(20,H*0.80,t,4.1,0.55);
+    drawFlame(W-28,H*0.28,t,3.2,0.85);drawFlame(W-50,H*0.58,t,1.8,0.7);drawFlame(W-20,H*0.82,t,5.0,0.55);
+    ctx.globalAlpha=1;
+  }
+  frame();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+
+<script src="../js/app-shell.js"></script>
+</body>
+</html>

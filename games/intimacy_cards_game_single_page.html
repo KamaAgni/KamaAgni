@@ -1,0 +1,392 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="../css/fonts.css"/>
+  <link rel="stylesheet" href="../css/premium.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#05060f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Intimacy Pro: The Game</title>
+    <style>
+        :root {
+            --bg: #05070a;
+            --card-bg: #111827;
+            --accent: #ff4757;
+            --common: #9fb0c8;
+            --rare: #3498db;
+            --epic: #a55eea;
+            --legendary: #f7b731;
+            --text: #f8fafc;
+        }
+
+        * { box-sizing: border-box; transition: all 0.3s ease; }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: radial-gradient(circle at top, #1e1b4b 0%, #020617 100%);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .game-container {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- HEADER & PROGRESS --- */
+        .stats-panel {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .player-bar {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .meter-container {
+            background: #1e293b;
+            height: 12px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #334155;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent), #ff7f50);
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+        }
+
+        /* --- CARD DRAFTING --- */
+        .hand {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            border: 2px solid #334155;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .card:hover { transform: translateY(-3px); border-color: var(--accent); }
+        
+        .card.COMMON { border-left: 6px solid var(--common); }
+        .card.RARE { border-left: 6px solid var(--rare); box-shadow: 0 0 10px rgba(52, 152, 219, 0.2); }
+        .card.EPIC { border-left: 6px solid var(--epic); box-shadow: 0 0 15px rgba(165, 94, 234, 0.3); }
+
+        .rarity-tag {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .card-name { font-size: 1.2rem; font-weight: 800; }
+        .card-desc { font-size: 0.9rem; color: #94a3b8; }
+        
+        .card-bonus {
+            font-size: 0.8rem;
+            color: var(--legendary);
+            font-weight: bold;
+        }
+
+        /* --- CONTROLS --- */
+        .controls { text-align: center; }
+        button.main-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(255, 71, 87, 0.3);
+        }
+
+        button.main-btn:disabled { background: #334155; cursor: not-allowed; }
+
+        /* --- FEEDBACK --- */
+        #log {
+            font-size: 0.85rem;
+            color: #64748b;
+            text-align: center;
+            height: 40px;
+        }
+
+        .combo-alert {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--legendary);
+            color: black;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 900;
+            z-index: 100;
+            display: none;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: translateX(-50%) scale(0); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+    </style>
+
+  <style id="kamaagni-responsive">
+    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
+    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
+    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+  </style>
+</head>
+<body>
+<!-- <a id="ka-back" href="../index.html">← Home</a> -->
+
+    <div class="game-container">
+        <div class="combo-alert" id="comboAlert">COMBO UNLOCKED!</div>
+
+        <div class="stats-panel">
+            <div class="player-bar">
+                <span id="playerRole">Player A's Turn</span>
+                <span id="levelDisplay">Lv. 1 Newcomers</span>
+            </div>
+            <div class="meter-container">
+                <div class="meter-fill" id="meter"></div>
+            </div>
+            <div style="text-align: right; font-size: 10px; margin-top: 5px; color: #64748b;">
+                <span id="connectionVal">0</span> / 100 Connection
+            </div>
+        </div>
+
+        <div id="log">Choose a card to begin your connection...</div>
+
+        <div class="hand" id="hand">
+        </div>
+
+        <div class="controls">
+            <button class="main-btn" id="drawBtn">Deal Cards</button>
+        </div>
+    </div>
+
+    <script>
+    // --- 1. THE DATA STRUCTURE (CARDS) ---
+        const CARD_DB = [
+        // SOFT — Level 1
+            { id: 1,  name: "Gentle Trace",       level: 1,  rarity: "COMMON", xp: 10, desc: "Slowly trace your fingers over their forearm.", type: "touch" },
+            { id: 2,  name: "Deep Eye Contact",    level: 1,  rarity: "COMMON", xp: 12, desc: "Look into their eyes for 30 seconds without speaking.", type: "gaze" },
+            { id: 3,  name: "The Compliment",      level: 1,  rarity: "RARE",   xp: 25, desc: "Whisper something you truly admire about their soul.", type: "vocal" },
+            { id: 8,  name: "The Slow Blink",      level: 1,  rarity: "COMMON", xp: 10, desc: "Look into their eyes and blink slowly, a signal of pure trust. Hold the gaze for 20 seconds.", type: "gaze" },
+            { id: 9,  name: "Hand Geography",      level: 1,  rarity: "COMMON", xp: 12, desc: "Trace every line on their palm with one fingertip. Name what each line means to you.", type: "touch" },
+            { id: 10, name: "The Forehead Press",  level: 1,  rarity: "COMMON", xp: 8,  desc: "Press foreheads together softly. Stay still. Match your breathing. No talking for 30 seconds.", type: "sensory" },
+            { id: 11, name: "Three True Things",   level: 1,  rarity: "RARE",   xp: 14, desc: "Say three things about their body you genuinely find beautiful. Be specific, no generic compliments.", type: "vocal" },
+            { id: 12, name: "Scent Memory",        level: 1,  rarity: "COMMON", xp: 11, desc: "Press your face into their neck, hair, or shoulder and breathe deeply. Tell them what it makes you feel.", type: "sensory" },
+
+        // MEDIUM — Unlock at Level 5
+            { id: 4,  name: "Neck Nibble",         level: 5,  rarity: "COMMON", xp: 15, desc: "Gently nibble the area where their neck meets their shoulder.", type: "touch" },
+            { id: 5,  name: "Rhythmic Breathing",  level: 5,  rarity: "RARE",   xp: 30, desc: "Press chests together and synchronize 10 breaths.", type: "sensory" },
+            { id: 13, name: "Temperature Play",    level: 5,  rarity: "RARE",   xp: 35, desc: "Run warm hands over their body, then press cool fingertips to the same spots. Alternate 4 times.", type: "wild" },
+            { id: 14, name: "The Long Exhale Kiss",level: 5,  rarity: "RARE",   xp: 28, desc: "Begin a kiss on an out-breath and hold it for the entire exhale. Don't rush. Don't breathe in until it ends.", type: "touch" },
+            { id: 15, name: "Whisper Map",         level: 5,  rarity: "RARE",   xp: 32, desc: "Whisper a fantasy into their ear about somewhere new you want to try together. Describe it in full detail.", type: "vocal" },
+            { id: 16, name: "Mirror Desire",       level: 5,  rarity: "RARE",   xp: 30, desc: "Tell your partner exactly how you want to be touched right now. They must follow your instructions precisely.", type: "sensory" },
+            { id: 17, name: "Slow Undress",        level: 5,  rarity: "RARE",   xp: 38, desc: "Remove one item of clothing from your partner, but it must take at least 60 full seconds.", type: "wild" },
+
+        // WILD — Unlock at Level 10
+            { id: 6,  name: "Blindfold Surprise",  level: 10, rarity: "EPIC",   xp: 50, desc: "Partner closes eyes. Touch them in 3 places with a surprise object (or lips).", type: "wild" },
+            { id: 7,  name: "Dominant Pull",        level: 10, rarity: "RARE",   xp: 35, desc: "Pull them closer by the waist with firm confidence.", type: "wild" },
+            { id: 18, name: "Full Body Scan",       level: 10, rarity: "EPIC",   xp: 55, desc: "One partner lies still with eyes closed. The other uses only their lips to explore from neck to ankle. Nothing is rushed..", type: "wild" },
+            { id: 19, name: "Consent Negotiation",  level: 10, rarity: "EPIC",   xp: 48, desc: "Both partners write one thing they've never asked for. Swap papers and spend 5 minutes discussing. There is no pressure to act.", type: "vocal" },
+            { id: 20, name: "Blindfold Symphony",   level: 10, rarity: "EPIC",   xp: 60, desc: "Blindfold your partner. Touch them with 5 different textures: fabric, ice, feather, lips and tongue. They score each sensation.", type: "wild" },
+            { id: 21, name: "Role Reversal",        level: 10, rarity: "EPIC",   xp: 52, desc: "For the next 3 minutes, the passive partner takes complete control. The active partner follows every instruction.", type: "wild" }
+        ];
+
+    // --- 2. GAME STATE ---
+        let state = {
+            connection: 0,
+            level: 1,
+            turn: 'A',
+            history: [],
+            maxConnection: 100
+        };
+
+        const COMBOS = [
+            { name: "Slow Burn",       sequence: ["touch",   "gaze",    "vocal"],   bonus: 40 },
+            { name: "Whisper & Touch", sequence: ["vocal",   "touch",   "gaze"],    bonus: 50 },
+            { name: "Rising Heat",     sequence: ["sensory", "sensory", "wild"],    bonus: 60 },
+            { name: "Soul Connection", sequence: ["gaze",    "vocal",   "gaze"],    bonus: 45 }
+        ];
+
+    // --- 3. CORE LOGIC ---
+        const drawBtn = document.getElementById('drawBtn');
+        const handEl = document.getElementById('hand');
+        const meterEl = document.getElementById('meter');
+        const logEl = document.getElementById('log');
+
+        function updateUI() {
+            meterEl.style.width = `${state.connection}%`;
+            document.getElementById('connectionVal').innerText = state.connection;
+            document.getElementById('playerRole').innerText = `Player ${state.turn}'s Turn`;
+            
+            let rank = "Newcomers";
+            if(state.level >= 5) rank = "Passionates";
+            if(state.level >= 10) rank = "Soulmates";
+            document.getElementById('levelDisplay').innerText = `Lv. ${state.level} ${rank}`;
+        }
+
+        function drawCards() {
+            handEl.innerHTML = '';
+            drawBtn.disabled = true;
+            
+        // Filter cards by player level
+            const available = CARD_DB.filter(c => c.level <= state.level);
+            
+        // Pick 3 random
+            const shuffle = [...available].sort(() => 0.5 - Math.random());
+            const selection = shuffle.slice(0, 3);
+
+            selection.forEach(card => {
+                const div = document.createElement('div');
+                div.className = `card ${card.rarity}`;
+                div.innerHTML = `
+                <span class="rarity-tag" style="color:var(--${card.rarity.toLowerCase()})">${card.rarity}</span>
+                <div class="card-name">${card.name}</div>
+                <div class="card-desc">${card.desc}</div>
+                <div class="card-bonus">+${card.xp} Connection</div>
+                `;
+                div.onclick = () => selectCard(card);
+                handEl.appendChild(div);
+            });
+        }
+
+        function selectCard(card) {
+        // Add to state
+            state.connection += card.xp;
+            state.history.push(card.type);
+            if(state.history.length > 3) state.history.shift();
+
+        // Check for Combos
+            checkCombos();
+
+        // Level Up Logic
+            if(state.connection >= state.maxConnection) {
+                state.level++;
+                state.connection = 0;
+                logEl.innerHTML = `<span style="color:var(--legendary)">LEVEL UP! Level ${state.level} unlocked.</span>`;
+            } else {
+                logEl.innerText = `Player ${state.turn} used ${card.name}!`;
+            }
+
+        // Switch Turn
+            state.turn = state.turn === 'A' ? 'B' : 'A';
+            
+            handEl.innerHTML = '';
+            drawBtn.disabled = false;
+            updateUI();
+        }
+
+        function checkCombos() {
+            const currentPath = state.history.join(',');
+            COMBOS.forEach(combo => {
+                if(currentPath.includes(combo.sequence.join(','))) {
+                    state.connection += combo.bonus;
+                    showComboAlert(combo.name);
+                }
+            });
+        }
+
+        function showComboAlert(name) {
+            const alert = document.getElementById('comboAlert');
+            alert.innerText = `COMBO: ${name} (+${COMBOS[0].bonus})`;
+            alert.style.display = 'block';
+            setTimeout(() => { alert.style.display = 'none'; }, 3000);
+        }
+
+        drawBtn.addEventListener('click', drawCards);
+        updateUI();
+    </script>
+
+
+<!-- CONSTELLATION ANIMATION -->
+<canvas id="star-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
+<script>
+(function(){
+  const cv=document.getElementById("star-canvas");
+  const ctx=cv.getContext("2d");
+  let W,H,mx=-999,my=-999,burst=[];
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;});
+  document.addEventListener("touchstart",e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY;},{passive:true});
+  const stars=Array.from({length:70},()=>({
+    x:Math.random()*1600,y:Math.random()*900,
+    vx:(Math.random()-.5)*0.15,vy:(Math.random()-.5)*0.15,
+    r:0.6+Math.random()*1.8,a:0.2+Math.random()*0.55
+  }));
+  document.addEventListener("click",e=>{
+    if(e.target.closest(".card")){
+      for(let i=0;i<18;i++){
+        const ang=Math.random()*Math.PI*2,spd=1.5+Math.random()*3.5;
+        burst.push({x:e.clientX,y:e.clientY,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:60+Math.random()*40,max:100,r:1+Math.random()*2.5});
+      }
+    }
+  });
+  function frame(){
+    requestAnimationFrame(frame);
+    ctx.clearRect(0,0,W,H);
+    const sx=W/1600,sy=H/900;
+    stars.forEach(s=>{
+      s.x=(s.x+s.vx+1600)%1600;s.y=(s.y+s.vy+900)%900;
+      ctx.beginPath();ctx.arc(s.x*sx,s.y*sy,s.r,0,Math.PI*2);
+      ctx.fillStyle="rgba(245,200,220,"+s.a+")";ctx.fill();
+    });
+    const near=stars.filter(s=>{const dx=s.x*sx-mx,dy=s.y*sy-my;return Math.hypot(dx,dy)<110;});
+    for(let i=0;i<near.length;i++){
+      for(let j=i+1;j<near.length;j++){
+        const dx=(near[i].x-near[j].x)*sx,dy=(near[i].y-near[j].y)*sy,d=Math.hypot(dx,dy);
+        if(d<90){ctx.strokeStyle="rgba(232,99,122,"+(0.5*(1-d/90))+")";ctx.lineWidth=0.5;ctx.beginPath();ctx.moveTo(near[i].x*sx,near[i].y*sy);ctx.lineTo(near[j].x*sx,near[j].y*sy);ctx.stroke();}
+      }
+    }
+    for(let i=burst.length-1;i>=0;i--){
+      const p=burst[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.96;p.vy*=0.96;p.life--;
+      ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle="rgba(232,99,122,"+(p.life/p.max*0.8)+")";ctx.fill();
+      if(p.life<=0)burst.splice(i,1);
+    }
+  }
+  frame();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+
+<script src="../js/app-shell.js"></script>
+</body>
+</html>

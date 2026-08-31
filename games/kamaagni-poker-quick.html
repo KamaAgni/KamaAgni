@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KamaAgni — Poker for Couples</title>
+<link rel="manifest" href="../manifest.json"/>
+<meta name="theme-color" content="#05060f"/>
+<link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<style>
+  :root{
+    --bg:#12070a;
+    --bg2:#1d0d0d;
+    --ember:#ff6a2b;
+    --ember-deep:#c22a12;
+    --flame:#ff9c3d;
+    --gold:#e6b568;
+    --gold-dim:#8a6a3c;
+    --cream:#f6e9d8;
+    --ash:#9c8378;
+    --card-bg:#f6ecdd;
+    --card-ink:#2a1108;
+    --danger:#e34b3b;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255,106,43,.20), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 100%, rgba(194,42,18,.25), transparent 60%),
+      linear-gradient(180deg, var(--bg2), var(--bg) 40%);
+    color:var(--cream);
+    font-family:'DM Sans', sans-serif;
+    position:relative;
+    overflow-x:hidden;
+  }
+  #embers{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .ember-particle{
+    position:absolute; bottom:-10px; width:4px; height:4px; border-radius:50%;
+    background:radial-gradient(circle, var(--flame), var(--ember-deep) 70%, transparent);
+    opacity:.7; animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) translateX(0); opacity:0;}
+    10%{opacity:.8;}
+    100%{ transform:translateY(-110vh) translateX(var(--drift,20px)); opacity:0;}
+  }
+  #app{position:relative; z-index:1; max-width:640px; margin:0 auto; padding:28px 18px 60px;}
+
+  h1,h2,h3{font-family:'Cinzel', serif; letter-spacing:.02em; margin:0 0 6px;}
+  .eyebrow{
+    font-family:'Cinzel', serif; text-transform:uppercase; letter-spacing:.28em;
+    font-size:11px; color:var(--gold); opacity:.85; margin-bottom:6px;
+  }
+  .logo{
+    text-align:center; margin-bottom:28px;
+  }
+  .logo h1{
+    font-size:38px; font-weight:900;
+    background:linear-gradient(180deg, var(--gold) 10%, var(--ember) 60%, var(--ember-deep));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(255,106,43,.25);
+  }
+  .logo .tag{color:var(--ash); font-size:13px; letter-spacing:.08em;}
+
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    border:1px solid rgba(230,181,104,.25);
+    border-radius:18px;
+    padding:24px 22px;
+    margin-bottom:18px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35);
+  }
+
+  label{display:block; font-size:12px; color:var(--ash); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;}
+  input[type=text]{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(230,181,104,.3);
+    background:rgba(0,0,0,.25); color:var(--cream); font-size:16px; font-family:'DM Sans',sans-serif;
+    margin-bottom:16px;
+  }
+  input[type=text]:focus{outline:none; border-color:var(--ember);}
+
+  button{
+    font-family:'DM Sans',sans-serif; font-weight:700; letter-spacing:.02em;
+    border:none; border-radius:12px; padding:13px 22px; font-size:15px;
+    cursor:pointer; transition:transform .12s ease, box-shadow .12s ease;
+  }
+  button:active{transform:scale(.97);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--flame), var(--ember-deep));
+    color:#fff8ee; box-shadow:0 6px 20px rgba(255,106,43,.35);
+    width:100%;
+  }
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed; box-shadow:none;}
+  .btn-ghost{
+    background:transparent; border:1px solid rgba(230,181,104,.4); color:var(--gold);
+  }
+  .btn-danger{background:rgba(227,75,59,.15); color:#ffb3a8; border:1px solid rgba(227,75,59,.5);}
+  .btn-row{display:flex; gap:10px; margin-top:6px;}
+  .btn-row button{flex:1;}
+
+  .agni-track{display:flex; gap:14px; margin-bottom:18px;}
+  .agni-col{flex:1; text-align:center;}
+  .agni-name{font-family:'Cinzel',serif; font-size:13px; color:var(--gold); margin-bottom:6px;}
+  .agni-bar{
+    height:10px; border-radius:6px; background:rgba(255,255,255,.08); overflow:hidden;
+    border:1px solid rgba(230,181,104,.25);
+  }
+  .agni-fill{
+    height:100%; border-radius:6px;
+    background:linear-gradient(90deg, var(--ember-deep), var(--ember), var(--flame));
+    transition:width .5s ease;
+  }
+  .agni-sub{font-size:11px; color:var(--ash); margin-top:4px;}
+
+  .card-hand{display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:18px 0;}
+  .playing-card{
+    width:56px; height:80px; background:var(--card-bg); border-radius:8px;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    color:var(--card-ink); font-weight:700; font-size:18px; position:relative;
+    box-shadow:0 4px 10px rgba(0,0,0,.4); border:2px solid transparent; cursor:pointer;
+    user-select:none; transition:transform .15s ease, border-color .15s ease, margin-top .15s ease;
+  }
+  .playing-card .suit{font-size:20px; margin-top:2px;}
+  .playing-card.red{color:#a3172c;}
+  .playing-card.selected{border-color:var(--ember); margin-top:-10px; box-shadow:0 10px 18px rgba(255,106,43,.4);}
+  .playing-card.static{cursor:default;}
+
+  .hand-verdict{
+    text-align:center; font-family:'Cinzel',serif; color:var(--flame); font-size:15px; margin-top:-6px; margin-bottom:14px;
+  }
+
+  .privacy-screen{text-align:center; padding:30px 10px;}
+  .privacy-screen .icon{font-size:40px; margin-bottom:10px;}
+
+  .badge{
+    display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px;
+    text-transform:uppercase; letter-spacing:.12em; font-family:'Cinzel',serif;
+    background:rgba(230,181,104,.12); border:1px solid rgba(230,181,104,.4); color:var(--gold);
+    margin-bottom:10px;
+  }
+
+  .reward-type{
+    font-family:'Cinzel',serif; font-size:26px; text-align:center; margin-bottom:4px;
+    color:var(--flame);
+  }
+  .reward-desc{text-align:center; color:var(--ash); font-size:13px; margin-bottom:20px;}
+  .option{
+    display:block; width:100%; text-align:left; padding:14px 16px; margin-bottom:10px;
+    border-radius:12px; border:1px solid rgba(230,181,104,.3); background:rgba(0,0,0,.2);
+    color:var(--cream); cursor:pointer; font-size:15px; line-height:1.4;
+  }
+  .option.chosen{border-color:var(--ember); background:rgba(255,106,43,.12); box-shadow:0 0 0 1px var(--ember) inset;}
+
+  .center{text-align:center;}
+  .muted{color:var(--ash); font-size:13px;}
+  .divider{height:1px; background:linear-gradient(90deg, transparent, rgba(230,181,104,.35), transparent); margin:20px 0;}
+
+  .clothes-row{display:flex; justify-content:space-around; margin-bottom:6px;}
+  .clothes-count{font-family:'Cinzel',serif; font-size:28px; color:var(--gold);}
+  .clothes-label{font-size:11px; color:var(--ash); text-transform:uppercase; letter-spacing:.1em;}
+
+  .final-screen{text-align:center; padding:20px 0;}
+  .final-screen h2{font-size:30px; color:var(--flame);}
+
+  .checkbox-hint{text-align:center; font-size:12px; color:var(--ash); margin-top:-6px; margin-bottom:14px;}
+  #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+  #ka-back:hover{color:var(--flame);border-color:rgba(255,156,61,0.4)}
+  @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+</style>
+</head>
+<body>
+<a id="ka-back" href="../index.html">← Home</a>
+<div id="embers"></div>
+<div id="app"></div>
+
+<script>
+/* ---------------- Embers background ---------------- */
+(function(){
+  const wrap = document.getElementById('embers');
+  const n = 26;
+  for(let i=0;i<n;i++){
+    const e = document.createElement('div');
+    e.className='ember-particle';
+    const left = Math.random()*100;
+    const dur = 6 + Math.random()*8;
+    const delay = Math.random()*10;
+    const drift = (Math.random()*60-30)+'px';
+    e.style.left = left+'%';
+    e.style.animationDuration = dur+'s';
+    e.style.animationDelay = delay+'s';
+    e.style.setProperty('--drift', drift);
+    e.style.width = e.style.height = (2+Math.random()*3)+'px';
+    wrap.appendChild(e);
+  }
+})();
+
+/* ---------------- Deck & Poker evaluation ---------------- */
+const SUITS = ['♠','♥','♦','♣'];
+const REDS = new Set(['♥','♦']);
+function rankLabel(r){ return r<=10 ? String(r) : {11:'J',12:'Q',13:'K',14:'A'}[r]; }
+
+function freshDeck(){
+  const d = [];
+  for(const s of SUITS) for(let r=2;r<=14;r++) d.push({r,s});
+  return d;
+}
+function shuffle(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+const HAND_NAMES = {10:'Royal Flush',9:'Straight Flush',8:'Four of a Kind',7:'Full House',6:'Flush',5:'Straight',4:'Three of a Kind',3:'Two Pair',2:'Pair',1:'High Card'};
+
+function evaluateHand(cards){
+  const counts = {};
+  cards.forEach(c=> counts[c.r]=(counts[c.r]||0)+1);
+  const groups = Object.entries(counts).map(([r,c])=>({r:+r,c})).sort((a,b)=> b.c-a.c || b.r-a.r);
+  const ranksSorted = cards.map(c=>c.r).sort((a,b)=>b-a);
+  const isFlush = cards.every(c=>c.s===cards[0].s);
+  const uniq = [...new Set(ranksSorted)];
+  let isStraight=false, high=null;
+  if(uniq.length===5){
+    if(uniq[0]-uniq[4]===4){ isStraight=true; high=uniq[0]; }
+    else if(uniq[0]===14 && uniq[1]===5 && uniq[2]===4 && uniq[3]===3 && uniq[4]===2){ isStraight=true; high=5; }
+  }
+  let cat, tie;
+  if(isStraight && isFlush){ cat = high===14?10:9; tie=[high]; }
+  else if(groups[0].c===4){ cat=8; tie=[groups[0].r, groups[1].r]; }
+  else if(groups[0].c===3 && groups[1] && groups[1].c===2){ cat=7; tie=[groups[0].r, groups[1].r]; }
+  else if(isFlush){ cat=6; tie=ranksSorted; }
+  else if(isStraight){ cat=5; tie=[high]; }
+  else if(groups[0].c===3){ cat=4; tie=[groups[0].r, ...groups.slice(1).map(g=>g.r)]; }
+  else if(groups[0].c===2 && groups[1] && groups[1].c===2){ cat=3; tie=[groups[0].r, groups[1].r, groups[2].r]; }
+  else if(groups[0].c===2){ cat=2; tie=[groups[0].r, ...groups.slice(1).map(g=>g.r)]; }
+  else { cat=1; tie=ranksSorted; }
+  return {cat, name:HAND_NAMES[cat], tie};
+}
+function compareHands(a,b){
+  if(a.cat!==b.cat) return a.cat-b.cat;
+  for(let i=0;i<a.tie.length;i++){
+    if(a.tie[i]!==b.tie[i]) return a.tie[i]-b.tie[i];
+  }
+  return 0;
+}
+
+/* ---------------- Reward content ---------------- */
+const REWARD_ORDER = ['strip','strip','cuddle','nude','hot','hot','lust','climax'];
+const REWARD_META = {
+  strip:{label:'Strip', desc:'One item comes off.'},
+  cuddle:{label:'Cuddle', desc:'A moment of closeness.'},
+  nude:{label:'Nude', desc:'Time to bare it all.'},
+  hot:{label:'Hot', desc:'Turn up the heat.'},
+  lust:{label:'Lust', desc:'Let the fire speak.'},
+  climax:{label:'Climax', desc:'The game is won.'}
+};
+const REWARD_CONTENT = {
+  cuddle:[
+    "Hold each other close, forehead to forehead, for one full minute.",
+    "Spoon up and just breathe together for a minute — no talking.",
+    "Give your partner three slow hugs from behind.",
+    "Trace lazy circles on your partner's back while you tell them one thing you love about tonight."
+  ],
+  hot:[
+    "Give your partner a slow 90-second massage, anywhere they ask.",
+    "Kiss your partner's neck and collarbone, taking your time.",
+    "Whisper one thing you want to do to them later tonight.",
+    "Trail your fingertips slowly from their jaw down to their hips."
+  ],
+  strip:[
+    "Remove one item of your choice — nice and slow.",
+    "Your partner picks which item comes off.",
+    "Remove one item, but no using your hands.",
+    "Swap one item of clothing with your partner if you can, otherwise remove one of yours."
+  ],
+  nude:[
+    "Finish undressing completely — no more clothes for the rest of the game.",
+    "Let your partner finish undressing you, piece by piece.",
+    "Strip down to just one item of your choice.",
+    "Undress each other at the same time, matching each other's pace."
+  ],
+  lust:[
+    "Tell your partner exactly what you want to do to them next.",
+    "Give your partner step-by-step instructions on how you want to be touched.",
+    "Kiss your partner like it's the last thing you'll do tonight.",
+    "Straddle your partner and don't stop kissing them for 30 seconds."
+  ],
+  climax:[
+    "Take things all the way — lead however you want.",
+    "Let your partner take full control until you finish.",
+    "Move wherever's comfortable and finish what this game started.",
+    "Switch off and take turns finishing each other."
+  ]
+};
+function randomOptions(type){
+  return shuffle(REWARD_CONTENT[type]).slice(0, type==='climax'?4:3);
+}
+
+/* ---------------- Game State ---------------- */
+let S = null;
+
+function newPlayer(name){
+  return { name, hand:[], deckIndex:0, bails:2, clothes:5 };
+}
+
+function initGame(nameA, nameB){
+  S = {
+    phase:'deal-p1', // pipeline of phases
+    round:1,
+    dealer:0, // index into players, 0 or 1
+    players:[newPlayer(nameA), newPlayer(nameB)],
+    pack:[],
+    selected:[],
+    revealed:false,
+    rewardQueue:[], // list of {who, type} to resolve this round, in order
+    currentReward:null, // {who, type, options, chosenIdx}
+    lastRoundResult:null,
+    winner:null,
+    log:[]
+  };
+  startRound();
+}
+
+function startRound(){
+  const deck = shuffle(freshDeck());
+  S.players[0].hand = deck.splice(0,5);
+  S.players[1].hand = deck.splice(0,5);
+  S.pack = deck;
+  S.selected = [[], []];
+  S.revealed = false;
+  S.phase = 'exchange1-nondealer-gate';
+}
+
+function nonDealer(){ return 1 - S.dealer; }
+
+function drawReplacements(playerIdx){
+  const p = S.players[playerIdx];
+  const sel = S.selected[playerIdx];
+  if(sel.length){
+    const kept = p.hand.filter((_,i)=> !sel.includes(i));
+    const drawn = S.pack.splice(0, sel.length);
+    p.hand = kept.concat(drawn);
+  }
+  S.selected[playerIdx] = [];
+}
+
+function resolveShowdown(){
+  const evalA = evaluateHand(S.players[0].hand);
+  const evalB = evaluateHand(S.players[1].hand);
+  const cmp = compareHands(evalA, evalB);
+  let winnerIdx = null;
+  if(cmp>0) winnerIdx = 0;
+  else if(cmp<0) winnerIdx = 1;
+  S.lastRoundResult = {evalA, evalB, winnerIdx};
+
+  if(winnerIdx===null){
+    S.phase = 'tie';
+    return;
+  }
+  // build reward queue for the winner (just one draw)
+  const wp = S.players[winnerIdx];
+  const type = REWARD_ORDER[wp.deckIndex];
+  wp.deckIndex++;
+  S.currentReward = {who:winnerIdx, type, options: randomOptions(type), chosenIdx:0, bailedOnce:false};
+  S.phase = 'showdown';
+}
+
+function applyClothing(playerIdx, type){
+  const p = S.players[playerIdx];
+  if(type==='strip') p.clothes = Math.max(0, p.clothes-1);
+  if(type==='nude') p.clothes = 0;
+}
+
+function finishReward(){
+  const r = S.currentReward;
+  applyClothing(r.who, r.type);
+  if(r.type==='climax'){
+    S.winner = r.who;
+    S.phase = 'final';
+    return;
+  }
+  // advance dealer & round
+  S.dealer = 1 - S.dealer;
+  S.round++;
+  S.currentReward = null;
+  startRound();
+}
+
+/* ---------------- Rendering ---------------- */
+const app = document.getElementById('app');
+
+function render(){
+  app.innerHTML = '';
+  app.appendChild(logo());
+  if(!S){ app.appendChild(setupScreen()); return; }
+  app.appendChild(agniTrack());
+
+  switch(true){
+    case S.phase==='exchange1-nondealer-gate':
+      app.appendChild(privacyGate(nonDealer(), ()=>{ S.phase='exchange1-nondealer'; render(); }, 'First Exchange'));
+      break;
+    case S.phase==='exchange1-nondealer':
+      app.appendChild(exchangeScreen(nonDealer(), ()=>{
+        drawReplacements(nonDealer());
+        S.phase='exchange1-dealer-gate';
+        render();
+      }));
+      break;
+    case S.phase==='exchange1-dealer-gate':
+      app.appendChild(privacyGate(S.dealer, ()=>{ S.phase='exchange1-dealer'; render(); }, 'First Exchange'));
+      break;
+    case S.phase==='exchange1-dealer':
+      app.appendChild(exchangeScreen(S.dealer, ()=>{
+        drawReplacements(S.dealer);
+        S.phase='exchange2-nondealer-gate';
+        render();
+      }));
+      break;
+    case S.phase==='exchange2-nondealer-gate':
+      app.appendChild(privacyGate(nonDealer(), ()=>{ S.phase='exchange2-nondealer'; render(); }, 'Second Exchange'));
+      break;
+    case S.phase==='exchange2-nondealer':
+      app.appendChild(exchangeScreen(nonDealer(), ()=>{
+        drawReplacements(nonDealer());
+        S.phase='exchange2-dealer-gate';
+        render();
+      }));
+      break;
+    case S.phase==='exchange2-dealer-gate':
+      app.appendChild(privacyGate(S.dealer, ()=>{ S.phase='exchange2-dealer'; render(); }, 'Second Exchange'));
+      break;
+    case S.phase==='exchange2-dealer':
+      app.appendChild(exchangeScreen(S.dealer, ()=>{
+        drawReplacements(S.dealer);
+        S.phase='showdown-gate';
+        render();
+      }));
+      break;
+    case S.phase==='showdown-gate':
+      app.appendChild(showdownGate());
+      break;
+    case S.phase==='showdown':
+      app.appendChild(showdownScreen());
+      break;
+    case S.phase==='tie':
+      app.appendChild(tieScreen());
+      break;
+    case S.phase==='reward':
+      app.appendChild(rewardScreen());
+      break;
+    case S.phase==='final':
+      app.appendChild(finalScreen());
+      break;
+  }
+}
+
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html!==undefined) e.innerHTML = html;
+  return e;
+}
+
+function logo(){
+  const d = el('div','logo');
+  d.innerHTML = `<div class="eyebrow" style="text-align:center">KamaAgni Presents</div>
+    <h1>Poker for Couples</h1>
+    <div class="tag">the quick version · let the fire decide</div>`;
+  return d;
+}
+
+function setupScreen(){
+  const wrap = el('div','panel');
+  wrap.innerHTML = `
+    <div class="eyebrow">Before you begin</div>
+    <p class="muted" style="margin-bottom:18px;">Two players, five clothing items each (a pair of socks or shoes counts as one). Play in a room where you won't be interrupted for about 90 minutes.</p>
+    <label>Player One</label>
+    <input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
+    <label>Player Two</label>
+    <input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
+    <button class="btn-primary" id="startBtn">Deal the First Hand</button>
+  `;
+  wrap.querySelector('#startBtn').onclick = ()=>{
+    const a = wrap.querySelector('#nameA').value.trim() || 'Player One';
+    const b = wrap.querySelector('#nameB').value.trim() || 'Player Two';
+    initGame(a,b);
+    render();
+  };
+  return wrap;
+}
+
+function agniTrack(){
+  const wrap = el('div','panel');
+  const track = el('div','agni-track');
+  S.players.forEach((p,i)=>{
+    const pct = Math.round((p.deckIndex/8)*100);
+    const col = el('div','agni-col');
+    col.innerHTML = `
+      <div class="agni-name">${p.name}${S.dealer===i?' <span style="opacity:.5">(dealer)</span>':''}</div>
+      <div class="agni-bar"><div class="agni-fill" style="width:${pct}%"></div></div>
+      <div class="agni-sub">${p.clothes} item${p.clothes===1?'':'s'} left · ${p.bails} bail${p.bails===1?'':'s'}</div>
+    `;
+    track.appendChild(col);
+  });
+  wrap.appendChild(track);
+  wrap.appendChild(el('div','muted center', `Round ${S.round}`));
+  return wrap;
+}
+
+function privacyGate(playerIdx, onReady, phaseLabel){
+  const p = S.players[playerIdx];
+  const wrap = el('div','panel privacy-screen');
+  wrap.innerHTML = `
+    <div class="badge">${phaseLabel}</div>
+    <div class="icon">🔥</div>
+    <h2>Pass to ${p.name}</h2>
+    <p class="muted">Make sure ${S.players[1-playerIdx].name} can't see the screen.</p>
+  `;
+  const btn = el('button','btn-primary', `I'm ${p.name} — show my hand`);
+  btn.style.marginTop='16px';
+  btn.onclick = onReady;
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function cardEl(card, selected, onClick){
+  const red = REDS.has(card.s ? SUITS[card.s] : '');
+  const suitChar = SUITS[card.s];
+  const isRed = REDS.has(suitChar);
+  const c = el('div', 'playing-card'+(selected?' selected':'')+(onClick?'':' static'));
+  c.classList.toggle('red', isRed);
+  c.innerHTML = `<div>${rankLabel(card.r)}</div><div class="suit">${suitChar}</div>`;
+  if(onClick) c.onclick = onClick;
+  return c;
+}
+
+function exchangeScreen(playerIdx, onConfirm){
+  const p = S.players[playerIdx];
+  const sel = S.selected[playerIdx];
+  const wrap = el('div','panel');
+  wrap.appendChild(el('div','badge', `${p.name}'s hand`));
+  wrap.appendChild(el('p','muted', 'Tap any cards you want to discard, then exchange them for new ones. You may keep your whole hand if you\'re happy with it.'));
+  const handWrap = el('div','card-hand');
+  p.hand.forEach((card, i)=>{
+    const isSel = sel.includes(i);
+    handWrap.appendChild(cardEl(card, isSel, ()=>{
+      const idx = sel.indexOf(i);
+      if(idx>-1) sel.splice(idx,1); else sel.push(i);
+      render();
+    }));
+  });
+  wrap.appendChild(handWrap);
+  wrap.appendChild(el('div','checkbox-hint', sel.length ? `${sel.length} card${sel.length===1?'':'s'} selected to discard` : 'No cards selected — you may keep everything'));
+  const btn = el('button','btn-primary', sel.length ? `Exchange ${sel.length} Card${sel.length===1?'':'s'}` : 'Keep My Hand');
+  btn.onclick = onConfirm;
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function showdownGate(){
+  const wrap = el('div','panel privacy-screen');
+  wrap.innerHTML = `
+    <div class="badge">Showdown</div>
+    <div class="icon">🃏</div>
+    <h2>Ready to Reveal</h2>
+    <p class="muted">Both of you should be able to see the screen now.</p>
+  `;
+  const btn = el('button','btn-primary','Show Both Hands');
+  btn.style.marginTop='16px';
+  btn.onclick = ()=>{ resolveShowdown(); render(); };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function handBlock(playerIdx, evalResult, isWinner){
+  const p = S.players[playerIdx];
+  const box = el('div','panel');
+  box.style.marginBottom='10px';
+  const badge = el('div','badge', p.name + (isWinner ? ' — Winner' : ''));
+  if(isWinner) badge.style.background='rgba(255,106,43,.18)';
+  box.appendChild(badge);
+  const handWrap = el('div','card-hand');
+  p.hand.forEach(card => handWrap.appendChild(cardEl(card, false, null)));
+  box.appendChild(handWrap);
+  box.appendChild(el('div','hand-verdict', evalResult.name));
+  return box;
+}
+
+function showdownScreen(){
+  const {evalA, evalB, winnerIdx} = S.lastRoundResult;
+  const wrap = document.createDocumentFragment();
+  const container = el('div');
+  container.appendChild(handBlock(0, evalA, winnerIdx===0));
+  container.appendChild(handBlock(1, evalB, winnerIdx===1));
+  const btn = el('button','btn-primary', `${S.players[winnerIdx].name} draws a reward card`);
+  btn.onclick = ()=>{ S.phase = 'reward'; render(); };
+  container.appendChild(btn);
+  return container;
+}
+
+function tieScreen(){
+  const wrap = el('div','panel center');
+  wrap.innerHTML = `<div class="badge">Exact Tie</div>
+    <h2>Too close to call</h2>
+    <p class="muted">Your hands are exactly equal in strength. Per the rules, you'll replay this round — no reward card drawn.</p>`;
+  const btn = el('button','btn-primary','Replay This Round');
+  btn.onclick = ()=>{ startRound(); render(); };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function rewardScreen(){
+  const r = S.currentReward;
+  const drawer = S.players[r.who];
+  const other = S.players[1-r.who];
+  const meta = REWARD_META[r.type];
+  const wrap = el('div','panel');
+  wrap.appendChild(el('div','badge', `${drawer.name} won the round`));
+  wrap.appendChild(el('div','reward-type', meta.label+' Card'));
+  wrap.appendChild(el('div','reward-desc', meta.desc));
+
+  const optWrap = el('div');
+  r.options.forEach((text, i)=>{
+    const o = el('div', 'option'+(r.chosenIdx===i?' chosen':''), text);
+    o.onclick = ()=>{ r.chosenIdx = i; render(); };
+    optWrap.appendChild(o);
+  });
+  wrap.appendChild(optWrap);
+
+  wrap.appendChild(el('p','muted', `${drawer.name} picks one option above and you both follow it. You may temporarily remove clothing to complete it, but only strip/nude/climax cards permanently remove clothes.`));
+
+  const doBtn = el('button','btn-primary', 'Do It');
+  doBtn.onclick = ()=>{ finishReward(); render(); };
+  wrap.appendChild(doBtn);
+
+  if(other.bails>0){
+    const bailBtn = el('button','btn-ghost', `${other.name}, Bail on This (${other.bails} left)`);
+    bailBtn.style.marginTop='10px';
+    bailBtn.style.width='100%';
+    bailBtn.onclick = ()=>{
+      other.bails--;
+      // remove chosen option, pick fresh set excluding chosen
+      const remaining = REWARD_CONTENT[r.type].filter(t=> t!==r.options[r.chosenIdx]);
+      r.options = shuffle(remaining).slice(0, r.type==='climax'?4:3);
+      r.chosenIdx = 0;
+      render();
+    };
+    wrap.appendChild(bailBtn);
+  }
+  return wrap;
+}
+
+function finalScreen(){
+  const w = S.players[S.winner];
+  const wrap = el('div','panel final-screen');
+  wrap.innerHTML = `<div class="badge">Game Over</div>
+    <h2>${w.name} wins the game! 🔥</h2>
+    <p class="muted">The Climax card is drawn — you're both free to finish however you like.</p>`;
+  const restart = el('button','btn-primary','Play Again');
+  restart.style.marginTop='16px';
+  restart.onclick = ()=>{ initGame(S.players[0].name, S.players[1].name); render(); };
+  wrap.appendChild(restart);
+  return wrap;
+}
+
+render();
+</script>
+
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+</body>
+</html>

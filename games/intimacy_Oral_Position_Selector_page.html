@@ -1,0 +1,1795 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="../css/fonts.css"/>
+  <link rel="stylesheet" href="../css/premium.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#05060f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Intimacy Selector: 1000 Positions and Twists</title>
+
+  <style>
+    /* ─── Design Tokens ─────────────────────────────────────── */
+    :root {
+      --bg:        #06080f;
+      --surface:   #0d1220;
+      --surface2:  #131a2e;
+      --border:    rgba(255,255,255,0.07);
+      --accent:    #e8637a;
+      --accent2:   #f4a0ae;
+      --green:     #34c97a;
+      --muted:     #7a90b0;
+      --text:      #dce9ff;
+      --dice-size: 96px;
+      --radius:    16px;
+      --transition: 0.22s ease;
+    }
+
+    /* ─── Reset & Base ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ─── Ambient BG ────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 900px 500px at 15% 0%, rgba(232,99,122,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 600px 400px at 85% 90%, rgba(52,201,122,0.05) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ─── Layout ────────────────────────────────────────────── */
+    .app {
+      position: relative;
+      z-index: 1;
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 20px 60px;
+    }
+
+    /* ─── Toast Notification ────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .toast {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+      white-space: nowrap;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(52,201,122,0.4); color: var(--green); }
+    .toast.like    { border-color: rgba(232,99,122,0.4);  color: var(--accent2); }
+    .toast.info    { border-color: rgba(255,255,255,0.15); }
+
+    /* ─── Top Bar ───────────────────────────────────────────── */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .home-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 999px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .home-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+    /* ─── User Status ───────────────────────────────────────── */
+    #userStatus {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    #userStatus .username {
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* ─── Hero Header ───────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--accent);
+    }
+    .hero .lead {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    /* ─── Progress Bar ──────────────────────────────────────── */
+    .progress-wrap {
+      max-width: 440px;
+      margin: 18px auto 0;
+    }
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      height: 5px;
+      border-radius: 999px;
+      background: var(--surface2);
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.6s ease;
+    }
+
+    /* ─── Controls ──────────────────────────────────────────── */
+    .controls {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 24px 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 24px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 15px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent) 0%, #f4718a 100%);
+      color: #fff;
+      box-shadow: 0 4px 24px rgba(232,99,122,0.3);
+    }
+    .btn-primary:hover:not(:disabled) {
+      box-shadow: 0 8px 36px rgba(232,99,122,0.45);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: var(--surface);
+      color: var(--muted);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+
+    .btn-green {
+      background: linear-gradient(135deg, #27ae60, var(--green));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(52,201,122,0.25);
+    }
+    .btn-green:hover { box-shadow: 0 6px 28px rgba(52,201,122,0.4); }
+
+    .btn-rose {
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      box-shadow: 0 4px 20px rgba(232,99,122,0.25);
+    }
+
+    .btn-danger {
+      background: rgba(192,57,43,0.18);
+      color: #e17168;
+      border: 1px solid rgba(192,57,43,0.3);
+    }
+    .btn-danger:hover { background: rgba(192,57,43,0.28); }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 13px;
+    }
+
+    /* ─── Filter Toggle (styled) ────────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 4px 0 12px;
+      flex-wrap: wrap;
+    }
+    .toggle-divider {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+    .toggle-switch { position: relative; display: inline-block; width: 40px; height: 22px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      border-radius: 999px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: background var(--transition);
+    }
+    .toggle-track::after {
+      content: '';
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: var(--muted);
+      transition: transform var(--transition), background var(--transition);
+    }
+    .toggle-switch input:checked + .toggle-track { background: rgba(232,99,122,0.3); border-color: var(--accent); }
+    .toggle-switch input:checked + .toggle-track::after { transform: translateX(18px); background: var(--accent); }
+
+    /* Folder toggle uses green accent to visually distinguish from ink filter toggle */
+    .toggle-switch input.folder-toggle:checked + .toggle-track { background: rgba(52,201,122,0.3); border-color: var(--green); }
+    .toggle-switch input.folder-toggle:checked + .toggle-track::after { background: var(--green); }
+
+    /* ─── Dice ──────────────────────────────────────────────── */
+    .dice-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 12px 0 24px;
+    }
+
+    .die-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .die-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .die {
+      width: var(--dice-size);
+      height: var(--dice-size);
+      perspective: 1000px;
+      position: relative;
+    }
+
+    .cube {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      transform-style: preserve-3d;
+    }
+
+    .face {
+      position: absolute; inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 14px;
+      padding: 8px;
+      text-align: center;
+      font-weight: 800;
+      line-height: 1.2;
+      backface-visibility: hidden;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+    }
+
+    .face:nth-child(1) { transform: rotateY(  0deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(2) { transform: rotateY( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(3) { transform: rotateY(180deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(4) { transform: rotateY(-90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(5) { transform: rotateX( 90deg) translateZ(calc(var(--dice-size)/2)); }
+    .face:nth-child(6) { transform: rotateX(-90deg) translateZ(calc(var(--dice-size)/2)); }
+
+    .die[data-die-type="d10"] .face {
+      background: linear-gradient(145deg, #b7e0ff, #dff4ff);
+      color: #02122a;
+      font-size: 30px;
+    }
+
+    .die[data-die-type="d6"] .face {
+      background: linear-gradient(145deg, #fff5c7, #ffdca8);
+      color: #1b1205;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .die-shadow {
+      position: absolute; left: 50%; bottom: -8px;
+      transform: translateX(-50%);
+      width: 65%; height: 14px;
+      border-radius: 50%;
+      filter: blur(10px);
+      background: rgba(0,0,0,0.5);
+      transition: width 0.6s, opacity 0.6s;
+    }
+
+    .die.rolling .die-shadow { width: 90%; opacity: 0.7; }
+
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(232,99,122,0); }
+      50% { box-shadow: 0 0 0 8px rgba(232,99,122,0.15); }
+    }
+    .die.rolling { animation: pulse-glow 0.8s infinite; border-radius: 14px; }
+
+    /* ─── Result Card ───────────────────────────────────────── */
+    @keyframes cardReveal {
+      from { opacity: 0; transform: translateY(16px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    #results { min-height: 80px; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 20px;
+      max-width: 760px;
+      margin: 0 auto;
+      animation: cardReveal 0.5s cubic-bezier(0.22,1,0.36,1) both;
+    }
+
+    .result-image-wrap {
+      width: 100%;
+      height: 420px;
+      background: var(--bg);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .result-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .img-fallback {
+      color: var(--muted);
+      text-align: center;
+      font-size: 14px;
+      padding: 20px;
+    }
+
+    .result-meta {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .result-number {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .result-twist {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+      font-style: italic;
+    }
+
+    .result-twist strong { color: var(--accent2); font-style: normal; }
+
+    .result-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .result-actions .btn { flex: 1; max-width: 260px; justify-content: center; }
+
+    /* ─── Ink wash filter ───────────────────────────────────── */
+    .ink-filter { filter: contrast(120%) brightness(110%) saturate(150%) hue-rotate(250deg) invert(100%); }
+    body.filters-off .ink-filter { filter: none; }
+
+    /* ─── Consent Tip ───────────────────────────────────────── */
+    .consent-tip {
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-style: italic;
+      margin-top: 20px;
+      opacity: 0.7;
+    }
+
+    /* ─── Section Panels ────────────────────────────────────── */
+    .section-panel { display: none; }
+    .section-panel.active { display: block; }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .section-header h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    .section-header p {
+      color: var(--muted);
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    /* ─── Filter Tabs ───────────────────────────────────────── */
+    .filter-tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .filter-tab {
+      padding: 7px 18px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .filter-tab:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+    .filter-tab.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(232,99,122,0.3);
+    }
+
+    /* ─── Data Grid ─────────────────────────────────────────── */
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+      gap: 14px;
+    }
+
+    .grid-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform var(--transition), border-color var(--transition), box-shadow var(--transition);
+      position: relative;
+    }
+
+    .grid-item:hover {
+      transform: translateY(-3px);
+      border-color: rgba(255,255,255,0.16);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    }
+
+    .grid-item-img {
+      width: 100%;
+      height: 130px;
+      overflow: hidden;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .grid-item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .grid-item-body {
+      padding: 8px 10px;
+    }
+
+    .grid-item-num {
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--text);
+    }
+
+    .grid-item-sub {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .item-badges {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      display: flex;
+      gap: 4px;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+    .badge-green { background: rgba(52,201,122,0.2); color: var(--green); border: 1px solid rgba(52,201,122,0.3); }
+    .badge-rose  { background: rgba(232,99,122,0.2); color: var(--accent2); border: 1px solid rgba(232,99,122,0.3); }
+    .badge-muted { background: rgba(255,255,255,0.07); color: var(--muted); border: 1px solid var(--border); }
+
+    /* ─── Load More ─────────────────────────────────────────── */
+    #galleryLoadMore {
+      display: block;
+      margin: 28px auto 0;
+    }
+
+    /* ─── Empty State ───────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+    .empty-state .empty-icon { font-size: 48px; margin-bottom: 16px; }
+    .empty-state h3 { font-family: 'Cormorant Garamond', serif; font-size: 22px; color: var(--text); margin-bottom: 8px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ─── Modal ─────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px;
+      max-width: 820px;
+      width: 100%;
+      position: relative;
+      touch-action: pan-y;
+      animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1);
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+
+    .modal-close-btn {
+      position: absolute;
+      top: 14px; right: 16px;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 26px;
+      cursor: pointer;
+      line-height: 1;
+      transition: color var(--transition);
+      z-index: 2;
+    }
+    .modal-close-btn:hover { color: var(--text); }
+
+    .modal-nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.08);
+      border: 1px solid var(--border);
+      color: var(--text);
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      font-size: 22px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+      z-index: 2;
+    }
+    .modal-nav-btn:hover { background: rgba(255,255,255,0.15); }
+    .modal-nav-btn.prev { left: -20px; }
+    .modal-nav-btn.next { right: -20px; }
+    .modal-nav-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+    .modal-image-wrap {
+      width: 100%;
+      height: 440px;
+      background: var(--bg);
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+    .modal-image-wrap img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    .modal-details { text-align: center; }
+    .modal-details h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 26px;
+      color: var(--accent);
+    }
+    .modal-details .modal-twist { color: var(--muted); font-size: 14px; font-style: italic; margin: 6px 0 4px; }
+    .modal-details .modal-count { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .modal-actions .btn { flex: 1; justify-content: center; }
+
+    /* ─── Confirm Modal ─────────────────────────────────────── */
+    .confirm-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 30px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      animation: modalIn 0.3s ease;
+    }
+    .confirm-card h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; margin-bottom: 10px; }
+    .confirm-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .confirm-card .confirm-actions { display: flex; gap: 10px; }
+    .confirm-card .confirm-actions .btn { flex: 1; justify-content: center; }
+
+    /* ─── Auth Modal ────────────────────────────────────────── */
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 100%;
+      position: relative;
+      animation: modalIn 0.3s ease;
+      text-align: center;
+    }
+
+    .auth-card h3 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .auth-card .auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+
+    .auth-field {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'DM Sans', sans-serif;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    .auth-field:focus { border-color: rgba(232,99,122,0.5); }
+    .auth-field::placeholder { color: var(--muted); }
+
+    .auth-toggle-link {
+      display: inline-block;
+      margin-top: 16px;
+      font-size: 13px;
+      color: var(--accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .auth-toggle-link:hover { text-decoration: underline; }
+
+    .auth-note {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 14px;
+      opacity: 0.7;
+    }
+
+    /* ─── Keyboard hint ─────────────────────────────────────── */
+    .kbd-hint {
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 10px;
+      opacity: 0.6;
+    }
+    .kbd { display: inline-block; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--border); font-size: 11px; }
+
+    /* ─── Divider ───────────────────────────────────────────── */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .section-divider-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    /* ─── Responsiveness ────────────────────────────────────── */
+    @media (max-width: 640px) {
+      :root { --dice-size: 70px; }
+      .result-image-wrap { height: 300px; }
+      .modal-image-wrap  { height: 250px; }
+      .modal-nav-btn.prev { left: -8px; }
+      .modal-nav-btn.next { right: -8px; }
+      .data-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+      .result-actions { flex-direction: column; align-items: stretch; }
+      .result-actions .btn { max-width: 100%; }
+      .modal-actions { flex-direction: column; }
+    }
+
+    @media (max-width: 480px) {
+      .dice-area { gap: 10px; }
+      .die-label { font-size: 10px; }
+    }
+  </style>
+
+  <style id="kamaagni-responsive">
+    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
+    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
+    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+  </style>
+</head>
+<body>
+<!-- <a id="ka-back" href="../index.html">← Home</a> -->
+
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<div class="app">
+
+  <!-- Top Bar -->
+  <div class="topbar">
+    <a href="../index.html" class="home-btn">← Home</a>
+    <div id="userStatus"></div>
+  </div>
+
+  <!-- ══════════════ DICE SECTION ══════════════ -->
+  <div id="diceSection" class="section-panel active">
+
+    <div class="hero">
+      <h1>1000 Positions &amp; <em>Twist</em></h1>
+      <p class="lead">Roll three dice for a unique oral position and one for a playful twist.</p>
+
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-label">
+          <span id="progressText">0 of 84 explored</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
+    </div>
+
+    <div class="controls">
+      <button id="rollBtn" class="btn btn-primary">🎲 Roll the Dice</button>
+      <button id="historyLinkBtn" class="btn btn-ghost">📜 My Journey</button>
+      <button id="galleryLinkBtn" class="btn btn-ghost">🖼️ All Positions</button>
+    </div>
+
+    <div class="dice-area" id="game">
+      <div class="die-wrap">
+        <span class="die-label">Hundreds</span>
+        <div class="die" data-index="0" data-die-type="d10" role="img" aria-label="Hundreds die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Tens</span>
+        <div class="die" data-index="1" data-die-type="d10" role="img" aria-label="Tens die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Units</span>
+        <div class="die" data-index="2" data-die-type="d10" role="img" aria-label="Units die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+      <div class="die-wrap">
+        <span class="die-label">Twist</span>
+        <div class="die" data-index="3" data-die-type="d6" role="img" aria-label="Twist die">
+          <div class="cube"></div>
+          <div class="die-shadow"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="results"></div>
+
+    <p class="kbd-hint">Press <kbd class="kbd">Space</kbd> or <kbd class="kbd">Enter</kbd> to roll</p>
+    <p class="consent-tip">Communication and consent make every position the perfect position. ♡</p>
+  </div>
+
+  <!-- ══════════════ HISTORY SECTION ══════════════ -->
+  <div id="historySection" class="section-panel">
+    <div class="section-header">
+      <h2>📜 My Intimacy Journey</h2>
+      <p>Every position you've rolled, right here.</p>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
+    </div>
+
+    <div class="section-divider">
+      <div class="filter-tabs" id="historyFilterTabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="performed">Performed</button>
+        <button class="filter-tab" data-filter="liked">Liked ❤️</button>
+        <button class="filter-tab" data-filter="not_performed">Not Yet</button>
+      </div>
+      <div class="section-divider-actions">
+        <button id="backToRollBtnHistory" class="btn btn-ghost btn-sm">← Back</button>
+      </div>
+    </div>
+
+    <div class="data-grid" id="historyGrid"></div>
+    <div id="historyEmpty" class="empty-state" style="display:none;">
+      <div class="empty-icon">🎲</div>
+      <h3>Nothing here yet</h3>
+      <p>Roll the dice to start your journey!</p>
+    </div>
+
+    <div style="text-align:center; margin-top:32px;">
+      <button id="resetDataBtn" class="btn btn-danger btn-sm">⚠️ Clear All Data</button>
+    </div>
+  </div>
+
+  <!-- ══════════════ GALLERY SECTION ══════════════ -->
+  <div id="gallerySection" class="section-panel">
+    <div class="section-header">
+      <h2>🖼️ Explore All Positions</h2>
+      <p>Browse the full catalog and mark your favorites along the way.</p>
+    </div>
+
+    <div class="toggle-row">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
+    </div>
+
+    <div style="text-align:right; margin-bottom:16px;">
+      <button id="backToRollBtnGallery" class="btn btn-ghost btn-sm">← Back</button>
+    </div>
+
+    <div class="data-grid" id="galleryGrid"></div>
+    <button id="galleryLoadMore" class="btn btn-ghost" style="display:none;">Load More</button>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- ══════════════ POSITION DETAIL MODAL ══════════════ -->
+<div id="historyModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <button class="modal-nav-btn prev" id="modalPrev" aria-label="Previous">&#8249;</button>
+  <div class="modal-card">
+    <button class="modal-close-btn" id="modalClose" aria-label="Close">&times;</button>
+    <div class="modal-image-wrap">
+      <img id="modalImage" class="ink-filter" src="" alt="Position illustration" loading="lazy">
+    </div>
+    <div class="modal-details">
+      <h3 id="modalTitle"></h3>
+      <p class="modal-twist" id="modalTwist"></p>
+      <p class="modal-count" id="modalCount"></p>
+    </div>
+    <div class="modal-actions">
+      <button id="modalPerformBtn" class="btn btn-green">Mark Performed ✅</button>
+      <button id="modalLikeBtn" class="btn btn-rose">Like / Save ❤️</button>
+    </div>
+    <div class="toggle-row" style="margin-top:16px; margin-bottom:0;">
+      <label class="toggle-switch">
+        <input type="checkbox" class="filter-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+      <span>Stylized ink filter</span>
+      <span class="toggle-divider"></span>
+      <label class="toggle-switch">
+        <input type="checkbox" class="folder-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <span>Alt image set</span>
+    </div>
+  </div>
+  <button class="modal-nav-btn next" id="modalNext" aria-label="Next">&#8250;</button>
+</div>
+
+<!-- ══════════════ CONFIRM DELETE MODAL ══════════════ -->
+<div id="confirmModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="confirm-card">
+    <h3>Clear All Data?</h3>
+    <p>This will permanently delete all saved positions, likes, and history for your account. This cannot be undone.</p>
+    <div class="confirm-actions">
+      <button id="confirmCancel" class="btn btn-ghost">Cancel</button>
+      <button id="confirmDelete" class="btn btn-danger">Yes, Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ AUTH MODAL ══════════════ -->
+<div id="userAuthModal" class="modal-overlay" role="dialog" aria-modal="true">
+  <div class="auth-card">
+    <button class="modal-close-btn" id="authModalClose">&times;</button>
+    <h3 id="authTitle">Sign Up</h3>
+    <p class="auth-subtitle">Keep your journey private and synced across visits.</p>
+    <form id="authForm" novalidate>
+      <input type="email" id="authEmail" class="auth-field" placeholder="Email address" autocomplete="email" required>
+      <input type="password" id="authPassword" class="auth-field" placeholder="Password" autocomplete="current-password" required>
+      <button type="submit" id="authSubmitBtn" class="btn btn-green" style="width:100%; justify-content:center;">Sign Up</button>
+    </form>
+    <a class="auth-toggle-link" id="toggleAuthMode">Switch to Login</a>
+    <p class="auth-note">⚠️ Demo mode only. Data is stored locally in your browser.</p>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════════ */
+const positionData = [];
+for (let i = 0; i < 84; i++) {
+  positionData.push({
+    id: i,
+    number: i.toString().padStart(3, '0')
+  });
+}
+
+const d6Twists = [
+  "Use only your non-dominant hand for all support and touch.",
+  "Maintain soft, direct eye contact throughout.",
+  "Focus on one single non-genital body part for 30 seconds.",
+  "Half your current speed for the next 10 movements.",
+  "Synchronize all movement to your partner's breath.",
+  "Whisper one specific thing you love that is happening right now.",
+  "Say only kind compliments for the next full minute.",
+  "Pause to share three non-sexual reasons you appreciate them.",
+  "Introduce one contrasting element: ice, warmth or scent.",
+  "Use only non-word sounds to communicate pleasure.",
+  "Only connected parts move; all hands stay completely still.",
+  "Incorporate a soft garment or blindfold as a playful prop.",
+  "Take turns whispering a playful, exciting shared fantasy.",
+  "Intentionally kiss a non-genital spot tenderly for 30 seconds.",
+  "Use only the tip for the first full minute, with no pressure.",
+  "The receiving partner keeps both hands in their own hair.",
+  "Hum softly throughout. The vibration is the gift.",
+  "Make eye contact every time you come up for breath.",
+  "Alternate between extremely slow and extremely fast. Their signal determines which.",
+  "The receiving partner must stay completely silent. No sounds allowed.",
+  "Use warmth first: warm breath, then cool, then warm lips again.",
+  "Ask for permission before each new action. Wait for a clear yes.",
+  "Pause every 45 seconds and kiss the inner thigh before returning.",
+  "Receiving partner describes what they want in real time.",
+  "Hold eye contact for the full duration. Neither looks away.",
+  "Use an ice cube nearby and alternate between cold and warm unpredictably.",
+  "Use only the flat tongue for the first minute, with no pressure.",
+  "The receiving partner gives one verbal instruction every 30 seconds.",
+  "Blindfold the receiving partner to remove all senses except touch."
+];
+
+const defaultTwist = "Roll to start!";
+const ROLL_DURATION = 3500;
+const DEFAULT_D10_FACE = '·';
+const PAGE_SIZE = 48;
+
+/* ══════════════════════════════════════════════════════
+   IMAGE FOLDER SOURCE
+   Rename ALT_FOLDER below to match your actual alternate
+   image folder name. Both folders are expected to contain
+   files named the same way: "Oral Sex Position (N).jpg"
+══════════════════════════════════════════════════════ */
+const BASE_FOLDER = '../assets/images/Oral Sex Position';
+const ALT_FOLDER = '../assets/images/Oral Sex Position Alt';
+const FOLDER_PREF_KEY = 'oralFolderPreference';
+
+function getImageFolder() {
+  return document.body.classList.contains('alt-images') ? ALT_FOLDER : BASE_FOLDER;
+}
+
+function imagePathFor(posId) {
+  return `${getImageFolder()}/Oral Sex Position (${posId + 1}).jpg`;
+}
+
+/* ══════════════════════════════════════════════════════
+   AUTH
+══════════════════════════════════════════════════════ */
+const LOGGED_IN_KEY = 'current_user_id';
+const ALL_USERS_KEY = 'registered_users';
+const BASE_HISTORY_KEY = 'position_roll_history_v3';
+
+function getCurrentUser() {
+  const uid = localStorage.getItem(LOGGED_IN_KEY);
+  if (!uid) return null;
+  const users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
+  return users[uid] || null;
+}
+
+function getHistoryKey() {
+  const u = getCurrentUser();
+  return u ? `${BASE_HISTORY_KEY}_${u.id}` : BASE_HISTORY_KEY;
+}
+
+function migrateGuestHistory(uid) {
+  const guest = localStorage.getItem(BASE_HISTORY_KEY);
+  if (!guest) return;
+  const userKey = `${BASE_HISTORY_KEY}_${uid}`;
+  if (!localStorage.getItem(userKey)) localStorage.setItem(userKey, guest);
+  localStorage.removeItem(BASE_HISTORY_KEY);
+}
+
+/* ══════════════════════════════════════════════════════
+   HISTORY STATE
+══════════════════════════════════════════════════════ */
+function getHistory() {
+  try { return JSON.parse(localStorage.getItem(getHistoryKey()) || '[]'); }
+  catch { return []; }
+}
+function saveHistory(h) { localStorage.setItem(getHistoryKey(), JSON.stringify(h)); }
+
+function findOrCreateItem(posId, twist = defaultTwist) {
+  let history = getHistory();
+  let idx = history.findIndex(x => x.id === posId && x.twist === twist);
+  if (idx === -1) {
+    const pos = positionData.find(p => p.id === posId);
+    if (!pos) return null;
+    const item = { id: posId, number: pos.number, twist, isLiked: false, performedCount: 0, timestamp: twist === defaultTwist ? 0 : Date.now() };
+    history.push(item);
+    saveHistory(history);
+    idx = history.length - 1;
+  }
+  return { item: history[idx], index: idx, history };
+}
+
+function updateHistory(posId, twist, action) {
+  const data = findOrCreateItem(posId, twist);
+  if (!data) return null;
+  let { item, index, history } = data;
+  if (action === 'like') item.isLiked = !item.isLiked;
+  else if (action === 'perform') item.performedCount = (item.performedCount || 0) + 1;
+  if (twist !== defaultTwist) item.timestamp = Date.now();
+  history[index] = item;
+  saveHistory(history);
+  refreshActiveView();
+  return item;
+}
+
+/* ══════════════════════════════════════════════════════
+   TOAST
+══════════════════════════════════════════════════════ */
+function showToast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  requestAnimationFrame(() => { requestAnimationFrame(() => el.classList.add('show')); });
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 320);
+  }, 3000);
+}
+
+/* ══════════════════════════════════════════════════════
+   PROGRESS
+══════════════════════════════════════════════════════ */
+function updateProgress() {
+  const history = getHistory();
+  const rolled = new Set(history.filter(x => x.twist !== defaultTwist).map(x => x.id));
+  const pct = Math.round((rolled.size / positionData.length) * 100);
+  document.getElementById('progressText').textContent = `${rolled.size} of ${positionData.length} explored`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+/* ══════════════════════════════════════════════════════
+   USER UI
+══════════════════════════════════════════════════════ */
+function renderUserUI() {
+  const u = getCurrentUser();
+  const el = document.getElementById('userStatus');
+  if (u) {
+    el.innerHTML = `<span class="username">${u.email.split('@')[0]}</span><button id="logoutBtn" class="btn btn-ghost btn-sm">Logout</button>`;
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.removeItem(LOGGED_IN_KEY);
+      showToast('Logged out successfully.', 'info');
+      setTimeout(() => location.reload(), 800);
+    });
+  } else {
+    el.innerHTML = `<button id="authLinkBtn" class="btn btn-ghost btn-sm">Sign Up / Login</button>`;
+    document.getElementById('authLinkBtn').addEventListener('click', openAuthModal);
+  }
+}
+
+/* ══════════════════════════════════════════════════════
+   AUTH MODAL
+══════════════════════════════════════════════════════ */
+const userAuthModal = document.getElementById('userAuthModal');
+const authTitle = document.getElementById('authTitle');
+const authSubmitBtn = document.getElementById('authSubmitBtn');
+const toggleAuthMode = document.getElementById('toggleAuthMode');
+const authEmail = document.getElementById('authEmail');
+const authPassword = document.getElementById('authPassword');
+let isLoginMode = false;
+
+function openAuthModal() { userAuthModal.classList.add('open'); isLoginMode = false; syncAuthMode(); }
+function closeAuthModal() { userAuthModal.classList.remove('open'); authEmail.value = ''; authPassword.value = ''; }
+
+function syncAuthMode() {
+  authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
+  authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
+  toggleAuthMode.textContent = isLoginMode ? 'Switch to Sign Up' : 'Switch to Login';
+}
+
+document.getElementById('authForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+  let users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
+  const uid = btoa(email);
+
+  if (isLoginMode) {
+    if (users[uid] && users[uid].password === password) {
+      localStorage.setItem(LOGGED_IN_KEY, uid);
+      migrateGuestHistory(uid);
+      closeAuthModal();
+      renderUserUI();
+      showToast(`Welcome back, ${email.split('@')[0]}!`, 'success');
+    } else {
+      showToast('Login failed. Please check your email and password.', 'info');
+    }
+  } else {
+    if (users[uid]) {
+      showToast('Email already registered. Please login.', 'info');
+    } else {
+      users[uid] = { email, password, id: uid };
+      localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users));
+      localStorage.setItem(LOGGED_IN_KEY, uid);
+      migrateGuestHistory(uid);
+      closeAuthModal();
+      renderUserUI();
+      showToast('Account created! Your journey is now saved.', 'success');
+    }
+  }
+});
+
+document.getElementById('authModalClose').addEventListener('click', closeAuthModal);
+toggleAuthMode.addEventListener('click', (e) => { e.preventDefault(); isLoginMode = !isLoginMode; syncAuthMode(); });
+userAuthModal.addEventListener('click', (e) => { if (e.target === userAuthModal) closeAuthModal(); });
+
+/* ══════════════════════════════════════════════════════
+   DICE
+══════════════════════════════════════════════════════ */
+const diceEls = document.querySelectorAll('.die');
+const rollBtn = document.getElementById('rollBtn');
+const resultsEl = document.getElementById('results');
+const d10Faces = ['0','1','2','3','4','5','6','7','8','9'];
+
+function applyFaces() {
+  diceEls.forEach(die => {
+    const cube = die.querySelector('.cube');
+    cube.style.transition = 'none';
+    cube.innerHTML = '';
+    const type = die.getAttribute('data-die-type');
+    const defaultText = type === 'd10' ? DEFAULT_D10_FACE : defaultTwist;
+    for (let f = 0; f < 6; f++) {
+      const face = document.createElement('div');
+      face.className = 'face';
+      face.textContent = f === 0 ? defaultText : (type === 'd10' ? d10Faces[f] : d6Twists[f]);
+      cube.appendChild(face);
+    }
+  });
+}
+
+function realisticRoll() {
+  if (rollBtn.disabled) return;
+  rollBtn.disabled = true;
+  resultsEl.innerHTML = '';
+  applyFaces();
+  diceEls.forEach(d => d.classList.add('rolling'));
+
+  const posDigits = [];
+  let twistText = '';
+  const finalFace = {};
+
+  diceEls.forEach((die, index) => {
+    const cube = die.querySelector('.cube');
+    const faces = cube.querySelectorAll('.face');
+    const type = die.getAttribute('data-die-type');
+    let rollValue, faceIndex;
+
+    if (type === 'd10') {
+      const maxRoll = positionData.length - 1; // 83
+      rollValue = Math.floor(Math.random() * 10);
+      if (index === 0) rollValue = Math.floor(Math.random() * (Math.floor(maxRoll / 100) + 1));
+      if (index === 1) {
+        const h = posDigits[0];
+        if (h === Math.floor(maxRoll / 100)) rollValue = Math.floor(Math.random() * (Math.floor((maxRoll % 100) / 10) + 1));
+      }
+      if (index === 2) {
+        const h = posDigits[0], t = posDigits[1];
+        if (h === Math.floor(maxRoll / 100) && t === Math.floor((maxRoll % 100) / 10))
+          rollValue = Math.floor(Math.random() * ((maxRoll % 10) + 1));
+      }
+      posDigits.push(rollValue);
+      faceIndex = rollValue % 6;
+      finalFace[index] = { el: faces[faceIndex], value: rollValue };
+    } else {
+      rollValue = Math.floor(Math.random() * 6);
+      twistText = d6Twists[rollValue];
+      faceIndex = rollValue;
+      finalFace[index] = { el: faces[faceIndex], value: twistText };
+    }
+
+    const faceRotations = [
+      'rotateX(0deg) rotateY(0deg)', 'rotateY(-90deg)', 'rotateY(-180deg)',
+      'rotateY(90deg)', 'rotateX(-90deg)', 'rotateX(90deg)'
+    ];
+    const extraX = 360 * (3 + Math.floor(Math.random() * 3));
+    const extraY = 360 * (3 + Math.floor(Math.random() * 3));
+    cube.style.transition = `transform ${ROLL_DURATION}ms cubic-bezier(.2,.9,.3,1)`;
+    cube.style.transform = `${faceRotations[faceIndex]} rotateX(${extraX}deg) rotateY(${extraY}deg)`;
+    setTimeout(() => { faces[faceIndex].textContent = type === 'd10' ? rollValue : twistText; }, 400);
+  });
+
+  setTimeout(() => {
+    diceEls.forEach(d => { d.querySelector('.cube').style.transition = 'none'; d.classList.remove('rolling'); });
+    [0,1,2,3].forEach(i => { if (finalFace[i]) finalFace[i].el.textContent = finalFace[i].value; });
+
+    const posIndex = (posDigits[0] * 100) + (posDigits[1] * 10) + posDigits[2];
+    const pos = positionData.find(p => p.id === posIndex);
+    if (!pos) { rollBtn.disabled = false; return; }
+
+    const rolledItem = updateHistory(pos.id, twistText, 'roll');
+    const isLiked = rolledItem ? rolledItem.isLiked : false;
+    const imgPath = imagePathFor(pos.id);
+
+    resultsEl.innerHTML = `
+      <div class="result-card">
+        <div class="result-image-wrap">
+          <img src="${imgPath}" alt="Position ${pos.number}" class="ink-filter" loading="lazy" data-pos-id="${pos.id}">
+          <div class="img-fallback" style="display:none;">No image for #${pos.number}</div>
+        </div>
+        <div class="result-meta">
+          <div class="result-number">Position #${pos.number}</div>
+          <div class="result-twist">Twist: <strong>${twistText}</strong></div>
+        </div>
+        <div class="result-actions">
+          <button id="performBtn" class="btn btn-green">Performed ✅</button>
+          <button id="likeBtn" class="btn btn-rose">${isLiked ? 'Liked ❤️' : 'Like / Save ❤️'}</button>
+        </div>
+      </div>`;
+
+    // Image error fallback
+    const img = resultsEl.querySelector('img');
+    img.addEventListener('error', () => { img.style.display = 'none'; img.nextElementSibling.style.display = 'block'; });
+
+    document.getElementById('performBtn').addEventListener('click', () => {
+      updateHistory(pos.id, twistText, 'perform');
+      showToast(`Position #${pos.number} marked as performed! ✅`, 'success');
+      updateProgress();
+    });
+
+    document.getElementById('likeBtn').addEventListener('click', function () {
+      const updated = updateHistory(pos.id, twistText, 'like');
+      this.textContent = updated.isLiked ? 'Liked ❤️' : 'Like / Save ❤️';
+      showToast(updated.isLiked ? 'Saved to your likes! ❤️' : 'Removed from likes.', 'like');
+    });
+
+    updateProgress();
+    rollBtn.disabled = false;
+  }, ROLL_DURATION);
+}
+
+rollBtn.addEventListener('click', realisticRoll);
+document.addEventListener('keydown', (e) => {
+  const inModal = document.querySelector('.modal-overlay.open');
+  if (!inModal && (e.key === ' ' || e.key === 'Enter') && document.activeElement === document.body) {
+    e.preventDefault(); realisticRoll();
+  }
+});
+
+/* ══════════════════════════════════════════════════════
+   GRID ITEMS
+══════════════════════════════════════════════════════ */
+function getItemBadges(item) {
+  let b = '';
+  if (item.isLiked) b += `<span class="badge badge-rose">❤️</span>`;
+  if (item.performedCount > 0) b += `<span class="badge badge-green">✅</span>`;
+  if (item.performedCount > 1) b += `<span class="badge badge-muted">×${item.performedCount}</span>`;
+  return b;
+}
+
+function createGridItem(item, isGallery) {
+  const imgPath = imagePathFor(item.id);
+  const twist = item.twist || defaultTwist;
+  const subLabel = isGallery
+    ? `#${item.number}`
+    : (twist !== defaultTwist ? twist.substring(0, 28) + (twist.length > 28 ? '…' : '') : `#${item.number}`);
+
+  const div = document.createElement('div');
+  div.className = 'grid-item';
+  div.setAttribute('data-id', item.id);
+  div.setAttribute('data-twist', twist);
+  div.innerHTML = `
+    <div class="grid-item-img">
+      <img src="${imgPath}" alt="Position ${item.number}" loading="lazy" class="ink-filter" data-pos-id="${item.id}">
+    </div>
+    <div class="item-badges">${getItemBadges(item)}</div>
+    <div class="grid-item-body">
+      <div class="grid-item-num">#${item.number}</div>
+      <div class="grid-item-sub" title="${twist}">${subLabel}</div>
+    </div>`;
+
+  const img = div.querySelector('img');
+  img.addEventListener('error', () => { img.parentElement.innerHTML = '<div class="img-fallback">No image</div>'; });
+  div.addEventListener('click', openModal);
+  return div;
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER HISTORY
+══════════════════════════════════════════════════════ */
+function renderHistory(filter) {
+  const history = getHistory();
+  let items = history.filter(x => x.twist !== defaultTwist);
+  if (filter === 'performed') items = items.filter(x => x.performedCount > 0);
+  else if (filter === 'liked')   items = items.filter(x => x.isLiked);
+  else if (filter === 'not_performed') items = items.filter(x => x.performedCount === 0);
+  items.sort((a, b) => b.timestamp - a.timestamp);
+
+  const grid = document.getElementById('historyGrid');
+  const empty = document.getElementById('historyEmpty');
+  grid.innerHTML = '';
+  if (items.length === 0) { empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  items.forEach(item => grid.appendChild(createGridItem(item, false)));
+}
+
+/* ══════════════════════════════════════════════════════
+   RENDER GALLERY (paginated)
+══════════════════════════════════════════════════════ */
+let galleryPage = 0;
+
+function renderGallery(reset = true) {
+  const grid = document.getElementById('galleryGrid');
+  const loadMoreBtn = document.getElementById('galleryLoadMore');
+  if (reset) { grid.innerHTML = ''; galleryPage = 0; }
+
+  const history = getHistory();
+  const start = galleryPage * PAGE_SIZE;
+  const slice = positionData.slice(start, start + PAGE_SIZE);
+
+  slice.forEach(pos => {
+    const histItem = history.find(x => x.id === pos.id && x.twist === defaultTwist);
+    const item = histItem || { id: pos.id, number: pos.number, twist: defaultTwist, isLiked: false, performedCount: 0 };
+    grid.appendChild(createGridItem(item, true));
+  });
+
+  galleryPage++;
+  loadMoreBtn.style.display = galleryPage * PAGE_SIZE < positionData.length ? 'block' : 'none';
+}
+
+document.getElementById('galleryLoadMore').addEventListener('click', () => renderGallery(false));
+
+/* ══════════════════════════════════════════════════════
+   VIEW SWITCHING
+══════════════════════════════════════════════════════ */
+function switchView(view) {
+  ['diceSection', 'historySection', 'gallerySection'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById(view + 'Section').classList.add('active');
+
+  if (view === 'history') {
+    document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(b => b.classList.remove('active'));
+    document.querySelector('#historyFilterTabs [data-filter="all"]').classList.add('active');
+    renderHistory('all');
+  } else if (view === 'gallery') {
+    renderGallery(true);
+  }
+}
+
+function refreshActiveView() {
+  if (document.getElementById('historySection').classList.contains('active')) {
+    const active = document.querySelector('#historyFilterTabs .filter-tab.active');
+    renderHistory(active ? active.getAttribute('data-filter') : 'all');
+  } else if (document.getElementById('gallerySection').classList.contains('active')) {
+    renderGallery(true);
+  }
+}
+
+document.getElementById('historyLinkBtn').addEventListener('click', () => switchView('history'));
+document.getElementById('galleryLinkBtn').addEventListener('click', () => switchView('gallery'));
+document.getElementById('backToRollBtnHistory').addEventListener('click', () => switchView('dice'));
+document.getElementById('backToRollBtnGallery').addEventListener('click', () => switchView('dice'));
+
+document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(btn => {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('#historyFilterTabs .filter-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    renderHistory(this.getAttribute('data-filter'));
+  });
+});
+
+/* ══════════════════════════════════════════════════════
+   CONFIRM DELETE MODAL
+══════════════════════════════════════════════════════ */
+const confirmModal = document.getElementById('confirmModal');
+document.getElementById('resetDataBtn').addEventListener('click', () => confirmModal.classList.add('open'));
+document.getElementById('confirmCancel').addEventListener('click', () => confirmModal.classList.remove('open'));
+document.getElementById('confirmDelete').addEventListener('click', () => {
+  localStorage.removeItem(getHistoryKey());
+  confirmModal.classList.remove('open');
+  showToast('All data cleared.', 'info');
+  setTimeout(() => location.reload(), 900);
+});
+confirmModal.addEventListener('click', e => { if (e.target === confirmModal) confirmModal.classList.remove('open'); });
+
+/* ══════════════════════════════════════════════════════
+   POSITION DETAIL MODAL
+══════════════════════════════════════════════════════ */
+const historyModal = document.getElementById('historyModal');
+const modalImage = document.getElementById('modalImage');
+const modalTitle = document.getElementById('modalTitle');
+const modalTwist = document.getElementById('modalTwist');
+const modalCount = document.getElementById('modalCount');
+const modalPerformBtn = document.getElementById('modalPerformBtn');
+const modalLikeBtn = document.getElementById('modalLikeBtn');
+const modalPrev = document.getElementById('modalPrev');
+const modalNext = document.getElementById('modalNext');
+
+let currentModalItems = [];
+let currentModalIndex = -1;
+let modalContext = 'history';
+
+function openModal(e) {
+  const el = e.currentTarget;
+  const posId = parseInt(el.getAttribute('data-id'));
+  const twist = el.getAttribute('data-twist');
+
+  if (document.getElementById('gallerySection').classList.contains('active')) {
+    modalContext = 'gallery';
+    const history = getHistory();
+    currentModalItems = positionData.map(pos => {
+      const h = history.find(x => x.id === pos.id && x.twist === defaultTwist);
+      return h || { id: pos.id, number: pos.number, twist: defaultTwist, isLiked: false, performedCount: 0 };
+    });
+    currentModalItems.sort((a, b) => a.id - b.id);
+  } else {
+    modalContext = 'history';
+    const history = getHistory();
+    let items = history.filter(x => x.twist !== defaultTwist);
+    const activeFilter = document.querySelector('#historyFilterTabs .filter-tab.active')?.getAttribute('data-filter') || 'all';
+    if (activeFilter === 'performed') items = items.filter(x => x.performedCount > 0);
+    else if (activeFilter === 'liked') items = items.filter(x => x.isLiked);
+    else if (activeFilter === 'not_performed') items = items.filter(x => x.performedCount === 0);
+    items.sort((a, b) => b.timestamp - a.timestamp);
+    currentModalItems = items;
+  }
+
+  currentModalIndex = currentModalItems.findIndex(x => x.id === posId && x.twist === twist);
+  if (currentModalIndex === -1) currentModalIndex = 0;
+  displayModalContent(currentModalIndex);
+  historyModal.classList.add('open');
+  // Focus trap
+  setTimeout(() => document.getElementById('modalClose').focus(), 50);
+}
+
+function displayModalContent(index) {
+  if (index < 0 || index >= currentModalItems.length) return;
+  currentModalIndex = index;
+  const item = currentModalItems[index];
+  const imgPath = imagePathFor(item.id);
+
+  modalImage.src = imgPath;
+  modalImage.setAttribute('data-pos-id', item.id);
+  modalImage.onerror = () => { modalImage.style.display = 'none'; };
+  modalImage.onload  = () => { modalImage.style.display = 'block'; };
+  modalTitle.textContent = `Position #${item.number}`;
+  modalTwist.textContent = item.twist === defaultTwist ? 'Base Position' : `Twist: ${item.twist}`;
+  modalCount.textContent = item.performedCount > 0 ? `Performed ${item.performedCount} time(s)` : 'Not performed yet.';
+  modalLikeBtn.textContent = item.isLiked ? 'Liked ❤️' : 'Like / Save ❤️';
+  modalPerformBtn.setAttribute('data-id', item.id);
+  modalPerformBtn.setAttribute('data-twist', item.twist);
+  modalLikeBtn.setAttribute('data-id', item.id);
+  modalLikeBtn.setAttribute('data-twist', item.twist);
+  modalPrev.disabled = index === 0;
+  modalNext.disabled = index === currentModalItems.length - 1;
+}
+
+function navigateModal(dir) {
+  const next = currentModalIndex + dir;
+  if (next >= 0 && next < currentModalItems.length) displayModalContent(next);
+}
+
+function closeModal() { historyModal.classList.remove('open'); currentModalItems = []; currentModalIndex = -1; }
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+historyModal.addEventListener('click', e => { if (e.target === historyModal) closeModal(); });
+modalPrev.addEventListener('click', e => { e.stopPropagation(); navigateModal(-1); });
+modalNext.addEventListener('click', e => { e.stopPropagation(); navigateModal(1); });
+
+modalPerformBtn.addEventListener('click', function () {
+  const posId = parseInt(this.getAttribute('data-id'));
+  const twist = this.getAttribute('data-twist');
+  updateHistory(posId, twist, 'perform');
+  const item = currentModalItems[currentModalIndex];
+  if (item) { item.performedCount = (item.performedCount || 0) + 1; displayModalContent(currentModalIndex); }
+  showToast(`Position #${posId.toString().padStart(3,'0')} marked as performed! ✅`, 'success');
+  updateProgress();
+});
+
+modalLikeBtn.addEventListener('click', function () {
+  const posId = parseInt(this.getAttribute('data-id'));
+  const twist = this.getAttribute('data-twist');
+  const updated = updateHistory(posId, twist, 'like');
+  const item = currentModalItems[currentModalIndex];
+  if (item) { item.isLiked = updated.isLiked; displayModalContent(currentModalIndex); }
+  showToast(updated.isLiked ? 'Saved to your likes! ❤️' : 'Removed from likes.', 'like');
+});
+
+// Swipe
+let touchStartX = 0;
+document.querySelector('.modal-card').addEventListener('touchstart', e => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+document.querySelector('.modal-card').addEventListener('touchend', e => {
+  const diff = touchStartX - e.changedTouches[0].screenX;
+  if (Math.abs(diff) > 50) navigateModal(diff > 0 ? 1 : -1);
+}, { passive: true });
+
+// Keyboard nav
+document.addEventListener('keydown', e => {
+  if (historyModal.classList.contains('open')) {
+    if (e.key === 'ArrowLeft') navigateModal(-1);
+    else if (e.key === 'ArrowRight') navigateModal(1);
+    else if (e.key === 'Escape') closeModal();
+  }
+  if (confirmModal.classList.contains('open') && e.key === 'Escape') confirmModal.classList.remove('open');
+  if (userAuthModal.classList.contains('open') && e.key === 'Escape') closeAuthModal();
+});
+
+/* ══════════════════════════════════════════════════════
+   FILTER TOGGLE (ink wash)
+══════════════════════════════════════════════════════ */
+function applyFilterPref(enabled) {
+  document.body.classList.toggle('filters-off', !enabled);
+  document.querySelectorAll('.filter-toggle').forEach(t => t.checked = enabled);
+  localStorage.setItem('filterPreference', enabled);
+}
+
+/* ══════════════════════════════════════════════════════
+   FOLDER TOGGLE (alt image set)
+══════════════════════════════════════════════════════ */
+function applyFolderPref(enabled) {
+  document.body.classList.toggle('alt-images', enabled);
+  document.querySelectorAll('.folder-toggle').forEach(t => t.checked = enabled);
+  localStorage.setItem(FOLDER_PREF_KEY, enabled);
+  refreshImageSources();
+}
+
+function refreshImageSources() {
+  // Update the currently displayed roll result image, if any
+  const resultImg = resultsEl.querySelector('img[data-pos-id]');
+  if (resultImg) {
+    const id = parseInt(resultImg.getAttribute('data-pos-id'), 10);
+    if (!isNaN(id)) {
+      resultImg.style.display = '';
+      resultImg.src = imagePathFor(id);
+      const fallback = resultImg.nextElementSibling;
+      if (fallback) fallback.style.display = 'none';
+    }
+  }
+  // Re-render whichever grid view is active
+  refreshActiveView();
+  // Update the detail modal image if it's open
+  if (historyModal.classList.contains('open') && currentModalIndex > -1) {
+    displayModalContent(currentModalIndex);
+  }
+}
+
+document.addEventListener('change', e => {
+  if (e.target.classList.contains('filter-toggle')) applyFilterPref(e.target.checked);
+  if (e.target.classList.contains('folder-toggle')) applyFolderPref(e.target.checked);
+});
+
+const savedPref = localStorage.getItem('filterPreference');
+if (savedPref !== null) applyFilterPref(savedPref === 'true');
+
+const savedFolderPref = localStorage.getItem(FOLDER_PREF_KEY);
+if (savedFolderPref !== null) applyFolderPref(savedFolderPref === 'true');
+
+/* ══════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════ */
+applyFaces();
+renderUserUI();
+updateProgress();
+switchView('dice');
+</script>
+
+<!-- MAGNETIC CURSOR HEARTS -->
+<canvas id="heart-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0"></canvas>
+<script>
+(function(){
+  const cv=document.getElementById("heart-canvas");
+  const ctx=cv.getContext("2d");
+  let W,H,mx=null,my=null,t=0;
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;});
+  document.addEventListener("touchmove",e=>{mx=e.touches[0].clientX;my=e.touches[0].clientY;},{passive:true});
+  const hearts=Array.from({length:22},()=>({
+    x:Math.random()*window.innerWidth,y:Math.random()*window.innerHeight,
+    vx:(Math.random()-.5)*0.4,vy:(Math.random()-.5)*0.4,
+    size:5+Math.random()*12,hue:Math.random()<0.6?350:18,alpha:0.25+Math.random()*0.45
+  }));
+  const sparks=[];
+  document.addEventListener("click",e=>{
+    for(let i=0;i<12;i++){
+      const ang=Math.random()*Math.PI*2,spd=2+Math.random()*5;
+      sparks.push({x:e.clientX,y:e.clientY,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,size:3+Math.random()*7,life:50,max:50,hue:Math.random()<.5?350:18});
+    }
+  });
+  function drawHeart(x,y,s,a,hue){
+    ctx.save();ctx.globalAlpha=a;ctx.fillStyle="hsl("+hue+",85%,65%)";
+    ctx.beginPath();ctx.moveTo(x,y-s*.25);ctx.bezierCurveTo(x+s*.5,y-s*.75,x+s*.95,y+s*.05,x,y+s*.6);ctx.bezierCurveTo(x-s*.95,y+s*.05,x-s*.5,y-s*.75,x,y-s*.25);ctx.fill();ctx.restore();
+  }
+  function frame(){
+    requestAnimationFrame(frame);ctx.clearRect(0,0,W,H);t+=0.016;
+    hearts.forEach(h=>{
+      if(mx!==null){const dx=mx-h.x,dy=my-h.y,dist=Math.sqrt(dx*dx+dy*dy)||1,pull=Math.min(3.2,280/dist);h.vx=(h.vx+dx/dist*pull)*0.90;h.vy=(h.vy+dy/dist*pull)*0.90;}
+      else{h.vx*=0.99;h.vy*=0.99;}
+      h.x+=h.vx;h.y+=h.vy;
+      if(h.x<0||h.x>W)h.vx*=-0.6;if(h.y<0||h.y>H)h.vy*=-0.6;
+      drawHeart(h.x,h.y,h.size,h.alpha,h.hue);
+    });
+    for(let i=sparks.length-1;i>=0;i--){
+      const p=sparks[i];p.x+=p.vx;p.y+=p.vy;p.vx*=0.94;p.vy*=0.94;p.life--;
+      drawHeart(p.x,p.y,p.size*(p.life/p.max),(p.life/p.max)*0.8,p.hue);
+      if(p.life<=0)sparks.splice(i,1);
+    }
+  }
+  frame();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+
+<script src="../js/app-shell.js"></script>
+</body>
+</html>

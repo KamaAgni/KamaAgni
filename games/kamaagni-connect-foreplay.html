@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KamaAgni — Connect Foreplay</title>
+<link rel="manifest" href="../manifest.json"/>
+<meta name="theme-color" content="#05060f"/>
+<link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<style>
+  :root{
+    --bg:#12070a;
+    --bg2:#1d0d0d;
+    --ember:#ff6a2b;
+    --ember-deep:#c22a12;
+    --flame:#ff9c3d;
+    --gold:#e6b568;
+    --gold-deep:#b8863a;
+    --gold-dim:#8a6a3c;
+    --cream:#f6e9d8;
+    --ash:#9c8378;
+    --slot-empty:#26141a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% -10%, rgba(255,106,43,.20), transparent 60%),
+      radial-gradient(ellipse 70% 50% at 90% 100%, rgba(194,42,18,.25), transparent 60%),
+      linear-gradient(180deg, var(--bg2), var(--bg) 40%);
+    color:var(--cream);
+    font-family:'DM Sans', sans-serif;
+    position:relative;
+    overflow-x:hidden;
+  }
+  #embers{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;}
+  .ember-particle{
+    position:absolute; bottom:-10px; width:4px; height:4px; border-radius:50%;
+    background:radial-gradient(circle, var(--flame), var(--ember-deep) 70%, transparent);
+    opacity:.7; animation:rise linear infinite;
+  }
+  @keyframes rise{
+    0%{ transform:translateY(0) translateX(0); opacity:0;}
+    10%{opacity:.8;}
+    100%{ transform:translateY(-110vh) translateX(var(--drift,20px)); opacity:0;}
+  }
+  #app{position:relative; z-index:1; max-width:640px; margin:0 auto; padding:28px 16px 60px;}
+
+  h1,h2,h3{font-family:'Cinzel', serif; letter-spacing:.02em; margin:0 0 6px;}
+  .eyebrow{
+    font-family:'Cinzel', serif; text-transform:uppercase; letter-spacing:.28em;
+    font-size:11px; color:var(--gold); opacity:.85; margin-bottom:6px;
+  }
+  .logo{text-align:center; margin-bottom:24px;}
+  .logo h1{
+    font-size:34px; font-weight:900;
+    background:linear-gradient(180deg, var(--gold) 10%, var(--ember) 60%, var(--ember-deep));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    text-shadow:0 0 40px rgba(255,106,43,.25);
+  }
+  .logo .tag{color:var(--ash); font-size:13px; letter-spacing:.08em;}
+
+  .panel{
+    background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.01));
+    border:1px solid rgba(230,181,104,.25);
+    border-radius:18px;
+    padding:22px 20px;
+    margin-bottom:16px;
+    box-shadow:0 12px 40px rgba(0,0,0,.35);
+  }
+
+  label{display:block; font-size:12px; color:var(--ash); text-transform:uppercase; letter-spacing:.1em; margin-bottom:6px;}
+  input[type=text]{
+    width:100%; padding:12px 14px; border-radius:10px; border:1px solid rgba(230,181,104,.3);
+    background:rgba(0,0,0,.25); color:var(--cream); font-size:16px; font-family:'DM Sans',sans-serif;
+    margin-bottom:16px;
+  }
+  input[type=text]:focus{outline:none; border-color:var(--ember);}
+
+  button{
+    font-family:'DM Sans',sans-serif; font-weight:700; letter-spacing:.02em;
+    border:none; border-radius:12px; padding:13px 22px; font-size:15px;
+    cursor:pointer; transition:transform .12s ease, box-shadow .12s ease;
+  }
+  button:active{transform:scale(.97);}
+  .btn-primary{
+    background:linear-gradient(135deg, var(--flame), var(--ember-deep));
+    color:#fff8ee; box-shadow:0 6px 20px rgba(255,106,43,.35);
+    width:100%;
+  }
+  .btn-primary:disabled{opacity:.4; cursor:not-allowed; box-shadow:none;}
+  .btn-ghost{background:transparent; border:1px solid rgba(230,181,104,.4); color:var(--gold); width:100%;}
+
+  .center{text-align:center;}
+  .muted{color:var(--ash); font-size:13px;}
+  .badge{
+    display:inline-block; padding:4px 12px; border-radius:20px; font-size:11px;
+    text-transform:uppercase; letter-spacing:.12em; font-family:'Cinzel',serif;
+    background:rgba(230,181,104,.12); border:1px solid rgba(230,181,104,.4); color:var(--gold);
+    margin-bottom:10px;
+  }
+
+  .turn-row{display:flex; gap:14px; margin-bottom:16px;}
+  .turn-col{flex:1; text-align:center; padding:10px 6px; border-radius:12px; border:1px solid transparent;}
+  .turn-col.active{border-color:var(--ember); background:rgba(255,106,43,.1);}
+  .turn-name{font-family:'Cinzel',serif; font-size:14px; color:var(--gold);}
+  .turn-disc{width:16px; height:16px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle;}
+
+  .board-wrap{
+    background:rgba(0,0,0,.3); border-radius:16px; padding:10px;
+    border:1px solid rgba(230,181,104,.25);
+  }
+  .board{
+    display:grid;
+    grid-template-columns:repeat(7, 1fr);
+    gap:6px;
+  }
+  .col{display:flex; flex-direction:column-reverse; gap:6px; cursor:pointer;}
+  .col:hover .slot.empty{background:rgba(255,106,43,.12);}
+  .slot{
+    aspect-ratio:1/1; border-radius:50%; background:var(--slot-empty);
+    display:flex; align-items:center; justify-content:center; font-size:15px;
+    border:1px solid rgba(230,181,104,.15); position:relative;
+  }
+  .slot.p0{background:linear-gradient(135deg, var(--flame), var(--ember-deep)); box-shadow:0 3px 8px rgba(255,106,43,.4);}
+  .slot.p1{background:linear-gradient(135deg, #f6e0a8, var(--gold-deep)); box-shadow:0 3px 8px rgba(230,181,104,.4);}
+  .slot .icon{font-size:14px;}
+
+  .legend{display:flex; flex-wrap:wrap; gap:8px; margin-top:14px; justify-content:center;}
+  .legend-item{
+    font-size:11px; color:var(--ash); background:rgba(255,255,255,.04);
+    border:1px solid rgba(230,181,104,.2); border-radius:8px; padding:4px 8px;
+  }
+
+  .tier-banner{
+    text-align:center; font-family:'Cinzel',serif; font-size:22px; color:var(--flame);
+    margin-bottom:4px;
+  }
+  .tier-sub{text-align:center; color:var(--ash); font-size:12px; margin-bottom:16px;}
+
+  .challenge-list{list-style:none; margin:0 0 18px; padding:0;}
+  .challenge-item{
+    display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:12px;
+    border:1px solid rgba(230,181,104,.25); background:rgba(0,0,0,.2); margin-bottom:10px;
+  }
+  .challenge-icon{font-size:20px; line-height:1;}
+  .challenge-text{font-size:14px; line-height:1.4;}
+  .challenge-tag{font-size:10px; text-transform:uppercase; letter-spacing:.1em; color:var(--gold); display:block; margin-bottom:2px;}
+
+  .final-screen{text-align:center; padding:10px 0;}
+  .final-screen h2{font-size:28px; color:var(--flame);}
+
+  .rules-section{margin-bottom:20px;}
+  .rules-section h3{font-size:16px; color:var(--gold); margin-bottom:8px;}
+  .rules-section p, .rules-section li{font-size:14px; line-height:1.55; color:var(--cream);}
+  .rules-section ul{margin:0; padding-left:20px;}
+  .rules-section ul li{margin-bottom:4px;}
+  .link-btn{
+    background:none; border:none; color:var(--gold); text-decoration:underline;
+    font-size:13px; padding:0; cursor:pointer; width:auto; font-weight:600;
+  }
+  #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+  #ka-back:hover{color:var(--flame);border-color:rgba(255,156,61,0.4)}
+  @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+</style>
+</head>
+<body>
+<a id="ka-back" href="../index.html">← Home</a>
+<div id="embers"></div>
+<div id="app"></div>
+
+<script>
+/* ---------------- Embers background ---------------- */
+(function(){
+  const wrap = document.getElementById('embers');
+  for(let i=0;i<24;i++){
+    const e = document.createElement('div');
+    e.className='ember-particle';
+    e.style.left = (Math.random()*100)+'%';
+    e.style.animationDuration = (6+Math.random()*8)+'s';
+    e.style.animationDelay = (Math.random()*10)+'s';
+    e.style.setProperty('--drift', (Math.random()*60-30)+'px');
+    e.style.width = e.style.height = (2+Math.random()*3)+'px';
+    wrap.appendChild(e);
+  }
+})();
+
+/* ---------------- Content: tiers & marker types ---------------- */
+const TIERS = [
+  {
+    key:'spark', label:'Spark', sub:'Round 1 of 3 — warming up',
+    types:{
+      talk:{icon:'💬', options:[
+        "Tell your partner one thing you find irresistible about them.",
+        "Whisper your favorite memory of the two of you together.",
+        "Describe what you want to do to them tonight, in one sentence."
+      ]},
+      touch:{icon:'✋', options:[
+        "Hold hands and trace slow circles on your partner's palm for 20 seconds.",
+        "Run your fingers through your partner's hair for 15 seconds.",
+        "Place your hand on your partner's chest and feel their heartbeat for 10 seconds."
+      ]},
+      tease:{icon:'😏', options:[
+        "Bite your lip and hold eye contact with your partner for 10 seconds.",
+        "Slowly undo one button of your partner's shirt, then stop.",
+        "Trace your fingertip along your partner's collarbone."
+      ]},
+      cuddle:{icon:'🤗', options:[
+        "Pull your partner into a close hug and don't let go for a minute.",
+        "Sit in your partner's lap for the next challenge.",
+        "Wrap your arms around your partner from behind and hold them close."
+      ]}
+    }
+  },
+  {
+    key:'blaze', label:'Blaze', sub:'Round 2 of 3 — turning up the heat',
+    types:{
+      kiss:{icon:'💋', options:[
+        "Kiss your partner slowly for 20 seconds.",
+        "Kiss your partner's neck, three times.",
+        "Give your partner a kiss somewhere they don't expect."
+      ]},
+      massage:{icon:'🤲', options:[
+        "Give your partner a one-minute shoulder massage.",
+        "Massage your partner's hands, one finger at a time.",
+        "Rub your partner's lower back for 60 seconds."
+      ]},
+      strip:{icon:'🎽', options:[
+        "Remove one item of your partner's clothing, slowly.",
+        "Remove one item of your own clothing, however you like.",
+        "Let your partner choose one item of clothing for you to remove."
+      ]},
+      whisper:{icon:'🤫', options:[
+        "Whisper what you want to happen once the game is over.",
+        "Whisper your partner's biggest turn-on back to them.",
+        "Whisper three words that describe how you're feeling right now."
+      ]}
+    }
+  },
+  {
+    key:'inferno', label:'Inferno', sub:'Round 3 of 3 — the final round',
+    types:{
+      bare:{icon:'🔥', options:[
+        "Remove another item of clothing, your choice.",
+        "Let your partner remove one more item of yours.",
+        "Both of you remove one item at the same time."
+      ]},
+      command:{icon:'👑', options:[
+        "Give your partner one command they must follow for the next 30 seconds.",
+        "Tell your partner exactly how you want to be touched right now.",
+        "Direct your partner's hands wherever you want them."
+      ]},
+      worship:{icon:'💫', options:[
+        "Kiss your way from your partner's neck down to their waist.",
+        "Spend 30 seconds giving your partner your full attention, anywhere they choose.",
+        "Tell your partner what you love most about their body right now."
+      ]},
+      edge:{icon:'⚡', options:[
+        "Bring your partner right to the edge, then stop.",
+        "Take things as far as you both want to go.",
+        "Whoever's more turned on right now doesn't choose what happens next — their partner does."
+      ]}
+    }
+  }
+];
+
+function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+/* ---------------- Connect-4 mechanics ---------------- */
+const ROWS = 6, COLS = 7;
+function emptyGrid(){
+  return Array.from({length:ROWS}, ()=> Array(COLS).fill(null));
+}
+function lowestEmptyRow(grid, col){
+  for(let r=0;r<ROWS;r++){ if(!grid[r][col]) return r; }
+  return -1;
+}
+const DIRECTIONS = [[0,1],[1,0],[1,1],[1,-1]];
+function findWinLine(grid, row, col){
+  const player = grid[row][col].player;
+  for(const [dr,dc] of DIRECTIONS){
+    let line = [[row,col]];
+    // positive direction
+    let r=row+dr, c=col+dc;
+    while(r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r][c]&&grid[r][c].player===player){ line.push([r,c]); r+=dr; c+=dc; }
+    // negative direction
+    r=row-dr; c=col-dc;
+    while(r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r][c]&&grid[r][c].player===player){ line.unshift([r,c]); r-=dr; c-=dc; }
+    if(line.length>=4){
+      return line.slice(0,4);
+    }
+  }
+  return null;
+}
+function boardFull(grid){
+  return grid[ROWS-1].every(cell=>cell!==null);
+}
+
+/* ---------------- Game State ---------------- */
+let S = null;
+let savedGame = null;
+
+function initGame(nameA, nameB){
+  S = {
+    phase:'board',
+    tierIndex:0,
+    players:[nameA, nameB],
+    turn:0,
+    grid:emptyGrid(),
+    winLine:null,
+    winner:null,     // round winner (0/1)
+    finalWinner:null
+  };
+}
+
+function dropDisc(col){
+  const grid = S.grid;
+  const row = lowestEmptyRow(grid, col);
+  if(row===-1) return;
+  const tier = TIERS[S.tierIndex];
+  const typeKeys = Object.keys(tier.types);
+  const type = randomFrom(typeKeys);
+  grid[row][col] = {player:S.turn, type};
+
+  const line = findWinLine(grid, row, col);
+  if(line){
+    S.winLine = line;
+    S.winner = S.turn;
+    S.phase = 'round-win';
+    return;
+  }
+  if(boardFull(grid)){
+    S.phase = 'draw';
+    return;
+  }
+  S.turn = 1 - S.turn;
+}
+
+function nextRound(){
+  if(S.tierIndex >= TIERS.length-1){
+    S.finalWinner = S.winner;
+    S.phase = 'final';
+    return;
+  }
+  S.tierIndex++;
+  S.grid = emptyGrid();
+  S.winLine = null;
+  S.winner = null;
+  S.turn = 0;
+  S.phase = 'board';
+}
+
+function replayTier(){
+  S.grid = emptyGrid();
+  S.winLine = null;
+  S.winner = null;
+  S.turn = 0;
+  S.phase = 'board';
+}
+
+/* ---------------- Rendering ---------------- */
+const app = document.getElementById('app');
+function el(tag, cls, html){
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html!==undefined) e.innerHTML = html;
+  return e;
+}
+
+function render(){
+  app.innerHTML='';
+  app.appendChild(logo());
+  if(!S){ app.appendChild(setupScreen()); return; }
+  if(S.phase==='rules'){ app.appendChild(rulesScreen()); return; }
+
+  switch(S.phase){
+    case 'board': app.appendChild(boardScreen()); break;
+    case 'round-win': app.appendChild(roundWinScreen()); break;
+    case 'draw': app.appendChild(drawScreen()); break;
+    case 'final': app.appendChild(finalScreen()); break;
+  }
+}
+
+function logo(){
+  const d = el('div','logo');
+  d.innerHTML = `<div class="eyebrow" style="text-align:center">KamaAgni Presents</div>
+    <h1>Connect Foreplay</h1>
+    <div class="tag">connect four, then turn up the heat</div>`;
+  return d;
+}
+
+function setupScreen(){
+  const wrap = el('div','panel');
+  wrap.innerHTML = `
+    <div class="eyebrow">Before you begin</div>
+    <p class="muted" style="margin-bottom:18px;">Two players, one board, three rounds that get hotter as you go. Connect four discs in a row — horizontally, vertically, or diagonally — to win the round and set your challenges.</p>
+    <label>Player One (goes first)</label>
+    <input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
+    <label>Player Two</label>
+    <input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
+    <button class="btn-primary" id="startBtn">Light the Board</button>
+    <div class="center" style="margin-top:12px;">
+      <button class="link-btn" id="rulesBtn">How to Play →</button>
+    </div>
+  `;
+  wrap.querySelector('#startBtn').onclick = ()=>{
+    const a = wrap.querySelector('#nameA').value.trim() || 'Player One';
+    const b = wrap.querySelector('#nameB').value.trim() || 'Player Two';
+    initGame(a,b);
+    render();
+  };
+  wrap.querySelector('#rulesBtn').onclick = ()=>{
+    S = {phase:'rules', prevSetup:true};
+    render();
+  };
+  return wrap;
+}
+
+function rulesScreen(){
+  const wrap = el('div','panel');
+  wrap.appendChild(el('div','badge','How to Play'));
+  wrap.appendChild(el('h2','','Connect Foreplay Rules'));
+
+  const s1 = el('div','rules-section');
+  s1.innerHTML = `<h3>The Board</h3><p>Connect Foreplay is played on a vertical grid with <strong>7 columns and 6 rows</strong> — 42 spaces in total. Discs are dropped in from the top and fall to the lowest open space in that column, just like classic Connect Four.</p>`;
+  wrap.appendChild(s1);
+
+  const s2 = el('div','rules-section');
+  s2.innerHTML = `<h3>How to Play</h3>
+    <ul>
+      <li>Players take turns. Player One drops first.</li>
+      <li>Every disc you drop is randomly branded with a challenge type for the current round — you won't know which one until it lands.</li>
+      <li>Discs never move once placed.</li>
+      <li>Play alternates until someone connects four, or the board fills up.</li>
+    </ul>`;
+  wrap.appendChild(s2);
+
+  const s3 = el('div','rules-section');
+  s3.innerHTML = `<h3>How to Win a Round</h3>
+    <p>Connect <strong>four of your own discs</strong> in a consecutive line to win the round. This can be:</p>
+    <ul>
+      <li><strong>Horizontal</strong> — four across a row</li>
+      <li><strong>Vertical</strong> — four stacked in a column</li>
+      <li><strong>Diagonal</strong> — four in a slanted line, either direction</li>
+    </ul>
+    <p>The round ends the instant a line of four is completed. Both partners then complete the four challenges tied to the discs in that winning line — together.</p>`;
+  wrap.appendChild(s3);
+
+  const s4 = el('div','rules-section');
+  s4.innerHTML = `<h3>Rounds Get Hotter</h3>
+    <p>There are three rounds — <strong>Spark, Blaze, and Inferno</strong> — each with its own set of challenge types. Win the round to clear the board and move up to the next, hotter tier. Win the Inferno round and the game is over.</p>`;
+  wrap.appendChild(s4);
+
+  const s5 = el('div','rules-section');
+  s5.innerHTML = `<h3>Draws</h3><p>If all 42 spaces fill up and neither player has four in a row, it's a draw — no challenges this time. Clear the board and replay the same round.</p>`;
+  wrap.appendChild(s5);
+
+  const s6 = el('div','rules-section');
+  s6.innerHTML = `<h3>Quick Tips</h3>
+    <ul>
+      <li>The center column gives you the most ways to build a line — start there.</li>
+      <li>Watch the diagonals; they're the easiest wins to miss.</li>
+      <li>Think about what you're setting up for your <em>partner</em> too — every win is shared.</li>
+    </ul>`;
+  wrap.appendChild(s6);
+
+  const btn = el('button','btn-primary','Back');
+  btn.onclick = ()=>{ S = savedGame; savedGame = null; render(); };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function turnRow(){
+  const wrap = el('div','turn-row');
+  S.players.forEach((name,i)=>{
+    const col = el('div','turn-col'+(S.turn===i?' active':''));
+    const discColor = i===0 ? 'linear-gradient(135deg, var(--flame), var(--ember-deep))' : 'linear-gradient(135deg, #f6e0a8, var(--gold-deep))';
+    col.innerHTML = `<span class="turn-disc" style="background:${discColor}"></span><span class="turn-name">${name}</span>`;
+    wrap.appendChild(col);
+  });
+  return wrap;
+}
+
+function boardScreen(){
+  const frag = document.createDocumentFragment();
+  const tier = TIERS[S.tierIndex];
+
+  const panel1 = el('div','panel');
+  panel1.appendChild(el('div','tier-banner', tier.label));
+  panel1.appendChild(el('div','tier-sub', tier.sub));
+  panel1.appendChild(turnRow());
+  const rulesLink = el('div','center', '<button class="link-btn" id="inGameRules">How to Play →</button>');
+  rulesLink.querySelector('#inGameRules').onclick = ()=>{ savedGame = S; S = {phase:'rules'}; render(); };
+  panel1.appendChild(rulesLink);
+  frag.appendChild(panel1);
+
+  const boardPanel = el('div','panel');
+  const boardWrap = el('div','board-wrap');
+  const board = el('div','board');
+  for(let c=0;c<COLS;c++){
+    const colEl = el('div','col');
+    colEl.onclick = ()=>{ dropDisc(c); render(); };
+    for(let r=ROWS-1;r>=0;r--){
+      const cell = S.grid[r][c];
+      const slot = el('div','slot'+(cell?` p${cell.player}`:' empty'));
+      if(cell){ slot.innerHTML = `<span class="icon">${tier.types[cell.type].icon}</span>`; }
+      colEl.appendChild(slot);
+    }
+    board.appendChild(colEl);
+  }
+  boardWrap.appendChild(board);
+  boardPanel.appendChild(boardWrap);
+
+  const legend = el('div','legend');
+  Object.entries(tier.types).forEach(([key, t])=>{
+    legend.appendChild(el('div','legend-item', `${t.icon} ${key}`));
+  });
+  boardPanel.appendChild(legend);
+  frag.appendChild(boardPanel);
+
+  return frag;
+}
+
+function roundWinScreen(){
+  const tier = TIERS[S.tierIndex];
+  const winnerName = S.players[S.winner];
+  const wrap = el('div','panel');
+  wrap.appendChild(el('div','badge', `${tier.label} — Round Won`));
+  wrap.appendChild(el('h2', '', `${winnerName} connected four!`));
+  wrap.appendChild(el('p','muted', 'Both of you complete these four challenges together, based on the markers in the winning line:'));
+
+  const list = el('ul','challenge-list');
+  S.winLine.forEach(([r,c])=>{
+    const cell = S.grid[r][c];
+    const type = cell.type;
+    const meta = tier.types[type];
+    const text = randomFrom(meta.options);
+    const item = el('li','challenge-item');
+    item.innerHTML = `<span class="challenge-icon">${meta.icon}</span>
+      <span class="challenge-text"><span class="challenge-tag">${type}</span>${text}</span>`;
+    list.appendChild(item);
+  });
+  wrap.appendChild(list);
+
+  const isLastTier = S.tierIndex >= TIERS.length-1;
+  const btn = el('button','btn-primary', isLastTier ? 'Finish the Game' : `Continue to ${TIERS[S.tierIndex+1].label}`);
+  btn.onclick = ()=>{ nextRound(); render(); };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function drawScreen(){
+  const wrap = el('div','panel center');
+  wrap.innerHTML = `<div class="badge">Board Full</div>
+    <h2>No one connected four</h2>
+    <p class="muted">The board filled up with no winner. Clear it and try this round again.</p>`;
+  const btn = el('button','btn-primary','Replay This Round');
+  btn.onclick = ()=>{ replayTier(); render(); };
+  wrap.appendChild(btn);
+  return wrap;
+}
+
+function finalScreen(){
+  const winnerName = S.players[S.finalWinner];
+  const wrap = el('div','panel final-screen');
+  wrap.innerHTML = `<div class="badge">Inferno Complete</div>
+    <h2>${winnerName} won the final round 🔥</h2>
+    <p class="muted">You've made it through Spark, Blaze, and Inferno. Take things wherever you both want to go from here.</p>`;
+  const restart = el('button','btn-primary','Play Again');
+  restart.style.marginTop='16px';
+  restart.onclick = ()=>{ initGame(S.players[0], S.players[1]); render(); };
+  wrap.appendChild(restart);
+  return wrap;
+}
+
+render();
+</script>
+
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+</body>
+</html>

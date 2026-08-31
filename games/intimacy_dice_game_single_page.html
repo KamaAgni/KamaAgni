@@ -1,0 +1,685 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="../css/fonts.css"/>
+  <link rel="stylesheet" href="../css/premium.css"/>
+  <link rel="manifest" href="../manifest.json"/>
+  <meta name="theme-color" content="#05060f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
+  <link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Intimacy Dice: What, Where and How</title>
+  <meta name="description" content="Roll three intimacy dice to discover your next playful connection move."/>
+  <style>
+/* ════ TOKENS ════ */
+:root {
+  --bg:       #05060f;
+  --surface:  #0c0e1c;
+  --surface2: #12152a;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.13);
+  --rose:     #e8637a;
+  --rose2:    #f4a0ae;
+  --indigo:   #6c7ef8;
+  --indigo2:  #a5aeff;
+  --gold:     #f5c842;
+  --muted:    #7a8aab;
+  --text:     #dce9ff;
+  --text2:    #a8bcd8;
+  --tr:       0.22s ease;
+  --ds:       150px;
+}
+*,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+html,body { height:100%; }
+body {
+  font-family:'DM Sans',system-ui,sans-serif;
+  background:var(--bg); color:var(--text);
+  min-height:100vh; -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+  display:flex; flex-direction:column; align-items:center;
+  padding:20px 16px 48px;
+}
+a { text-decoration:none; color:inherit; }
+
+/* Ambient */
+body::before {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -5%,  rgba(108,126,248,0.10) 0%,transparent 65%),
+    radial-gradient(ellipse 700px 400px at 88% 108%, rgba(232,99,122,0.08) 0%,transparent 65%);
+}
+body::after {
+  content:''; position:fixed; inset:0; z-index:0; pointer-events:none; opacity:0.022;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* Toast */
+#toast-wrap {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  display:flex; flex-direction:column; align-items:center; gap:8px;
+  z-index:9999; pointer-events:none;
+}
+.toast {
+  background:var(--surface2); border:1px solid var(--border2);
+  color:var(--text); padding:10px 22px; border-radius:999px;
+  font-size:13px; font-weight:600; opacity:0; transform:translateY(8px);
+  transition:opacity .26s ease, transform .26s ease;
+  white-space:nowrap; box-shadow:0 8px 28px rgba(0,0,0,0.5);
+}
+.toast.show    { opacity:1; transform:translateY(0); }
+.toast.success { border-color:rgba(232,99,122,0.4);   color:var(--rose2); }
+.toast.info    { border-color:rgba(108,126,248,0.35); color:var(--indigo2); }
+
+/* App shell */
+.app {
+  position:relative; z-index:1;
+  width:100%; max-width:1060px;
+  background:linear-gradient(160deg,rgba(255,255,255,0.025) 0%,rgba(0,0,0,0.18) 100%);
+  border:1px solid var(--border); border-radius:22px;
+  padding:28px 32px 36px;
+  box-shadow:0 24px 80px rgba(0,0,0,0.55);
+}
+
+/* Topbar */
+.topbar { display:flex; align-items:center; margin-bottom:24px; }
+.home-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 16px; border-radius:999px;
+  background:var(--surface); border:1px solid var(--border);
+  color:var(--muted); font-size:13px; font-weight:600;
+  transition:color var(--tr), border-color var(--tr);
+}
+.home-btn:hover { color:var(--text); border-color:var(--border2); }
+
+/* Header */
+header { text-align:center; margin-bottom:26px; }
+.header-eyebrow {
+  display:inline-flex; align-items:center; gap:7px;
+  padding:4px 14px; border-radius:999px;
+  border:1px solid rgba(232,99,122,0.28); background:rgba(232,99,122,0.07);
+  font-size:11px; font-weight:700; letter-spacing:0.1em;
+  text-transform:uppercase; color:var(--rose2); margin-bottom:14px;
+}
+.eyebrow-dot {
+  width:5px; height:5px; border-radius:50%;
+  background:var(--rose); box-shadow:0 0 7px var(--rose);
+  animation:dotPulse 2.2s ease infinite;
+}
+@keyframes dotPulse {
+  0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.6)}
+}
+header h1 {
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(26px,4vw,44px); font-weight:700;
+  letter-spacing:-0.02em; line-height:1.1; color:var(--text); margin-bottom:10px;
+}
+header h1 em {
+  font-style:italic;
+  background:linear-gradient(135deg,var(--rose),var(--rose2));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.lead { font-size:15px; color:var(--muted); line-height:1.6; max-width:520px; margin:0 auto; }
+.lead strong { color:var(--text2); }
+
+/* Controls */
+.controls {
+  display:flex; gap:12px; align-items:center;
+  justify-content:center; flex-wrap:wrap; margin-bottom:28px;
+}
+.select-wrap { position:relative; }
+.select-wrap::after {
+  content:'▾'; position:absolute; right:14px; top:50%; transform:translateY(-50%);
+  color:var(--muted); pointer-events:none; font-size:13px;
+}
+select {
+  appearance:none; -webkit-appearance:none;
+  background:var(--surface2); color:var(--text);
+  border:1px solid var(--border); border-radius:12px;
+  padding:11px 38px 11px 16px;
+  font-family:'DM Sans',sans-serif; font-size:14px; font-weight:600;
+  cursor:pointer; transition:border-color var(--tr); outline:none;
+}
+select:hover,select:focus { border-color:var(--border2); }
+select option { background:#12152a; }
+.btn-roll {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:12px 28px; border-radius:999px; border:none;
+  background:linear-gradient(135deg,var(--rose),#f07090);
+  color:#fff; font-family:'DM Sans',sans-serif;
+  font-size:16px; font-weight:700; cursor:pointer;
+  box-shadow:0 6px 22px rgba(232,99,122,0.32);
+  transition:transform .14s ease, box-shadow .14s ease, opacity .14s ease;
+}
+.btn-roll:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 32px rgba(232,99,122,0.48); }
+.btn-roll:active  { transform:scale(0.96); }
+.btn-roll:disabled{ opacity:0.4; cursor:not-allowed; }
+
+/* Dice labels */
+.dice-labels {
+  display:flex; justify-content:center; gap:20px; margin-bottom:10px;
+}
+.dice-label {
+  width:var(--ds); text-align:center;
+  font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase;
+}
+
+/* Game row */
+.game {
+  display:flex; gap:20px; align-items:center;
+  justify-content:center; flex-wrap:wrap; margin-bottom:24px;
+}
+
+/* ═══════════════════════════════════════════
+   DIE: single face, always visible.
+   Roll = blur+scale spin keyframe.
+   After roll lands: snap to new text cleanly.
+═══════════════════════════════════════════ */
+.die {
+  width:var(--ds); height:var(--ds);
+  position:relative; flex-shrink:0;
+}
+
+.die-face {
+  width:100%; height:100%;
+  border-radius:20px;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center; padding:14px;
+  font-family:'DM Sans',sans-serif;
+  font-weight:800; font-size:17px; line-height:1.25;
+  box-shadow:0 8px 32px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.07);
+  transition:box-shadow 0.4s ease;
+  position:relative; overflow:hidden;
+  /* Idle state */
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  color:var(--muted);
+}
+
+/* Idle "?" label */
+.die-face::before {
+  content: attr(data-label);
+  position:absolute; bottom:10px; left:0; right:0;
+  font-size:10px; font-weight:700; letter-spacing:0.08em;
+  text-transform:uppercase; opacity:0.5; text-align:center;
+}
+
+/* Die colour themes — applied via JS class */
+.die-face.is-action {
+  background:linear-gradient(145deg,#2a0d18,#1c0810);
+  color:var(--rose2); border:1px solid rgba(232,99,122,0.3);
+  box-shadow:0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(232,99,122,0.1);
+}
+.die-face.is-body {
+  background:linear-gradient(145deg,#0c1128,#06091a);
+  color:var(--indigo2); border:1px solid rgba(108,126,248,0.3);
+  box-shadow:0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(108,126,248,0.1);
+}
+.die-face.is-manner {
+  background:linear-gradient(145deg,#1c1506,#110e03);
+  color:#f5d96e; border:1px solid rgba(245,200,66,0.25);
+  box-shadow:0 8px 32px rgba(0,0,0,0.55), 0 0 0 1px rgba(245,200,66,0.1);
+}
+
+/* Roll spin animation */
+@keyframes dieSpin {
+  0%   { transform:scale(1)    rotateY(0deg);   filter:blur(0px);  opacity:1; }
+  20%  { transform:scale(1.12) rotateY(120deg); filter:blur(3px);  opacity:0.7; }
+  50%  { transform:scale(1.08) rotateY(280deg); filter:blur(5px);  opacity:0.5; }
+  75%  { transform:scale(1.05) rotateY(400deg); filter:blur(2px);  opacity:0.8; }
+  100% { transform:scale(1)    rotateY(540deg); filter:blur(0px);  opacity:1; }
+}
+
+/* Land animation — small bounce when result appears */
+@keyframes dieLand {
+  0%   { transform:scale(1.08); }
+  60%  { transform:scale(0.96); }
+  100% { transform:scale(1); }
+}
+
+.die-face.spinning {
+  animation:dieSpin 0.75s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+.die-face.landing {
+  animation:dieLand 0.3s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+/* Shadow */
+.die-shadow {
+  position:absolute; left:50%; bottom:-10px; transform:translateX(-50%);
+  width:70%; height:14px; border-radius:50%;
+  filter:blur(10px); background:rgba(0,0,0,0.4);
+  transition:width .5s, opacity .5s; pointer-events:none;
+}
+.die.rolling .die-shadow { width:90%; opacity:0.6; }
+
+/* Result card */
+.results { min-height:60px; text-align:center; }
+@keyframes cardReveal {
+  from { opacity:0; transform:translateY(16px) scale(0.98); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.result-card {
+  display:none;
+  background:var(--surface); border:1px solid var(--border2);
+  border-radius:18px; padding:22px 26px;
+  max-width:560px; margin:0 auto; text-align:left;
+}
+.result-card.show { display:block; animation:cardReveal 0.45s cubic-bezier(0.22,1,0.36,1) both; }
+.result-header  { display:flex; align-items:flex-start; gap:12px; }
+.result-emoji   { font-size:26px; flex-shrink:0; margin-top:2px; }
+.result-text {
+  flex:1;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(18px,2.5vw,24px); font-weight:600; line-height:1.35; color:var(--text);
+}
+.save-btn {
+  background:none; border:none; cursor:pointer;
+  font-size:22px; flex-shrink:0; color:var(--muted);
+  transition:transform var(--tr), color var(--tr); padding:2px 4px;
+}
+.save-btn:hover { transform:scale(1.25); color:var(--rose); }
+.save-btn.saved { color:var(--rose); }
+.result-divider { height:1px; background:var(--border); margin:14px 0; }
+.result-prompt  { font-size:13px; color:var(--muted); line-height:1.6; }
+.result-badges  { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.result-badge {
+  padding:3px 12px; border-radius:999px;
+  font-size:11px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase;
+}
+.result-badge.action { background:rgba(232,99,122,0.12); color:var(--rose2);   border:1px solid rgba(232,99,122,0.25); }
+.result-badge.body   { background:rgba(108,126,248,0.12); color:var(--indigo2); border:1px solid rgba(108,126,248,0.25); }
+.result-badge.manner { background:rgba(245,200,66,0.10);  color:#f5d96e;        border:1px solid rgba(245,200,66,0.22); }
+
+/* Tip bar */
+.tip-bar {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:12px; padding:10px 16px;
+  max-width:560px; margin:16px auto 0;
+  font-size:13px; color:var(--muted); line-height:1.5;
+}
+.tip-icon { font-size:16px; flex-shrink:0; }
+
+/* Favorites */
+.fav-section { margin-top:32px; border-top:1px solid var(--border); padding-top:24px; }
+.fav-header  { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.fav-title   { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:var(--rose2); }
+.btn-clear {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 16px; border-radius:999px;
+  background:rgba(180,50,40,0.12); color:#e17168;
+  border:1px solid rgba(180,50,40,0.28);
+  font-family:'DM Sans',sans-serif; font-size:13px; font-weight:600; cursor:pointer;
+  transition:background var(--tr);
+}
+.btn-clear:hover { background:rgba(180,50,40,0.22); }
+.fav-list  { display:flex; flex-direction:column; gap:8px; }
+.fav-item  {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:10px; padding:10px 14px;
+  font-size:14px; color:var(--text2); line-height:1.5;
+  transition:border-color var(--tr);
+}
+.fav-item:hover   { border-color:var(--border2); }
+.fav-item-icon    { font-size:16px; flex-shrink:0; }
+.fav-empty { font-size:14px; color:var(--muted); font-style:italic; text-align:center; padding:20px 0; }
+
+/* Responsive */
+@media(max-width:720px) {
+  :root { --ds:120px; }
+  .app  { padding:20px 18px 28px; border-radius:16px; }
+  .die-face { font-size:14px; }
+}
+@media(max-width:480px) {
+  :root { --ds:100px; }
+  .controls { flex-direction:column; }
+  select,.btn-roll { width:100%; justify-content:center; }
+  .dice-labels { display:none; }
+  .die-face { font-size:13px; }
+}
+  </style>
+
+  <style id="kamaagni-responsive">
+    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
+    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
+    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
+    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
+  </style>
+</head>
+<body>
+<!-- <a id="ka-back" href="../index.html">← Home</a> -->
+
+
+<div id="toast-wrap"></div>
+
+<div class="app" role="application">
+
+  <div class="topbar">
+    <a href="../index.html" class="home-btn">← Home</a>
+  </div>
+
+  <header>
+    <div class="header-eyebrow">
+      <span class="eyebrow-dot"></span>
+      What · Where · How
+    </div>
+    <h1>Intimacy <em>Dice</em></h1>
+    <p class="lead">Three dice: <strong>What</strong> to do, <strong>Where</strong> to focus, and <strong>How</strong> to do it. Choose a level and roll!</p>
+  </header>
+
+  <div class="controls">
+    <div class="select-wrap">
+      <select id="level" aria-label="Joy level">
+        <option value="soft">🌙 Gentle Joy: comfort &amp; closeness</option>
+        <option value="medium">🔥 Passionate Joy: warm &amp; flirty</option>
+        <option value="wild">💥 Wild Joy: bold &amp; playful</option>
+      </select>
+    </div>
+    <button id="rollBtn" class="btn-roll">🎲 Roll the Dice</button>
+  </div>
+
+  <div class="dice-labels">
+    <span class="dice-label" style="color:var(--rose2)">What</span>
+    <span class="dice-label" style="color:var(--indigo2)">Where</span>
+    <span class="dice-label" style="color:#f5d96e">How</span>
+  </div>
+
+  <div class="game" id="game">
+    <div class="die" id="die0">
+      <div class="die-face" id="face0" data-label="What">?</div>
+      <div class="die-shadow"></div>
+    </div>
+    <div class="die" id="die1">
+      <div class="die-face" id="face1" data-label="Where">?</div>
+      <div class="die-shadow"></div>
+    </div>
+    <div class="die" id="die2">
+      <div class="die-face" id="face2" data-label="How">?</div>
+      <div class="die-shadow"></div>
+    </div>
+  </div>
+
+  <div class="results" id="results"></div>
+
+  <div class="tip-bar">
+    <span class="tip-icon">💡</span>
+    <span id="tip">Tip: Affectionate touch, shared novelty, eye contact and laughter all boost connection.</span>
+  </div>
+
+  <div class="fav-section">
+    <div class="fav-header">
+      <div class="fav-title">❤️ Saved Moves</div>
+      <button class="btn-clear" id="clearFavs">✕ Clear All</button>
+    </div>
+    <div class="fav-list" id="favList"></div>
+  </div>
+
+</div>
+
+<script>
+const pools = {
+  soft: {
+    actions: ['HOLD HANDS','TRACE','KISS','CUDDLE','COMPLIMENT','MASSAGE',
+              'BRUSH HAIR','WRITE ON SKIN','SMELL DEEPLY','SLOW DANCE','HOLD FACE'],
+    bodies:  ['CHEEK','FOREHEAD','HAND','BACK','SHOULDER','ARM','LIPS','NECK','EARS','FINGERS','LOWER BELLY',
+              'SCALP','WRIST','ANKLE','SPINE','TEMPLE','COLLARBONE'],
+    manners: ['SLOWLY','SOFTLY','WITH EYE CONTACT','TEASINGLY','TENDERLY','BREATHING TOGETHER','EYES CLOSED','WITHOUT HANDS',
+              'WHILE HUMMING SOFTLY','TRACING TINY CIRCLES','AS IF IT IS THE LAST TIME','WHILE COUNTING BREATHS TOGETHER']
+  },
+  medium: {
+    actions: ['KISS DEEPLY','MASSAGE DEEPLY','NIBBLE','TEASE','PULL CLOSER','EXPLORE WITH TONGUE','GIVE A HICKEY',
+              'PIN HANDS','BREATHE ON','UNDRESS ONE LAYER','PRESS FOREHEADS','MIRROR TOUCH'],
+    bodies:  ['NECK','LIPS','EAR','WAIST','CHEST','HAIR','STOMACH','INNER THIGHS','HIPS','LOWER BELLY'],
+    manners: ['WITH RHYTHM','WITH EYE CONTACT','WITH MOANS','WHILE LAUGHING','FAST & SLOW','WITH A WHISPER','EYES CLOSED','WITHOUT HANDS',
+              'THEN STOP SUDDENLY AND HOLD','WITH BOTH HANDS ONLY','SLOWER THAN YOU THINK IS POSSIBLE','WHILE TELLING THEM WHY','SWITCHING BETWEEN FAST & AGONISINGLY SLOW']
+  },
+  wild: {
+    actions: ['TEASE','SPANK','BITE','KISS FIRMLY','TRACE WITH FINGERTIPS','LICK','SCRATCH','EAT WHIPPED CREAM OFF',
+              'ICE TRACE','LIFT','EDGE & STOP','MARK','DESCRIBE'],
+    bodies:  ['NECK','HIPS','INNER THIGH','LOWER BACK','COLLAR BONE','WRIST','BOTTOM','NIPPLES','GENITALS','WHOLE BODY'],
+    manners: ['WITH CONFIDENCE','BLINDFOLDED','WITH DOMINANCE','SILENTLY','WITH DIRTY TALK','FOLLOWING THEIR MOANS','EYES CLOSED','WITHOUT HANDS',
+              'UNTIL THEY BEG YOU TO CONTINUE','USING ONLY YOUR LIPS AND TONGUE','WHILE MAINTAINING EYE CONTACT THE ENTIRE TIME','AS SLOWLY AS THEY CAN STAND']
+  }
+};
+
+const rollBtn     = document.getElementById('rollBtn');
+const levelSel    = document.getElementById('level');
+const resultsEl   = document.getElementById('results');
+const tipEl       = document.getElementById('tip');
+const favListEl   = document.getElementById('favList');
+const clearFavsBtn= document.getElementById('clearFavs');
+const faceEls     = [document.getElementById('face0'), document.getElementById('face1'), document.getElementById('face2')];
+const dieEls      = [document.getElementById('die0'),  document.getElementById('die1'),  document.getElementById('die2')];
+
+function showToast(msg, type='info') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  document.getElementById('toast-wrap').appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 320); }, 2800);
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function microPrompt() {
+  return pick([
+    'Take a slow breath together before you start.',
+    'Hold the gaze for 5 seconds.',
+    'Try it for about one minute.',
+    'End with a smile or a laugh.',
+    'Whisper something you appreciate afterward.',
+    'Keep your touch steady and intentional.'
+  ]);
+}
+
+function formatSentence(action, body, manner) {
+  const a = action.toLowerCase(), b = body.toLowerCase(), m = manner.toLowerCase();
+  const bodyText = b==='whole body' ? 'their whole body' : b==='genitals' ? 'their intimate areas' : `your partner's ${b}`;
+  if (a.includes('hold hands'))           return `Hold hands ${m}.`;
+  if (a.includes('compliment'))           return `Give your partner a genuine compliment ${m}.`;
+  if (a.includes('cuddle'))               return `Cuddle your partner ${m}.`;
+  if (a.includes('trace'))                return `Trace along ${bodyText} ${m}.`;
+  if (a.includes('kiss deeply'))          return `Kiss your partner's ${b} deeply ${m}.`;
+  if (a.includes('kiss firmly'))          return `Kiss your partner's ${b} firmly ${m}.`;
+  if (a.includes('kiss'))                 return `Kiss your partner's ${b} ${m}.`;
+  if (a.includes('massage deeply'))       return `Give a deep massage to ${bodyText} ${m}.`;
+  if (a.includes('massage'))              return `Massage ${bodyText} ${m}.`;
+  if (a.includes('explore with tongue'))  return `Explore ${bodyText} with your tongue ${m}.`;
+  if (a.includes('lick'))                 return `Lick ${bodyText} ${m}.`;
+  if (a.includes('nibble'))               return `Gently nibble ${bodyText} ${m}.`;
+  if (a.includes('bite'))                 return `Gently bite ${bodyText} ${m}.`;
+  if (a.includes('tease'))                return `Playfully tease ${bodyText} ${m}.`;
+  if (a.includes('spank'))                return `Give a playful spank on your partner's ${b} ${m}.`;
+  if (a.includes('pull closer'))          return `Pull your partner closer ${m}.`;
+  if (a.includes('scratch'))              return `Lightly scratch ${bodyText} ${m}.`;
+  if (a.includes('eat whipped cream'))    return `Eat whipped cream off ${bodyText} ${m}.`;
+  if (a.includes('give a hickey'))        return `Give a hickey to your partner's ${b} ${m}.`;
+  return `${action} your partner's ${b} ${m}.`;
+}
+
+/* ─── ROLL ─── */
+let isRolling = false;
+
+function roll() {
+  if (isRolling) return;
+  isRolling = true;
+  rollBtn.disabled = true;
+
+  const level = levelSel.value;
+  const chosen = [
+    pick(pools[level].actions),
+    pick(pools[level].bodies),
+    pick(pools[level].manners)
+  ];
+  const types  = ['is-action','is-body','is-manner'];
+
+  // Spin each die with a small stagger offset
+  faceEls.forEach((face, i) => {
+    dieEls[i].classList.add('rolling');
+    // Reset animation by removing/re-adding class
+    face.classList.remove('spinning','landing');
+    void face.offsetWidth;
+
+    setTimeout(() => {
+      face.classList.add('spinning');
+    }, i * 80); // stagger start: 0, 80, 160ms
+  });
+
+  // After spin finishes, snap text + landing bounce — staggered
+  const spinDuration = 750;
+  faceEls.forEach((face, i) => {
+    setTimeout(() => {
+      // Swap text & colour
+      face.textContent = chosen[i];
+      face.className = `die-face ${types[i]}`;
+      face.setAttribute('data-label', ['What','Where','How'][i]);
+      // Landing bounce
+      void face.offsetWidth;
+      face.classList.add('landing');
+      dieEls[i].classList.remove('rolling');
+
+      face.addEventListener('animationend', () => face.classList.remove('landing'), { once:true });
+    }, i * 80 + spinDuration);
+  });
+
+  // Show result after all three land
+  const totalWait = 2 * 80 + spinDuration + 320;
+  setTimeout(() => {
+    const [a, b, c] = chosen;
+    const sentence  = formatSentence(a, b, c);
+    const prompt    = microPrompt();
+    const saved     = JSON.parse(localStorage.getItem('dice_favorites')||'[]');
+    const isSaved   = saved.includes(sentence);
+
+    resultsEl.innerHTML = `
+      <div class="result-card show">
+        <div class="result-header">
+          <span class="result-emoji">💋</span>
+          <p class="result-text">${sentence}</p>
+          <button id="saveFav" class="save-btn${isSaved?' saved':''}" title="Save this move">${isSaved?'❤️':'🤍'}</button>
+        </div>
+        <div class="result-badges">
+          <span class="result-badge action">${a}</span>
+          <span class="result-badge body">${b}</span>
+          <span class="result-badge manner">${c}</span>
+        </div>
+        <div class="result-divider"></div>
+        <p class="result-prompt">✨ ${prompt}</p>
+      </div>`;
+
+    document.getElementById('saveFav').addEventListener('click', function() {
+      const list = JSON.parse(localStorage.getItem('dice_favorites')||'[]');
+      if (!list.includes(sentence)) {
+        list.push(sentence);
+        localStorage.setItem('dice_favorites', JSON.stringify(list));
+        this.textContent = '❤️'; this.classList.add('saved');
+        renderFavorites();
+        showToast('Saved to favorites ❤️','success');
+      } else { showToast('Already in favorites!','info'); }
+    });
+
+    const joined = (a+' '+b+' '+c).toLowerCase();
+    const tips   = {
+      touch:'Gentle physical touch releases oxytocin, the bonding hormone.',
+      kiss:'Kissing and slow affection deepen emotional connection.',
+      novelty:'Doing something new together reignites spark and curiosity.',
+      laugh:'Shared laughter builds playfulness and trust.',
+      gaze:'Eye contact and presence strengthen intimacy.'
+    };
+    let t = tips.touch;
+    if (joined.includes('kiss'))                                 t = tips.kiss;
+    else if (joined.includes('novel')||joined.includes('dance')) t = tips.novelty;
+    else if (joined.includes('laugh')||joined.includes('humor')) t = tips.laugh;
+    else if (joined.includes('eye')||joined.includes('gaze'))    t = tips.gaze;
+    tipEl.textContent = t;
+
+    rollBtn.disabled = false;
+    isRolling = false;
+  }, totalWait);
+}
+
+function renderFavorites() {
+  const list = JSON.parse(localStorage.getItem('dice_favorites')||'[]');
+  favListEl.innerHTML = list.length
+    ? list.map(item=>`<div class="fav-item"><span class="fav-item-icon">💞</span><span>${item}</span></div>`).join('')
+    : '<p class="fav-empty">No saved moves yet. Roll the dice and hit the heart!</p>';
+}
+
+clearFavsBtn.addEventListener('click',()=>{
+  localStorage.removeItem('dice_favorites');
+  renderFavorites();
+  showToast('Favorites cleared.','info');
+});
+
+levelSel.addEventListener('change',()=>{
+  // Reset dice faces to idle
+  faceEls.forEach((f,i)=>{
+    f.className = 'die-face';
+    f.textContent = '?';
+    f.setAttribute('data-label',['What','Where','How'][i]);
+  });
+  resultsEl.innerHTML = '';
+  const names={soft:'🌙 Gentle',medium:'🔥 Passionate',wild:'💥 Wild'};
+  showToast(`Switched to ${names[levelSel.value]} Joy mode.`,'info');
+});
+
+window.addEventListener('keydown', e=>{
+  if((e.key==='Enter'||e.key===' ')&&!e.target.matches('button,select,input')){
+    e.preventDefault(); roll();
+  }
+});
+
+rollBtn.addEventListener('click', roll);
+renderFavorites();
+</script>
+
+<!-- HEARTBEAT ANIMATION -->
+<canvas id="hb-canvas" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;opacity:0.55"></canvas>
+<script>
+(function(){
+  const cv=document.getElementById("hb-canvas");
+  const ctx=cv.getContext("2d");
+  let W,H,t=0,rolling=false;
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight;}
+  resize();window.addEventListener("resize",resize);
+  setTimeout(()=>{
+    const rb=document.getElementById("rollBtn");
+    if(rb)rb.addEventListener("click",()=>{rolling=true;setTimeout(()=>{rolling=false;},2200);});
+  },500);
+  function ecg(x,phase,amp){
+    const p=((x/W)+phase)%1;
+    if(p<0.30)return 0;
+    if(p<0.33)return -(p-0.30)/0.03*amp*0.4;
+    if(p<0.37)return ((p-0.33)/0.04)*amp;
+    if(p<0.40)return amp-((p-0.37)/0.03)*(amp*1.2);
+    if(p<0.43)return -amp*0.2+((p-0.40)/0.03)*amp*0.35;
+    if(p<0.46)return amp*0.15-((p-0.43)/0.03)*amp*0.15;
+    return 0;
+  }
+  function frame(){
+    requestAnimationFrame(frame);
+    ctx.clearRect(0,0,W,H);
+    t+=rolling?0.012:0.004;
+    const amp=rolling?22:10;
+    const y1=H*0.82,y2=H*0.90;
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=2){const y=y1+ecg(x,t,amp)*2;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle="rgba(232,99,122,"+(rolling?0.55:0.22)+")";ctx.lineWidth=rolling?1.8:1.2;ctx.stroke();
+    ctx.beginPath();
+    for(let x=0;x<=W;x+=2){const y=y2+ecg(x,t+0.13,amp*0.75)*2;x===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+    ctx.strokeStyle="rgba(255,107,53,"+(rolling?0.40:0.14)+")";ctx.lineWidth=rolling?1.4:0.9;ctx.stroke();
+  }
+  frame();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+
+<script src="../js/app-shell.js"></script>
+</body>
+</html>
