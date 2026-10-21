@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Couples Bucket List</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top, pick} = KX;
+  const app = document.getElementById('app');
+  const base = KA_DATA.bucket;
+  let items = base;
+  let st = LS.get('ka_bucket', {start: '', done: {}, own: []});
+  st.own = st.own || []; items = [...base, ...st.own];
+  let q = '', filter = 'all';
+  const save = () => LS.set('ka_bucket', st);
+  const doneCount = () => items.filter(i => st.done[i]).length;
+  function shell() {
+    app.innerHTML = top('Our Bucket List', `${items.length} experiences to tick off together, in any order.`) + `
+      <div class="kx-card">
+        <div class="kx-row" style="justify-content:space-between"><b id="cnt"></b>
+          <label class="kx-muted">Started <input type="date" id="start" class="kx-input" style="display:inline-block;width:auto;margin:0 0 0 6px;padding:6px 10px" value="${esc(st.start)}"></label></div>
+        <div class="kx-prog"><i id="bar"></i></div>
+        <div class="kx-muted" id="days"></div>
+        <div class="kx-row" style="margin-top:12px"><button class="kx-btn sm" id="rnd">🎲 Pick one for tonight</button>
+          <button class="kx-btn ghost sm" id="rst">Reset list</button></div>
+        <div id="tonight" class="kx-big" style="margin-top:12px;color:var(--rose2);font-size:24px"></div>
+      </div>
+      <div style="margin:16px 0 0"><input class="kx-input" id="q" type="search" placeholder="Search (e.g. car, roleplay, ropes)"></div>
+      <div class="kx-tabs"><button data-f="all" class="on">All</button><button data-f="todo">To do</button><button data-f="done">Done</button></div>
+      <div class="kx-list" id="list"></div>
+      <div class="kx-card" style="margin-top:18px"><b>Your own ideas</b><p class="kx-muted" style="margin:4px 0 10px">Add anything that isn't on the list.</p>
+        <input class="kx-input" id="own" maxlength="80" placeholder="e.g. Dance together in the rain"><button class="kx-btn sm" id="addown">Add to list</button></div>`;
+    document.getElementById('addown').onclick = () => { const v = document.getElementById('own').value.trim(); if (v && !items.includes(v)) { st.own.push(v); items = [...base, ...st.own]; save(); shell(); } };
+    document.getElementById('start').onchange = e => { st.start = e.target.value; save(); stats(); };
+    document.getElementById('q').oninput = e => { q = e.target.value.toLowerCase(); list(); };
+    app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; app.querySelectorAll('[data-f]').forEach(x => x.classList.toggle('on', x === b)); list(); });
+    document.getElementById('rnd').onclick = () => { const t = items.filter(i => !st.done[i]); document.getElementById('tonight').textContent = t.length ? pick(t) : 'You finished everything! 🎉'; };
+    document.getElementById('rst').onclick = () => { if (confirm('Clear all ticks?')) { st = {start: st.start, done: {}, own: st.own}; save(); list(); stats(); } };
+    list(); stats();
+  }
+  function stats() {
+    const n = doneCount();
+    document.getElementById('cnt').textContent = `${n} / ${items.length} done`;
+    document.getElementById('bar').style.width = (n / items.length * 100) + '%';
+    const d = st.start ? Math.floor((Date.now() - new Date(st.start)) / 864e5) : null;
+    document.getElementById('days').textContent = d !== null && d >= 0 ? `Day ${d + 1} of your journey` : 'Set a start date to count your days.';
+  }
+  function list() {
+    const el = document.getElementById('list');
+    el.innerHTML = items.map((t, i) => ({t, i, d: !!st.done[t]}))
+      .filter(x => (filter === 'all' || (filter === 'done') === x.d) && x.t.toLowerCase().includes(q))
+      .map(x => `<div class="kx-item ${x.d ? 'done' : ''}"><button class="kx-check ${x.d ? 'on' : ''}" data-t="${x.i}" aria-label="Toggle">${x.d ? '✓' : ''}</button><span class="kx-it">${esc(x.t)}</span>${x.d ? `<span class="kx-muted">${esc(st.done[x.t])}</span>` : ''}</div>`).join('')
+      || '<p class="kx-muted kx-center">Nothing here.</p>';
+    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+      const t = items[+b.dataset.t];
+      if (st.done[t]) delete st.done[t]; else st.done[t] = new Date().toLocaleDateString();
+      save(); list(); stats();
+    });
+  }
+  shell();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

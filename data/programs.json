@@ -1,0 +1,500 @@
+[
+{
+"id": "reconnect",
+"icon": "🫶",
+"title": "Reconnect",
+"level": "Start here",
+"blurb": "Rebuild closeness and non-sexual touch before anything else. Best after a busy or distant stretch.",
+"weeks": [
+{
+"theme": "Presence",
+"lesson": "Desire grows from feeling noticed. Before technique, rebuild small moments of full attention: phones away, eyes up.",
+"ex": [
+{
+"t": "Six-second kiss",
+"d": "Kiss for a full six seconds, once a day, no agenda. Notice how your body responds.",
+"m": 10
+},
+{
+"t": "Ten-minute check-in",
+"d": "Sit together, no screens. Each answers: \"What was one good moment this week, and one thing I need?\" The listener only reflects back.",
+"m": 10,
+"go": "together"
+},
+{
+"t": "Eye-gazing",
+"d": "Two minutes of silent eye contact. Laugh if you need to; that is part of it.",
+"m": 5
+}
+]
+},
+{
+"theme": "Touch without goals",
+"lesson": "Touch that does not have to lead to sex lowers pressure and makes real desire easier. Agree \"this is just for pleasure\" out loud.",
+"ex": [
+{
+"t": "Hand and arm massage",
+"d": "Ten minutes each, slow, with oil or lotion. Receiver gives one line of feedback: warmer, softer, slower.",
+"m": 20
+},
+{
+"t": "Cuddle ritual",
+"d": "Choose a daily 10-minute cuddle position. Breathe together.",
+"m": 10
+},
+{
+"t": "Guided session: Sweet",
+"d": "Run a Sweet-level guided session with the \"Romantic\" mood.",
+"m": 30,
+"go": "session"
+}
+]
+},
+{
+"theme": "Appreciation",
+"lesson": "People open up where they feel admired. Specific praise beats general praise.",
+"ex": [
+{
+"t": "Three specifics",
+"d": "Tell your partner three specific things you find attractive or loving about them, one of them physical.",
+"m": 10
+},
+{
+"t": "Love coupon",
+"d": "Give each other a coupon for something small and thoughtful.",
+"m": 10,
+"go": "love-coupons"
+},
+{
+"t": "Reflect",
+"d": "Write one journal entry about what felt good this week.",
+"m": 10,
+"go": "journal"
+}
+]
+},
+{
+"theme": "Play",
+"lesson": "Playfulness keeps long relationships alive. Laughter and novelty are both intimacy.",
+"ex": [
+{
+"t": "Flirt by text",
+"d": "Send one flirty message in the day. Keep it kind and teasing.",
+"m": 10
+},
+{
+"t": "Light game night",
+"d": "Play Truth or Dare at Sweet level.",
+"m": 25,
+"go": "truth-or-dare"
+},
+{
+"t": "Plan a date",
+"d": "Plan one date for next week together, even a home one.",
+"m": 15,
+"go": "tonight"
+}
+]
+}
+]
+},
+{
+"id": "talk",
+"icon": "🗣️",
+"title": "Talk About Sex",
+"level": "Beginner",
+"blurb": "A gentle path to saying what you want, hearing what your partner wants, and handling \"no\" with warmth.",
+"weeks": [
+{
+"theme": "The vocabulary",
+"lesson": "Many couples struggle simply because they have no comfortable words. Agree on words you both like (and words you dislike) first.",
+"ex": [
+{
+"t": "Our words",
+"d": "Each lists words you like and dislike for body parts and acts. Compare.",
+"m": 10
+},
+{
+"t": "Yes / Maybe / No",
+"d": "Go through the private Match list on your own, then compare overlaps.",
+"m": 15,
+"go": "together"
+},
+{
+"t": "Explore ideas",
+"d": "Browse the Kink Explorer together, only reacting with curiosity.",
+"m": 20,
+"go": "kink-explorer"
+}
+]
+},
+{
+"theme": "Asking for what you want",
+"lesson": "Use \"I\" statements and a specific request: \"I'd love it if you… slowly\" works better than \"you never…\".",
+"ex": [
+{
+"t": "Three wants",
+"d": "Each states three things you would love, framed positively. Partner repeats them back.",
+"m": 10
+},
+{
+"t": "Feedback during touch",
+"d": "During a massage use only: \"more / less / there / slower\". Practise guiding.",
+"m": 20
+},
+{
+"t": "Desire Match",
+"d": "Play Desire Match and discuss any surprise.",
+"m": 20,
+"go": "desire-match"
+}
+]
+},
+{
+"theme": "Receiving no",
+"lesson": "A \"no\" is information, not rejection. The best reply is \"thank you for telling me\", followed by an alternative.",
+"ex": [
+{
+"t": "Practice no",
+"d": "Take turns asking for something small; the other practises a kind no plus an alternative.",
+"m": 10
+},
+{
+"t": "Safeword rehearsal",
+"d": "Choose a safeword and a slow-down word. Practise using each once.",
+"m": 10
+},
+{
+"t": "Learn: consent",
+"d": "Read the consent and aftercare guide together.",
+"m": 15,
+"go": "learn"
+}
+]
+},
+{
+"theme": "Debrief",
+"lesson": "A short, kind debrief after intimacy (\"what did you love? anything to change?\") builds trust faster than anything else.",
+"ex": [
+{
+"t": "Aftercare chat",
+"d": "After your next intimate time, 10 minutes of cuddling plus one thing you loved each.",
+"m": 10
+},
+{
+"t": "Write it down",
+"d": "Record the night in your journal with a rating.",
+"m": 5,
+"go": "journal"
+},
+{
+"t": "Pulse check",
+"d": "Do the weekly Pulse and compare.",
+"m": 10,
+"go": "pulse"
+}
+]
+}
+]
+},
+{
+"id": "desire",
+"icon": "🔥",
+"title": "Desire & Rhythm",
+"level": "Intermediate",
+"blurb": "For couples with mismatched desire or a routine that has gone quiet. Practical, pressure-free.",
+"weeks": [
+{
+"theme": "Understand your desire styles",
+"lesson": "Some people feel desire first (spontaneous); many feel it only after touch begins (responsive). Neither is wrong; plan for both.",
+"ex": [
+{
+"t": "Desire map",
+"d": "Each notes when, where and with what you feel most open (time of day, mood, setting).",
+"m": 10
+},
+{
+"t": "Dashboard check",
+"d": "Look at your Pulse trends and talk about patterns.",
+"m": 10,
+"go": "pulse"
+},
+{
+"t": "Name the pressure",
+"d": "Discuss: when does sex feel like an obligation? What would remove that?",
+"m": 10
+}
+]
+},
+{
+"theme": "Build anticipation",
+"lesson": "Anticipation is the cheapest and strongest aphrodisiac. Teasing earlier in the day makes the evening easier.",
+"ex": [
+{
+"t": "Morning tease",
+"d": "Send a message in the morning about what you would like tonight.",
+"m": 10
+},
+{
+"t": "Secret envelope",
+"d": "Send a secret envelope with a small dare.",
+"m": 10,
+"go": "secret"
+},
+{
+"t": "Date night calendar",
+"d": "Put one date night in your calendars.",
+"m": 15,
+"go": "tonight"
+}
+]
+},
+{
+"theme": "Variety in small doses",
+"lesson": "Novelty can be tiny: a new room, time, or order of touch.",
+"ex": [
+{
+"t": "Swap the order",
+"d": "Do things in a different order than usual: massage first, kissing later.",
+"m": 10
+},
+{
+"t": "Roleplay lite",
+"d": "Try a short roleplay scene.",
+"m": 30,
+"go": "roleplay"
+},
+{
+"t": "Task Deck",
+"d": "Draw three tasks from a pack you both picked.",
+"m": 25,
+"go": "task-deck"
+}
+]
+},
+{
+"theme": "Protect the rhythm",
+"lesson": "Couples who plan intimacy keep it. Planning is not unromantic; it is care.",
+"ex": [
+{
+"t": "Weekly slot",
+"d": "Pick a regular \"us\" time and guard it.",
+"m": 10
+},
+{
+"t": "Fire streak",
+"d": "Keep the streak by doing something small together each day.",
+"m": 5,
+"go": "progress"
+},
+{
+"t": "Review",
+"d": "Look at your History and talk about what worked best.",
+"m": 10,
+"go": "history"
+}
+]
+}
+]
+},
+{
+"id": "ldr",
+"icon": "🌍",
+"title": "Long-Distance Intimacy",
+"level": "For apart couples",
+"blurb": "Stay close across time zones using the Together tools: messages, shared games and check-ins.",
+"weeks": [
+{
+"theme": "Daily connection",
+"lesson": "Small frequent contact beats rare long calls. Predictable rituals create safety across distance.",
+"ex": [
+{
+"t": "Link up",
+"d": "Link your accounts in Together.",
+"m": 10,
+"go": "together"
+},
+{
+"t": "Good-morning / good-night note",
+"d": "Send a short note each day for a week in Chat.",
+"m": 5,
+"go": "together"
+},
+{
+"t": "Share a photo of your day",
+"d": "Something ordinary: your coffee, your view.",
+"m": 10
+}
+]
+},
+{
+"theme": "Shared experiences",
+"lesson": "Doing the same activity at the same time makes distance feel smaller.",
+"ex": [
+{
+"t": "Shared card",
+"d": "Draw a shared card live while on a call.",
+"m": 20,
+"go": "together"
+},
+{
+"t": "Same song, same time",
+"d": "Pick a song; listen together and message what you feel.",
+"m": 10
+},
+{
+"t": "Watch a film in sync",
+"d": "Choose a film and chat during it.",
+"m": 90
+}
+]
+},
+{
+"theme": "Erotic connection from afar",
+"lesson": "Agree boundaries first: what is okay on camera, what is only text, what stays private. Never record or screenshot without clear consent.",
+"ex": [
+{
+"t": "Boundaries talk",
+"d": "Use the Match tool to find what you both like.",
+"m": 15,
+"go": "together"
+},
+{
+"t": "Voice or text scene",
+"d": "Write a short scene for your partner, read it aloud by call.",
+"m": 20
+},
+{
+"t": "Sync timer",
+"d": "Start a shared timer and each do a slow self-touch or breathing exercise, then compare notes.",
+"m": 10,
+"go": "together"
+}
+]
+},
+{
+"theme": "Plan the reunion",
+"lesson": "Anticipation of the next meeting keeps desire alive.",
+"ex": [
+{
+"t": "Reunion list",
+"d": "Each writes 5 things you want to do at your next meeting.",
+"m": 10
+},
+{
+"t": "Secret envelope",
+"d": "Open a secret envelope together on a call.",
+"m": 10,
+"go": "secret"
+},
+{
+"t": "Bucket list",
+"d": "Add shared bucket list items.",
+"m": 10,
+"go": "bucket-list"
+}
+]
+}
+]
+},
+{
+"id": "kink",
+"icon": "⛓️",
+"title": "Beginner Kink, Safely",
+"level": "Advanced",
+"blurb": "Explore power play and sensation with consent, negotiation and aftercare built in.",
+"weeks": [
+{
+"theme": "Consent & negotiation",
+"lesson": "Negotiate before, not during. Cover wants, limits, safeword, health, and how you will check in.",
+"ex": [
+{
+"t": "Read the guide",
+"d": "Read the consent and aftercare section together.",
+"m": 15,
+"go": "learn"
+},
+{
+"t": "Yes/Maybe/No list",
+"d": "Complete the match list; only talk about overlaps.",
+"m": 15,
+"go": "together"
+},
+{
+"t": "Safeword practice",
+"d": "Set stop and slow words and practise each.",
+"m": 10
+}
+]
+},
+{
+"theme": "Sensation basics",
+"lesson": "Start soft: touch, temperature, light scratching, blindfold. Slow progress, frequent check-ins.",
+"ex": [
+{
+"t": "Blindfold touch",
+"d": "One partner receives with a blindfold; the other uses feather, fingertips, warm breath.",
+"m": 20
+},
+{
+"t": "Sensory pack",
+"d": "Try tasks from a sensory or light-bondage pack.",
+"m": 25,
+"go": "task-deck"
+},
+{
+"t": "Journey step",
+"d": "Complete a step from the Journey.",
+"m": 20,
+"go": "journey"
+}
+]
+},
+{
+"theme": "Power exchange, gently",
+"lesson": "Power play is trust made visible. The \"bottom\" has the real control through limits and the safeword.",
+"ex": [
+{
+"t": "Dominance for 15 minutes",
+"d": "Agree a short scene where one leads; end with aftercare.",
+"m": 30
+},
+{
+"t": "Roleplay studio",
+"d": "Plan a scene together.",
+"m": 20,
+"go": "roleplay"
+},
+{
+"t": "Challenge",
+"d": "Do a challenge step.",
+"m": 15,
+"go": "challenges"
+}
+]
+},
+{
+"theme": "Aftercare & review",
+"lesson": "Both partners can feel emotionally low after intense play (\"drop\"). Plan warmth, water, food and talk for the next day.",
+"ex": [
+{
+"t": "Aftercare kit",
+"d": "Prepare blanket, water, snack, something soft for next time.",
+"m": 10
+},
+{
+"t": "Next-day check-in",
+"d": "Message the day after: how are you feeling, body and mind?",
+"m": 10
+},
+{
+"t": "Review & adjust",
+"d": "Update your yes/maybe/no list and log the experience.",
+"m": 15,
+"go": "journal"
+}
+]
+}
+]
+}
+]

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Plan Tonight</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+
+(() => {
+  const {LS, esc, top, pick, heat, heatBar, HEAT} = KX;
+  const app = document.getElementById('app');
+  const G = {
+    coupons: ['kamaagni-love-coupons.html', '🎟 Love Coupons'], wyp: ['kamaagni-would-you-prefer.html', '⚖️ Would You Prefer'], tod: ['kamaagni-truth-or-dare.html', '🎭 Truth or Dare'],
+    match: ['kamaagni-desire-match.html', '💞 Desire Match'], dice: ['intimacy_dice_game_single_page.html', '🎲 Intimacy Dice'], cards: ['intimacy_cards_game_single_page.html', '🃏 Intimacy Cards'],
+    ludo: ['intimacy_ludo_dice_game_single_page.html', '♟️ Intimacy Ludo'], connect: ['kamaagni-connect-foreplay.html', '🔴 Connect Foreplay'], poker: ['kamaagni-poker-quick.html', '♠️ Poker for Couples'],
+    pos: ['intimacy_Position_Selector_page.html', '🔥 Position Selector'], oral: ['intimacy_Oral_Position_Selector_page.html', '🌸 Oral Selector'], tasks: ['kamaagni-task-deck.html', '🃏 Task Deck'],
+    mission: ['kamaagni-mission-week.html', '🗓 Mission Week'], learn: ['kamaagni-learn.html', '💬 Conversation starters'], journal: ['kamaagni-journal.html', '📓 Journal']
+  };
+  const MOODS = {
+    romantic: {n: '🌹 Romantic', warm: ['coupons', 'wyp', 'learn'], main: ['dice', 'cards', 'pos'], extra: ['tasks', 'mission']},
+    playful: {n: '😜 Playful', warm: ['tod', 'wyp', 'poker'], main: ['dice', 'ludo', 'connect'], extra: ['tasks', 'cards']},
+    adventurous: {n: '🔥 Adventurous', warm: ['match', 'tod', 'wyp'], main: ['tasks', 'ludo', 'oral'], extra: ['pos', 'dice']},
+    tired: {n: '😴 Tired but trying', warm: ['coupons', 'learn'], main: ['wyp', 'cards', 'dice'], extra: ['coupons']}
+  };
+  const st = LS.get('ka_plan_in', {mood: 'romantic', mins: 60, when: ''});
+  let plan = LS.get('ka_plan', null);
+  const save = () => { LS.set('ka_plan_in', st); LS.set('ka_plan', plan); };
+  const link = k => G[k][0].startsWith('kamaagni') || G[k][0].startsWith('intimacy') ? G[k][0] : G[k][0];
+  function build() {
+    const m = MOODS[st.mood], mins = +st.mins, steps = [];
+    steps.push({t: 'Warm up', min: mins <= 30 ? 5 : 10, g: pick(m.warm), note: 'Phones away. Eye contact. Slow down.'});
+    steps.push({t: 'Main event', min: mins <= 30 ? 20 : mins <= 60 ? 30 : 40, g: pick(m.main), note: 'Heat level: ' + HEAT[heat()]});
+    if (mins >= 90) steps.push({t: 'Turn it up', min: 20, g: pick(m.extra), note: 'Only if you both still want to.'});
+    steps.push({t: 'Aftercare', min: 10, g: 'learn', note: 'Water, blanket, cuddles, and a check-in: how was it?', fixed: 'kamaagni-learn.html'});
+    plan = {mood: st.mood, mins, heat: heat(), made: Date.now(), steps: steps.map(s => ({...s, done: false}))};
+    save();
+  }
+  function ics() {
+    const d = new Date(st.when || Date.now() + 36e5), end = new Date(d.getTime() + (+st.mins) * 60000);
+    const f = x => x.toISOString().replace(/[-:]|\.\d{3}/g, '');
+    const n = KX.names();
+    const body = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//KamaAgni//EN', 'BEGIN:VEVENT', 'UID:' + Date.now() + '@kamaagni', 'DTSTAMP:' + f(new Date()), 'DTSTART:' + f(d), 'DTEND:' + f(end),
+      'SUMMARY:Date night with ' + (n[1] === 'Partner 2' ? 'you' : n[1]), 'DESCRIPTION:Our private evening. ' + plan.steps.map(s => s.t).join(' > '), 'BEGIN:VALARM', 'TRIGGER:-PT30M', 'ACTION:DISPLAY', 'DESCRIPTION:Tonight', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([body], {type: 'text/calendar'})); a.download = 'date-night.ics'; a.click();
+  }
+  async function invite() {
+    const when = st.when ? new Date(st.when).toLocaleString([], {weekday: 'long', hour: '2-digit', minute: '2-digit'}) : 'tonight';
+    const text = `I've planned something for us ${when} 🔥 ${MOODS[st.mood].n.replace(/^\S+ /, '')} mood, about ${st.mins} minutes. Phones away, just you and me.`;
+    try { if (navigator.share) { await navigator.share({text}); return; } await navigator.clipboard.writeText(text); KX.toast('Invite copied — paste it to your partner'); } catch {}
+  }
+  function draw() {
+    const mood = MOODS[st.mood];
+    app.innerHTML = top('Plan Tonight', 'A whole evening in 10 seconds: warm-up, main event, aftercare.') + `<div id="hb"></div>
+      <div class="kx-card">
+        <div class="kx-sec" style="margin-top:0">Mood</div><div class="kx-tabs" id="mo">${Object.entries(MOODS).map(([k, v]) => `<button data-m="${k}" class="${k === st.mood ? 'on' : ''}">${v.n}</button>`).join('')}</div>
+        <div class="kx-sec">Time we have</div><div class="kx-tabs" id="ti">${[30, 60, 90, 120].map(x => `<button data-t="${x}" class="${x === +st.mins ? 'on' : ''}">${x} min</button>`).join('')}</div>
+        <button class="kx-btn" id="mk">✨ ${plan ? 'Make a new plan' : 'Plan our evening'}</button></div>
+      ${plan ? `<div class="kx-sec">Tonight's plan · ${MOODS[plan.mood].n} · ${plan.mins} min</div>
+      <div class="kx-list" id="pl">${plan.steps.map((s, i) => `<div class="kx-card ${s.done ? 'kx-item done' : ''}" style="padding:16px;display:block">
+        <div class="kx-row" style="justify-content:space-between"><b style="font-family:'Cormorant Garamond',serif;font-size:21px">${i + 1}. ${esc(s.t)}</b><span class="kx-chip">${s.min} min</span></div>
+        <p class="kx-muted" style="margin:4px 0 10px">${esc(s.note)}</p>
+        <div class="kx-row"><a class="kx-btn sm" href="${s.fixed || G[s.g][0]}">${esc(G[s.g][1])} →</a><button class="kx-btn ghost sm" data-tm="${s.min}">⏱ Timer</button>
+        <button class="kx-btn ghost sm" data-sw="${i}">↻ Swap</button><button class="kx-btn ${s.done ? '' : 'ghost'} sm" data-d="${i}">${s.done ? '✓ Done' : 'Mark done'}</button></div></div>`).join('')}</div>
+      <div class="kx-card" style="margin-top:14px"><div class="kx-sec" style="margin-top:0">Make it official</div>
+        <input class="kx-input" type="datetime-local" id="when" value="${esc(st.when)}">
+        <div class="kx-row"><button class="kx-btn sm gold" id="ics">📅 Add to calendar</button><button class="kx-btn sm" id="inv">💌 Send invite</button><button class="kx-btn sm ghost" id="jr">📓 Log it after</button></div></div>` : ''}`;
+    heatBar(document.getElementById('hb'), () => { });
+    document.getElementById('mo').onclick = e => { const b = e.target.closest('[data-m]'); if (b) { st.mood = b.dataset.m; save(); draw(); } };
+    document.getElementById('ti').onclick = e => { const b = e.target.closest('[data-t]'); if (b) { st.mins = +b.dataset.t; save(); draw(); } };
+    document.getElementById('mk').onclick = () => { build(); draw(); };
+    if (!plan) return;
+    document.getElementById('when').onchange = e => { st.when = e.target.value; save(); };
+    document.getElementById('ics').onclick = ics; document.getElementById('inv').onclick = invite;
+    document.getElementById('jr').onclick = () => (window.KA_go || (u => location.href = u))('kamaagni-journal.html');
+    app.querySelectorAll('[data-tm]').forEach(b => b.onclick = () => window.KA && KA.timer(+b.dataset.tm * 60, 'Plan'));
+    app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { plan.steps[+b.dataset.d].done ^= 1; save(); draw(); });
+    app.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { const s = plan.steps[+b.dataset.sw]; if (s.fixed) return; const m = MOODS[plan.mood]; const pool = [...m.warm, ...m.main, ...m.extra].filter(k => k !== s.g); s.g = pick(pool); save(); draw(); });
+  }
+  draw();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

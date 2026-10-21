@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni — Hornopoly</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top, pick, shuffle, heat, heatBar} = KX;
+  const app = document.getElementById('app');
+  const [A, B] = KX.names();
+  let dk = {};
+  try {
+    for (const id of ['hornopoly', 'hornobdsm', 'questions']) dk[id] = await (await fetch('../data/packs/' + id + '.json')).json();
+  } catch { app.innerHTML = top('Hornopoly', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
+  let st = {turn: 0, score: [0, 0], deck: 'hornopoly', pile: [], card: null};
+  const fill = (t, who) => { const a = who === 0 ? A : B, b = who === 0 ? B : A; return t.replace(/\{A\}/g, a).replace(/\{B\}/g, b); };
+  function setup() {
+    const h = heat();
+    app.innerHTML = top('Hornopoly', 'The card game of Hornopoly, no board needed. Take turns drawing; the active player is {A}.'.replace('{A}', A)) + '<div id="hb"></div>' +
+      `<div class="kx-tabs"><button data-d="hornopoly" class="${st.deck === 'hornopoly' ? 'on' : ''}">🃏 Game cards</button>${h >= 3 ? `<button data-d="hornobdsm" class="${st.deck === 'hornobdsm' ? 'on' : ''}">⛓ BDSM cards</button>` : ''}<button data-d="questions" class="${st.deck === 'questions' ? 'on' : ''}">❓ Questions</button></div>
+      <div class="kx-card kx-center"><div class="kx-turn">Score</div><div class="kx-row" style="justify-content:space-around"><div><div class="kx-big" style="font-size:30px">${st.score[0]}</div><div class="kx-muted">${esc(A)}</div></div><div><div class="kx-big" style="font-size:30px">${st.score[1]}</div><div class="kx-muted">${esc(B)}</div></div></div></div>
+      <div class="kx-card kx-play" style="margin-top:12px" id="cd"><div class="kx-turn">${esc(st.turn === 0 ? A : B)}'s turn</div>
+        <div class="kx-big" style="font-size:22px">${st.card ? esc(fill(st.card, st.turn)) : 'Draw a card'}</div></div>
+      <div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn" id="dr">🃏 Draw</button>${st.card ? '<button class="kx-btn gold" id="dn">Done +1</button><button class="kx-btn ghost" id="pa">Pass</button>' : ''}${st.card && /\((\d+)(?:-\d+)? ?min/.test(st.card) ? '<button class="kx-btn gold" id="tm">⏱ Timer</button>' : ''}</div>
+      <p class="kx-note">Agree on a safe word. Respect each other's limits. Pass any card you do not both want.</p>`;
+    heatBar(document.getElementById('hb'), () => { if (heat() < 3 && st.deck === 'hornobdsm') st.deck = 'hornopoly'; setup(); });
+    app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { st.deck = b.dataset.d; st.pile = []; st.card = null; setup(); });
+    document.getElementById('dr').onclick = () => { if (!st.pile.length) st.pile = shuffle(dk[st.deck]); st.card = st.pile.pop(); setup(); };
+    const dn = document.getElementById('dn'); if (dn) dn.onclick = () => { st.score[st.turn]++; st.turn = 1 - st.turn; st.card = null; setup(); };
+    const pa = document.getElementById('pa'); if (pa) pa.onclick = () => { st.turn = 1 - st.turn; st.card = null; setup(); };
+    const tm = document.getElementById('tm'); if (tm) tm.onclick = () => { const m = st.card.match(/\((\d+)(?:-(\d+))?/); window.KA && KA.timer(+(m[2] || m[1]) * 60, 'Hornopoly'); };
+  }
+  setup();
+})();
+
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

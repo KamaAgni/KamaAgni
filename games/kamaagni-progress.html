@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Progress</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-track.js"></script>
+<script>
+(function(){
+  const {LS,esc,top}=KX;
+  const cnt=v=>{if(!v)return 0;if(Array.isArray(v))return v.length;if(typeof v==='object')return Object.values(v).filter(x=>x&&(typeof x!=='object'||Object.keys(x).length)).length;return v?1:0};
+  const sub=(o,k)=>o&&typeof o==='object'?o[k]:null;
+  const tasks=cnt(sub(LS.get('ka_tasks',{}),'done'));
+  const coup=cnt(sub(LS.get('ka_coupons',{}),'used'))||cnt(LS.get('ka_coupons',{}));
+  const journal=cnt(LS.get('ka_journal',[]));
+  const bucket=cnt(sub(LS.get('ka_bucket',{}),'done'));
+  const match=cnt(LS.get('ka_dm',{}));
+  const kinks=cnt(LS.get('ka_kinkex',{}));
+  const favs=cnt(LS.get('ka_fav_cards',[]))+cnt(LS.get('ka_fav_pos',[]))+cnt(LS.get('dice_favorites',[]));
+  const journey=cnt(sub(LS.get('ka_journey',{}),'done')),chal=cnt(sub(LS.get('ka_chal',{}),'done')),act=(window.KA_TRACK?KA_TRACK.get():{}),sess=(act.ev||{}).session||0,env=cnt(LS.get('ka_envelopes',[])),visited=Object.keys(act.pages||{}).length,strk=window.KA_TRACK?KA_TRACK.streak():0,lv=window.KA_TRACK?KA_TRACK.level(act.xp||0):null;
+  const stats=[['🎭','Guided sessions',sess],['⛓','Journey tasks',journey],['🏁','Challenges ticked',chal],['💌','Secret envelopes',env],['🃏','Tasks done',tasks],['🎟️','Coupons used',coup],['📓','Journal entries',journal],['🪣','Bucket items done',bucket],['💞','Desire answers',match],['🧭','Kinks explored',kinks],['♡','Saved moments',favs]];
+  const total=stats.reduce((a,s)=>a+s[2],0);
+  const badges=[['🕯️','First session',sess>=1],['📅','7-day streak',strk>=7],['💌','Secret keepers',env>=3],['🧭','Explorers (12 games)',visited>=12],['⛓','Journey: 50 tasks',journey>=50],['🏁','Challenge 25',chal>=25],['🌱','First spark',total>=1],['🔥','Warming up',total>=10],['💫','Regulars',total>=30],['👑','Devoted',total>=100],['📖','Storytellers',journal>=3],['🃏','Task masters',tasks>=25],['🪣','Dream chasers',bucket>=5],['💞','In sync',match>=40]];
+  const names=KX.names().join(' & ');
+  document.getElementById('app').innerHTML=top('Progress',names+' — your journey so far')+
+   (lv?'<div class="kx-card kx-center"><div style="font-size:44px">'+lv.icon+'</div><div class="kx-big">Level '+lv.n+' · '+lv.name+'</div><div class="kx-prog"><i style="width:'+lv.pct+'%"></i></div><p class="kx-muted">'+lv.xp+' XP'+(lv.to?' · '+(lv.to-lv.xp)+' to next level':'')+' · 🔥 '+strk+' day streak</p></div><div style="height:12px"></div>':'')+'<div class="kx-card kx-center"><div class="kx-big">'+total+' moments together</div><div class="kx-prog"><i style="width:'+Math.min(100,total)+'%"></i></div><p class="kx-muted">Goal: 100 for the Devoted badge</p></div>'+
+   '<div class="kx-sec">Your numbers</div><div class="kx-list">'+stats.map(s=>'<div class="kx-item"><span style="font-size:22px">'+s[0]+'</span><span class="kx-it">'+esc(s[1])+'</span><b>'+s[2]+'</b></div>').join('')+'</div>'+
+   '<div class="kx-sec">Badges</div><div class="kx-list">'+badges.map(b=>'<div class="kx-item'+(b[2]?'':' done')+'"><span style="font-size:22px">'+(b[2]?b[0]:'🔒')+'</span><span class="kx-it">'+esc(b[1])+'</span></div>').join('')+'</div>';
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

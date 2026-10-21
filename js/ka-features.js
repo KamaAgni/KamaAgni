@@ -23,19 +23,50 @@ function markSessionUnlocked() {
   try { sessionStorage.setItem(SESSION_KEY, '1'); } catch {}
 }
 
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ─── PIN hashing + lockout ──────────────────────────── */
+async function hashPin(pin) {
+  const salt = LS.get('ka_pin_salt', null) || (() => { const s = Array.from(crypto.getRandomValues(new Uint8Array(12)), b => b.toString(16).padStart(2, '0')).join(''); LS.set('ka_pin_salt', s); return s; })();
+  try {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salt + ':' + pin));
+    return 'h1:' + Array.from(new Uint8Array(buf), b => b.toString(16).padStart(2, '0')).join('');
+  } catch { return 'p0:' + pin; }   // insecure-context fallback
+}
+async function pinMatches(entered, saved) {
+  if (saved && saved.startsWith('h1:')) return (await hashPin(entered)) === saved;
+  if (saved && saved.startsWith('p0:')) return saved === 'p0:' + entered;
+  if (saved === entered) { LS.set('ka_pin', await hashPin(entered)); return true; }   // migrate old plain-text PIN
+  return false;
+}
+const lockInfo = () => LS.get('ka_pin_lock', { fails: 0, until: 0 });
+
 /* ─── Festival detection ──────────────────────────────── */
-const FESTIVALS = [
-  { emoji: '🪔', dates: [[9,2],[9,12]],   color: '#f5c842', label: 'Navratri Nights' },
-  { emoji: '🎆', dates: [[10,20],[10,27]], color: '#ff6b35', label: 'Diwali Nights' },
-  { emoji: '🪁', dates: [[0,13],[0,15]],   color: '#6c7ef8', label: 'Uttarayan Mode' },
-  { emoji: '💝', dates: [[1,12],[1,15]],   color: '#e8637a', label: "Valentine's Week" },
-  { emoji: '🎊', dates: [[11,30],[0,2]],   color: '#f5c842', label: 'New Year Special' },
+/* Fixed-date festivals repeat every year; lunar ones (Navratri, Diwali) change, so they are
+   listed per year. Add the next year's dates here each autumn: [startMonth, startDay, endMonth, endDay] (month 1-12). */
+const FIXED_FESTIVALS = [
+  { emoji: '🪁', range: [1, 13, 1, 15],  color: '#6c7ef8', label: 'Uttarayan Mode' },
+  { emoji: '💝', range: [2, 10, 2, 15],  color: '#e8637a', label: "Valentine's Week" },
+  { emoji: '🎊', range: [12, 29, 1, 2],  color: '#f5c842', label: 'New Year Special' },
 ];
+const LUNAR_FESTIVALS = {
+  2026: [
+    { emoji: '🪔', range: [10, 11, 10, 20], color: '#f5c842', label: 'Navratri Nights' },
+    { emoji: '🎆', range: [11, 6, 11, 10],  color: '#ff6b35', label: 'Diwali Nights' },
+  ],
+};
 function getActiveFestival() {
-  const m = new Date().getMonth(), d = new Date().getDate();
-  for (const f of FESTIVALS)
-    for (const [fm, fd] of f.dates)
-      if (m === fm && Math.abs(d - fd) <= 3) return f;
+  const now = new Date(), y = now.getFullYear(), t = now.getTime();
+  const list = [...(LUNAR_FESTIVALS[y] || []), ...FIXED_FESTIVALS];
+  for (const f of list) {
+    const [sm, sd, em, ed] = f.range;
+    // a range that wraps the new year (e.g. Dec 29 - Jan 2) can start last year or end next year
+    for (const yy of [y - 1, y]) {
+      const start = new Date(yy, sm - 1, sd).getTime();
+      const end = new Date(em < sm ? yy + 1 : yy, em - 1, ed, 23, 59, 59).getTime();
+      if (t >= start && t <= end) return f;
+    }
+  }
   return null;
 }
 
@@ -132,9 +163,25 @@ function injectCSS() {
 .ka-vol{width:100%;accent-color:#e8637a;margin-top:6px}
 .ka-toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(8px);background:#12152a;border:1px solid rgba(255,255,255,0.14);color:#dce9ff;padding:10px 22px;border-radius:999px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:opacity .24s,transform .24s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,0.5)}
 .ka-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+#ka-timer-pill{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9500;display:flex;align-items:center;gap:10px;background:#12152a;border:1px solid rgba(232,99,122,.5);border-radius:999px;padding:8px 10px 8px 16px;box-shadow:0 8px 30px rgba(0,0,0,.55);font-weight:700;font-size:15px;color:#dce9ff;font-variant-numeric:tabular-nums}
+#ka-timer-pill button{background:rgba(255,255,255,.08);border:none;color:#dce9ff;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;min-height:30px}
+#ka-timer-pill.done{background:#2a1020;animation:kaGlow .6s ease infinite}
+.ka-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+#ka-panic{position:fixed;inset:0;z-index:9900;background:#000;color:#222;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;font-size:64px;font-weight:200;user-select:none;cursor:default}
+.ka-set-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:#a8bcd8;margin:4px 0 12px}
+.ka-switch{width:42px;height:24px;border-radius:99px;background:#222845;border:1px solid rgba(255,255,255,.14);position:relative;cursor:pointer;flex-shrink:0}
+.ka-switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#7a8aab;transition:all .18s}
+.ka-switch.on{background:rgba(232,99,122,.35);border-color:#e8637a}.ka-switch.on::after{left:20px;background:#e8637a}
+#ka-settings{max-height:72vh;overflow-y:auto}
+@media(max-width:640px){
+  body{padding-bottom:76px}
+  #ka-toolbar{left:0;right:0;bottom:0;flex-direction:row;justify-content:center;gap:10px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(8,10,22,.9);border-top:1px solid rgba(255,255,255,0.09);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+  .ka-fab{width:44px;height:44px}
+  .ka-toast{bottom:88px}
+  #ka-settings{left:8px;bottom:78px;width:calc(100vw - 16px)}
+}
 @media(max-width:480px){
   .ka-modal{padding:22px 16px}
-  #ka-settings{left:8px;bottom:76px;width:calc(100vw - 16px)}
 }
 </style>`);
 }
@@ -192,19 +239,27 @@ function buildLockScreen() {
 async function runUnlockFlow(ls) {
   const saved = LS.get('ka_pin', null);
   if (!saved) { ls.remove(); return; }
-  let tries = 0;
-  while (tries < 6) {
+  for (;;) {
+    const li = lockInfo();
+    const wait = Math.ceil((li.until - Date.now()) / 1000);
+    if (wait > 0) {
+      const note = document.createElement('div');
+      note.className = 'ka-lock-sub'; note.style.marginTop = '-20px';
+      ls.appendChild(note);
+      while (Date.now() < lockInfo().until) {
+        note.textContent = 'Too many attempts. Try again in ' + Math.ceil((lockInfo().until - Date.now()) / 1000) + 's';
+        await new Promise(r => setTimeout(r, 500));
+      }
+      note.remove();
+    }
     const entered = await pinKeypad('enter');
-    if (entered === saved) { markSessionUnlocked(); ls.remove(); return; }
-    tries++;
-    document.querySelectorAll('.ka-pin-dot').forEach(d => {
-      d.classList.add('shake');
-      setTimeout(() => d.classList.remove('shake'), 400);
-    });
-    toast('Incorrect PIN. Please try again.');
+    if (await pinMatches(entered, LS.get('ka_pin', null))) {
+      LS.del('ka_pin_lock'); markSessionUnlocked(); ls.remove(); return;
+    }
+    const f = lockInfo().fails + 1;
+    LS.set('ka_pin_lock', { fails: f, until: f >= 5 ? Date.now() + Math.min(300, 15 * 2 ** (f - 5)) * 1000 : 0 });
+    toast(f >= 5 ? 'Too many attempts. Please wait.' : 'Incorrect PIN. Please try again.');
   }
-  markSessionUnlocked();
-  ls.remove();
 }
 
 /* ─── Check PIN on page load ─────────────────────────── */
@@ -236,10 +291,10 @@ function openCoupleProfile() {
       <button class="ka-x" id="kcp-x">×</button>
       <h2>Your Couple Profile</h2>
       <p class="ka-sub">Personalise your KamaAgni experience</p>
-      <input class="ka-input" id="kcp-p1" placeholder="Partner 1 name" value="${p.p1 || ''}">
-      <input class="ka-input" id="kcp-p2" placeholder="Partner 2 name" value="${p.p2 || ''}">
+      <input class="ka-input" id="kcp-p1" placeholder="Partner 1 name" value="${esc(p.p1)}">
+      <input class="ka-input" id="kcp-p2" placeholder="Partner 2 name" value="${esc(p.p2)}">
       <label style="font-size:11px;color:#7a8aab;display:block;margin:-2px 0 6px;text-align:left">Anniversary date</label>
-      <input class="ka-input" id="kcp-ann" type="date" value="${p.ann || ''}">
+      <input class="ka-input" id="kcp-ann" type="date" value="${esc(p.ann)}">
       <button class="ka-btn ka-btn-rose" id="kcp-save">Save Profile</button>
       <button class="ka-btn ka-btn-ghost" id="kcp-cancel">Cancel</button>
     </div>`;
@@ -263,7 +318,7 @@ function renderCoupleBanner() {
   if (!b) return;
   const p = LS.get('ka_couple', {});
   if (!p.p1 && !p.p2) { b.classList.remove('on'); return; }
-  const names = [p.p1, p.p2].filter(Boolean).join(' and ');
+  const names = [p.p1, p.p2].filter(Boolean).map(esc).join(' and ');
   let days = '';
   if (p.ann) {
     const d = Math.floor((Date.now() - new Date(p.ann)) / 86400000);
@@ -300,10 +355,10 @@ const SITE_ROOT = (() => {
 const GAME = (name) => SITE_ROOT + 'games/' + name;
 
 const MOOD_GAMES = [
-  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_cards_game_single_page.html')],
-  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_ludo_dice_game_single_page.html'), GAME('kamaagni-connect-foreplay.html')],
-  [GAME('intimacy_Position_Selector_page.html'), GAME('intimacy_Oral_Position_Selector_page.html'), GAME('intimacy_ludo_dice_game_single_page.html')],
-  [GAME('intimacy_cards_game_single_page.html'), GAME('intimacy_dice_game_single_page.html'), GAME('kamaagni-poker-quick.html')],
+  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_cards_game_single_page.html'), GAME('kamaagni-love-coupons.html'), GAME('kamaagni-would-you-prefer.html')],
+  [GAME('intimacy_dice_game_single_page.html'), GAME('intimacy_ludo_dice_game_single_page.html'), GAME('kamaagni-connect-foreplay.html'), GAME('kamaagni-truth-or-dare.html')],
+  [GAME('intimacy_Position_Selector_page.html'), GAME('intimacy_Oral_Position_Selector_page.html'), GAME('kamaagni-desire-match.html'), GAME('kamaagni-mission-week.html')],
+  [GAME('intimacy_cards_game_single_page.html'), GAME('kamaagni-would-you-prefer.html'), GAME('kamaagni-poker-quick.html'), GAME('kamaagni-love-coupons.html')],
 ];
 const MOODS = ['Romantic 🌹','Playful 😜','Adventurous 🔥','Tired but Trying 😴'];
 
@@ -323,7 +378,7 @@ function openMoodPicker() {
     btn.addEventListener('click', () => {
       const games = MOOD_GAMES[+btn.dataset.i];
       ov.remove();
-      window.location.href = games[Math.floor(Math.random() * games.length)];
+      (window.KA_go || (u => { window.location.href = u; }))(games[Math.floor(Math.random() * games.length)]);
     });
   });
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
@@ -344,7 +399,7 @@ function openFavHub() {
       <h2 style="text-align:center">Saved Moments</h2>
       <div class="ka-fav-list">
         ${all.length
-          ? all.map(f => `<div class="ka-fav-item"><span class="ka-fav-tag">${f.tag}</span><span>${f.text}</span></div>`).join('')
+          ? all.map(f => `<div class="ka-fav-item"><span class="ka-fav-tag">${esc(f.tag)}</span><span>${esc(f.text)}</span></div>`).join('')
           : `<div class="ka-fav-empty">Nothing saved yet. Play a game and tap the heart to save your favourite moments.</div>`}
       </div>
     </div>`;
@@ -362,9 +417,14 @@ const ALL_GAMES = [
   GAME('intimacy_Oral_Position_Selector_page.html'),
   GAME('kamaagni-connect-foreplay.html'),
   GAME('kamaagni-poker-quick.html'),
+  GAME('kamaagni-would-you-prefer.html'),
+  GAME('kamaagni-truth-or-dare.html'),
+  GAME('kamaagni-mission-week.html'),
+  GAME('kamaagni-love-coupons.html'),
+  GAME('kamaagni-task-deck.html'),
 ];
 function surpriseMe() {
-  window.location.href = ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)];
+  (window.KA_go || (u => { window.location.href = u; }))(ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)]);
 }
 
 function injectSurpriseBtn() {
@@ -516,6 +576,94 @@ function openMusicPlayer() {
   ov.addEventListener('click', e => { if (e.target === ov) ov.remove(); });
 }
 
+/* ─── Timer ──────────────────────────────────────────── */
+let tmr = null;
+function beep() {
+  try { initAudio(); const o = mkOsc('sine', 880), g = mkGain(0.22); o.connect(g); g.connect(actx.destination); o.start(); g.gain.setTargetAtTime(0, actx.currentTime + 0.3, 0.12); setTimeout(() => { try { o.stop(); } catch {} }, 900); } catch {}
+  try { navigator.vibrate && navigator.vibrate([250, 120, 250]); } catch {}
+}
+const fmt = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
+function clearTimer() { if (tmr) { clearInterval(tmr.iv); tmr = null; } const p = document.getElementById('ka-timer-pill'); if (p) p.remove(); }
+function startTimer(sec, label) {
+  clearTimer();
+  tmr = { end: Date.now() + sec * 1000, label: label || '' };
+  const pill = document.createElement('div'); pill.id = 'ka-timer-pill'; pill.setAttribute('role', 'timer');
+  pill.innerHTML = '<span id="ka-tp-t"></span><button type="button" id="ka-tp-add">+1 min</button><button type="button" id="ka-tp-x">✕</button>';
+  document.body.appendChild(pill);
+  document.getElementById('ka-tp-x').onclick = clearTimer;
+  document.getElementById('ka-tp-add').onclick = () => { if (tmr) tmr.end += 60000; };
+  const tick = () => {
+    if (!tmr) return;
+    const left = Math.ceil((tmr.end - Date.now()) / 1000);
+    const t = document.getElementById('ka-tp-t'); if (t) t.textContent = '⏱ ' + fmt(Math.max(0, left)) + (tmr.label ? ' · ' + tmr.label : '');
+    if (left <= 0) { beep(); pill.classList.add('done'); if (t) t.textContent = "⏰ Time's up"; clearInterval(tmr.iv); setTimeout(clearTimer, 6000); }
+  };
+  tmr.iv = setInterval(tick, 250); tick();
+}
+function openTimer() {
+  const ov = document.createElement('div'); ov.className = 'ka-overlay';
+  ov.innerHTML = `<div class="ka-modal"><button class="ka-x" id="ktm-x" aria-label="Close">×</button><h2>Timer</h2><p class="ka-sub">Runs in the background while you play.</p>
+    <div class="ka-presets">${[1, 2, 3, 5, 10, 15].map(m => `<button class="ka-btn ka-btn-ghost" style="margin:0" data-m="${m}">${m} min</button>`).join('')}</div>
+    <input class="ka-input" id="ktm-c" type="number" min="1" max="180" placeholder="Custom minutes">
+    <button class="ka-btn ka-btn-rose" id="ktm-go">Start</button></div>`;
+  document.body.appendChild(ov);
+  const close = () => ov.remove();
+  document.getElementById('ktm-x').onclick = close;
+  ov.addEventListener('click', e => { if (e.target === ov) close(); const b = e.target.closest('[data-m]'); if (b) { startTimer(+b.dataset.m * 60); close(); } });
+  document.getElementById('ktm-go').onclick = () => { const v = +document.getElementById('ktm-c').value; if (v > 0) { startTimer(v * 60); close(); } };
+}
+
+/* ─── Quick hide (panic screen) ──────────────────────── */
+function panic() {
+  if (document.getElementById('ka-panic')) return;
+  try { trackIdx = -1; stopMusic(); document.getElementById('ka-music-fab')?.classList.remove('music-on'); } catch {}
+  const el = document.createElement('div'); el.id = 'ka-panic';
+  const clock = () => { const d = new Date(); el.textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
+  clock(); const iv = setInterval(clock, 10000);
+  el.addEventListener('dblclick', () => { clearInterval(iv); el.remove(); });
+  let last = 0; el.addEventListener('touchend', () => { const n = Date.now(); if (n - last < 350) { clearInterval(iv); el.remove(); } last = n; });
+  document.body.appendChild(el);
+}
+let lastEsc = 0;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { const n = Date.now(); if (n - lastEsc < 600) panic(); lastEsc = n; } });
+
+/* ─── Auto-lock when the app is hidden ───────────────── */
+document.addEventListener('visibilitychange', () => {
+  if (!LS.get('ka_autolock', false) || !LS.get('ka_pin', null)) return;
+  if (document.visibilityState === 'hidden') { try { sessionStorage.removeItem(SESSION_KEY); } catch {} }
+  else if (!isSessionUnlocked() && !document.getElementById('ka-lock-screen')) { checkPinOnLoad(); }
+});
+
+/* ─── Backup / restore ───────────────────────────────── */
+const SKIP_KEYS = ['ka_pin', 'ka_pin_salt', 'ka_pin_lock'];
+function backup() {
+  const data = {};
+  try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!SKIP_KEYS.includes(k)) data[k] = localStorage.getItem(k); } } catch {}
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify({app: 'kamaagni', v: 1, saved: new Date().toISOString(), data})], {type: 'application/json'}));
+  a.download = 'kamaagni-backup-' + new Date().toISOString().slice(0, 10) + '.json'; a.click();
+  toast('Backup saved (your PIN is not included).');
+}
+function restore() {
+  const inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'application/json,.json';
+  inp.onchange = async () => {
+    try {
+      const j = JSON.parse(await inp.files[0].text());
+      if (j.app !== 'kamaagni' || !j.data) throw 0;
+      if (!confirm('Restore this backup? It will replace your current progress on this device.')) return;
+      Object.entries(j.data).forEach(([k, v]) => { if (!SKIP_KEYS.includes(k) && typeof v === 'string') { try { localStorage.setItem(k, v); } catch {} } });
+      toast('Restored. Reloading…'); setTimeout(() => location.reload(), 900);
+    } catch { toast('That file is not a KamaAgni backup.'); }
+  };
+  inp.click();
+}
+
+/* ─── Install prompt ─────────────────────────────────── */
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = document.getElementById('ks-install'); if (b) b.style.display = ''; });
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+
 /* ─── Settings panel ─────────────────────────────────── */
 function buildSettings() {
   const panel = document.createElement('div');
@@ -526,8 +674,14 @@ function buildSettings() {
     <button class="ka-btn ka-btn-ghost" id="ks-mood">🎭 Pick a Mood</button>
     <button class="ka-btn ka-btn-ghost" id="ks-favs">❤️ Saved Moments</button>
     <div class="ka-divider"></div>
-    <button class="ka-btn ka-btn-ghost" id="ks-pin-set">🔐 Change PIN</button>
-    <button class="ka-btn ka-btn-danger" id="ks-pin-clr">Remove PIN</button>`;
+    <button class="ka-btn ka-btn-ghost" id="ks-pin-set">🔐 Set / Change PIN</button>
+    <div class="ka-set-row"><span>Auto-lock when app is hidden</span><div class="ka-switch ${LS.get('ka_autolock', false) ? 'on' : ''}" id="ks-auto" role="switch" tabindex="0" aria-checked="${LS.get('ka_autolock', false)}"></div></div>
+    <button class="ka-btn ka-btn-danger" id="ks-pin-clr">Remove PIN</button>
+    <div class="ka-divider"></div>
+    <button class="ka-btn ka-btn-ghost" id="ks-backup">⬇ Backup my data</button>
+    <button class="ka-btn ka-btn-ghost" id="ks-restore">⬆ Restore backup</button>
+    <button class="ka-btn ka-btn-ghost" id="ks-install" style="${deferredInstall && !isStandalone() ? '' : 'display:none'}">📲 Install app</button>
+    ${isIOS && !isStandalone() ? '<p class="ka-sub" style="margin:0;font-size:12px">To install: tap Share, then Add to Home Screen.</p>' : ''}`;
   document.body.appendChild(panel);
 
   const close = () => panel.classList.remove('open');
@@ -536,16 +690,21 @@ function buildSettings() {
   document.getElementById('ks-favs').onclick   = () => { close(); openFavHub(); };
   document.getElementById('ks-pin-set').onclick = () => {
     close();
-    LS.del('ka_pin');
     pinKeypad('set').then(p1 => {
       if (!p1) return;
       pinKeypad('confirm').then(p2 => {
-        if (p1 === p2) { LS.set('ka_pin', p1); markSessionUnlocked(); toast('PIN saved.'); }
+        if (p1 === p2) { LS.del('ka_pin_salt'); hashPin(p1).then(h => { LS.set('ka_pin', h); LS.del('ka_pin_lock'); markSessionUnlocked(); toast('PIN saved.'); }); }
         else toast('PINs did not match. Please try again.');
       });
     });
   };
-  document.getElementById('ks-pin-clr').onclick = () => { LS.del('ka_pin'); close(); toast('PIN removed.'); };
+  const sw = document.getElementById('ks-auto');
+  const flip = () => { const v = !LS.get('ka_autolock', false); if (v && !LS.get('ka_pin', null)) { toast('Set a PIN first to use auto-lock.'); return; } LS.set('ka_autolock', v); sw.classList.toggle('on', v); sw.setAttribute('aria-checked', v); };
+  sw.onclick = flip; sw.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+  document.getElementById('ks-backup').onclick = () => { close(); backup(); };
+  document.getElementById('ks-restore').onclick = () => { close(); restore(); };
+  document.getElementById('ks-install').onclick = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; close(); };
+  document.getElementById('ks-pin-clr').onclick = () => { LS.del('ka_pin'); LS.del('ka_pin_salt'); LS.del('ka_pin_lock'); close(); toast('PIN removed.'); };
 }
 
 /* ─── Floating toolbar ───────────────────────────────── */
@@ -554,10 +713,11 @@ function buildToolbar() {
   tb.id = 'ka-toolbar';
   tb.innerHTML = `
     <button class="ka-fab" id="ka-settings-fab" title="Settings">⚙️</button>
-    <button class="ka-fab" id="ka-music-fab"    title="Mood Music">🎵</button>
-    <button class="ka-fab" id="ka-mood-fab"     title="Pick a Mood">🎭</button>
-    <button class="ka-fab" id="ka-favs-fab"     title="Saved Moments">❤️</button>
-    <button class="ka-fab" id="ka-lock-fab"     title="Quick Lock">🔒</button>`;
+    <button class="ka-fab" id="ka-music-fab"    title="Mood Music" aria-label="Mood music">🎵</button>
+    <button class="ka-fab" id="ka-timer-fab"    title="Timer" aria-label="Timer">⏱</button>
+    <button class="ka-fab" id="ka-favs-fab"     title="Saved Moments" aria-label="Saved moments">❤️</button>
+    <button class="ka-fab" id="ka-lock-fab"     title="Quick Lock" aria-label="Quick lock">🔒</button>
+    <button class="ka-fab" id="ka-hide-fab"     title="Hide screen (or press Esc twice)" aria-label="Hide screen">🕶</button>`;
   document.body.appendChild(tb);
 
   document.getElementById('ka-settings-fab').addEventListener('click', e => {
@@ -565,7 +725,8 @@ function buildToolbar() {
     document.getElementById('ka-settings').classList.toggle('open');
   });
   document.getElementById('ka-music-fab').addEventListener('click', openMusicPlayer);
-  document.getElementById('ka-mood-fab').addEventListener('click', openMoodPicker);
+  document.getElementById('ka-timer-fab').addEventListener('click', openTimer);
+  document.getElementById('ka-hide-fab').addEventListener('click', panic);
   document.getElementById('ka-favs-fab').addEventListener('click', openFavHub);
   document.getElementById('ka-lock-fab').addEventListener('click', quickLock);
 
@@ -623,6 +784,8 @@ window.KA = {
   openFavHub,
   openMoodPicker,
   surpriseMe,
+  timer: startTimer,
+  panic,
 };
 
 })();

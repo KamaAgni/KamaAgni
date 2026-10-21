@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni — Challenges</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  let D, W;
+  try { D = await (await fetch('../data/challenges.json')).json(); W = await (await fetch('../data/wishlist.json')).json(); }
+  catch { app.innerHTML = top('Challenges', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
+  const st = LS.get('ka_chal', {done: {}, start: {}, tab: 'couple', wish: {}, mine: []});
+  const save = () => LS.set('ka_chal', st);
+  const TABS = [['couple', '💑 Couple'], ['him', '👑 For him to command'], ['her', '🌹 For her'], ['wish', '🎁 Wish list']];
+  function view() {
+    const t = st.tab;
+    let body = '';
+    if (t === 'wish') {
+      const all = W.concat(st.mine);
+      body = `<div class="kx-card"><div class="kx-muted" style="margin-bottom:10px">Tap what you would love as a gift or experience. Show your partner.</div>
+        <div class="kx-list">${all.map((w, i) => `<div class="kx-item ${st.wish[w] ? 'done' : ''}"><button class="kx-check ${st.wish[w] ? 'on' : ''}" data-w="${esc(w)}">${st.wish[w] ? '♥' : ''}</button><span class="kx-it">${esc(w)}</span></div>`).join('')}</div>
+        <div class="kx-row" style="margin-top:12px"><input class="kx-input" id="nw" maxlength="60" placeholder="Add your own idea" style="flex:1;margin:0"><button class="kx-btn sm" id="aw">Add</button></div></div>`;
+    } else {
+      const items = D[t], done = items.filter((_, i) => st.done[t + i]).length;
+      const next = items.findIndex((_, i) => !st.done[t + i]);
+      body = `<div class="kx-card kx-center"><div class="kx-big" style="font-size:26px">${done} / ${items.length}</div><div class="kx-prog"><i style="width:${done / items.length * 100}%"></i></div>
+        <div class="kx-row" style="justify-content:center;margin-top:8px"><span class="kx-muted">Start date</span><input type="date" class="kx-input" id="sd" style="width:auto;margin:0" value="${st.start[t] || ''}"></div>
+        ${st.start[t] && done === items.length ? '<p style="margin-top:8px">🏆 You did them all!</p>' : ''}</div>
+        <p class="kx-note" style="text-align:left">Do them in order, easiest to hardest. Each of you may swap one challenge for one of similar difficulty. A safe word means stop.</p>
+        <div class="kx-list" style="margin-top:10px">${items.map((x, i) => `<div class="kx-item ${st.done[t + i] ? 'done' : ''}" ${i === next ? 'style="border-color:var(--rose)"' : ''}><span class="kx-muted" style="min-width:26px">${i + 1}</span><button class="kx-check ${st.done[t + i] ? 'on' : ''}" data-k="${t + i}">${st.done[t + i] ? '✓' : ''}</button><span class="kx-it">${esc(x)}</span></div>`).join('')}</div>`;
+    }
+    app.innerHTML = top('Challenges', 'Long journeys to tick off together, and a wish list to share.') + `<div class="kx-tabs">${TABS.map(([k, l]) => `<button data-t="${k}" class="${k === t ? 'on' : ''}">${l}</button>`).join('')}</div>` + body;
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { st.tab = b.dataset.t; save(); view(); });
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k; if (st.done[k]) delete st.done[k]; else { st.done[k] = 1; window.KA_TRACK && KA_TRACK.log('challenge', 'Challenge step done', ''); } save(); const y = scrollY; view(); scrollTo(0, y); });
+    app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { const k = b.dataset.w; if (st.wish[k]) delete st.wish[k]; else st.wish[k] = 1; save(); const y = scrollY; view(); scrollTo(0, y); });
+    const sd = document.getElementById('sd'); if (sd) sd.onchange = e => { st.start[t] = e.target.value; save(); view(); };
+    const aw = document.getElementById('aw'); if (aw) aw.onclick = () => { const v = document.getElementById('nw').value.trim(); if (v) { st.mine.push(v.slice(0, 60)); save(); view(); } };
+  }
+  view();
+})();
+
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

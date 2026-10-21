@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Truth or Dare</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {esc, names, top, shuffle} = KX;
+  const app = document.getElementById('app');
+  const decks = {truth: shuffle(KA_DATA.truth), dare: shuffle(KA_DATA.dare)};
+  const idx = {truth: 0, dare: 0};
+  let turn = 0, skips = [2, 2];
+  function menu(msg) {
+    const nm = names()[turn];
+    app.innerHTML = top('Truth or Dare', 'Honest answers, playful dares. Pass is always allowed.') + `
+      <div class="kx-card kx-play">
+        <div class="kx-turn">${esc(nm)}'s turn</div>
+        <div class="kx-big">${esc(msg || 'Truth, or Dare?')}</div>
+        <div class="kx-row" style="justify-content:center">
+          <button class="kx-btn indigo" data-k="truth">💬 Truth</button>
+          <button class="kx-btn" data-k="dare">🔥 Dare</button>
+          <button class="kx-btn gold" id="brave">⚔️ Brave</button></div>
+        <p class="kx-muted">Passes left — ${esc(names()[0])}: ${skips[0]} · ${esc(names()[1])}: ${skips[1]}</p>
+      </div>`;
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => card(b.dataset.k));
+    document.getElementById('brave').onclick = braveMenu;
+  }
+  let brave = null;
+  async function braveMenu() {
+    if (!brave) { try { brave = (await (await fetch('../data/extras.json')).json()).brave; } catch { KX.toast('Could not load Brave cards (open from your hosted site)'); return; } }
+    app.innerHTML = top('Truth or Dare', 'Brave mode: the loser draws a challenge. Intense. Agree your safe word first.') + `
+      <div class="kx-card kx-play"><span class="kx-chip h3">Brave · Wild</span><div class="kx-big">Who is taking the challenge?</div>
+        <div class="kx-row" style="justify-content:center"><button class="kx-btn" data-b="hers">Her challenge</button><button class="kx-btn indigo" data-b="his">His challenge</button><button class="kx-btn ghost" data-b="both">Either</button></div>
+        <button class="kx-btn ghost sm" id="bk">← Back</button></div>`;
+    document.getElementById('bk').onclick = () => menu();
+    app.querySelectorAll('[data-b]').forEach(b => b.onclick = () => braveCard(b.dataset.b));
+  }
+  function braveCard(k) {
+    const list = brave[k].filter(x => x.length > 6), text = list[Math.floor(Math.random() * list.length)];
+    app.innerHTML = top('Truth or Dare', '') + `
+      <div class="kx-card kx-play"><span class="kx-chip h3">Brave · ${k === 'his' ? 'His' : k === 'hers' ? 'Her' : 'Either'}</span>
+        <div class="kx-big" style="font-size:clamp(19px,4.2vw,25px)">${esc(text)}</div>
+        <div class="kx-row" style="justify-content:center"><button class="kx-btn" id="bd">Done ✓</button><button class="kx-btn ghost" id="bp">Not brave enough (pass)</button></div></div>`;
+    document.getElementById('bd').onclick = () => braveMenu();
+    document.getElementById('bp').onclick = () => braveMenu();
+  }
+  function card(k) {
+    const d = decks[k]; if (idx[k] >= d.length) { decks[k] = shuffle(KA_DATA[k]); idx[k] = 0; }
+    const text = decks[k][idx[k]++];
+    app.innerHTML = top('Truth or Dare', '') + `
+      <div class="kx-card kx-play">
+        <span class="kx-chip ${k === 'dare' ? 'h3' : 'h1'}">${k}</span>
+        <div class="kx-big">${esc(text)}</div>
+        <div class="kx-row" style="justify-content:center">
+          <button class="kx-btn" id="done">Done ✓</button>
+          <button class="kx-btn ghost" id="pass" ${skips[turn] ? '' : 'disabled'}>Pass (${skips[turn]})</button>
+          <button class="kx-btn ghost" id="sv">♡</button></div>
+      </div>`;
+    document.getElementById('done').onclick = () => { turn = 1 - turn; menu(); };
+    document.getElementById('pass').onclick = () => { skips[turn]--; turn = 1 - turn; menu('Passed — no judgement.'); };
+    document.getElementById('sv').onclick = e => { KX.fav('cards', text); e.target.textContent = '♥'; };
+  }
+  menu();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

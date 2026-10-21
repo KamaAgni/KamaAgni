@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni — Guided Session</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-focus.js"></script><script src="../js/ka-data.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top, pick, shuffle, heat, HEAT} = KX;
+  const app = document.getElementById('app');
+  const [A, B] = KX.names();
+  const fill = t => String(t).replace(/\{A\}/g, A).replace(/\{B\}/g, B).replace(/\bPlayer 1\b/g, A).replace(/\bPlayer 2\b/g, B);
+  const qs = new URLSearchParams(location.search);
+  const MOODS = {
+    romantic: ['🌸', 'Romantic', 'Slow, tender, close.'], playful: ['😈', 'Playful', 'Teasing, fun, a little naughty.'],
+    wild: ['🔥', 'Wild', 'Bold and intense. Needs Wild heat.'], gentle: ['🛁', 'Tired & gentle', 'Soft touch, no pressure.'], apart: ['📱', 'Apart tonight', 'Long distance, together anyway.']
+  };
+  const TIMES = {15: ['⚡', '15 min', 'Quick'], 45: ['🕯️', '45 min', 'Evening'], 90: ['🌙', 'All night', 'Take your time']};
+  const CONNECT = ['What is one thing I did this week that made you feel loved?', 'What is a moment from our past that still makes you smile?', 'What would make tonight perfect for you?', 'Where do you most love to be touched right now?', 'Tell me something you have been wanting to try but felt shy to ask.', 'What is one thing you find irresistible about me?', 'What song makes you think of us?', 'Describe our best night together in three words.', 'What is one limit you want me to remember, and one thing you want more of?', 'How do you want to feel when tonight is over?'];
+  const AFTER = ['Water, a blanket and a cuddle.', 'Tell each other one thing you loved tonight.', 'Check in: how are you feeling, body and heart?', 'Slow kisses. No phones for 10 minutes.'];
+  const WYL = () => (D.wyp || []).flat().map(String);
+  const WY = () => pick(WYL().length ? WYL() : ['Give your partner a slow shoulder massage for 5 minutes']);
+  let D = null, packs = {}, PIDX = [], RP = [], steps = [], i = 0, mood = qs.get('mood') || '', mins = +qs.get('mins') || 0, rating = 0;
+  try { PIDX = await (await fetch('../data/packs/index.json')).json(); RP = await (await fetch('../data/roleplay.json')).json(); } catch {}
+  D = window.KA_DATA || {};
+  async function pack(id) {
+    if (packs[id]) return packs[id];
+    try { packs[id] = await (await fetch('../data/packs/' + id + '.json')).json(); }
+    catch { packs[id] = []; }
+    return packs[id];
+  }
+  async function oldPack(id) {
+    if (packs['t:' + id]) return packs['t:' + id];
+    try { const all = await (await fetch('../data/tasks.json')).json(); all.forEach(p => packs['t:' + p.id] = p.items); } catch {}
+    return packs['t:' + id] || [];
+  }
+  const MAIN = {
+    romantic: async () => pick([async () => ({k: 'Touch', t: WY(), m: 5}), async () => ({k: 'Coupon', t: (pick((D.coupons || []).filter(c => c.h <= 1)) || {t: 'Slow dance in the living room'}).t}), async () => ({k: 'Foreplay', t: pick(await pack('foreplaycards')), m: 5})])(),
+    playful: async () => pick([async () => ({k: 'Task', t: pick(await oldPack('switch'))}), async () => ({k: 'Truth or dare', t: pick(D.dare || [])}), async () => ({k: 'Task', t: pick(await oldPack('lightfd'))}), async () => ({k: 'Hornopoly', t: pick(await pack('hornopoly'))})])(),
+    wild: async () => { const ids = PIDX.filter(p => p.h <= heat() && ['slut700', 'revher', 'revhim', 'public550', 'edging', 'bondage', 'kinkycards', 'femdom700', 'blowjob650', 'solo400', 'bdsmtd', 'dungeon', 'warmup'].includes(p.id)); const p = pick(ids.length ? ids : PIDX); return {k: p.l, t: pick(await pack(p.id))}; },
+    gentle: async () => pick([async () => ({k: 'Massage', t: pick(WYL().filter(x => /massage|feet|back|hair|scalp/i.test(x)).concat(['Massage your partner’s back for 5 minutes'])), m: 5}), async () => ({k: 'Cuddle', t: 'Lie close, match your breathing, and say one kind thing each. No goal except being near.', m: 5}), async () => ({k: 'Foreplay', t: pick(await pack('foreplaycards')), m: 5})])(),
+    apart: async () => pick([async () => ({k: 'Message', t: pick(await oldPackFirst(['longdist']))}), async () => ({k: 'Voice note', t: 'Record a 1-minute voice note telling your partner exactly what you would do if you were together right now. Send it.', m: 2}), async () => ({k: 'Video call', t: 'Video call with a dress code: wear something your partner has not seen. Tell each other one fantasy.', m: 10})])()
+  };
+  async function oldPackFirst(ids) { const p = await pack(ids[0]); return p.length ? p : ['Write a message describing what you want tonight.']; }
+  async function build() {
+    let m = mood; if (m === 'wild' && heat() < 3) m = 'playful';
+    const main = () => MAIN[m]();
+    const seq = ['connect'];
+    if (mins >= 45) seq.push('warm');
+    seq.push('main'); if (mins >= 45) seq.push('main'); if (mins >= 90) { seq.push(m === 'playful' || m === 'wild' ? 'role' : 'main'); seq.push('main'); }
+    seq.push('close');
+    steps = [];
+    for (const s of seq) steps.push(await mk(s, m, main));
+    i = 0; run();
+  }
+  async function mk(s, m, main) {
+    if (s === 'connect') return {k: 'Connect', t: pick(CONNECT), m: 3, re: () => mk('connect', m, main)};
+    if (s === 'warm') return m === 'apart' ? {k: 'Warm-up', t: 'Send each other a photo or message of what you are wearing right now.', m: 3} : {k: 'Warm-up', t: pick(m === 'romantic' || m === 'gentle' ? WYL() : await pack('warmup')), m: 3, re: () => mk('warm', m, main)};
+    if (s === 'role') { const o = pick(RP); return {k: 'Roleplay · ' + o.t, t: pick(o.p), m: 20}; }
+    if (s === 'close') return {k: 'Aftercare', t: pick(AFTER), close: 1};
+    const x = await main(); x.re = async () => { const y = await main(); y.re = x.re; return y; }; return x;
+  }
+  function pickScreen() {
+    app.innerHTML = top('Guided Session', 'Tell us the mood and the time. We will lead you through the evening, step by step.') + `
+      <div class="kx-sec" style="margin-top:0">Mood</div><div class="kx-list" id="md">${Object.entries(MOODS).filter(([k]) => k !== 'wild' || heat() >= 3).map(([k, v]) => `<button class="kx-item" data-m="${k}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%;${k === mood ? 'border-color:var(--rose)' : ''}"><span style="font-size:26px">${v[0]}</span><span class="kx-it"><b>${v[1]}</b><br><span class="kx-muted">${v[2]}</span></span></button>`).join('')}</div>
+      ${heat() < 3 ? '<p class="kx-muted" style="margin-top:6px">Set heat to Wild on the Task Deck page to unlock the Wild mood.</p>' : ''}
+      <div class="kx-sec">Time</div><div class="kx-tabs">${Object.entries(TIMES).map(([k, v]) => `<button data-t="${k}" class="${+k === mins ? 'on' : ''}">${v[0]} ${v[1]}<br><span class="kx-muted">${v[2]}</span></button>`).join('')}</div>
+      <div class="kx-row" style="margin-top:16px"><button class="kx-btn" id="go" ${mood && mins ? '' : 'disabled'}>Begin ›</button></div>`;
+    app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mood = b.dataset.m; pickScreen(); });
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { mins = +b.dataset.t; pickScreen(); });
+    document.getElementById('go').onclick = () => { document.getElementById('go').textContent = 'Preparing…'; build(); };
+    if (window.KA_FOCUS) KA_FOCUS.build('../').then(f => { const r = f.recap, it = f.items[0]; const box = document.createElement('div'); box.className = 'kx-card'; box.style.marginTop = '14px';
+      box.innerHTML = `<div class="kx-muted">This week: ${r.sessions} session${r.sessions === 1 ? '' : 's'}${r.top ? ', top mood ' + esc(r.top) : ''}.</div>` + (it ? `<div style="margin-top:6px">Next up: <a href="${it.href.replace('../', '')}" style="color:var(--rose)">${it.icon} ${esc(it.label)}: ${esc(it.title)}</a></div>` : ''); const g = document.getElementById('go'); if (g && g.parentNode.parentNode) g.parentNode.after(box); });
+  }
+  function run() {
+    const s = steps[i], last = i === steps.length - 1;
+    app.innerHTML = top('Guided Session', `${MOODS[mood] ? MOODS[mood][1] : ''} · step ${i + 1} of ${steps.length}`) + `
+      <div class="kx-prog"><i style="width:${(i) / (steps.length - 1) * 100}%"></i></div>
+      <div class="kx-card kx-play" style="margin-top:12px"><span class="kx-chip h2">${esc(s.k)}</span>
+        <div class="kx-big" style="font-size:clamp(19px,4.2vw,25px)">${esc(fill(s.t))}</div>
+        ${s.close ? `<div class="kx-muted">How was tonight?</div><div class="kx-row" style="justify-content:center">${[1, 2, 3, 4, 5].map(n => `<button class="kx-btn sm ${n <= rating ? '' : 'ghost'}" data-r="${n}">${'★'.repeat(1)}${n}</button>`).join('')}</div>` : ''}
+      </div>
+      <div class="kx-row" style="justify-content:center;margin-top:14px">
+        ${s.close ? '<button class="kx-btn" id="fin">Finish & save</button>' : `<button class="kx-btn" id="nx">Next ›</button>${s.re ? '<button class="kx-btn ghost" id="sw">⟳ Swap</button>' : ''}`}
+        ${s.m ? `<button class="kx-btn gold" id="tm">⏱ ${s.m} min</button>` : ''}
+        ${i > 0 && !s.close ? '<button class="kx-btn ghost sm" id="bk">‹ Back</button>' : ''}
+        ${!s.close ? '<button class="kx-btn ghost sm" id="sv" aria-label="Save">♡</button>' : ''}</div>
+      <p class="kx-note">Pass or stop any time. Safe word first.</p>`;
+    const g = id => document.getElementById(id);
+    if (g('nx')) g('nx').onclick = () => { i++; run(); };
+    if (g('bk')) g('bk').onclick = () => { i--; run(); };
+    if (g('sw')) g('sw').onclick = async () => { steps[i] = await s.re(); steps[i].re = s.re; run(); };
+    if (g('tm')) g('tm').onclick = () => window.KA && KA.timer(s.m * 60, s.k);
+    if (g('sv')) g('sv').onclick = e => { KX.fav('cards', fill(s.t)); e.target.textContent = '♥'; };
+    app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rating = +b.dataset.r; run(); });
+    if (g('fin')) g('fin').onclick = finish;
+  }
+  function finish() {
+    const log = LS.get('ka_journal', []); const d = new Date();
+    log.push({id: Date.now(), d: window.KA_TRACK ? KA_TRACK.today() : d.toISOString().slice(0, 10), r: rating || 4, g: ['Guided session', MOODS[mood] ? MOODS[mood][1] : ''].filter(Boolean), n: ''});
+    LS.set('ka_journal', log);
+    if (window.KA_TRACK) KA_TRACK.award('session', 40); if (window.KA_TRACK) KA_TRACK.log('session','Guided session', (MOODS[mood]?MOODS[mood][1]:'')+' · '+mins+' min');
+    const st = window.KA_TRACK ? KA_TRACK.streak() : 1, lv = window.KA_TRACK ? KA_TRACK.level(KA_TRACK.get().xp || 0) : null;
+    app.innerHTML = top('Session complete', '') + `<div class="kx-card kx-play"><div style="font-size:54px">🔥</div><div class="kx-big">Beautiful. Saved to your journal.</div>
+      <div class="kx-muted">${st} day streak${lv ? ' · ' + lv.icon + ' ' + lv.name + ' · ' + lv.xp + ' XP' : ''}</div>
+      <div class="kx-row" style="justify-content:center"><a class="kx-btn" href="kamaagni-journal.html">Add a note</a><a class="kx-btn ghost" href="../index.html">Home</a></div></div>`;
+  }
+  if (mood && mins && MOODS[mood]) build(); else pickScreen();
+})();
+
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

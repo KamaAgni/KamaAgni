@@ -1,16 +1,23 @@
 <!doctype html>
 <html lang="en">
 <head>
+<meta name="robots" content="noindex,nofollow"/>
+<meta property="og:title" content="KamaAgni — games for couples (18+)"/>
+<meta property="og:description" content="A private game space for consenting adult couples."/>
+<meta property="og:image" content="assets/icons/icon-512.png"/>
+  <script src="js/ka-boot.js"></script>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#05060f"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
   <link rel="stylesheet" href="css/fonts.css"/>
   <link rel="stylesheet" href="css/premium.css"/>
   <link rel="manifest" href="manifest.json"/>
-  <meta name="theme-color" content="#05060f"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-  <meta name="apple-mobile-web-app-title" content="KamaAgni"/>
+  <link rel="icon" href="assets/icons/icon-192.png"/>
   <link rel="apple-touch-icon" href="assets/icons/icon-192.png"/>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
   <title>KamaAgni: Intimacy Suite for Couples</title>
   <meta name="description" content="A private collection of intimacy games designed for couples."/>
 
@@ -484,6 +491,7 @@ body::after {
 .game-card:nth-child(3){animation-delay:0.20s}
 .game-card:nth-child(4){animation-delay:0.26s}
 .game-card:nth-child(5){animation-delay:0.32s}
+.game-card:nth-child(n+6){animation-delay:0.38s}
 
 .game-card::before {
   content:'';
@@ -571,6 +579,32 @@ body::after {
 .cta-arrow { transition:transform var(--tr); font-size:15px; }
 .card-cta:hover .cta-arrow { transform:translateX(4px); }
 
+/* Featured banner */
+
+/* ── Tonight dashboard ── */
+.dash{margin:0 0 36px;padding:24px 22px 22px;border-radius:24px;border:1px solid rgba(232,99,122,.32);background:radial-gradient(ellipse 80% 120% at 0% 0%,rgba(232,99,122,.20),transparent 60%),radial-gradient(ellipse 70% 100% at 100% 100%,rgba(108,126,248,.16),transparent 60%),rgba(12,14,28,.78);box-shadow:0 20px 60px rgba(0,0,0,.35);animation:cardUp .55s cubic-bezier(.22,1,.36,1) both}
+.dash h2{font-family:'Cinzel',serif;font-size:clamp(20px,4.6vw,27px);font-weight:900;letter-spacing:.04em;line-height:1.2;margin-bottom:4px}
+.dash h2 span{background:linear-gradient(135deg,#ffb27a,#ff6b35 45%,#e8637a);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.dash .d-sub{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:var(--muted);margin-bottom:16px}
+.d-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.d-chip{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);font-size:13px;font-weight:700;color:#dce9ff}
+.d-lvl{flex:1;min-width:190px;display:block;border-radius:16px;padding:9px 14px}
+.d-lvl .bar{height:6px;border-radius:99px;background:rgba(255,255,255,.1);margin-top:6px;overflow:hidden}.d-lvl .bar i{display:block;height:100%;background:linear-gradient(90deg,#e8637a,#ff6b35);border-radius:99px}
+.d-moods{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:16px}
+.d-mood{display:flex;flex-direction:column;align-items:center;gap:4px;padding:14px 8px;border-radius:16px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:#dce9ff;font-size:13px;font-weight:700;text-align:center;transition:transform .18s,border-color .18s,background .18s}
+.d-mood b{font-size:26px;font-weight:400;line-height:1}.d-mood:hover{transform:translateY(-3px);border-color:rgba(232,99,122,.6);background:rgba(232,99,122,.10)}
+.d-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.d-go{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:14px 28px;border-radius:999px;background:linear-gradient(135deg,#e8637a,#ff6b35);color:#fff;font-weight:800;font-size:15px;box-shadow:0 8px 28px rgba(232,99,122,.4);min-height:48px;animation:dashPulse 2.8s ease-in-out infinite}
+@keyframes dashPulse{0%,100%{box-shadow:0 8px 28px rgba(232,99,122,.35)}50%{box-shadow:0 8px 40px rgba(255,107,53,.65)}}
+.d-link{display:inline-flex;align-items:center;gap:6px;padding:11px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.16);background:transparent;color:#a8bcd8;font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:44px}
+.d-link:hover{color:#fff;border-color:rgba(232,99,122,.5)}
+.d-next{margin-top:14px;display:flex;gap:10px;flex-wrap:wrap}.d-next a{flex:1;min-width:200px;padding:12px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);font-size:13px;color:#a8bcd8}.d-next a b{display:block;color:#fff;font-size:14px;margin-top:2px}
+.d-banner{margin-bottom:14px;padding:11px 14px;border-radius:14px;background:rgba(255,107,53,.12);border:1px solid rgba(255,107,53,.4);font-weight:700;font-size:14px}
+@media(prefers-reduced-motion:reduce){.d-go{animation:none}}
+.feature-banner{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;margin:0 0 44px;padding:26px 28px;border-radius:22px;border:1px solid rgba(232,99,122,.28);background:linear-gradient(135deg,rgba(232,99,122,.14),rgba(255,107,53,.08) 60%,rgba(108,126,248,.08));animation:cardUp .55s cubic-bezier(0.22,1,0.36,1) .05s both}
+.section-label{margin-top:44px}
+.feature-banner + .section-label{margin-top:0}
+.games + .section-label{margin-top:44px}
 /* ════════════════════════════════════════
    FOOTER
 ════════════════════════════════════════ */
@@ -671,13 +705,13 @@ body::after {
 <!-- ═══════════════════════════════════
      MAIN CONTENT
 ═══════════════════════════════════ -->
+<canvas id="star-canvas" aria-hidden="true"></canvas>
 <div id="main-content">
   <div class="page">
 
     <!-- Hero -->
     <header class="hero">
       <div class="eyebrow">
-        <span class="eyebrow-dot"></span>
         Private · For Couples
       </div>
 
@@ -686,7 +720,7 @@ body::after {
       </h1>
       <p class="hero-sub-brand">Intimacy Suite</p>
 
-      <p class="hero-desc">A handcrafted collection of intimacy games for couples.<br>
+      <p class="hero-desc">A handcrafted suite of games, planners and guides for couples.<br>
       <span id="tw-hero" style="font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--rose2);font-size:1.05em"></span><span id="tw-cursor" style="display:inline-block;width:2px;height:1em;background:var(--rose);vertical-align:middle;margin-left:2px;animation:pulse 0.7s infinite"></span>
       </p>
 
@@ -697,11 +731,54 @@ body::after {
       </div>
     </header>
 
-    <!-- Section label -->
-    <p class="section-label">Choose Your Game</p>
 
-    <!-- Cards -->
+    <section class="dash" id="dash" aria-label="Tonight">
+      <h2 id="d-hi"><span>Welcome back</span></h2>
+      <p class="d-sub" id="d-sub">How are you two feeling tonight?</p>
+      <div id="d-ban"></div>
+      <div class="d-stats" id="d-stats"></div>
+      <div class="d-moods" id="d-moods"></div>
+      <div class="d-row">
+        <a class="d-go" href="games/kamaagni-session.html">🔥 Start tonight's session</a>
+        <a class="d-link" href="games/kamaagni-secret.html">💌 Send a secret</a>
+        <button class="d-link" id="d-sur" type="button">🎲 Surprise me</button>
+        <button class="d-link" id="d-cal" type="button">📅 Date-night reminder</button>
+      </div>
+      <div class="d-next" id="d-next"></div>
+    </section>
+
+    <div class="feature-banner">
+      <div>
+        <span class="card-tag rose">New · Tonight</span>
+        <div class="card-title" style="font-size:28px">Plan Tonight</div>
+        <p class="card-desc" style="max-width:420px">Pick your mood and how much time you have. Get a complete evening: warm-up, main event and aftercare, with timers, a calendar invite and a message to send.</p>
+      </div>
+      <a href="games/kamaagni-tonight.html" class="card-cta rose">Plan our evening <span class="cta-arrow">→</span></a>
+    </div>
+
+    <p class="section-label">Play together</p>
     <div class="games">
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🕯️</div>
+        <div>
+          <span class="card-tag rose">Guided</span>
+          <div class="card-title">Guided Session</div>
+          <p class="card-desc">Pick a mood and your time. We lead the evening step by step, with timers and aftercare.</p>
+        </div>
+        <a href="games/kamaagni-session.html" class="card-cta rose">Begin <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">💌</div>
+        <div>
+          <span class="card-tag rose">Surprise</span>
+          <div class="card-title">Secret Envelope</div>
+          <p class="card-desc">Send a sealed dare or promise by private link. Set a time lock. They reply when done.</p>
+        </div>
+        <a href="games/kamaagni-secret.html" class="card-cta rose">Send <span class="cta-arrow">→</span></a>
+      </div>
 
       <div class="game-card">
         <div class="card-bar rose"></div>
@@ -709,7 +786,7 @@ body::after {
         <div>
           <span class="card-tag rose">Dice</span>
           <div class="card-title">Intimacy Dice</div>
-          <p class="card-desc">Roll the What, Where &amp; How dice for spontaneous, playful moments. Every roll surprises.</p>
+          <p class="card-desc">Roll the What, Where &amp; How dice for spontaneous, playful moments.</p>
         </div>
         <a href="games/intimacy_dice_game_single_page.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
       </div>
@@ -731,31 +808,9 @@ body::after {
         <div>
           <span class="card-tag gold">Board Game</span>
           <div class="card-title">Intimacy Ludo</div>
-          <p class="card-desc">Classic board game reimagined for couples. Hidden tiles, tasks &amp; playful twists at every turn.</p>
+          <p class="card-desc">Classic board game reimagined for couples. Hidden tiles, tasks &amp; twists.</p>
         </div>
         <a href="games/intimacy_ludo_dice_game_single_page.html" class="card-cta gold">Play Now <span class="cta-arrow">→</span></a>
-      </div>
-
-      <div class="game-card">
-        <div class="card-bar rose"></div>
-        <div class="card-icon">🌸</div>
-        <div>
-          <span class="card-tag rose">Selector</span>
-          <div class="card-title">Oral Position Selector</div>
-          <p class="card-desc">Roll three dice to land on one of many unique positions, then add your own playful twist.</p>
-        </div>
-        <a href="games/intimacy_Oral_Position_Selector_page.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
-      </div>
-
-      <div class="game-card">
-        <div class="card-bar indigo"></div>
-        <div class="card-icon">🔥</div>
-        <div>
-          <span class="card-tag indigo">Selector</span>
-          <div class="card-title">Position Selector</div>
-          <p class="card-desc">Explore your full catalog of positions with a twist. Roll the dice and discover something new.</p>
-        </div>
-        <a href="games/intimacy_Position_Selector_page.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
       </div>
 
       <div class="game-card">
@@ -764,7 +819,7 @@ body::after {
         <div>
           <span class="card-tag gold">Board Game</span>
           <div class="card-title">Connect Foreplay</div>
-          <p class="card-desc">A Connect-Four showdown with a heated twist, three rising rounds of Spark, Blaze and Inferno.</p>
+          <p class="card-desc">Connect-Four with a heated twist: Spark, Blaze and Inferno rounds.</p>
         </div>
         <a href="games/kamaagni-connect-foreplay.html" class="card-cta gold">Play Now <span class="cta-arrow">→</span></a>
       </div>
@@ -775,15 +830,249 @@ body::after {
         <div>
           <span class="card-tag rose">Cards</span>
           <div class="card-title">Poker for Couples</div>
-          <p class="card-desc">A quick, playful poker variant where every hand you lose costs you something to take off.</p>
+          <p class="card-desc">A quick poker variant where every lost hand costs you something.</p>
         </div>
         <a href="games/kamaagni-poker-quick.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">⚖️</div>
+        <div>
+          <span class="card-tag rose">Cards</span>
+          <div class="card-title">Would You Prefer?</div>
+          <p class="card-desc">Two options, no third choice. Take turns picking.</p>
+        </div>
+        <a href="games/kamaagni-would-you-prefer.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🎭</div>
+        <div>
+          <span class="card-tag gold">Cards</span>
+          <div class="card-title">Truth or Dare</div>
+          <p class="card-desc">300+ truths and dares, plus an intense Brave mode.</p>
+        </div>
+        <a href="games/kamaagni-truth-or-dare.html" class="card-cta gold">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🃏</div>
+        <div>
+          <span class="card-tag indigo">Tasks</span>
+          <div class="card-title">Task Deck</div>
+          <p class="card-desc">2,500+ tasks in 15 packs: light femdom, switch, bondage, long-distance, Christmas and more.</p>
+        </div>
+        <a href="games/kamaagni-task-deck.html" class="card-cta indigo">Draw <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🗓️</div>
+        <div>
+          <span class="card-tag rose">Challenge</span>
+          <div class="card-title">Mission Week</div>
+          <p class="card-desc">One mission for seven days, one point a day.</p>
+        </div>
+        <a href="games/kamaagni-mission-week.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+    </div>
+
+    <p class="section-label">Explore</p>
+    <div class="games">
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">💞</div>
+        <div>
+          <span class="card-tag indigo">Together</span>
+          <div class="card-title">Desire Match</div>
+          <p class="card-desc">Each of you answers privately; only what you both want is revealed.</p>
+        </div>
+        <a href="games/kamaagni-desire-match.html" class="card-cta indigo">Start <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🔎</div>
+        <div>
+          <span class="card-tag rose">Learn</span>
+          <div class="card-title">Kink Explorer</div>
+          <p class="card-desc">53 kinks explained in plain language. Mark curious, maybe or not for me.</p>
+        </div>
+        <a href="games/kamaagni-kink-explorer.html" class="card-cta rose">Explore <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🔥</div>
+        <div>
+          <span class="card-tag indigo">Selector</span>
+          <div class="card-title">Position Selector</div>
+          <p class="card-desc">Roll the dice and discover something new from the full catalog.</p>
+        </div>
+        <a href="games/intimacy_Position_Selector_page.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🌸</div>
+        <div>
+          <span class="card-tag rose">Selector</span>
+          <div class="card-title">Oral Position Selector</div>
+          <p class="card-desc">Roll three dice to land on a unique position, then add a twist.</p>
+        </div>
+        <a href="games/intimacy_Oral_Position_Selector_page.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+
+    </div>
+
+    <p class="section-label">Keep &amp; plan</p>
+    <div class="games">
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🎟️</div>
+        <div>
+          <span class="card-tag gold">Coupons</span>
+          <div class="card-title">Love Coupons</div>
+          <p class="card-desc">Redeemable promises across three heat levels. Send one or write your own.</p>
+        </div>
+        <a href="games/kamaagni-love-coupons.html" class="card-cta gold">Open <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">✅</div>
+        <div>
+          <span class="card-tag indigo">Tracker</span>
+          <div class="card-title">Our Bucket List</div>
+          <p class="card-desc">Over 120 experiences to tick off, with search and a random pick.</p>
+        </div>
+        <a href="games/kamaagni-bucket-list.html" class="card-cta indigo">Open <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">📓</div>
+        <div>
+          <span class="card-tag rose">Journal</span>
+          <div class="card-title">Our Journal</div>
+          <p class="card-desc">Rate your nights, see your streak, export it all. Private on this device.</p>
+        </div>
+        <a href="games/kamaagni-journal.html" class="card-cta rose">Open <span class="cta-arrow">→</span></a>
+      </div>
+
+    </div>
+
+    <p class="section-label">Learn &amp; library</p>
+    <div class="games">
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🛡️</div>
+        <div>
+          <span class="card-tag indigo">Guide</span>
+          <div class="card-title">Learn</div>
+          <p class="card-desc">Consent, safe words, aftercare and conversation starters for better nights.</p>
+        </div>
+        <a href="games/kamaagni-learn.html" class="card-cta indigo">Read <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🎭</div>
+        <div>
+          <span class="card-tag indigo">Roleplay</span>
+          <div class="card-title">Roleplay Studio</div>
+          <p class="card-desc">25 scenarios with props, plots and roles. Nurse, boss, strangers, spy and more.</p>
+        </div>
+        <a href="games/kamaagni-roleplay.html" class="card-cta indigo">Play <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">⛓️</div>
+        <div>
+          <span class="card-tag indigo">Journey</span>
+          <div class="card-title">BDSM Journey</div>
+          <p class="card-desc">500 beginner tasks in 10 categories and 5 levels, with rewards and progress.</p>
+        </div>
+        <a href="games/kamaagni-journey.html" class="card-cta indigo">Begin <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🏁</div>
+        <div>
+          <span class="card-tag indigo">Long game</span>
+          <div class="card-title">Challenges &amp; Wish List</div>
+          <p class="card-desc">100 challenges for couples, him and her to tick off, plus a shared wish list.</p>
+        </div>
+        <a href="games/kamaagni-challenges.html" class="card-cta indigo">Start <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🎲</div>
+        <div>
+          <span class="card-tag gold">Dice</span>
+          <div class="card-title">Dice Sets</div>
+          <p class="card-desc">Sex, Christmas, BDSM and Punishment dice. Roll two faces and do both.</p>
+        </div>
+        <a href="games/kamaagni-kinky-dice.html" class="card-cta gold">Roll <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🃏</div>
+        <div>
+          <span class="card-tag gold">Card game</span>
+          <div class="card-title">Hornopoly</div>
+          <p class="card-desc">Take turns drawing Hornopoly cards with timers, scores and questions.</p>
+        </div>
+        <a href="games/kamaagni-hornopoly.html" class="card-cta gold">Play <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">✍️</div>
+        <div>
+          <span class="card-tag indigo">Reflect</span>
+          <div class="card-title">Reflection Prompts</div>
+          <p class="card-desc">512 journaling questions on trust, desire and connection.</p>
+        </div>
+        <a href="games/kamaagni-prompts.html" class="card-cta indigo">Write <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🏆</div>
+        <div>
+          <span class="card-tag indigo">Together</span>
+          <div class="card-title">Progress &amp; Badges</div>
+          <p class="card-desc">See how far you have come: tasks, journal, bucket list and badges.</p>
+        </div>
+        <a href="games/kamaagni-progress.html" class="card-cta indigo">View <span class="cta-arrow">→</span></a>
+      </div>
+
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">📚</div>
+        <div>
+          <span class="card-tag gold">PDF Library</span>
+          <div class="card-title">Printable Library</div>
+          <p class="card-desc">70 printable games, card decks, coupons, calendars and ebooks. Preview or download.</p>
+        </div>
+        <a href="games/kamaagni-library.html" class="card-cta gold">Browse <span class="cta-arrow">→</span></a>
       </div>
 
     </div>
 
     <!-- Footer -->
+    <div id="spark" class="kx-card kx-center" style="max-width:560px;margin:24px auto 0"></div>
     <footer class="footer">
+      <p><a href="about.html" style="text-decoration:underline">About · Privacy · Share</a></p>
       <p>Made with <em class="footer-heart">♡</em> for couples</p>
       <p class="footer-note">
         <span class="footer-note-dot"></span>
@@ -810,7 +1099,6 @@ word.split('').forEach((ch, i) => {
   const delay = 1.4 + i * 0.07;
   span.style.animationDelay = delay + 's';
   span.style.animationPlayState = 'running';
-  span.querySelector = () => null;
   wm.appendChild(span);
 
   // shimmer pass
@@ -935,7 +1223,7 @@ function loop() {
   }
   ctx.globalCompositeOperation = 'source-over';
 }
-loop();
+if (!document.documentElement.classList.contains('ka-skip-intro')) loop();
 
 
 /* ════════════════════════════════════════
@@ -945,6 +1233,7 @@ let exiting = false;
 function exitIntro() {
   if (exiting) return;
   exiting = true;
+  try { sessionStorage.setItem('ka_intro_seen', '1'); localStorage.setItem('ka_intro_seen', '1'); } catch {}
 
   const intro = document.getElementById('intro');
   intro.classList.add('exiting');
@@ -962,8 +1251,11 @@ function exitIntro() {
   }, 600);
 }
 
-// Auto-exit after 6.5s if user hasn't tapped
-setTimeout(() => exitIntro(), 6500);
+// Auto-exit after 6.5s if user hasn't tapped (immediately for reduced-motion users)
+const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!document.documentElement.classList.contains('ka-skip-intro')) setTimeout(() => exitIntro(), reduceMotion ? 50 : 6500);
+// Keyboard: Enter / Space also dismisses the intro
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && document.getElementById('intro') && document.getElementById('intro').style.display !== 'none') exitIntro(); });
 
 
 /* ════════════════════════════════════════
@@ -1055,5 +1347,58 @@ document.addEventListener('mousemove', e => {
 <script src="js/ka-features.js"></script>
 
 <script src="js/app-shell.js"></script>
+<script src="js/ka-config.js"></script><script src="js/ka-gate.js"></script>
+<script src="js/ka-data.js"></script>
+<script>(function(){try{var D=window.KA_DATA,d=new Date(),seed=d.getFullYear()*372+d.getMonth()*31+d.getDate();var pool=[].concat(D.truth.slice(0,60),D.wyp.map(function(x){return Array.isArray(x)?x[0]:x}),D.coupons.filter(function(c){return c.h<=1}).map(function(c){return c.t}));var t=pool[seed%pool.length];var el=document.getElementById('spark');el.innerHTML='<div class="kx-turn">✨ Today\'s spark</div><div class="kx-big" style="font-size:22px;margin-top:8px"></div>';el.lastChild.textContent=t}catch(e){}})();</script>
+<script src="js/ka-track.js"></script><script src="js/ka-focus.js"></script>
+<script>
+(function(){try{
+var LS=function(k,d){try{var v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}};
+var $=function(i){return document.getElementById(i)};
+var esc=function(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})};
+var c=LS('ka_couple',{})||{},A=c.p1,B=c.p2,hr=new Date().getHours();
+var greet=hr<5?'Late night':hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+$('d-hi').innerHTML='<span>'+greet+(A&&B?', '+esc(A)+' &amp; '+esc(B):'')+'</span>';
+var T=window.KA_TRACK,act=T?T.get():{},st=T?T.streak():0,lv=T?T.level(act.xp||0):null;
+var chips='';
+if(lv){chips+='<span class="d-chip">🔥 '+st+' day'+(st===1?'':'s')+' streak</span>';
+chips+='<span class="d-chip d-lvl">'+lv.icon+' Level '+lv.n+' · '+lv.name+' <span style="color:#8a99b8;font-weight:600">'+lv.xp+' XP'+(lv.to?' / '+lv.to:'')+'</span><span class="bar"><i style="width:'+lv.pct+'%"></i></span></span>';}
+$('d-stats').innerHTML=chips;
+var heat=LS('ka_heat',2);
+var M=[['romantic','🌸','Romantic'],['playful','😈','Playful'],['wild','🔥','Wild'],['gentle','🛁','Tired & gentle'],['apart','📱','Apart tonight']].filter(function(m){return m[0]!=='wild'||heat>=3});
+$('d-moods').innerHTML=M.map(function(m){return '<a class="d-mood" href="games/kamaagni-session.html?mood='+m[0]+'"><b>'+m[1]+'</b>'+m[2]+'</a>'}).join('');
+var NAMES={intimacy_dice_game_single_page:'Intimacy Dice',intimacy_cards_game_single_page:'Intimacy Cards',intimacy_ludo_dice_game_single_page:'Intimacy Ludo',intimacy_Position_Selector_page:'Position Selector',intimacy_Oral_Position_Selector_page:'Oral Selector','kamaagni-connect-foreplay':'Connect & Foreplay','kamaagni-poker-quick':'Quick Poker','kamaagni-desire-match':'Desire Match','kamaagni-would-you-prefer':'Would You Prefer','kamaagni-truth-or-dare':'Truth or Dare','kamaagni-bucket-list':'Bucket List','kamaagni-mission-week':'Mission Week','kamaagni-love-coupons':'Love Coupons','kamaagni-task-deck':'Task Deck','kamaagni-kink-explorer':'Kink Explorer','kamaagni-learn':'Learn','kamaagni-tonight':'Plan Tonight','kamaagni-journal':'Our Journal','kamaagni-roleplay':'Roleplay Studio','kamaagni-journey':'BDSM Journey','kamaagni-challenges':'Challenges','kamaagni-kinky-dice':'Dice Sets','kamaagni-hornopoly':'Hornopoly','kamaagni-prompts':'Reflection Prompts','kamaagni-secret':'Secret Envelope','kamaagni-session':'Guided Session'};
+var nx='',last=act.last,pages=act.pages||{};
+if(last&&NAMES[last]&&last!=='kamaagni-session')nx+='<a href="games/'+last+'.html">Pick up where you left off<b>'+NAMES[last]+' →</b></a>';
+var unseen=Object.keys(NAMES).filter(function(k){return !pages[k]});
+if(unseen.length){var d=new Date(),k=unseen[(d.getFullYear()*372+d.getMonth()*31+d.getDate())%unseen.length];nx+='<a href="games/'+k+'.html">Try something new<b>'+NAMES[k]+' →</b></a>';}
+$('d-next').innerHTML=nx;
+try{var fx=document.createElement('div');fx.id='d-focus';fx.style.cssText='margin-top:14px';$('d-next').parentNode.insertBefore(fx,$('d-next').nextSibling);
+window.KA_FOCUS&&KA_FOCUS.build('').then(function(f){var r=f.recap;
+fx.innerHTML='<div class="d-next" style="display:block"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">This week</div>'+
+'<div style="font-size:14px;color:#dce9ff;margin-bottom:10px">'+(r.total?r.sessions+' session'+(r.sessions===1?'':'s')+', '+r.acts+' activit'+(r.acts===1?'y':'ies')+(r.top?', top mood '+esc(r.top):'')+'.':'A fresh week. Start with one small thing together.')+'</div>'+
+'<div style="display:flex;gap:8px;flex-wrap:wrap">'+f.items.slice(0,4).map(function(i){return '<a href="'+i.href+'" style="flex:1;min-width:170px;padding:11px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#a8bcd8;font-size:12.5px">'+i.icon+' '+esc(i.label)+'<b style="display:block;color:#fff;font-size:13.5px;margin-top:2px">'+esc(i.title)+'</b></a>'}).join('')+'</div></div>'})}catch(e){}
+var dn=LS('ka_datenight',null);
+if(dn&&dn.dow===new Date().getDay())$('d-ban').innerHTML='<div class="d-banner">📅 Tonight is date night'+(dn.time?' · '+esc(dn.time):'')+'. Start a session when you are ready.</div>';
+$('d-sur').onclick=function(){if(window.KA&&KA.surpriseMe)KA.surpriseMe();else location.href='games/kamaagni-session.html'};
+$('d-cal').onclick=function(){
+  var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(5,6,15,.9);display:flex;align-items:center;justify-content:center;padding:20px';
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  o.innerHTML='<div style="max-width:380px;width:100%;background:#0c0e1c;border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:22px;color:#dce9ff;font-family:DM Sans,system-ui,sans-serif"><div style="font:700 18px Cinzel,serif;color:#f4a0ae;margin-bottom:6px">Weekly date night</div><p style="font-size:13px;color:#8a99b8;margin-bottom:12px;line-height:1.6">Pick a day and time. You get a repeating calendar reminder (with an alert one hour before), and the app reminds you on the day.</p><select id="dd" style="width:100%;padding:12px;border-radius:12px;background:#12152a;color:#dce9ff;border:1px solid rgba(255,255,255,.15);margin-bottom:10px;font:inherit">'+days.map(function(x,i){return '<option value="'+i+'"'+(i===5?' selected':'')+'>'+x+'</option>'}).join('')+'</select><input id="dt" type="time" value="20:30" style="width:100%;padding:12px;border-radius:12px;background:#12152a;color:#dce9ff;border:1px solid rgba(255,255,255,.15);margin-bottom:14px;font:inherit"><button id="dg" style="width:100%;padding:13px;border-radius:999px;border:0;background:linear-gradient(135deg,#e8637a,#ff6b35);color:#fff;font:700 14px DM Sans,sans-serif;cursor:pointer;margin-bottom:8px">Save &amp; add to calendar</button><button id="dx" style="width:100%;padding:12px;border-radius:999px;border:1px solid rgba(255,255,255,.15);background:transparent;color:#a8bcd8;font:700 14px DM Sans,sans-serif;cursor:pointer">Cancel</button></div>';
+  document.body.appendChild(o);
+  o.querySelector('#dx').onclick=function(){o.remove()};
+  o.querySelector('#dg').onclick=function(){
+    var dow=+o.querySelector('#dd').value,tm=o.querySelector('#dt').value||'20:30';
+    localStorage.setItem('ka_datenight',JSON.stringify({dow:dow,time:tm}));
+    var n=new Date();n.setDate(n.getDate()+((dow-n.getDay()+7)%7||7));
+    var p=function(x){return (x<10?'0':'')+x},hm=tm.split(':');
+    var ds=n.getFullYear()+p(n.getMonth()+1)+p(n.getDate())+'T'+p(+hm[0])+p(+hm[1])+'00';
+    var ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//KamaAgni//EN','BEGIN:VEVENT','UID:kamaagni-datenight-'+dow+'@local','DTSTAMP:'+new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z','DTSTART:'+ds,'DURATION:PT2H','RRULE:FREQ=WEEKLY','SUMMARY:Date night (KamaAgni)','DESCRIPTION:Phones away. Open KamaAgni and start tonight\'s session.','BEGIN:VALARM','TRIGGER:-PT1H','ACTION:DISPLAY','DESCRIPTION:Date night in one hour','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download='date-night.ics';document.body.appendChild(a);a.click();setTimeout(function(){a.remove()},2000);o.remove();location.reload();
+  };
+};
+}catch(e){console.error(e)}})();
+</script>
+<script src="js/ka-chrome.js"></script>
 </body>
 </html>

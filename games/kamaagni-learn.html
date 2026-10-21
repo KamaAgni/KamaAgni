@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Learn</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const TABS = {
+    safety: ['🛡 Consent & Safety', `
+      <div class="kx-card"><h3 class="h">The basics</h3><ul class="ul">
+        <li><b>Enthusiastic yes.</b> Only do what you both want, and either of you can change your mind at any point, even mid-way.</li>
+        <li><b>Pick a safe word.</b> Something you would never say during play. Many couples use <i>Red</i>. When it's said, everything stops immediately, no questions until you're both calm.</li>
+        <li><b>Traffic lights.</b> <span style="color:#7be0a3">Green</span> = more please · <span style="color:#f5c842">Yellow</span> = slow down or check in · <span style="color:#ff7a70">Red</span> = stop now.</li>
+        <li><b>Non-verbal signal.</b> If a gag or blindfold is involved, agree on one: drop a soft object, tap three times, or squeeze twice.</li>
+        <li><b>Sober and unhurried.</b> Skip alcohol and drugs when using restraints, impact or anything intense.</li></ul></div>
+      <div class="kx-card" style="margin-top:12px"><h3 class="h">Five-minute negotiation</h3><p class="kx-muted" style="margin-bottom:8px">Before trying something new, ask each other:</p><ol class="ul">
+        <li>What do we each want to try tonight?</li><li>What is off the table?</li><li>What's our safe word and signal?</li><li>How long, and who sets the pace?</li><li>What do we each need afterwards?</li></ol>
+        <p class="kx-muted" style="margin-top:8px">Desire Match and the Kink Explorer make this easier: use them first.</p></div>
+      <div class="kx-card" style="margin-top:12px"><h3 class="h">Practical safety</h3><ul class="ul">
+        <li>Never leave someone restrained alone. Keep safety scissors within reach.</li>
+        <li>Nothing around the neck, and no pressure on throat, spine or kidneys. Check hands and feet for colour and feeling often.</li>
+        <li>Impact (spanking, flogging) belongs on fleshy areas such as buttocks and thighs. Start light, build slowly.</li>
+        <li>For anal play use plenty of lube, go slowly, and only use toys with a flared base. Clean or change protection before anything touches the vagina.</li>
+        <li>Wash toys before and after. Use condoms and get tested regularly unless you're in an exclusive, tested relationship.</li>
+        <li>Stop if anything hurts in the wrong way, numbness or tingling appears, or someone feels dizzy.</li></ul></div>`],
+    aftercare: ['💞 Aftercare', `
+      <div class="kx-card"><h3 class="h">Why it matters</h3><p class="kx-muted" style="color:var(--text2);font-size:14px">Intense play can leave people emotional, shaky or flat afterwards, for either partner, sometimes hours later. A few minutes of care keeps closeness strong.</p></div>
+      <div class="kx-card" style="margin-top:12px"><h3 class="h">Aftercare checklist</h3><div id="ac" class="kx-list"></div></div>
+      <div class="kx-card" style="margin-top:12px"><h3 class="h">Check-in questions</h3><ul class="ul"><li>How are you feeling right now, body and mind?</li><li>What felt best tonight?</li><li>Was anything too much?</li><li>What would you change next time?</li><li>What do you need before we sleep?</li></ul>
+        <p class="kx-muted" style="margin-top:8px">Check in again the next day. Feelings sometimes show up late.</p></div>`],
+    talk: ['💬 Talk about it', `
+      <div class="kx-card kx-center"><div class="kx-muted" style="margin-bottom:8px">Conversation starter</div><div class="kx-big" id="qs"></div>
+        <div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn" id="nq">Another one</button></div></div>
+      <p class="kx-note">Take turns. Listen first, don't judge, and thank each other for being honest.</p>`],
+    app: ['📱 Using KamaAgni', `
+      <div class="kx-card"><ul class="ul">
+        <li><b>Plan Tonight</b> builds an evening for your mood, time and heat level.</li>
+        <li><b>Heat level</b> (Sweet, Spicy, Wild) filters most games. Set it once; it's remembered.</li>
+        <li><b>Desire Match</b> shows only what you both want. A "no" is never revealed.</li>
+        <li><b>Timer</b> (⏱ in the bottom bar) works anywhere in the app, even while you browse.</li>
+        <li><b>Privacy:</b> everything is stored only in your browser. Set a PIN in Settings (⚙️), turn on auto-lock, and use 🕶 or press Esc twice to hide the screen instantly.</li>
+        <li><b>Backup:</b> Settings → Backup saves all your progress to a file. Restore it on a new phone.</li>
+        <li><b>Install:</b> add KamaAgni to your home screen for full-screen, offline play.</li></ul></div>`]
+  };
+  const STARTERS = ["What's a moment from our past you still think about?","What's one thing I do that instantly turns you on?","What's a fantasy you've never told me?","Where do you most like to be touched, and how?","What would a perfect night with no plans look like for you?","What's something you'd like me to initiate more often?","What makes you feel most wanted?","Is there anything you want to try but feel shy about?","What does a great kiss mean to you?","When do you feel closest to me?","What's one boundary you'd like me to always remember?","What's a song that makes you think of us?","What's the most romantic thing I could do this week?","How do you like to be asked for sex?","What would you like more of: slow, playful, intense or spontaneous?","What's something small I do that makes you feel loved?","What's a place you'd love to be intimate that we haven't tried?","What did you think of us when we first met?","What's one thing you'd like to do together in the next month?","What do you need from me when you're stressed?","What's something you find surprisingly sexy?","What was our best night, and why?","What do you want to say yes to more often?","What role would you love to play for a night?","How can I make you feel more comfortable trying new things?"];
+  const AC = ['Offer water and a snack','Wrap up in a blanket together','Cuddle or hold each other, skin to skin if wanted','Tell each other one thing you loved','Take a warm shower or bath together','Dim the lights, some quiet music','Check marks, circulation and sore spots','Say thank you'];
+  let tab = LS.get('ka_learn_tab', 'safety');
+  function draw() {
+    if (!TABS[tab]) tab = 'safety';
+    app.innerHTML = top('Learn', 'Safety, aftercare and better conversations.') + `<style>.h{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:10px}.ul{padding-left:20px;line-height:1.7;font-size:14px;color:var(--text2);display:flex;flex-direction:column;gap:6px}</style>
+      <div class="kx-tabs">${Object.entries(TABS).map(([k, v]) => `<button data-t="${k}" class="${k === tab ? 'on' : ''}">${v[0]}</button>`).join('')}</div>` + TABS[tab][1];
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; LS.set('ka_learn_tab', tab); draw(); });
+    const ac = document.getElementById('ac');
+    if (ac) { const done = new Set(); ac.innerHTML = AC.map((t, i) => `<div class="kx-item"><button class="kx-check" data-a="${i}" aria-label="Tick"></button><span class="kx-it">${esc(t)}</span></div>`).join('');
+      ac.onclick = e => { const b = e.target.closest('[data-a]'); if (!b) return; b.classList.toggle('on'); b.textContent = b.classList.contains('on') ? '✓' : ''; b.parentNode.classList.toggle('done'); }; }
+    const qs = document.getElementById('qs');
+    if (qs) { let i = Math.floor(Math.random() * STARTERS.length); qs.textContent = STARTERS[i]; document.getElementById('nq').onclick = () => { i = (i + 1) % STARTERS.length; qs.textContent = STARTERS[i]; }; }
+  }
+  draw();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

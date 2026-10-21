@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Love Coupons</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top, pick, heat, heatBar, HEAT, names} = KX;
+  const app = document.getElementById('app');
+  let st = LS.get('ka_coupons', {used: {}, custom: []});
+  const save = () => LS.set('ka_coupons', st);
+  let tab = 'wallet';
+  const all = () => [...KA_DATA.coupons.map(c => ({...c, id: 'b:' + c.t})), ...st.custom.map(t => ({h: 1, t, id: 'c:' + t, custom: true}))];
+  function render() {
+    app.innerHTML = top('Love Coupons', 'Little promises, redeemed whenever you choose.') + `<div id="hb"></div>
+      <div class="kx-tabs"><button data-t="wallet" class="${tab === 'wallet' ? 'on' : ''}">🎟 Wallet</button><button data-t="draw" class="${tab === 'draw' ? 'on' : ''}">🎲 Draw one</button><button data-t="make" class="${tab === 'make' ? 'on' : ''}">✍ Write your own</button></div><div id="body"></div>`;
+    heatBar(document.getElementById('hb'), render);
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    const body = document.getElementById('body'), h = heat();
+    const cp = c => `<div class="kx-coupon ${st.used[c.id] ? 'used' : ''}"><span class="kx-chip h${c.h}">${HEAT[c.h]}${c.custom ? ' · custom' : ''}</span>
+      <div class="kx-ct">${esc(c.t)}</div>
+      <div class="kx-row"><button class="kx-btn sm gold" data-u="${esc(c.id)}">${st.used[c.id] ? 'Redeemed ' + esc(st.used[c.id]) + ' · undo' : 'Redeem'}</button>
+      <button class="kx-btn sm ghost" data-s="${esc(c.id)}">Send</button></div></div>`;
+    const bind = () => {
+      const byId = Object.fromEntries(all().map(c => [c.id, c]));
+      body.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const id = b.dataset.u; if (st.used[id]) delete st.used[id]; else st.used[id] = new Date().toLocaleDateString(); save(); render(); });
+      body.querySelectorAll('[data-s]').forEach(b => b.onclick = async () => {
+        const text = '🎟 Love coupon: ' + byId[b.dataset.s].t;
+        try { if (navigator.share) { await navigator.share({text}); return; } await navigator.clipboard.writeText(text); KX.toast('Copied — paste it to your partner'); } catch {}
+      });
+    };
+    if (tab === 'wallet') {
+      const list = all().filter(c => c.h <= h);
+      body.innerHTML = `<div class="kx-muted" style="margin-bottom:12px">${list.filter(c => !st.used[c.id]).length} unused · ${list.filter(c => st.used[c.id]).length} redeemed</div><div class="kx-list">${list.map(cp).join('')}</div>`;
+    } else if (tab === 'draw') {
+      const pool = all().filter(c => c.h <= h && !st.used[c.id]);
+      body.innerHTML = pool.length ? `<div id="drawn"></div><div class="kx-center" style="margin-top:14px"><button class="kx-btn" id="dr">Draw a coupon</button></div>` : '<p class="kx-muted kx-center">All coupons at this heat level are redeemed.</p>';
+      const dr = document.getElementById('dr');
+      if (dr) dr.onclick = () => { document.getElementById('drawn').innerHTML = cp(pick(pool)); body.querySelectorAll('[data-u],[data-s]').forEach(() => 0); bind(); };
+    } else {
+      body.innerHTML = `<div class="kx-card"><p class="kx-muted" style="margin-bottom:10px">Write a coupon for ${esc(names()[1])} or ${esc(names()[0])} — a promise, a fantasy, a favour.</p>
+        <input class="kx-input" id="nc" maxlength="140" placeholder="e.g. A full-body massage with your favourite playlist"><button class="kx-btn" id="add">Add to wallet</button></div>`;
+      document.getElementById('add').onclick = () => { const v = document.getElementById('nc').value.trim(); if (v) { st.custom.push(v); save(); tab = 'wallet'; render(); } };
+    }
+    bind();
+  }
+  render();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

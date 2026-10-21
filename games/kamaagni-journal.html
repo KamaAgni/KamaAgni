@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Journal</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  let log = LS.get('ka_journal', []);
+  const save = () => LS.set('ka_journal', log);
+  const TAGS = ['Dice', 'Cards', 'Ludo', 'Truth or Dare', 'Tasks', 'Roleplay', 'Massage', 'Date night', 'New thing', 'Quickie', 'Slow & romantic'];
+  let rating = 4, sel = new Set();
+  const iso = d => d.toISOString().slice(0, 10);
+  function stats() {
+    if (!log.length) return '';
+    const now = new Date(), m = log.filter(e => e.d.slice(0, 7) === iso(now).slice(0, 7)).length;
+    const avg = (log.reduce((a, e) => a + e.r, 0) / log.length).toFixed(1);
+    // streak: consecutive weeks (Mon start) with at least one entry, counting back from this/last week
+    const wk = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x.getTime(); };
+    const weeks = new Set(log.map(e => wk(e.d)));
+    let w = wk(now), s = 0; if (!weeks.has(w)) w -= 6048e5;
+    while (weeks.has(w)) { s++; w -= 6048e5; }
+    return `<div class="kx-card"><div class="kx-row" style="justify-content:space-around;text-align:center">
+      <div><div class="kx-big" style="font-size:30px">${log.length}</div><div class="kx-muted">entries</div></div>
+      <div><div class="kx-big" style="font-size:30px">${m}</div><div class="kx-muted">this month</div></div>
+      <div><div class="kx-big" style="font-size:30px">${avg}</div><div class="kx-muted">avg rating</div></div>
+      <div><div class="kx-big" style="font-size:30px">${s}🔥</div><div class="kx-muted">week streak</div></div></div></div>`;
+  }
+  function draw() {
+    app.innerHTML = top('Our Journal', 'Private notes after your nights together. Only on this device.') + stats() + `
+      <div class="kx-card" style="margin-top:12px"><div class="kx-sec" style="margin-top:0">New entry</div>
+        <input type="date" class="kx-input" id="d" value="${iso(new Date())}">
+        <div class="kx-muted" style="margin-bottom:6px">How was it?</div><div id="rt" class="kx-row" style="margin-bottom:12px">${[1, 2, 3, 4, 5].map(n => `<button class="kx-btn sm ${n <= rating ? '' : 'ghost'}" data-r="${n}">${n <= rating ? '♥' : '♡'}</button>`).join('')}</div>
+        <div class="kx-muted" style="margin-bottom:6px">What did you do?</div><div class="kx-row" id="tg" style="margin-bottom:12px">${TAGS.map(t => `<button class="kx-chip" style="cursor:pointer;background:${sel.has(t) ? 'rgba(232,99,122,.2)' : 'transparent'};color:${sel.has(t) ? '#fff' : ''}" data-g="${esc(t)}">${esc(t)}</button>`).join('')}</div>
+        <textarea class="kx-input" id="n" rows="3" maxlength="600" placeholder="What did you love? What would you try next time?"></textarea>
+        <button class="kx-btn" id="add">Save entry</button></div>
+      <div class="kx-sec">History</div><div class="kx-list" id="h">${log.slice().sort((a, b) => b.d.localeCompare(a.d)).map(e => `<div class="kx-card" style="padding:14px 16px"><div class="kx-row" style="justify-content:space-between"><b>${esc(new Date(e.d + 'T12:00').toLocaleDateString([], {weekday: 'short', day: 'numeric', month: 'short', year: 'numeric'}))}</b><span style="color:var(--rose2)">${'♥'.repeat(e.r)}${'♡'.repeat(5 - e.r)}</span></div>
+        ${e.g.length ? `<div class="kx-row" style="margin:8px 0">${e.g.map(t => `<span class="kx-chip">${esc(t)}</span>`).join('')}</div>` : ''}
+        ${e.n ? `<p style="font-size:14px;color:var(--text2);line-height:1.6;white-space:pre-wrap">${esc(e.n)}</p>` : ''}
+        <button class="kx-btn ghost sm" data-x="${e.id}" style="margin-top:8px">Delete</button></div>`).join('') || '<p class="kx-muted kx-center">No entries yet.</p>'}</div>
+      ${log.length ? '<div class="kx-row" style="justify-content:center;margin-top:16px"><button class="kx-btn ghost sm" id="exp">⬇ Export (CSV)</button></div>' : ''}`;
+    app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rating = +b.dataset.r; keep(); });
+    app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { sel.has(b.dataset.g) ? sel.delete(b.dataset.g) : sel.add(b.dataset.g); keep(); });
+    document.getElementById('add').onclick = () => { log.push({id: Date.now(), d: document.getElementById('d').value || iso(new Date()), r: rating, g: [...sel], n: document.getElementById('n').value.trim()}); save(); window.KA_TRACK && KA_TRACK.log('journal', 'Journal entry saved', '★'.repeat(rating)); sel = new Set(); rating = 4; draw(); KX.toast('Saved'); };
+    app.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { if (confirm('Delete this entry?')) { log = log.filter(e => e.id !== +b.dataset.x); save(); draw(); } });
+    const ex = document.getElementById('exp');
+    if (ex) ex.onclick = () => { const q = s => '"' + String(s).replace(/"/g, '""') + '"'; const csv = 'date,rating,tags,notes\n' + log.map(e => [e.d, e.r, q(e.g.join('; ')), q(e.n)].join(',')).join('\n'); const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type: 'text/csv'})); a.download = 'kamaagni-journal.csv'; a.click(); };
+  }
+  // keep typed values when toggling ratings/tags
+  function keep() { const d = document.getElementById('d').value, n = document.getElementById('n').value; draw(); document.getElementById('d').value = d; document.getElementById('n').value = n; }
+  draw();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

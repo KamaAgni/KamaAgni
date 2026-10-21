@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>About KamaAgni</title>
+<link rel="stylesheet" href="css/fonts.css"/><link rel="stylesheet" href="css/premium.css"/><link rel="stylesheet" href="css/ka-shared.css"/>
+</head><body>
+<main class="kx app">
+<div class="kx-top"><a class="kx-back" href="index.html">← Home</a></div>
+<h1 class="kx-title"><span>About KamaAgni</span></h1>
+<p class="kx-sub">A private playground for consenting adult couples.</p>
+<div class="kx-card"><div class="kx-sec" style="margin-top:0">How to use it</div>
+<p class="kx-muted">Open it together, set your names and heat level (Sweet, Spicy, Wild), pick a game, and play. Anything you don't both want — pass. Agree on a safe word first. Install it from your browser menu ("Add to Home Screen") to use it offline.</p>
+<div class="kx-sec">Privacy</div>
+<p class="kx-muted">No accounts, no tracking, no servers. Your names, favourites, journal and settings live only in this browser on this device. Use ⚙️ → Backup to move them. Set a PIN in settings and use the 🕶 quick-hide button if someone walks in.</p>
+<div class="kx-sec">Consent</div>
+<p class="kx-muted">Adults only (18+). Everything is optional. A "no" or "pass" is always the right answer. Stop any time. Aftercare matters.</p>
+<div class="kx-sec">Share</div>
+<div class="kx-row"><button class="kx-btn" id="sh">📤 Share with a friend</button><button class="kx-btn ghost" id="rs">Reset my data</button></div>
+</div></main>
+<script src="js/ka-common.js"></script>
+<script>
+document.getElementById('sh').onclick=function(){var u=(window.KA_CONFIG&&KA_CONFIG.SHARE_URL)||location.href.replace(/about\.html.*/,'');var d={title:'KamaAgni',text:'A private game space for couples (18+).',url:u};
+if(navigator.share)navigator.share(d).catch(function(){});else{(navigator.clipboard?navigator.clipboard.writeText(u):Promise.reject()).then(function(){KX.toast('Link copied')},function(){prompt('Copy this link',u)})}};
+document.getElementById('rs').onclick=function(){if(confirm('Erase all KamaAgni data on this device? (Cloud data is deleted from the History page.)')){try{localStorage.clear();sessionStorage.clear()}catch(e){}location.href='index.html'}};
+</script>
+<script src="js/ka-config.js"></script><script src="js/ka-features.js"></script><script src="js/app-shell.js"></script><script src="js/ka-gate.js"></script>
+<script src="js/ka-track.js"></script>
+<script src="js/ka-chrome.js"></script>
+</body></html>

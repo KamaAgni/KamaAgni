@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Mission Week</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top, pick, heat, heatBar, HEAT} = KX;
+  const app = document.getElementById('app');
+  let st = LS.get('ka_week', {m: null, days: [0,0,0,0,0,0,0], start: null});
+  const save = () => LS.set('ka_week', st);
+  const M = KA_DATA.missions;
+  function active() {
+    const m = M[st.m], pts = st.days.reduce((a, b) => a + b, 0);
+    app.innerHTML = top('Mission Week', 'One mission, seven days, one point per day.') + `
+      <div class="kx-card">
+        <span class="kx-chip h${m.h}">${HEAT[m.h]} · started ${esc(st.start)}</span>
+        <div class="kx-big" style="margin:10px 0 8px">${esc(m.t)}</div>
+        <p class="kx-muted" style="font-size:14px;color:var(--text2)">${esc(m.d)}</p>
+        <div class="kx-sec">Tap each day you completed</div>
+        <div class="kx-days">${st.days.map((d, i) => `<button class="${d ? 'on' : ''}" data-d="${i}">${i + 1}</button>`).join('')}</div>
+        <div class="kx-row" style="justify-content:space-between"><b>${pts} / 7 points</b><span class="kx-muted">${pts === 7 ? '🏆 Perfect week!' : 'Keep going'}</span></div>
+        <div class="kx-prog"><i style="width:${pts / 7 * 100}%"></i></div>
+        <div class="kx-row" style="margin-top:14px"><button class="kx-btn ghost sm" id="end">End mission</button></div>
+      </div>
+      <p class="kx-note">Either partner can call a day off, or swap the mission, at any time.</p>`;
+    app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { st.days[+b.dataset.d] ^= 1; save(); active(); });
+    document.getElementById('end').onclick = () => { if (confirm('End this mission?')) { st = {m: null, days: [0,0,0,0,0,0,0], start: null}; save(); choose(); } };
+  }
+  function start(i) { st = {m: i, days: [0,0,0,0,0,0,0], start: new Date().toLocaleDateString()}; save(); active(); }
+  function choose() {
+    app.innerHTML = top('Mission Week', 'Pick a mission for the week, or let fate choose.') + `<div id="hb"></div>
+      <div class="kx-row" style="margin-bottom:16px"><button class="kx-btn" id="rnd">🎲 Surprise us</button></div><div class="kx-list" id="l"></div>`;
+    const draw = () => {
+      const ok = M.map((m, i) => ({m, i})).filter(x => x.m.h <= heat());
+      document.getElementById('l').innerHTML = ok.map(x => `<div class="kx-card" style="padding:16px"><span class="kx-chip h${x.m.h}">${HEAT[x.m.h]}</span>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;margin:8px 0 4px">${esc(x.m.t)}</div>
+        <p class="kx-muted">${esc(x.m.d.length > 170 ? x.m.d.slice(0, 167) + '…' : x.m.d)}</p>
+        <button class="kx-btn sm" data-i="${x.i}" style="margin-top:10px">Choose this mission</button></div>`).join('');
+      app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => start(+b.dataset.i));
+      document.getElementById('rnd').onclick = () => start(pick(ok).i);
+    };
+    heatBar(document.getElementById('hb'), draw); draw();
+  }
+  st.m !== null && M[st.m] ? active() : choose();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

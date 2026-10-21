@@ -63,6 +63,9 @@
   });
   observer.observe(doc.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
 
+  /* No page-transition animation: links navigate immediately. KA_go kept for compatibility. */
+  window.KA_go = href => { location.href = href; };
+
   addEventListener('error', e => console.error('[KamaAgni]', e.error || e.message));
   addEventListener('unhandledrejection', e => console.error('[KamaAgni promise]', e.reason));
 

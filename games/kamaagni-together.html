@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Together</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-data.js"></script>
+<script>
+(() => {
+  const {LS, esc, top, pick} = KX; const app = document.getElementById('app');
+  const C = () => window.KA_CLOUD, S = () => (C() ? C().state() : {enabled: false});
+  const me = () => KX.names()[0];
+  let tab = LS.get('ka_tg_tab', 'chat') || 'chat', started = false, partnerOn = false, pname = '';
+  const ev = {msgs: [], tomb: {}, draw: null, resp: {}, timer: null, sig: {}, chk: {}, match: {}};
+  const fill = t => t.replace(/\{A\}/g, KX.names()[0]).replace(/\{B\}/g, pname || 'your partner');
+  const HASH = (location.hash.match(/join=([^&]+)/) || [])[1];
+
+  function apply(e) {
+    const b = e.body; if (!b) return; const who = e.mine ? 'me' : 'them';
+    if (e.kind === 'msg') ev.msgs.push({id: e.id, mine: e.mine, at: e.at, t: b.t, n: b.n});
+    else if (e.kind === 'tomb') ev.tomb[b.x] = 1;
+    else if (e.kind === 'draw') { ev.draw = {id: e.id, t: b.t, p: b.p, by: e.mine}; ev.resp = {}; }
+    else if (e.kind === 'resp') { if (ev.draw && b.d === ev.draw.id) ev.resp[who] = b.r; }
+    else if (e.kind === 'timer') ev.timer = b;
+    else if (e.kind === 'sig') ev.sig[who] = {s: b.s, at: e.at};
+    else if (e.kind === 'chk') ev.chk[who] = {...b, at: e.at};
+    else if (e.kind === 'match') ev.match[who] = b.a;
+    if (b.n && !e.mine) pname = b.n;
+    paint();
+  }
+  const send = (k, o) => C().couple.send(k, {...o, n: me()}).catch(x => KX.toast(x.message));
+
+  function gate() {
+    const s = S();
+    if (!s.enabled) return top('Together', '') + `<div class="kx-card"><b>Cloud sync isn't switched on yet</b><p class="kx-muted">Partner features need the free online account. The site owner sets this up once (see SETUP-CLOUD.md). Everything else works as normal.</p></div>`;
+    if (!s.ready) return top('Together', '') + '<div class="kx-card">Connecting…</div>';
+    if (!s.user) return top('Together', 'Play and talk together, wherever you are.') + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Sign in first</div><p class="kx-muted">Your account keeps your data on every device and lets you link with your partner.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">👤 Sign in / Create account</button>${HASH ? '<p class="kx-muted">Your invite is saved in this page link. Come back here after signing in.</p>' : ''}</div>`;
+    if (s.vault !== 'ready') return top('Together', '') + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Unlock your vault</div><p class="kx-muted">Enter your vault passphrase to continue.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">🔒 Unlock</button></div>`;
+    return null;
+  }
+
+  function linkView() {
+    const s = S(); const c = s.couple;
+    if (!c) return top('Together', 'Connect with your partner, as if you were in the same room.') + `<div class="kx-card"><b>1 · Invite your partner</b><p class="kx-muted">Creates a private link. Send it only to them (it contains the key that encrypts everything you share).</p><button class="kx-btn" id="mk">Create invite link</button></div>
+      <div class="kx-card"><b>2 · Or join your partner's invite</b><input class="kx-input" id="jl" placeholder="Paste the invite link here" value="${esc(HASH ? 'join=' + HASH : '')}"><button class="kx-btn" id="jn" style="margin-top:8px">Join</button><div class="kx-muted" id="jm"></div></div>`;
+    if (!c.partnerJoined) return top('Together', 'Waiting for your partner') + `<div class="kx-card"><b>Invite ready</b><p class="kx-muted">Send this link. It works once.</p><input class="kx-input" id="il" readonly value="${esc(C().couple.link())}"><div class="kx-row" style="margin-top:8px"><button class="kx-btn" id="cp">Copy link</button>${navigator.share ? '<button class="kx-btn ghost" id="shr">Share…</button>' : ''}<button class="kx-btn ghost" id="lv">Cancel</button></div></div>`;
+    if (!c.hasKey) return top('Together', '') + `<div class="kx-card"><b>This device doesn't have your shared key</b><p class="kx-muted">Open the original invite link on this device, or unlink and create a new invite.</p><button class="kx-btn ghost" id="lv">Unlink</button></div>`;
+    return null;
+  }
+
+  function bindLink() {
+    const g = id => document.getElementById(id), C0 = C().couple;
+    if (g('mk')) g('mk').onclick = () => C0.create().then(draw, e => KX.toast(e.message));
+    if (g('jn')) g('jn').onclick = () => C0.join(g('jl').value).then(() => { history.replaceState(null, '', location.pathname); draw(); }, e => { g('jm').textContent = e.message; });
+    if (g('cp')) g('cp').onclick = () => { g('il').select(); navigator.clipboard && navigator.clipboard.writeText(g('il').value); KX.toast('Copied'); };
+    if (g('shr')) g('shr').onclick = () => navigator.share({title: 'KamaAgni', text: 'Join me on KamaAgni 🔥', url: g('il').value}).catch(() => {});
+    if (g('lv')) g('lv').onclick = () => confirm('Unlink from your partner? Shared messages are deleted.') && C0.leave().then(draw);
+  }
+
+  const TABS = [['chat', '💬 Chat'], ['live', '🔥 Play'], ['chk', '💗 Check-in'], ['match', '🤝 Match']];
+  function main() {
+    const s = S(), live = partnerOn;
+    return top('Together', '') + `<div class="kx-card" style="padding:12px 14px"><div class="kx-row" style="justify-content:space-between"><span><span style="color:${live ? '#4ade80' : '#6c7a95'}">●</span> ${esc(pname || 'Your partner')} is <b>${live ? 'here now' : 'away'}</b></span><button class="kx-btn ghost sm" id="lv">Unlink</button></div></div>
+      <div class="kx-row" style="margin:6px 0">${TABS.map(t => `<button class="kx-btn sm ${tab === t[0] ? '' : 'ghost'}" data-tab="${t[0]}">${t[1]}</button>`).join('')}</div><div id="pane"></div>`;
+  }
+  const sigIcon = {g: '🟢', y: '🟡', r: '🔴'};
+  function pane() {
+    const p = document.getElementById('pane'); if (!p) return;
+    if (tab === 'chat') {
+      const ms = ev.msgs.filter(m => !ev.tomb[m.id]);
+      p.innerHTML = `<div class="kx-card"><div class="kx-list" id="ml" style="max-height:48vh;overflow:auto">${ms.map(m => `<div class="kx-item" style="${m.mine ? 'border-color:var(--rose)' : ''}"><span class="kx-it"><span class="kx-muted" style="font-size:12px">${m.mine ? 'You' : esc(m.n || 'Partner')} · ${new Date(m.at).toLocaleString([], {weekday: 'short', hour: 'numeric', minute: '2-digit'})}</span><br>${esc(m.t)}</span>${m.mine ? `<button class="kx-btn ghost sm" data-del="${m.id}" aria-label="Delete">🗑</button>` : ''}</div>`).join('') || '<p class="kx-muted kx-center">No messages yet. Say something sweet 💌</p>'}</div>
+        <div class="kx-row" style="margin-top:10px"><input class="kx-input" id="mi" placeholder="Write a note…" maxlength="500" style="flex:1"><button class="kx-btn" id="ms">Send</button></div><p class="kx-note">End-to-end encrypted. You can delete your own messages for both of you.</p></div>`;
+      const ml = document.getElementById('ml'); ml.scrollTop = ml.scrollHeight;
+      const go = () => { const i = document.getElementById('mi'), t = i.value.trim(); if (!t) return; i.value = ''; send('msg', {t}); };
+      document.getElementById('ms').onclick = go; document.getElementById('mi').onkeydown = e => { if (e.key === 'Enter') go(); };
+      p.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { const id = +b.dataset.del; await send('tomb', {x: id}); ev.tomb[id] = 1; C().couple.del(id).catch(() => {}); paint(); });
+    } else if (tab === 'live') {
+      const d = ev.draw, my = ev.sig.me, th = ev.sig.them, stop = (my && my.s === 'r') || (th && th.s === 'r');
+      const left = ev.timer ? Math.max(0, Math.round((ev.timer.end - Date.now()) / 1000)) : 0;
+      p.innerHTML = (stop ? `<div class="kx-card kx-center" style="border-color:#ef4444"><div style="font-size:48px">🔴</div><div class="kx-big">STOP — pause everything</div><p class="kx-muted">${(my && my.s === 'r') ? 'You' : esc(pname || 'Your partner')} asked to stop. Check in, no questions asked.</p>${my && my.s === 'r' ? '<button class="kx-btn" data-sig="g">I\'m okay to continue</button>' : '<p class="kx-muted">Wait for them to say they\'re ready.</p>'}</div>` : '') +
+        `<div class="kx-card"><div class="kx-muted">How are you feeling? <b>You ${sigIcon[(my || {}).s] || '⚪'}</b> · <b>${esc(pname || 'Partner')} ${sigIcon[(th || {}).s] || '⚪'}</b></div><div class="kx-row" style="margin-top:8px"><button class="kx-btn sm ghost" data-sig="g">🟢 Good</button><button class="kx-btn sm ghost" data-sig="y">🟡 Slow down</button><button class="kx-btn sm ghost" data-sig="r">🔴 Stop</button></div></div>
+        <div class="kx-card kx-play">${d ? `<span class="kx-chip">${esc(d.p)}</span><div class="kx-big" style="font-size:clamp(19px,4.2vw,24px)">${esc(fill(d.t))}</div><div class="kx-muted">You: ${ev.resp.me || '…'} · ${esc(pname || 'Partner')}: ${ev.resp.them || '…'}</div><div class="kx-row" style="justify-content:center"><button class="kx-btn" data-r="done">Done ✓</button><button class="kx-btn ghost" data-r="pass">Pass</button></div>` : '<div class="kx-big" style="font-size:20px">Draw a card for both of you</div><p class="kx-muted">You will both see the same card at the same time.</p>'}
+        <div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="dr">🃏 Draw shared card</button><button class="kx-btn ghost" id="tm">⏱ 3 min timer for both</button></div>${left ? `<div class="kx-big" id="tleft" style="margin-top:10px">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div>` : ''}</div><p class="kx-note">Cards follow your Heat level (${KX.HEAT[KX.heat()]}). Anyone can pass or stop at any time.</p>`;
+      p.querySelectorAll('[data-sig]').forEach(b => b.onclick = () => send('sig', {s: b.dataset.sig}));
+      p.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { send('resp', {d: d.id, r: b.dataset.r}); if (b.dataset.r === 'done') window.KA_TRACK && KA_TRACK.log('together', 'Did a shared card', d.p); });
+      document.getElementById('dr').onclick = drawCard; document.getElementById('tm').onclick = () => send('timer', {end: Date.now() + 180000});
+    } else if (tab === 'chk') {
+      const m = ev.chk.me, t = ev.chk.them;
+      const bar = (l, v) => `<div style="margin:6px 0"><span class="kx-muted">${l}</span> <b>${v}/5</b><div style="height:8px;border-radius:6px;background:#12152a"><div style="height:8px;border-radius:6px;width:${v * 20}%;background:linear-gradient(90deg,#e8637a,#f5c842)"></div></div></div>`;
+      p.innerHTML = `<div class="kx-card"><b>How are we this week?</b><p class="kx-muted">Each of you answers privately; you see both once you have each sent yours.</p>
+        ${[['d', 'Desire / mood for intimacy'], ['c', 'Feeling connected to each other']].map(([k, l]) => `<div style="margin:10px 0"><div>${l}</div><div class="kx-row">${[1, 2, 3, 4, 5].map(n => `<button class="kx-btn sm ${((m || {})[k] || +(window.__v || {})[k]) === n ? '' : 'ghost'}" data-v="${k}${n}">${n}</button>`).join('')}</div></div>`).join('')}
+        <input class="kx-input" id="cn" placeholder="One thing I'd love this week (optional)" maxlength="160"><button class="kx-btn" id="cs" style="margin-top:8px">${m ? 'Update check-in' : 'Send check-in'}</button></div>
+        ${m && t ? `<div class="kx-card"><b>Side by side</b><div class="kx-row" style="align-items:flex-start"><div style="flex:1"><div class="kx-muted">You</div>${bar('Desire', m.d)}${bar('Connection', m.c)}<p>${esc(m.note || '')}</p></div><div style="flex:1"><div class="kx-muted">${esc(pname || 'Partner')}</div>${bar('Desire', t.d)}${bar('Connection', t.c)}<p>${esc(t.note || '')}</p></div></div>
+        <p class="kx-muted">${Math.abs(m.d - t.d) >= 2 ? 'Your desire levels differ. That is normal. Talk about what each of you needs, e.g. cuddles, slow touch, or a planned night.' : 'You\'re quite in sync. Great time for a Guided Session.'}</p></div>` : m ? '<div class="kx-card kx-muted">Waiting for your partner\'s check-in…</div>' : ''}`;
+      window.__v = window.__v || {};
+      p.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { window.__v[b.dataset.v[0]] = +b.dataset.v.slice(1); p.querySelectorAll('[data-v^="' + b.dataset.v[0] + '"]').forEach(x => x.classList.add('ghost')); b.classList.remove('ghost'); });
+      document.getElementById('cs').onclick = () => { const v = window.__v; const o = {d: v.d || (m || {}).d, c: v.c || (m || {}).c, note: document.getElementById('cn').value.trim()}; if (!o.d || !o.c) return KX.toast('Pick both scores'); send('chk', o); window.KA_TRACK && KA_TRACK.log('together', 'Weekly check-in sent', ''); };
+    } else {
+      const items = (KA_DATA.consent || []).flatMap(c => c.items.map(i => i)).filter((x, i, a) => a.indexOf(x) === i);
+      const mine = LS.get('ka_match_mine', {}), th = ev.match.them || {};
+      const both = Object.keys(mine).filter(k => mine[k] !== 'n' && th[k] && th[k] !== 'n');
+      const strong = both.filter(k => mine[k] === 'y' && th[k] === 'y');
+      const todo = items.filter(k => !mine[k]).slice(0, 1)[0];
+      p.innerHTML = `<div class="kx-card"><b>Private match</b><p class="kx-muted">Answer Yes / Maybe / No on each idea. You only ever see what you BOTH said yes or maybe to. Nothing else is shown.</p>
+        ${todo ? `<div class="kx-card kx-play"><div class="kx-big" style="font-size:22px">${esc(todo)}</div><div class="kx-row" style="justify-content:center"><button class="kx-btn" data-m="y">Yes</button><button class="kx-btn gold" data-m="m">Maybe</button><button class="kx-btn ghost" data-m="n">No</button></div><div class="kx-muted">${Object.keys(mine).length}/${items.length} answered</div></div>` : '<p class="kx-center">All answered 🎉</p>'}
+        <b>Matches (${both.length})</b><div class="kx-list" style="margin-top:8px">${both.map(k => `<div class="kx-item"><span class="kx-it">${strong.includes(k) ? '🔥' : '✨'} ${esc(k)}</span></div>`).join('') || '<p class="kx-muted">None yet. Keep answering; your partner answers on their side.</p>'}</div></div>`;
+      p.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mine[todo] = b.dataset.m; LS.set('ka_match_mine', mine); send('match', {a: mine}); paint(); });
+    }
+  }
+  function drawCard() {
+    fetch('../data/packs/index.json').then(r => r.json()).then(idx => {
+      const h = KX.heat(); const p = pick(idx.filter(x => x.h <= h));
+      return fetch('../data/packs/' + p.id + '.json').then(r => r.json()).then(items => send('draw', {t: pick(items), p: p.l}));
+    }).catch(() => KX.toast('Could not draw'));
+  }
+  let ticker = null;
+  function paint() {
+    if (tab === 'live' || tab === 'chk' || tab === 'match' || tab === 'chat') { const a = document.activeElement; if (a && a.tagName === 'INPUT' && a.value) return; pane(); }
+    document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; LS.set('ka_tg_tab', tab); document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('ghost', x !== b)); pane(); });
+  }
+  function draw() {
+    const s = S(), g = gate() || linkView();
+    if (g) { started = false; C() && C().couple.stop(); app.innerHTML = g; if (s.user && s.vault === 'ready') bindLink(); return; }
+    app.innerHTML = main(); bindLink(); paint();
+    if (!started) {
+      started = true; pname = pname || '';
+      C().couple.live(apply, names => { partnerOn = names.length > 0; if (names[0] && names[0].n) pname = names[0].n; const dot = app.querySelector('.kx-card span'); draw2(); }, me());
+    }
+    clearInterval(ticker); ticker = setInterval(() => { const t = document.getElementById('tleft'); if (t && ev.timer) { const l = Math.max(0, Math.round((ev.timer.end - Date.now()) / 1000)); t.textContent = Math.floor(l / 60) + ':' + String(l % 60).padStart(2, '0'); if (!l) { t.textContent = '⏰ Time!'; if (navigator.vibrate) navigator.vibrate(300); } } }, 500);
+  }
+  function draw2() { const was = tab; app.innerHTML = main(); bindLink(); paint(); }
+  window.addEventListener('ka:cloud', () => { const s = S(); const key = [s.ready, s.user && s.user.id, s.vault, s.couple && s.couple.id, s.couple && s.couple.partnerJoined, s.couple && s.couple.hasKey].join('|'); if (key !== draw.k) { draw.k = key; started = false; draw(); } });
+  draw.k = '';
+  draw();
+  if (HASH && S().user && S().vault === 'ready' && !S().couple) { /* prefilled in the join box */ }
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

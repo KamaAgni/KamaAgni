@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — History</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-data.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX; const app = document.getElementById('app');
+  const ICON = {play:'🎮', session:'🕯️', task:'🃏', journey:'⛓️', challenge:'🏆', journal:'📓', envelope:'💌', together:'💞', program:'🎓', pulse:'📊', roleplay:'🎭'};
+  const NAME = {play:'Games played', session:'Sessions', task:'Tasks', journey:'Journey', challenge:'Challenges', journal:'Journal', envelope:'Envelopes', together:'Together', program:'Programmes', pulse:'Pulse'};
+  let filter = 'all';
+  const when = t => { const d = new Date(t), n = new Date(); const day = x => x.toDateString(); const y = new Date(n - 864e5);
+    const tm = d.toLocaleTimeString([], {hour: 'numeric', minute: '2-digit'});
+    return (day(d) === day(n) ? 'Today' : day(d) === day(y) ? 'Yesterday' : d.toLocaleDateString([], {day: 'numeric', month: 'short', year: d.getFullYear() === n.getFullYear() ? undefined : 'numeric'})) + ' · ' + tm; };
+  const sect = (id, h, body) => `<div class="kx-card" id="${id}"><b>${h}</b>${body}</div>`;
+  function draw() {
+    const hist = LS.get('ka_hist', []);
+    const types = [...new Set(hist.map(h => h.y))];
+    const list = hist.filter(h => filter === 'all' || h.y === filter);
+    const jr = LS.get('ka_journal', []).slice().sort((a, b) => (b.d || '').localeCompare(a.d || ''));
+    const saved = [...LS.get('ka_fav_cards', []).map((t, i) => ({k: 'ka_fav_cards', i, t, tag: 'Card'})), ...LS.get('ka_fav_pos', []).map((t, i) => ({k: 'ka_fav_pos', i, t, tag: 'Position'})), ...LS.get('dice_favorites', []).map((t, i) => ({k: 'dice_favorites', i, t: typeof t === 'string' ? t : (t.text || t.t || JSON.stringify(t)), tag: 'Dice'}))];
+    const env = LS.get('ka_envelopes', []);
+    app.innerHTML = top('History & my data', 'Everything you did recently. You are in control: delete any item, or whole areas, whenever you like.') +
+      `<div class="kx-card"><b>Recent activity</b> <span class="kx-muted">(${hist.length})</span>
+        <div class="kx-row" style="margin:10px 0">${['all', ...types].map(t => `<button class="kx-btn sm ${filter === t ? '' : 'ghost'}" data-f="${t}">${t === 'all' ? 'All' : (ICON[t] || '•') + ' ' + (NAME[t] || t)}</button>`).join('')}</div>
+        <div class="kx-list">${list.map(h => `<div class="kx-item"><span style="font-size:20px">${ICON[h.y] || '•'}</span><span class="kx-it"><b>${esc(h.a)}</b>${h.b ? '<br><span class="kx-muted">' + esc(h.b) + '</span>' : ''}<br><span class="kx-muted" style="font-size:12px">${when(h.t)}</span></span><button class="kx-btn ghost sm" data-hd="${h.id}" aria-label="Delete">🗑</button></div>`).join('') || '<p class="kx-muted kx-center">Nothing here yet. Play something and it will appear.</p>'}</div>
+        ${hist.length ? `<button class="kx-btn ghost sm" id="hall" style="margin-top:10px">Clear ${filter === 'all' ? 'all activity' : 'this filter'}</button>` : ''}</div>` +
+      sect('jr', '📓 Journal entries (' + jr.length + ')', `<div class="kx-list" style="margin-top:8px">${jr.slice(0, 40).map(e => `<div class="kx-item"><span class="kx-it"><b>${esc(e.d || '')}</b> ${'★'.repeat(e.r || 0)}<br><span class="kx-muted">${esc((e.g || []).join(' · '))}${e.n ? ' — ' + esc(e.n) : ''}</span></span><button class="kx-btn ghost sm" data-jd="${e.id}" aria-label="Delete">🗑</button></div>`).join('') || '<p class="kx-muted">No entries.</p>'}</div>`) +
+      sect('sv', '♡ Saved moments (' + saved.length + ')', `<div class="kx-list" style="margin-top:8px">${saved.map(s => `<div class="kx-item"><span class="kx-it"><span class="kx-chip">${s.tag}</span> ${esc(String(s.t).slice(0, 140))}</span><button class="kx-btn ghost sm" data-sd="${s.k}|${s.i}" aria-label="Delete">🗑</button></div>`).join('') || '<p class="kx-muted">None saved.</p>'}</div>`) +
+      sect('ev', '💌 Secret envelopes (' + env.length + ')', `<div class="kx-row" style="margin-top:8px"><button class="kx-btn ghost sm" id="envx" ${env.length ? '' : 'disabled'}>Delete all envelopes</button></div>`) +
+      sect('rs', '↺ Reset an area', `<p class="kx-muted">Start fresh in one place. Nothing else changes.</p><div class="kx-row">
+        <button class="kx-btn ghost sm" data-rs="ka_tasks">Task Deck progress</button><button class="kx-btn ghost sm" data-rs="ka_journey">BDSM Journey</button><button class="kx-btn ghost sm" data-rs="ka_chal">Challenges</button><button class="kx-btn ghost sm" data-rs="ka_act">XP, streak &amp; badges</button><button class="kx-btn ghost sm" data-rs="ka_pulse">Pulse check-ins</button><button class="kx-btn ghost sm" data-rs="ka_prog">Programme progress</button><button class="kx-btn ghost sm" data-rs="ka_dm,ka_kinkex">Desire Match &amp; Kink Explorer</button></div>`) +
+      sect('al', '⚠️ Delete everything', `<p class="kx-muted">Removes all KamaAgni data from this device. Cloud data is separate.</p><div class="kx-row"><button class="kx-btn ghost sm" id="wl">Delete all data on this device</button><button class="kx-btn ghost sm" id="wc">Delete my cloud data</button><button class="kx-btn ghost sm" id="wa">Delete my account</button></div><div class="kx-muted" id="cmsg" style="margin-top:8px"></div>`);
+    const q = (s, f) => app.querySelectorAll(s).forEach(f);
+    q('[data-f]', b => b.onclick = () => { filter = b.dataset.f; draw(); });
+    q('[data-hd]', b => b.onclick = () => { LS.set('ka_hist', hist.filter(h => h.id !== b.dataset.hd)); draw(); });
+    const ha = document.getElementById('hall'); if (ha) ha.onclick = () => { if (confirm('Clear activity history?')) { LS.set('ka_hist', filter === 'all' ? [] : hist.filter(h => h.y !== filter)); draw(); } };
+    q('[data-jd]', b => b.onclick = () => { LS.set('ka_journal', LS.get('ka_journal', []).filter(e => String(e.id) !== b.dataset.jd)); draw(); });
+    q('[data-sd]', b => b.onclick = () => { const [k, i] = b.dataset.sd.split('|'); const a = LS.get(k, []); a.splice(+i, 1); LS.set(k, a); draw(); });
+    const ex = document.getElementById('envx'); if (ex) ex.onclick = () => { if (confirm('Delete all envelopes?')) { LS.set('ka_envelopes', []); draw(); } };
+    q('[data-rs]', b => b.onclick = () => { if (confirm('Reset ' + b.textContent + '?')) { b.dataset.rs.split(',').forEach(k => localStorage.removeItem(k)); KX.toast('Reset'); draw(); } });
+    const C = () => window.KA_CLOUD, cm = t => { document.getElementById('cmsg').textContent = t; };
+    document.getElementById('wl').onclick = () => { if (!confirm('Delete ALL KamaAgni data on this device? This cannot be undone.')) return; const keep = /^(ka_pin|ka_adult|ka_intro_seen|ka_vkey|ka_sync_linked)/; Object.keys(localStorage).filter(k => /^(ka_|dice_)/.test(k) && !keep.test(k)).forEach(k => localStorage.removeItem(k)); KX.toast('Deleted'); draw(); };
+    const needCloud = () => { const s = C() && C().state(); if (!s || !s.user || s.vault !== 'ready') { cm('Sign in and unlock your vault first (👤 at the top).'); return false; } return true; };
+    document.getElementById('wc').onclick = async () => { if (!needCloud() || !confirm('Delete everything stored in the cloud for this account (and unlink your partner)? Data on your devices stays.')) return; try { await C().wipeCloud(false); cm('Cloud data deleted.'); } catch (e) { cm(e.message); } };
+    document.getElementById('wa').onclick = async () => { if (!needCloud() || !confirm('Permanently delete your account and cloud data? This cannot be undone.')) return; try { await C().wipeCloud(true); cm('Account deleted.'); } catch (e) { cm(e.message); } };
+  }
+  draw();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

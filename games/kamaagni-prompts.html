@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni — Reflection Prompts</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top, pick} = KX;
+  const app = document.getElementById('app');
+  let D;
+  try { D = await (await fetch('../data/journal_prompts.json')).json(); }
+  catch { app.innerHTML = top('Reflection Prompts', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
+  const ans = LS.get('ka_prompt_ans', {});
+  const save = () => LS.set('ka_prompt_ans', ans);
+  let sec = -1, cur = null;
+  function view() {
+    app.innerHTML = top('Reflection Prompts', '512 journaling questions for connection, trust and desire. Write privately, or answer aloud together.') + `
+      <select class="kx-input" id="sc"><option value="-1">All themes</option>${D.map((s, i) => `<option value="${i}" ${i === sec ? 'selected' : ''}>${esc(s.t)} (${s.p.length})</option>`).join('')}</select>
+      <div class="kx-card kx-play" id="cd"><div class="kx-turn">${cur ? esc(D[cur[0]].t) : 'Draw a prompt'}</div>
+        <div class="kx-big" style="font-size:22px">${cur ? esc(D[cur[0]].p[cur[1]]) : 'Pick a theme or draw from all.'}</div></div>
+      ${cur ? `<textarea class="kx-input" id="an" rows="4" maxlength="1200" placeholder="Your private answer (saved on this device)" style="margin-top:12px">${esc(ans[cur[0] + ':' + cur[1]] || '')}</textarea>` : ''}
+      <div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn" id="dr">✍️ Draw a prompt</button>${cur ? '<button class="kx-btn ghost" id="sv">♡ Save</button>' : ''}</div>
+      <p class="kx-note">${Object.keys(ans).filter(k => ans[k]).length} answered so far.</p>`;
+    document.getElementById('sc').onchange = e => { sec = +e.target.value; view(); };
+    document.getElementById('dr').onclick = () => { const s = sec >= 0 ? sec : Math.floor(Math.random() * D.length); cur = [s, Math.floor(Math.random() * D[s].p.length)]; view(); };
+    const an = document.getElementById('an'); if (an) an.oninput = e => { ans[cur[0] + ':' + cur[1]] = e.target.value; save(); };
+    const sv = document.getElementById('sv'); if (sv) sv.onclick = () => KX.fav('cards', D[cur[0]].p[cur[1]]);
+  }
+  view();
+})();
+
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Desire Match</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, names, heat, heatBar, top, shuffle, pick} = KX;
+  const app = document.getElementById('app');
+  const SCALE = [
+    [5, 'Love it 🔥', ''], [4, 'I like it', ''], [3, "Let's try", ''],
+    [2, 'Neutral', ''], [1, "I'd do it for you", ''], [0, 'My limit — never', 's0']
+  ];
+  const LABEL = {0:'Limit',1:'For you',2:'Neutral',3:"Let's try",4:'Like',5:'Love'};
+  let st = LS.get('ka_dm', {a: [{}, {}], done: [false, false]});   // answers per partner: {itemKey: 0..5}
+  const save = () => LS.set('ka_dm', st);
+  const keyOf = (c, i) => c + '::' + i;
+  const pool = () => KA_DATA.consent.filter(c => c.heat <= heat())
+      .flatMap(c => c.items.map(i => ({cat: c.cat, item: i, key: keyOf(c.cat, i), heat: c.heat})));
+
+  function home() {
+    const [n1, n2] = names();
+    const total = pool().length;
+    const cnt = p => Object.keys(st.a[p]).filter(k => pool().some(x => x.key === k)).length;
+    app.innerHTML = top('Desire Match', 'Find what you both want, without ever revealing a "no".') + `
+      <div id="hb"></div>
+      <div class="kx-card">
+        <p class="kx-muted" style="margin-bottom:14px">Each of you answers privately, one item at a time. At the end you only see what you <b>both</b> said yes to, plus things worth a conversation. Limits are never shown to your partner.</p>
+        <div class="kx-sec" style="margin-top:0">${total} items at this heat level</div>
+        ${[0, 1].map(p => `<div style="margin-bottom:14px"><div class="kx-row" style="justify-content:space-between"><b>${esc(names()[p])}</b>
+          <span class="kx-muted">${cnt(p)}/${total} answered</span></div>
+          <div class="kx-prog"><i style="width:${Math.round(cnt(p) / total * 100)}%"></i></div>
+          <button class="kx-btn sm ${st.done[p] ? 'ghost' : ''}" data-go="${p}">${cnt(p) ? (cnt(p) >= total ? 'Review / edit' : 'Continue') : 'Start'} →</button></div>`).join('')}
+        <div class="kx-row" style="margin-top:6px">
+          <button class="kx-btn gold" id="res" ${cnt(0) && cnt(1) ? '' : 'disabled'}>See our matches</button>
+          <button class="kx-btn ghost sm" id="clr">Clear all answers</button></div>
+      </div>
+      <p class="kx-note">Answers are stored only in this browser. Use "Clear all answers" when you're done.</p>`;
+    heatBar(document.getElementById('hb'), home);
+    app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => run(+b.dataset.go));
+    document.getElementById('res').onclick = results;
+    document.getElementById('clr').onclick = () => { if (confirm('Clear both partners\' answers?')) { st = {a: [{}, {}], done: [false, false]}; save(); home(); } };
+  }
+
+  function run(p) {
+    // Hand the device over before starting.
+    app.innerHTML = top('Desire Match', '') + `<div class="kx-card kx-play"><div class="kx-turn">Private turn</div>
+      <div class="kx-big">Pass the phone to ${esc(names()[p])}</div>
+      <p class="kx-muted">Answer honestly. Your partner won't see your individual answers.</p>
+      <button class="kx-btn" id="go">I'm ${esc(names()[p])} — start</button></div>`;
+    document.getElementById('go').onclick = () => {
+      const q = pool(), order = shuffle(q);
+      let i = 0;
+      const answered = () => q.filter(x => st.a[p][x.key] !== undefined).length;
+      (function show() {
+        const todo = order.filter(x => st.a[p][x.key] === undefined);
+        if (!todo.length) { st.done[p] = true; save(); return home(); }
+        const x = todo[0];
+        app.innerHTML = top('Desire Match', names()[p] + ' · private') + `
+          <div class="kx-card kx-play">
+            <span class="kx-chip h${x.heat}">${esc(x.cat)}</span>
+            <div class="kx-big">${esc(x.item)}</div>
+            <div class="kx-scale">${SCALE.map(([v, l, c]) => `<button class="${c}" data-v="${v}">${l}</button>`).join('')}</div>
+            <div style="width:100%"><div class="kx-prog"><i style="width:${Math.round(answered() / q.length * 100)}%"></i></div>
+            <div class="kx-muted">${answered()} / ${q.length}</div></div>
+            <div class="kx-row"><button class="kx-btn ghost sm" id="skip">Skip</button><button class="kx-btn ghost sm" id="stop">Save &amp; hide</button></div>
+          </div>`;
+        app.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { st.a[p][x.key] = +b.dataset.v; save(); show(); });
+        document.getElementById('skip').onclick = () => { order.push(order.splice(order.indexOf(x), 1)[0]); show(); };
+        document.getElementById('stop').onclick = () => { save(); home(); };
+      })();
+    };
+  }
+
+  function results() {
+    const [n1, n2] = names();
+    const q = pool();
+    const yes = [], talk = [];
+    q.forEach(x => {
+      const a = st.a[0][x.key], b = st.a[1][x.key];
+      if (a === undefined || b === undefined) return;
+      if (a >= 3 && b >= 3) yes.push({...x, score: a + b});
+      else if ((a >= 3 && b >= 1 && b <= 2) || (b >= 3 && a >= 1 && a <= 2)) talk.push(x);
+    });
+    yes.sort((m, n) => n.score - m.score);
+    const group = arr => Object.entries(arr.reduce((o, x) => ((o[x.cat] = o[x.cat] || []).push(x), o), {}));
+    const list = (arr, cls) => group(arr).map(([c, xs]) => `<div class="kx-sec">${esc(c)}</div><div class="kx-list">${xs.map(x =>
+      `<div class="kx-item"><span class="kx-it">${esc(x.item)}</span><button class="kx-check" data-fav="${esc(x.item)}" title="Save" aria-label="Save">♡</button></div>`).join('')}</div>`).join('');
+    app.innerHTML = top('Your Matches', `${n1} & ${n2}`) + `
+      <div class="kx-card kx-center"><div class="kx-big">${yes.length} things you both want</div>
+        <p class="kx-muted" style="margin-top:6px">${talk.length} more are worth a gentle conversation. Anything either of you ruled out stays private.</p>
+        <div class="kx-row" style="justify-content:center;margin-top:14px">
+          <button class="kx-btn" id="tonight" ${yes.length ? '' : 'disabled'}>🎲 Pick one for tonight</button>
+          <button class="kx-btn ghost" id="back">← Back</button></div>
+        <div id="tn" class="kx-big" style="margin-top:16px;color:var(--rose2)"></div></div>
+      <div class="kx-sec" style="color:var(--rose2)">✔ You both said yes</div>${yes.length ? list(yes) : '<p class="kx-muted">No overlaps yet — try a higher heat level or answer more items.</p>'}
+      ${talk.length ? '<div class="kx-sec" style="color:var(--gold)">💬 Worth a conversation (one yes, one maybe)</div>' + list(talk) : ''}`;
+    document.getElementById('back').onclick = home;
+    document.getElementById('tonight').onclick = () => { document.getElementById('tn').textContent = pick(yes).item; };
+    app.querySelectorAll('[data-fav]').forEach(b => b.onclick = () => { KX.fav('pos', b.dataset.fav); b.textContent = '♥'; b.classList.add('on'); });
+  }
+  home();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

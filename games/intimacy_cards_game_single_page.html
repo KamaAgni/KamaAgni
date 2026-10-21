@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script src="../js/ka-boot.js"></script>
   <link rel="stylesheet" href="../css/fonts.css"/>
   <link rel="stylesheet" href="../css/premium.css"/>
   <link rel="manifest" href="../manifest.json"/>
@@ -283,6 +284,12 @@
                 <div class="card-desc">${card.desc}</div>
                 <div class="card-bonus">+${card.xp} Connection</div>
                 `;
+                const heart = document.createElement('button');
+                heart.type = 'button'; heart.textContent = '♡'; heart.title = 'Save to Saved Moments'; heart.setAttribute('aria-label','Save card');
+                heart.style.cssText = 'position:absolute;top:8px;right:10px;background:none;border:none;color:var(--muted,#8a99b8);font-size:20px;cursor:pointer;line-height:1';
+                heart.onclick = e => { e.stopPropagation(); if (window.KA) { KA.saveFav('cards', card.name + ': ' + card.desc); KA.toast('Saved to Saved Moments'); } heart.textContent = '♥'; heart.style.color = '#e8637a'; };
+                div.style.position = div.style.position || 'relative';
+                div.appendChild(heart);
                 div.onclick = () => selectCard(card);
                 handEl.appendChild(div);
             });
@@ -388,5 +395,9 @@
 <script src="../js/ka-features.js"></script>
 
 <script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-data.js"></script><script src="../js/ka-enhance.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
 </body>
 </html>

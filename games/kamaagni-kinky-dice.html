@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni — Dice Sets</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top, pick, heat, heatBar, HEAT} = KX;
+  const app = document.getElementById('app');
+  let D;
+  try { D = await (await fetch('../data/dice_faces.json')).json(); }
+  catch { app.innerHTML = top('Dice Sets', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
+  const SETS = [['sex', '🎲 Sex dice', 2, 'Classic activity dice.'], ['xmas', '🎄 Christmas dice', 2, 'Festive version.'], ['bdsm', '⛓ BDSM dice', 3, 'Intense. Roll one face each.'], ['punish', '🔥 Punishment dice', 3, 'For the one who misbehaved.']];
+  let cur = LS.get('ka_dice_set', 'sex'), faces = [], rolling = false;
+  function view() {
+    const h = heat(); const S = SETS.find(s => s[0] === cur) || SETS[0];
+    if (S[2] > h) { cur = 'sex'; }
+    app.innerHTML = top('Dice Sets', 'Roll two dice. Do both faces together, or take turns.') + '<div id="hb"></div>' +
+      `<div class="kx-tabs">${SETS.filter(s => s[2] <= h).map(s => `<button data-s="${s[0]}" class="${s[0] === cur ? 'on' : ''}">${s[1]}</button>`).join('')}</div>
+      <div class="kx-card kx-play" id="res" style="min-height:260px"><div class="kx-turn">${esc(S[3])}</div>
+        <div class="kx-row" style="justify-content:center;gap:14px" id="fc"><div class="kx-big" style="font-size:26px">Tap roll</div></div></div>
+      <div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn" id="rl">🎲 Roll</button><button class="kx-btn ghost" id="sv">♡ Save</button></div>
+      <p class="kx-note">Unlock the intense sets with the heat bar. Pass any roll you do not both want.</p>`;
+    heatBar(document.getElementById('hb'), view);
+    app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { cur = b.dataset.s; LS.set('ka_dice_set', cur); view(); });
+    document.getElementById('rl').onclick = roll;
+    document.getElementById('sv').onclick = () => faces.length && KX.fav('cards', faces.join(' + '));
+  }
+  function roll() {
+    if (rolling) return; rolling = true;
+    const pool = D[cur].filter(f => !/^\+ ?ROLL AGAIN$/.test(f));
+    const fc = document.getElementById('fc'); let n = 0;
+    const tick = setInterval(() => {
+      faces = [pick(pool), pick(pool)];
+      fc.innerHTML = faces.map(f => `<div class="kx-opt" style="width:auto;min-width:130px;padding:18px 14px;font-size:20px">${esc(f)}</div>`).join('<span class="kx-or">+</span>');
+      if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
+      if (++n > 9) { clearInterval(tick); rolling = false; }
+    }, 70);
+  }
+  view();
+})();
+
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

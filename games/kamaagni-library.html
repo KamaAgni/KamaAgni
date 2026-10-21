@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Library</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+
+(async () => {
+  const {esc, top, LS} = KX;
+  const app = document.getElementById('app');
+  const REPO = 'KamaAgni/KamaAgniPDF', BRANCH = 'main';
+  const enc = p => p.split('/').map(encodeURIComponent).join('/');
+  const raw  = p => `https://raw.githubusercontent.com/${REPO}/${BRANCH}/${enc(p)}`;
+  const view = (p, t) => 'pdf-viewer.html?p=' + encodeURIComponent(p) + '&n=' + encodeURIComponent(t);
+  const gh   = p => `https://github.com/${REPO}/blob/${BRANCH}/${enc(p)}`;
+  let items = [];
+  try { items = await (await fetch('../data/library.json')).json(); }
+  catch { app.innerHTML = top('Library', '') + '<div class="kx-card kx-center">Could not load the library list. Open this page from your hosted site.</div>'; return; }
+  const cats = ['All', '⭐ Featured', ...[...new Set(items.map(i => i.c))]];
+  let cat = '⭐ Featured', q = '';
+  const recent = () => LS.get('ka_lib_recent', []);
+  app.innerHTML = top('Library', 'Printable games, cards, task books and guides. Preview in your browser or download.') + `
+    <input class="kx-input" id="q" type="search" placeholder="Search the library (e.g. coupons, bondage, calendar)">
+    <div class="kx-tabs" id="tabs" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px"></div>
+    <div class="kx-list" id="list"></div>
+    <p class="kx-note">Files open from your KamaAgniPDF library on GitHub. Big files (50 MB+) can take a moment on mobile data. Print at "Actual size" for cards.</p>`;
+  const tabs = document.getElementById('tabs');
+  tabs.innerHTML = cats.map(c => `<button data-c="${esc(c)}" style="flex:0 0 auto;min-width:0;padding:10px 14px">${esc(c)}</button>`).join('');
+  const draw = () => {
+    tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === cat && !q));
+    let l = items.filter(i => q ? (i.t + ' ' + i.d + ' ' + i.c).toLowerCase().includes(q)
+      : cat === 'All' ? true : cat.startsWith('⭐') ? i.f : i.c === cat);
+    document.getElementById('list').innerHTML = l.map(i => `<div class="kx-card" style="padding:16px 16px 14px">
+      <div class="kx-row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><span class="kx-chip">${esc(i.c)}</span>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;margin:8px 0 2px;line-height:1.25">${esc(i.t)}</div></div>
+      <span class="kx-muted" style="white-space:nowrap">${i.pg ? i.pg + ' pp · ' : ''}${i.mb >= 1 ? Math.round(i.mb) + ' MB' : '<1 MB'}</span></div>
+      <p class="kx-muted" style="margin:2px 0 12px">${esc(i.d)}</p>
+      <div class="kx-row"><a class="kx-btn sm" href="${esc(view(i.p, i.t))}">👁 Read</a>
+      <a class="kx-btn sm gold" href="${esc(raw(i.p))}" data-dl="${esc(i.p)}" rel="noopener">⬇ Download</a>
+      <a class="kx-btn sm ghost" href="${gh(i.p)}" target="_blank" rel="noopener">GitHub</a></div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
+  };
+  document.getElementById('list').addEventListener('click', async e => {
+    const a = e.target.closest('[data-dl]'); if (!a) return; e.preventDefault();
+    const old = a.textContent; a.textContent = 'Downloading…';
+    try { const r = await fetch(a.href); if (!r.ok) throw 0; const bl = await r.blob(); const l = document.createElement('a'); l.href = URL.createObjectURL(bl); l.download = a.dataset.dl.split('/').pop(); document.body.appendChild(l); l.click(); setTimeout(() => { URL.revokeObjectURL(l.href); l.remove(); }, 4000); a.textContent = '✓ Saved'; setTimeout(() => a.textContent = old, 2500); }
+    catch { window.open(a.href, '_blank', 'noopener'); a.textContent = old; }
+  });
+  tabs.onclick = e => { const b = e.target.closest('[data-c]'); if (b) { cat = b.dataset.c; q = ''; document.getElementById('q').value = ''; draw(); } };
+  document.getElementById('q').oninput = e => { q = e.target.value.trim().toLowerCase(); draw(); };
+  draw();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

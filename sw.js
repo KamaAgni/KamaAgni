@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v3';
+const CACHE = 'kamaagni-v11';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -10,8 +10,17 @@ const p = (path) => BASE + path;
 const ASSETS = [
   p(''), p('index.html'), p('manifest.json'),
   p('css/fonts.css'), p('css/premium.css'),
-  p('js/app-shell.js'), p('js/ka-features.js'),
-  p('assets/icons/icon-192.png'), p('assets/icons/icon-512.png'),
+  p('css/ka-shared.css'),
+  p('js/ka-chrome.js'),
+  p('js/ka-cloud.js'),
+  p('js/ka-focus.js'),
+  p('data/programs.json'),
+  p('data/experts_qa.json'),
+  p('games/kamaagni-history.html'),
+  p('games/kamaagni-together.html'),
+  p('games/kamaagni-experts.html'),
+  p('js/ka-boot.js'), p('js/app-shell.js'), p('js/ka-features.js'), p('js/ka-common.js'), p('js/ka-data.js'),
+  p('assets/icons/icon-192.png'), p('assets/icons/icon-512.png'), p('assets/icons/icon-maskable-512.png'),
 
   p('games/intimacy_dice_game_single_page.html'),
   p('games/intimacy_cards_game_single_page.html'),
@@ -20,6 +29,19 @@ const ASSETS = [
   p('games/intimacy_Oral_Position_Selector_page.html'),
   p('games/kamaagni-connect-foreplay.html'),
   p('games/kamaagni-poker-quick.html'),
+  p('games/kamaagni-desire-match.html'),
+  p('games/kamaagni-would-you-prefer.html'),
+  p('games/kamaagni-truth-or-dare.html'),
+  p('games/kamaagni-bucket-list.html'),
+  p('games/kamaagni-mission-week.html'),
+  p('games/kamaagni-love-coupons.html'),
+  p('games/kamaagni-task-deck.html'),
+  p('games/kamaagni-kink-explorer.html'),
+  p('games/kamaagni-learn.html'),
+  p('games/kamaagni-tonight.html'),
+  p('games/kamaagni-journal.html'),
+  p('games/kamaagni-library.html'), p('games/kamaagni-progress.html'), p('games/kamaagni-roleplay.html'), p('games/kamaagni-session.html'), p('games/kamaagni-secret.html'), p('js/ka-track.js'), p('games/kamaagni-journey.html'), p('games/kamaagni-challenges.html'), p('games/kamaagni-kinky-dice.html'), p('games/kamaagni-hornopoly.html'), p('games/kamaagni-prompts.html'), p('data/bdsm500.json'), p('data/challenges.json'), p('data/wishlist.json'), p('data/dice_faces.json'), p('data/journal_prompts.json'), p('data/roleplay_hooks.json'), p('data/roleplay.json'), p('about.html'), p('games/pdf-viewer.html'), p('js/vendor/pdf.min.js'), p('js/vendor/pdf.worker.min.js'), p('js/ka-config.js'), p('js/ka-enhance.js'), p('js/ka-gate.js'), p('data/packs/index.json'),
+  p('data/tasks.json'), p('data/kinks.json'), p('data/library.json'), p('data/extras.json'),
 
   p('css/fonts/cinzel-latin-400-normal.woff2'),
   p('css/fonts/cinzel-latin-700-normal.woff2'),

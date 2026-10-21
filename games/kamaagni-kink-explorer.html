@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Kink Explorer</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  let kinks = [];
+  try { kinks = await (await fetch('../data/kinks.json')).json(); }
+  catch { app.innerHTML = top('Kink Explorer', '') + '<div class="kx-card kx-center">Could not load. Open from your hosted site.</div>'; return; }
+  kinks.sort((a, b) => a.n.localeCompare(b.n));
+  let st = LS.get('ka_kinkex', {}), q = '', f = 'all', open = null;
+  const save = () => LS.set('ka_kinkex', st);
+  const L = {y: '🔥 Curious', m: '🤔 Maybe', n: '🚫 Not for me'};
+  function draw() {
+    app.innerHTML = top('Kink Explorer', 'Read what each one means, then mark how you feel. Marks stay private on this device.') + `
+      <input class="kx-input" id="q" type="search" placeholder="Search (e.g. bondage, gag, spanking)" value="${esc(q)}">
+      <div class="kx-tabs"><button data-f="all" class="${f === 'all' ? 'on' : ''}">All (${kinks.length})</button><button data-f="y" class="${f === 'y' ? 'on' : ''}">Curious</button><button data-f="m" class="${f === 'm' ? 'on' : ''}">Maybe</button><button data-f="n" class="${f === 'n' ? 'on' : ''}">Not for me</button></div>
+      <div class="kx-list" id="l"></div>
+      <p class="kx-note">Tip: use Desire Match to compare with your partner without revealing a "no".</p>`;
+    const l = kinks.filter(k => k.n.toLowerCase().includes(q.toLowerCase()) && (f === 'all' || st[k.n] === f));
+    document.getElementById('l').innerHTML = l.map(k => `<div class="kx-card" style="padding:14px 16px">
+      <div class="kx-row" style="justify-content:space-between"><b style="font-family:'Cormorant Garamond',serif;font-size:20px">${esc(k.n)}</b>
+      <span class="kx-muted">${st[k.n] ? L[st[k.n]] : ''}</span></div>
+      <p class="kx-muted" style="color:var(--text2);font-size:14px;margin:8px 0 ${open === k.n ? 12 : 8}px;${open === k.n ? '' : 'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden'}">${esc(k.d)}</p>
+      <div class="kx-row"><button class="kx-btn ghost sm" data-o="${esc(k.n)}">${open === k.n ? 'Less' : 'Read more'}</button>
+      ${['y', 'm', 'n'].map(v => `<button class="kx-btn sm ${st[k.n] === v ? '' : 'ghost'}" data-m="${v}" data-k="${esc(k.n)}">${L[v]}</button>`).join('')}</div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
+    document.getElementById('q').oninput = e => { q = e.target.value; const pos = e.target.selectionStart; draw(); const i = document.getElementById('q'); i.focus(); i.setSelectionRange(pos, pos); };
+    app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { f = b.dataset.f; draw(); });
+    app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { open = open === b.dataset.o ? null : b.dataset.o; draw(); });
+    app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { const k = b.dataset.k; if (st[k] === b.dataset.m) delete st[k]; else st[k] = b.dataset.m; save(); draw(); });
+  }
+  draw();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>
