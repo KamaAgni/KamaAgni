@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni — Settings</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-data.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX; const app = document.getElementById('app'); const F = KA_FILTER;
+  const sw = (on, attrs) => `<button role="switch" aria-checked="${on}" ${attrs} style="flex:none;width:52px;height:30px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:${on ? 'linear-gradient(135deg,#e8637a,#f07090)' : '#12152a'};position:relative;cursor:pointer;padding:0"><span style="position:absolute;top:3px;${on ? 'right:3px' : 'left:3px'};width:22px;height:22px;border-radius:50%;background:#fff;transition:.15s"></span></button>`;
+  const PRESETS = [
+    ['Everything on', 'Show all topics (including the safety-off ones).', () => ({off: {}})],
+    ['Recommended', 'Everything except breath play and extreme topics.', () => ({off: {breath: 1, extreme: 1}})],
+    ['Gentle & romantic', 'Hide anal, BDSM, pain, humiliation, third parties, cum play, extreme, breath play.', () => ({off: {anal: 1, bdsm: 1, pain: 1, breath: 1, humil: 1, group: 1, cum: 1, extreme: 1, tease: 1}})],
+    ['Vanilla only', 'Hide every adventurous topic. Cuddles, kisses, touch, talking, classic positions.', () => ({off: Object.fromEntries(F.TOPICS.filter(t => !['alcohol', 'photo'].includes(t.id)).map(t => [t.id, 1]))})]
+  ];
+  function draw() {
+    const f = F.get(), on = id => !f.off[id];
+    const pages = (window.KA_CHROME ? KA_CHROME.MENU : []).flatMap(g => g[1]).filter(i => /games\//.test(i[2]) && !/settings|history|together|experts|learn/.test(i[2]));
+    app.innerHTML = top('Settings', 'You choose what appears. Turn a topic off and it disappears from every game, pack, programme and menu.') +
+      `<div class="kx-card"><b>Quick presets</b><div class="kx-list" style="margin-top:8px">${PRESETS.map((p, i) => `<button class="kx-item" data-pr="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it"><b>${p[0]}</b><br><span class="kx-muted">${p[1]}</span></span></button>`).join('')}</div></div>
+      <div class="kx-card"><b>Topics</b><p class="kx-muted" style="margin:4px 0 8px">On = shown, Off = hidden everywhere. Each of you can set your own; if you are linked, agree together what you both enjoy.</p>
+      <div class="kx-list">${F.TOPICS.map(t => `<div class="kx-item"><span class="kx-it"><b>${t.l}</b>${t.defOff ? ' <span class="kx-chip">off by default</span>' : ''}<br><span class="kx-muted">${t.d}</span></span>${sw(on(t.id), 'data-t="' + t.id + '" aria-label="' + t.l.replace(/&amp;/g, 'and') + '"')}</div>`).join('')}</div></div>
+      <div class="kx-card"><b>Default intensity</b><div class="kx-row" style="margin-top:8px">${[1, 2, 3].map(h => `<button class="kx-btn sm ${KX.heat() === h ? '' : 'ghost'}" data-h="${h}">${KX.HEAT[h]}</button>`).join('')}</div></div>
+      <div class="kx-card"><b>Your own hide-list</b><p class="kx-muted" style="margin:4px 0 8px">Type any word or phrase (for example "wax" or "blindfold"). Anything containing it is hidden.</p>
+        <div class="kx-row"><input class="kx-input" id="wd" placeholder="Add a word" maxlength="30" style="flex:1"><button class="kx-btn" id="wa">Add</button></div>
+        <div class="kx-row" style="margin-top:8px">${f.words.map((w, i) => `<button class="kx-chip" data-wr="${i}" style="cursor:pointer">${esc(w)} ✕</button>`).join('') || '<span class="kx-muted">None yet.</span>'}</div></div>
+      <div class="kx-card"><b>Hide whole games</b><div class="kx-list" style="margin-top:8px">${pages.map(i => { const n = i[2].split('/').pop().replace('.html', ''); return `<div class="kx-item"><span class="kx-it">${i[0]} ${esc(i[1])}</span>${sw(!f.pages[n], 'data-pg="' + n + '" aria-label="' + esc(i[1]) + '"')}</div>`; }).join('')}</div>
+        <p class="kx-note">The Position Selector uses numbered illustrations that can't be filtered by topic, so use the switch above if you want it hidden.</p></div>
+      <div class="kx-card"><div class="kx-row"><button class="kx-btn ghost sm" id="rs">Reset to defaults</button><a class="kx-btn ghost sm" href="kamaagni-history.html">My history &amp; data</a></div><p class="kx-note">Changes save instantly and follow your account to other devices.</p></div>`;
+    const q = (s, fn) => app.querySelectorAll(s).forEach(fn);
+    q('[data-t]', b => b.onclick = () => { const x = F.get(); if (x.off[b.dataset.t]) delete x.off[b.dataset.t]; else x.off[b.dataset.t] = 1; F.save(x); draw(); });
+    q('[data-pg]', b => b.onclick = () => { const x = F.get(); if (x.pages[b.dataset.pg]) delete x.pages[b.dataset.pg]; else x.pages[b.dataset.pg] = 1; F.save(x); draw(); });
+    q('[data-pr]', b => b.onclick = () => { const x = F.get(); x.off = PRESETS[+b.dataset.pr][2]().off; F.save(x); draw(); KX.toast('Applied'); });
+    q('[data-h]', b => b.onclick = () => { LS.set('ka_heat', +b.dataset.h); draw(); });
+    q('[data-wr]', b => b.onclick = () => { const x = F.get(); x.words.splice(+b.dataset.wr, 1); F.save(x); draw(); });
+    const add = () => { const v = document.getElementById('wd').value.trim().toLowerCase(); if (!v) return; const x = F.get(); if (!x.words.includes(v)) x.words.push(v); F.save(x); draw(); };
+    document.getElementById('wa').onclick = add; document.getElementById('wd').onkeydown = e => { if (e.key === 'Enter') add(); };
+    document.getElementById('rs').onclick = () => { if (confirm('Reset all content settings?')) { localStorage.removeItem('ka_filter'); F.save({off: Object.fromEntries(F.TOPICS.filter(t => t.defOff).map(t => [t.id, 1])), pages: {}, words: []}); draw(); } };
+  }
+  draw();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

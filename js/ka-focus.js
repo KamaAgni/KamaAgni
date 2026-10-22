@@ -15,12 +15,12 @@
     return fetch(base+'data/programs.json').then(function(r){return r.json()}).catch(function(){return[]}).then(function(P){
       var prog=LS('ka_prog',{});
       for(var i=0;i<P.length;i++){var st=prog[P[i].id];if(!st)continue;
-        for(var w=0;w<P[i].weeks.length;w++)for(var k=0;k<P[i].weeks[w].ex.length;k++)if(!(st.done||{})[w+'-'+k]){out.items.push({icon:P[i].icon,label:'Week '+(w+1)+' · '+P[i].title,title:P[i].weeks[w].ex[k].t,href:base+'games/kamaagni-experts.html'});w=99;break}
+        for(var w=0;w<P[i].weeks.length;w++)for(var k=0;k<P[i].weeks[w].ex.length;k++)if(!(st.done||{})[w+'-'+k]&&!(window.KA_FILTER&&!KA_FILTER.ok(P[i].weeks[w].ex[k].t+' '+P[i].weeks[w].ex[k].d))&&!(P[i].id==='kink'&&window.KA_FILTER&&KA_FILTER.topicOff('bdsm'))){out.items.push({icon:P[i].icon,label:'Week '+(w+1)+' · '+P[i].title,title:P[i].weeks[w].ex[k].t,href:base+'games/kamaagni-experts.html'});w=99;break}
         if(out.items.length)break}
       var pu=LS('ka_pulse',[]),lp=pu[pu.length-1];
       if(!lp||Date.now()-lp.t>6*864e5)out.items.push({icon:'📊',label:'Weekly Pulse',title:lp?'Time for this week\'s check-in':'Take your first Pulse (30 seconds)',href:base+'games/kamaagni-experts.html?t=pulse'});
       var jr=LS('ka_journey',{done:{}}),jn=Object.keys(jr.done||{}).length;
-      out.items.push({icon:'⛓️',label:'BDSM Journey',title:jn?jn+' steps done · next step':'Start your first step',href:base+'games/kamaagni-journey.html'});
+      if(!(window.KA_FILTER&&KA_FILTER.pageHidden('kamaagni-journey')))out.items.push({icon:'⛓️',label:'BDSM Journey',title:jn?jn+' steps done · next step':'Start your first step',href:base+'games/kamaagni-journey.html'});
       var ch=LS('ka_chal',{done:{}}),cn=Object.keys(ch.done||{}).length;
       out.items.push({icon:'🏆',label:'Challenges',title:cn?cn+' done · continue':'Pick a challenge',href:base+'games/kamaagni-challenges.html'});
       try{var l=LS('ka_couple_link',null);if(l)out.items.push({icon:'💞',label:'Partner',title:'Open Together',href:base+'games/kamaagni-together.html'})}catch(e){}

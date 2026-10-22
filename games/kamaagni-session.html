@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
 <title>KamaAgni — Guided Session</title>
@@ -39,6 +39,9 @@
     try { const all = await (await fetch('../data/tasks.json')).json(); all.forEach(p => packs['t:' + p.id] = p.items); } catch {}
     return packs['t:' + id] || [];
   }
+  const TALK = ['Each answer in turn: "What would make tonight feel great for you?" The listener only repeats it back.', 'Say one thing you want more of, and one thing you want less of, using "I would love it if…". No blame.', 'Share your comfort level tonight from 1 to 5 and your stop word. Then pick the first thing together.', 'Ask each other: "What are you in the mood for: slow, playful, or intense?" Choose the one that fits you both.'];
+  const TOUCH = ['Take turns giving 4 minutes of slow touch with no goal: no genitals, no pressure to arouse. The receiver says "warmer", "softer" or "slower" only.', 'Trace your partner\'s back, arms and legs with fingertips, then the flat of your hand. Notice texture and temperature. Swap after 4 minutes.', 'Explore their face, neck and shoulders with light, curious touch. Ask: "What feels best?" Swap.', 'Massage hands and feet for 4 minutes each, slowly. Breathe together and keep it unhurried.'];
+  const NOVEL = ['Change one thing about tonight: a different room, light, music or order of things.', 'Try one small first: a new kind of touch, a new word, or a new spot on the body.', 'Do something you have never done together, even tiny: feed each other, blindfold for a minute, or dance slowly.', 'Swap roles for five minutes: if one usually leads, let the other choose.'];
   const MAIN = {
     romantic: async () => pick([async () => ({k: 'Touch', t: WY(), m: 5}), async () => ({k: 'Coupon', t: (pick((D.coupons || []).filter(c => c.h <= 1)) || {t: 'Slow dance in the living room'}).t}), async () => ({k: 'Foreplay', t: pick(await pack('foreplaycards')), m: 5})])(),
     playful: async () => pick([async () => ({k: 'Task', t: pick(await oldPack('switch'))}), async () => ({k: 'Truth or dare', t: pick(D.dare || [])}), async () => ({k: 'Task', t: pick(await oldPack('lightfd'))}), async () => ({k: 'Hornopoly', t: pick(await pack('hornopoly'))})])(),
@@ -51,7 +54,7 @@
     let m = mood; if (m === 'wild' && heat() < 3) m = 'playful';
     const main = () => MAIN[m]();
     const seq = ['connect'];
-    if (mins >= 45) seq.push('warm');
+    seq.push('talk'); if (mins >= 30 && m !== 'wild' && m !== 'apart') seq.push('touch'); if (mins >= 45) seq.push('warm'); if (mins >= 60) seq.push('novel');
     seq.push('main'); if (mins >= 45) seq.push('main'); if (mins >= 90) { seq.push(m === 'playful' || m === 'wild' ? 'role' : 'main'); seq.push('main'); }
     seq.push('close');
     steps = [];
@@ -62,7 +65,10 @@
     if (s === 'connect') return {k: 'Connect', t: pick(CONNECT), m: 3, re: () => mk('connect', m, main)};
     if (s === 'warm') return m === 'apart' ? {k: 'Warm-up', t: 'Send each other a photo or message of what you are wearing right now.', m: 3} : {k: 'Warm-up', t: pick(m === 'romantic' || m === 'gentle' ? WYL() : await pack('warmup')), m: 3, re: () => mk('warm', m, main)};
     if (s === 'role') { const o = pick(RP); return {k: 'Roleplay · ' + o.t, t: pick(o.p), m: 20}; }
-    if (s === 'close') return {k: 'Aftercare', t: pick(AFTER), close: 1};
+    if (s === 'talk') return {k: 'Talk first', t: pick(TALK), m: 3, re: () => mk('talk', m, main)};
+    if (s === 'touch') return {k: 'Slow touch', t: pick(TOUCH), m: 8, re: () => mk('touch', m, main)};
+    if (s === 'novel') return {k: 'One new thing', t: pick(NOVEL), m: 2, re: () => mk('novel', m, main)};
+    if (s === 'close') return {k: 'Afterglow (10 min)', t: pick(AFTER) + ' Stay close for at least ten minutes, then each say one thing you loved tonight.', m: 10, close: 1};
     const x = await main(); x.re = async () => { const y = await main(); y.re = x.re; return y; }; return x;
   }
   function pickScreen() {

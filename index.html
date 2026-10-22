@@ -5,7 +5,7 @@
 <meta property="og:title" content="KamaAgni — games for couples (18+)"/>
 <meta property="og:description" content="A private game space for consenting adult couples."/>
 <meta property="og:image" content="assets/icons/icon-512.png"/>
-  <script src="js/ka-boot.js"></script>
+  <script src="js/ka-boot.js"></script><script src="js/ka-filter.js"></script>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
   <meta name="theme-color" content="#05060f"/>
@@ -863,7 +863,7 @@ body::after {
         <div>
           <span class="card-tag indigo">Tasks</span>
           <div class="card-title">Task Deck</div>
-          <p class="card-desc">2,500+ tasks in 15 packs: light femdom, switch, bondage, long-distance, Christmas and more.</p>
+          <p class="card-desc">2,500+ tasks in 15 packs: light femdom, switch, long-distance, Christmas and more.</p>
         </div>
         <a href="games/kamaagni-task-deck.html" class="card-cta indigo">Draw <span class="cta-arrow">→</span></a>
       </div>
@@ -1375,7 +1375,9 @@ if(unseen.length){var d=new Date(),k=unseen[(d.getFullYear()*372+d.getMonth()*31
 $('d-next').innerHTML=nx;
 try{var fx=document.createElement('div');fx.id='d-focus';fx.style.cssText='margin-top:14px';$('d-next').parentNode.insertBefore(fx,$('d-next').nextSibling);
 window.KA_FOCUS&&KA_FOCUS.build('').then(function(f){var r=f.recap;
-fx.innerHTML='<div class="d-next" style="display:block"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">This week</div>'+
+var LOOP=[['🗣️','Talk','games/kamaagni-experts.html?t=ask'],['🌿','Touch','games/kamaagni-session.html?mood=gentle'],['🔥','Play','games/kamaagni-task-deck.html'],['🫶','Afterglow','games/kamaagni-session.html'],['📓','Reflect','games/kamaagni-journal.html']];
+var loop='<div style="margin-bottom:12px"><div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">The loop that works</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+LOOP.map(function(l,i){return '<a href="'+l[2]+'" style="flex:1;min-width:64px;text-align:center;padding:9px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#dce9ff;font-size:12px">'+l[0]+'<br><b>'+l[1]+'</b></a>'}).join('')+'</div></div>';
+fx.innerHTML='<div class="d-next" style="display:block">'+loop+'<div style="font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">This week</div>'+
 '<div style="font-size:14px;color:#dce9ff;margin-bottom:10px">'+(r.total?r.sessions+' session'+(r.sessions===1?'':'s')+', '+r.acts+' activit'+(r.acts===1?'y':'ies')+(r.top?', top mood '+esc(r.top):'')+'.':'A fresh week. Start with one small thing together.')+'</div>'+
 '<div style="display:flex;gap:8px;flex-wrap:wrap">'+f.items.slice(0,4).map(function(i){return '<a href="'+i.href+'" style="flex:1;min-width:170px;padding:11px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#a8bcd8;font-size:12.5px">'+i.icon+' '+esc(i.label)+'<b style="display:block;color:#fff;font-size:13.5px;margin-top:2px">'+esc(i.title)+'</b></a>'}).join('')+'</div></div>'})}catch(e){}
 var dn=LS('ka_datenight',null);

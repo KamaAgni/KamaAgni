@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
@@ -16,21 +16,24 @@
 (async () => {
   const {LS, esc, top} = KX; const app = document.getElementById('app');
   let P = [], Q = [];
-  try { P = await (await fetch('../data/programs.json')).json(); Q = await (await fetch('../data/experts_qa.json')).json(); } catch { app.innerHTML = top('Intimacy Experts', '') + '<div class="kx-card">Could not load. Open from your hosted site.</div>'; return; }
+  try { P = await (await fetch('../data/programs.json')).json(); Q = await (await fetch('../data/experts_qa.json')).json();
+    const F = window.KA_FILTER;
+    P.forEach(p => p.weeks.forEach((w, wi) => w.ex.forEach((e, i) => { e.k = wi + '-' + i; })));
+    if (F) { P = P.filter(p => !(p.id === 'kink' && F.topicOff('bdsm'))).map(p => ({...p, weeks: p.weeks.map(w => ({...w, ex: w.ex.filter(e => F.ok(e.t + ' ' + e.d))})).filter(w => w.ex.length)})).filter(p => p.weeks.length); Q = Q.filter(q => F.ok(q.q) && !(q.p === 'kink' && F.topicOff('bdsm'))); } } catch { app.innerHTML = top('Intimacy Experts', '') + '<div class="kx-card">Could not load. Open from your hosted site.</div>'; return; }
   const DIMS = [['conn', 'Connection', 'reconnect'], ['comm', 'Communication', 'talk'], ['desire', 'Desire', 'desire'], ['sat', 'Satisfaction', 'talk'], ['trust', 'Safety & trust', 'kink'], ['play', 'Playfulness', 'desire']];
   const GO = {session: 'kamaagni-session.html', together: 'kamaagni-together.html', journal: 'kamaagni-journal.html', 'love-coupons': 'kamaagni-love-coupons.html', 'truth-or-dare': 'kamaagni-truth-or-dare.html', tonight: 'kamaagni-tonight.html', 'kink-explorer': 'kamaagni-kink-explorer.html', learn: 'kamaagni-learn.html', 'desire-match': 'kamaagni-desire-match.html', secret: 'kamaagni-secret.html', roleplay: 'kamaagni-roleplay.html', 'task-deck': 'kamaagni-task-deck.html', progress: 'kamaagni-progress.html', history: 'kamaagni-history.html', journey: 'kamaagni-journey.html', challenges: 'kamaagni-challenges.html', 'bucket-list': 'kamaagni-bucket-list.html', pulse: '#pulse'};
   let tab = new URLSearchParams(location.search).get('t') || 'prog', open = null, openQ = -1, cat = 'all';
   const prog = () => LS.get('ka_prog', {}), putProg = p => LS.set('ka_prog', p);
   const pulses = () => LS.get('ka_pulse', []);
-  const pct = p => { const st = prog()[p.id]; if (!st) return 0; const tot = p.weeks.reduce((a, w) => a + w.ex.length, 0); return Math.round(Object.keys(st.done || {}).length / tot * 100); };
-  const cur = p => { const st = prog()[p.id]; if (!st) return null; for (let w = 0; w < p.weeks.length; w++) for (let i = 0; i < p.weeks[w].ex.length; i++) if (!(st.done || {})[w + '-' + i]) return {w, i, e: p.weeks[w].ex[i], wk: p.weeks[w]}; return null; };
+  const pct = p => { const st = prog()[p.id]; if (!st) return 0; const tot = p.weeks.reduce((a, w) => a + w.ex.length, 0); return tot ? Math.min(100, Math.round(p.weeks.reduce((a, w) => a + w.ex.filter(e => (st.done || {})[e.k]).length, 0) / tot * 100)) : 0; };
+  const cur = p => { const st = prog()[p.id]; if (!st) return null; for (let w = 0; w < p.weeks.length; w++) for (let i = 0; i < p.weeks[w].ex.length; i++) if (!(st.done || {})[p.weeks[w].ex[i].k]) return {w, i, e: p.weeks[w].ex[i], wk: p.weeks[w]}; return null; };
   const weak = () => { const l = pulses().slice(-1)[0]; if (!l) return null; return DIMS.slice().sort((a, b) => l.v[a[0]] - l.v[b[0]])[0]; };
   function draw() {
     app.innerHTML = top('Intimacy Experts', 'Guided programmes, honest answers and a weekly pulse to keep your relationship growing.') +
-      `<div class="kx-row" style="margin-bottom:8px">${[['prog', '📘 Programmes'], ['ask', '💬 Ask the expert'], ['pulse', '📊 Weekly Pulse']].map(t => `<button class="kx-btn sm ${tab === t[0] ? '' : 'ghost'}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div><div id="body"></div>
+      `<div class="kx-row" style="margin-bottom:8px">${[['prog', '📘 Programmes'], ['ask', '💬 Ask the expert'], ['pulse', '📊 Weekly Pulse'], ['sci', '🔬 The science']].map(t => `<button class="kx-btn sm ${tab === t[0] ? '' : 'ghost'}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div><div id="body"></div>
       <p class="kx-note">Educational content, not medical or therapy advice. For pain, health concerns, trauma or serious relationship distress, please see a doctor or qualified therapist.</p>`;
     app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; draw(); });
-    ({prog: vProg, ask: vAsk, pulse: vPulse})[tab]();
+    ({prog: vProg, ask: vAsk, pulse: vPulse, sci: vSci})[tab]();
   }
   const body = () => document.getElementById('body');
   function vProg() {
@@ -43,10 +46,10 @@
         <div class="kx-row" style="margin-top:8px"><button class="kx-btn sm ${st ? '' : 'gold'}" data-o="${open === p.id ? '' : p.id}">${open === p.id ? 'Close' : st ? 'Continue' : 'Start'}</button>${st ? `<button class="kx-btn sm ghost" data-rp="${p.id}">Restart</button>` : ''}</div></div>`; }).join('');
     body().querySelectorAll('[data-o]').forEach(b => b.onclick = () => { const id = b.dataset.o; if (id && !prog()[id]) { const pp = prog(); pp[id] = {start: Date.now(), done: {}}; putProg(pp); window.KA_TRACK && KA_TRACK.log('program', 'Started programme', P.find(x => x.id === id).title); } open = id || null; vProg(); });
     body().querySelectorAll('[data-rp]').forEach(b => b.onclick = () => { if (confirm('Restart this programme?')) { const pp = prog(); delete pp[b.dataset.rp]; putProg(pp); vProg(); } });
-    body().querySelectorAll('[data-ck]').forEach(b => b.onclick = () => { const [id, k] = b.dataset.ck.split('|'), pp = prog(), st = pp[id]; if (st.done[k]) delete st.done[k]; else { st.done[k] = Date.now(); const p = P.find(x => x.id === id), [w, i] = k.split('-'); window.KA_TRACK && (KA_TRACK.award('program', 10), KA_TRACK.log('program', p.title + ' · done', p.weeks[w].ex[i].t)); } putProg(pp); vProg(); });
+    body().querySelectorAll('[data-ck]').forEach(b => b.onclick = () => { const [id, k] = b.dataset.ck.split('|'), pp = prog(), st = pp[id]; if (st.done[k]) delete st.done[k]; else { st.done[k] = Date.now(); const p = P.find(x => x.id === id), ee = p.weeks.flatMap(w => w.ex).find(x => x.k === k); window.KA_TRACK && (KA_TRACK.award('program', 10), KA_TRACK.log('program', p.title + ' · done', ee ? ee.t : '')); } putProg(pp); vProg(); });
   }
   function weekHTML(p) {
-    const st = prog()[p.id]; return p.weeks.map((w, wi) => `<div style="margin-top:12px"><div class="kx-sec">Week ${wi + 1} · ${esc(w.theme)}</div><p class="kx-muted" style="margin:4px 0 8px">${esc(w.lesson)}</p><div class="kx-list">${w.ex.map((e, i) => { const k = wi + '-' + i, d = st.done[k]; return `<div class="kx-item ${d ? 'done' : ''}"><button class="kx-check ${d ? 'on' : ''}" data-ck="${p.id}|${k}" aria-label="Mark done">${d ? '✓' : ''}</button><span class="kx-it"><b>${esc(e.t)}</b> <span class="kx-muted">· ${e.m} min</span><br><span class="kx-muted">${esc(e.d)}</span>${e.go && GO[e.go] ? `<br><a href="${GO[e.go]}" style="color:var(--rose)">Open →</a>` : ''}</span></div>`; }).join('')}</div></div>`).join('');
+    const st = prog()[p.id]; return p.weeks.map((w, wi) => `<div style="margin-top:12px"><div class="kx-sec">Week ${wi + 1} · ${esc(w.theme)}</div><p class="kx-muted" style="margin:4px 0 8px">${esc(w.lesson)}</p><div class="kx-list">${w.ex.map((e, i) => { const k = e.k, d = st.done[k]; return `<div class="kx-item ${d ? 'done' : ''}"><button class="kx-check ${d ? 'on' : ''}" data-ck="${p.id}|${k}" aria-label="Mark done">${d ? '✓' : ''}</button><span class="kx-it"><b>${esc(e.t)}</b> <span class="kx-muted">· ${e.m} min</span><br><span class="kx-muted">${esc(e.d)}</span>${e.go && GO[e.go] ? `<br><a href="${GO[e.go]}" style="color:var(--rose)">Open →</a>` : ''}</span></div>`; }).join('')}</div></div>`).join('');
   }
   function vAsk() {
     const cats = [['all', 'All'], ['talk', 'Talking'], ['desire', 'Desire'], ['health', 'Body & health'], ['kink', 'Kink & safety'], ['ldr', 'Distance'], ['reconnect', 'Reconnect']];
@@ -74,6 +77,16 @@
     body().querySelectorAll('[data-del]').forEach(b => b.onclick = () => { if (confirm('Delete all Pulse history?')) { localStorage.removeItem('ka_pulse'); vPulse(); } });
     const sh = document.getElementById('shp'); if (sh) sh.onclick = () => { const s = window.KA_CLOUD && KA_CLOUD.state(); if (!s || !s.couple || !s.couple.partnerJoined) return KX.toast('Link with your partner in Together first'); KA_CLOUD.couple.send('chk', {d: last.v.desire, c: last.v.conn, note: 'Pulse shared'}).then(() => KX.toast('Shared')); };
     if (due && last) body().insertAdjacentHTML('afterbegin', '<div class="kx-note" style="margin:0 0 8px">⏰ A new Pulse is due this week.</div>');
+  }
+  function vSci() {
+    const R = [
+      ['Talk well, enjoy more', 'A 2021 meta-analysis (93 studies, ~38,500 people, Mallory, Journal of Family Psychology) found sexual communication relates to sexual satisfaction (r≈.43) and relationship satisfaction (r≈.37). The quality of conversations mattered more than how often you talk or how much you disclose.', 'Used in: Talk First step in every session, the Talk About Sex programme, the Match tool, Weekly Check-in.'],
+      ['Tenderness after sex', 'Muise, Giang & Impett (2014, Archives of Sexual Behavior): in two studies (about 335 people, and 101 couples tracked for three months) more time spent on affection after sex was linked to higher sexual satisfaction, and to relationship satisfaction on daily and longer-term measures.', 'Used in: the 10-minute Afterglow that ends every guided session.'],
+      ['New things lift desire', 'Muise et al. (2019, Journal of Personality and Social Psychology): in 21-day diary studies of 200+ couples, days with more shared self-expanding (new, interesting) activity had higher desire and more sex, and a weekend experiment raised desire in couples prompted to try new things. Effects are modest and small novelty counts.', 'Used in: the One New Thing step, Try Something New on the home page.'],
+      ['Touch without a goal', 'Sensate focus (Masters & Johnson) is a staple of sex therapy that removes performance pressure by separating touch from the goal of arousal. Evidence is mostly clinical and the technique is described inconsistently across the literature, so it is a well-regarded tool rather than a proven cure-all.', 'Used in: the Slow Touch step and the Slow Touch programme.'],
+      ['Desire is context-dependent', 'Widely used models (Basson\'s responsive desire; Bancroft & Janssen\'s dual control model popularised by Nagoski) describe desire as often arising after touch begins and as shaped by "accelerators" (what turns you on) and "brakes" (stress, worry). Many people feel desire only once they start.', 'Used in: Desire & Rhythm programme, planning date nights, low-pressure starts.']
+    ];
+    body().innerHTML = '<div class="kx-card"><b>How this site is designed</b><p class="kx-muted">Every guided session follows the same loop that research links to better sex and closer relationships: <b>Talk → Touch → Play → Afterglow → Reflect</b>.</p></div>' + R.map(r => `<div class="kx-card"><b>${r[0]}</b><p>${r[1]}</p><p class="kx-note">${r[2]}</p></div>`).join('') + '<div class="kx-card"><b>Honest limits</b><p class="kx-muted">Most of this evidence is correlational, mostly from Western, heterosexual couples, and the effects are small to moderate. No design can excite everyone, because people differ. That is why you can switch topics off in Settings and choose your own pace.</p></div>';
   }
   function tip(k) { return ({conn: 'Try 10 minutes of phones-away time every day.', comm: 'Practise one "I\'d love it if…" request this week.', desire: 'Plan anticipation: a morning tease and one scheduled date.', sat: 'Do a short debrief after intimacy: what did you love?', trust: 'Revisit consent: agree stop words and check-ins.', play: 'Add one light game night or a fun text.'})[k]; }
   draw();

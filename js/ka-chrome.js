@@ -12,7 +12,7 @@
     ['Play', [['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Intimacy Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html']]],
     ['Explore', [['🃏', 'Task Deck', G + 'kamaagni-task-deck.html'], ['⛓️', 'BDSM Journey', G + 'kamaagni-journey.html'], ['🏆', 'Challenges', G + 'kamaagni-challenges.html'], ['🎭', 'Roleplay Studio', G + 'kamaagni-roleplay.html'], ['🧭', 'Kink Explorer', G + 'kamaagni-kink-explorer.html'], ['🧘', 'Position Selector', G + 'intimacy_Position_Selector_page.html'], ['👄', 'Oral Selector', G + 'intimacy_Oral_Position_Selector_page.html']]],
     ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['📅', 'Mission Week', G + 'kamaagni-mission-week.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
-    ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
+    ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
   ];
   var NAV = [['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🕘', 'History', G + 'kamaagni-history.html']];
   var u = function (p) { return BASE + p; };
@@ -63,7 +63,7 @@
   /* ---- menu ---- */
   var menu = doc.createElement('div'); menu.id = 'ka-menu'; menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-label', 'Site menu');
   menu.innerHTML = '<button class="km-x" type="button" aria-label="Close">✕</button><div class="km-in"><div class="km-g"><div class="km-grid"><a href="' + u('index.html') + '" class="' + (file === 'index.html' ? 'cur' : '') + '"><span>🏠</span>Home</a></div></div>' +
-    MENU.map(function (g) { return '<div class="km-g"><h3>' + g[0] + '</h3><div class="km-grid">' + g[1].filter(function (i) { return !(hideLib && /library/.test(i[2])); }).map(function (i) { return '<a href="' + u(i[2]) + '" class="' + (file === i[2].split('/').pop() ? 'cur' : '') + '"><span>' + i[0] + '</span>' + i[1] + '</a>'; }).join('') + '</div></div>'; }).join('') + '</div>';
+    MENU.map(function (g) { return '<div class="km-g"><h3>' + g[0] + '</h3><div class="km-grid">' + g[1].filter(function (i) { return !(hideLib && /library/.test(i[2])) && !(window.KA_FILTER && KA_FILTER.pageHidden(i[2])); }).map(function (i) { return '<a href="' + u(i[2]) + '" class="' + (file === i[2].split('/').pop() ? 'cur' : '') + '"><span>' + i[0] + '</span>' + i[1] + '</a>'; }).join('') + '</div></div>'; }).join('') + '</div>';
   doc.body.appendChild(menu);
   var toggleMenu = function (v) { menu.classList.toggle('show', v); doc.body.style.overflow = v ? 'hidden' : ''; };
   hdr.querySelector('#kh-menu').onclick = function () { toggleMenu(true); };
@@ -124,7 +124,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always</div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always</div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */

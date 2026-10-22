@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <script src="../js/ka-boot.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
   <link rel="stylesheet" href="../css/fonts.css"/>
   <link rel="stylesheet" href="../css/premium.css"/>
   <link rel="manifest" href="../manifest.json"/>
@@ -423,7 +423,7 @@ select option { background:#12152a; }
 </div>
 
 <script>
-const pools = {
+const pools = (function(__r){return window.KA_FILTER?KA_FILTER.keep(__r):__r})({
   soft: {
     actions: ['HOLD HANDS','TRACE','KISS','CUDDLE','COMPLIMENT','MASSAGE',
               'BRUSH HAIR','WRITE ON SKIN','SMELL DEEPLY','SLOW DANCE','HOLD FACE'],
@@ -446,7 +446,7 @@ const pools = {
     manners: ['WITH CONFIDENCE','BLINDFOLDED','WITH DOMINANCE','SILENTLY','WITH DIRTY TALK','FOLLOWING THEIR MOANS','EYES CLOSED','WITHOUT HANDS',
               'UNTIL THEY BEG YOU TO CONTINUE','USING ONLY YOUR LIPS AND TONGUE','WHILE MAINTAINING EYE CONTACT THE ENTIRE TIME','AS SLOWLY AS THEY CAN STAND']
   }
-};
+});
 
 const rollBtn     = document.getElementById('rollBtn');
 const levelSel    = document.getElementById('level');

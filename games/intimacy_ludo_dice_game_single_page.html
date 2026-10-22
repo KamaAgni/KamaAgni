@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <script src="../js/ka-boot.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
   <link rel="stylesheet" href="../css/fonts.css"/>
   <link rel="stylesheet" href="../css/premium.css"/>
   <link rel="manifest" href="../manifest.json"/>
@@ -914,7 +914,7 @@ const state = {
 /* ════════════════════════════════════════════════════
    TASK & POSITION POOLS
 ════════════════════════════════════════════════════ */
-const tasks = {
+const tasks = (function(__r){return window.KA_FILTER?KA_FILTER.keep(__r):__r})({
   soft: [
     'Put both hands on each other\'s glutes while facing each other',
     'Gentle 2-minute massage',
@@ -944,8 +944,8 @@ const tasks = {
     'One partner is blindfolded, the other touches 5 different spots in silence. Guess every one.',
     'Kiss for 2 full minutes without using hands anywhere except each other\'s hair'
   ]
-};
-const hiddenPositionsPool = {
+});
+const hiddenPositionsPool = (function(__r){return window.KA_FILTER?KA_FILTER.keep(__r):__r})({
   soft: [
     'Spoon cuddle',
     'Short lap hug',
@@ -963,8 +963,8 @@ const hiddenPositionsPool = {
     'Use warm oils for a few minutes',
     'Slow 5-minute kiss without rushing'
   ]
-};
-const winPositionsPool = {
+});
+const winPositionsPool = (function(__r){return window.KA_FILTER?KA_FILTER.keep(__r):__r})({
   soft: [
     'Side-by-Side (Spooning)',
     'Face-to-Face Lying Down',
@@ -983,7 +983,7 @@ const winPositionsPool = {
     'Standing Against Wall: lifted, held, eye contact locked',
     'Seated Straddle: face-to-face, full control from above, slow pace'
   ]
-};
+});
 
 /* ════════════════════════════════════════════════════
    UTILS

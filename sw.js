@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v11';
+const CACHE = 'kamaagni-v12';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -19,6 +19,8 @@ const ASSETS = [
   p('games/kamaagni-history.html'),
   p('games/kamaagni-together.html'),
   p('games/kamaagni-experts.html'),
+  p('js/ka-filter.js'),
+  p('games/kamaagni-settings.html'),
   p('js/ka-boot.js'), p('js/app-shell.js'), p('js/ka-features.js'), p('js/ka-common.js'), p('js/ka-data.js'),
   p('assets/icons/icon-192.png'), p('assets/icons/icon-512.png'), p('assets/icons/icon-maskable-512.png'),
 

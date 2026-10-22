@@ -198,6 +198,105 @@
 ]
 },
 {
+"id": "sensate",
+"icon": "🌿",
+"title": "Slow Touch (Sensate Focus)",
+"level": "Beginner",
+"blurb": "Based on the sensate-focus approach from sex therapy: touch for curiosity, not for a goal. Lowers pressure, builds body awareness, and brings desire back for many couples.",
+"ev": "Sensate focus comes from Masters & Johnson and is widely used by sex therapists; evidence is stronger for reducing performance pressure than for any single outcome.",
+"weeks": [
+{
+"theme": "Stage 1: non-sexual touch",
+"lesson": "For this week genitals and breasts are off limits and intercourse is off the table. The goal is simply to notice what different touch feels like. Taking the pressure out is the point.",
+"ex": [
+{
+"t": "Giver and receiver",
+"d": "One of you touches the other (back, arms, legs, face) for 15 minutes with no goal; then swap. The giver explores for their own curiosity, not to arouse.",
+"m": 35,
+"go": "session"
+},
+{
+"t": "Say it in one word",
+"d": "Receiver gives only one-word feedback: \"warmer\", \"lighter\", \"slower\", \"more\". Practise asking for what you like.",
+"m": 15
+},
+{
+"t": "Debrief",
+"d": "Afterwards each shares one thing that felt good and one surprise. No criticism.",
+"m": 10,
+"go": "journal"
+}
+]
+},
+{
+"theme": "Stage 1b: slow it down",
+"lesson": "Try different pressure, speed, temperature and texture. Notice thoughts drifting to performance and gently return to sensation.",
+"ex": [
+{
+"t": "Texture tour",
+"d": "Use fingertips, nails (lightly), a feather, a warm cloth, lotion. Receiver rates each from 1 to 5.",
+"m": 25
+},
+{
+"t": "Eyes closed",
+"d": "Receiver keeps eyes closed, giver stays silent for 10 minutes. Swap.",
+"m": 25
+},
+{
+"t": "Breathe together",
+"d": "Finish with 3 minutes of slow breathing in a spooning position.",
+"m": 5
+}
+]
+},
+{
+"theme": "Stage 2: include sensual areas",
+"lesson": "Now breasts, inner thighs and genitals may be included, but still without aiming for arousal or orgasm. If arousal happens, enjoy it and carry on exploring rather than \"doing something with it\". This keeps the pressure off.",
+"ex": [
+{
+"t": "Explore without a goal",
+"d": "Take turns touching all over, including sensual areas, with curiosity. Receiver can say \"pause\" at any time.",
+"m": 35
+},
+{
+"t": "Hand-over-hand",
+"d": "The receiver places their hand over the giver's hand to guide pressure and speed.",
+"m": 15
+},
+{
+"t": "Pulse",
+"d": "Do the weekly Pulse and see how connection and satisfaction changed.",
+"m": 10,
+"go": "pulse"
+}
+]
+},
+{
+"theme": "Stage 3: back to playing together",
+"lesson": "Combine what you learned. Mutual touch, guidance and communication. Intercourse is optional and happens only if both want it, keeping the unhurried attitude.",
+"ex": [
+{
+"t": "Mutual touch",
+"d": "Touch each other at the same time, using your one-word feedback.",
+"m": 35
+},
+{
+"t": "Guided session: Gentle",
+"d": "Do a full guided session in the Romantic or Gentle mood.",
+"m": 45,
+"go": "session"
+},
+{
+"t": "What stays",
+"d": "Write down 3 things from these weeks to keep doing.",
+"m": 10,
+"go": "journal"
+}
+]
+}
+]
+},
+{
 "id": "desire",
 "icon": "🔥",
 "title": "Desire & Rhythm",

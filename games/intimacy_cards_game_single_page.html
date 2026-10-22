@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <script src="../js/ka-boot.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
   <link rel="stylesheet" href="../css/fonts.css"/>
   <link rel="stylesheet" href="../css/premium.css"/>
   <link rel="manifest" href="../manifest.json"/>
@@ -202,7 +202,7 @@
 
     <script>
     // --- 1. THE DATA STRUCTURE (CARDS) ---
-        const CARD_DB = [
+        const CARD_DB = (function(__r){return window.KA_FILTER?KA_FILTER.keep(__r):__r})([
         // SOFT — Level 1
             { id: 1,  name: "Gentle Trace",       level: 1,  rarity: "COMMON", xp: 10, desc: "Slowly trace your fingers over their forearm.", type: "touch" },
             { id: 2,  name: "Deep Eye Contact",    level: 1,  rarity: "COMMON", xp: 12, desc: "Look into their eyes for 30 seconds without speaking.", type: "gaze" },
@@ -229,7 +229,7 @@
             { id: 19, name: "Consent Negotiation",  level: 10, rarity: "EPIC",   xp: 48, desc: "Both partners write one thing they've never asked for. Swap papers and spend 5 minutes discussing. There is no pressure to act.", type: "vocal" },
             { id: 20, name: "Blindfold Symphony",   level: 10, rarity: "EPIC",   xp: 60, desc: "Blindfold your partner. Touch them with 5 different textures: fabric, ice, feather, lips and tongue. They score each sensation.", type: "wild" },
             { id: 21, name: "Role Reversal",        level: 10, rarity: "EPIC",   xp: 52, desc: "For the next 3 minutes, the passive partner takes complete control. The active partner follows every instruction.", type: "wild" }
-        ];
+        ]);
 
     // --- 2. GAME STATE ---
         let state = {

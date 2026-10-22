@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
@@ -50,7 +50,7 @@
       .filter(o => o.n && (!query || (o.p.label + ' ' + o.p.desc + ' ' + (o.p.group || '')).toLowerCase().includes(query)));
     let lastG = null;
     document.getElementById('pk').innerHTML = vis.map(({p, n}) => {
-      const d = p.lazy ? Object.keys(st.done).filter(k => k.startsWith(p.id + ':')).length : p.items.filter((x, i) => st.done[key(p.id, i)] && ih(p, x) <= h).length;
+      const d = p.lazy ? Object.keys(st.done).filter(k => k.startsWith(p.id + ':')).length : p.items.filter((x, i) => st.done[key(p.id, (window.KA_FILTER?KA_FILTER.origIdx:(a,i)=>i)(p.items, i))] && ih(p, x) <= h).length;
       const g = p.group || 'Original packs'; const head = g !== lastG ? `<div class="kx-sec">${esc(g)}</div>` : ''; lastG = g;
       return head + `<label class="kx-item" style="cursor:pointer"><input type="checkbox" data-p="${p.id}" ${st.sel.includes(p.id) ? 'checked' : ''} style="width:20px;height:20px;accent-color:#e8637a">
         <span class="kx-it"><b>${esc(p.label)}</b> <span class="kx-chip h${p.heat}">${HEAT[p.heat]}</span><br><span class="kx-muted">${esc(p.desc)} · ${n} tasks · ${d} done</span></span></label>`; }).join('') || '<p class="kx-muted kx-center">No packs match.</p>';
@@ -62,7 +62,7 @@
   function pool() {
     const out = [];
     if (heat() < 3) { /* lazy packs follow their own level */ }
-    packs.filter(p => st.sel.includes(p.id)).forEach(p => p.items.forEach((t, i) => { if (!st.done[key(p.id, i)] && ih(p, t) <= heat()) out.push({p, i, t}); }));
+    packs.filter(p => st.sel.includes(p.id)).forEach(p => p.items.forEach((t, i) => { const oi = (window.KA_FILTER?KA_FILTER.origIdx:(a,i)=>i)(p.items, i); if (!st.done[key(p.id, oi)] && ih(p, t) <= heat()) out.push({p, i: oi, t}); }));
     return out;
   }
   function draw() {

@@ -44,3 +44,8 @@ Navratri/Diwali dates change every year: add next year's entry to `LUNAR_FESTIVA
 - **History** (`games/kamaagni-history.html`): recent activity, delete per item or per area, delete device data / cloud data / account.
 - Home "This week" recap + next steps; Guided Session shows the same panel (`js/ka-focus.js`).
 - Dev testing: `node dev/mock-server.js` and `MOCK_URL` (never ship with it set).
+
+## v9 — settings, content filter, evidence-based flow
+- **Settings** (`games/kamaagni-settings.html`): switch topics on/off (anal, oral, BDSM, pain, breath play, humiliation, public, third parties, toys, cum play, extreme, roleplay, photos/sexting, alcohol, edging), presets, your own hide-words, hide individual games. Implemented in `js/ka-filter.js`: filters fetched data, built-in decks, embedded game decks, menus and whole pages. Breath play and extreme topics are off by default. Saved in `ka_filter` and synced with the account.
+- Sessions follow Talk → Touch → Play → Afterglow → Reflect; new Slow Touch (sensate focus) programme; "The science" tab in Experts lists the research used and its limits.
+- The Position Selector is illustration-only and cannot be filtered by topic; hide the whole game instead.

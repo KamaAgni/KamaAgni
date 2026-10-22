@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
 <title>KamaAgni — BDSM Journey</title>
@@ -18,7 +18,7 @@
   catch { app.innerHTML = top('BDSM Journey', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
   const st = LS.get('ka_journey', {done: {}, reward: {}, cat: 0});
   const save = () => LS.set('ka_journey', st);
-  const byCat = c => D.items.map((x, i) => ({i, c: x[0], t: x[1]})).filter(x => x.c === c);
+  const byCat = c => D.items.map((x, i) => ({i: (window.KA_FILTER ? KA_FILTER.origIdx(D.items, i) : i), c: x[0], t: x[1]})).filter(x => x.c === c);
   const lvlOf = c => Math.floor(c / 2);
   const cnt = c => byCat(c).filter(x => st.done[x.i]).length;
   const total = () => Object.keys(st.done).length;
