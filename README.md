@@ -55,3 +55,8 @@ Navratri/Diwali dates change every year: add next year's entry to `LUNAR_FESTIVA
 - Forgiving **rhythm** (one rest day never breaks it); no lost-streak screens or guilt messages.
 - **Balance guard**: one gentle skippable "time to be together" pause per day (30/60/90 min, can be turned off).
 - Home: "Remember this" (a past great night) and "Make it a ritual" prompts. Science tab lists the habit research used.
+
+## v11 — live games, animated notifications, Fun hub
+- **Notifications** (`KA_CHROME.notify`): animated banner (bounce-in, glow, floating hearts for nudges/check-ins, red pulse for STOP), header 💞 wobble, soft chime + vibration (toggle in Settings → Healthy use). Fires for messages, nudges, shared draws, check-ins, STOP/slow-down signals and Fun-hub moves, on any page.
+- **Together → Play**: shared Card, Truth or Dare, Would You Prefer (reveal when both chose), Dice, Roleplay parts, with Done/Pass and history logging. The original single-page Ludo/Dice-board/Cards/Poker/Position games keep their own layouts and are not mirrored live.
+- **Free-time Fun** (`games/kamaagni-fun.html`, `data/fun.json`): Date wheel, Deep questions, Fantasy builder, Story builder, Know-me quiz, Two truths & a lie. Solo/face-to-face when not linked; live and synced when linked. All content respects Settings filters.

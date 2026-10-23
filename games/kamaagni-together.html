@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
 </head><body>
+<style>@keyframes tgpop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}@keyframes tgroll{0%{transform:rotate(0) scale(.5);opacity:.2}30%{transform:rotate(200deg) scale(1.15)}60%{transform:rotate(340deg) scale(.95)}100%{transform:rotate(360deg) scale(1);opacity:1}}.tg-pop{animation:tgpop .5s ease both}.tg-roll{animation:tgroll .8s ease both}</style>
 <main class="kx app" id="app"></main>
 <script src="../js/ka-common.js"></script>
 <script src="../js/ka-data.js"></script>
@@ -17,9 +18,9 @@
   const {LS, esc, top, pick} = KX; const app = document.getElementById('app');
   const C = () => window.KA_CLOUD, S = () => (C() ? C().state() : {enabled: false});
   const me = () => KX.names()[0];
-  let tab = LS.get('ka_tg_tab', 'nudge') || 'nudge', started = false, partnerOn = false, pname = '';
+  let liveOn = false, tab = LS.get('ka_tg_tab', 'nudge') || 'nudge', started = false, partnerOn = false, pname = '';
   const ev = {nudges: [], msgs: [], tomb: {}, draw: null, resp: {}, timer: null, sig: {}, chk: {}, match: {}};
-  const fill = t => t.replace(/\{A\}/g, KX.names()[0]).replace(/\{B\}/g, pname || 'your partner');
+  const fill = t => String(t == null ? '' : t).replace(/\{A\}/g, KX.names()[0]).replace(/\{B\}/g, pname || 'your partner');
   const HASH = (location.hash.match(/join=([^&]+)/) || [])[1];
 
   function apply(e) {
@@ -27,13 +28,14 @@
     if (e.kind === 'msg') ev.msgs.push({id: e.id, mine: e.mine, at: e.at, t: b.t, n: b.n});
     else if (e.kind === 'nudge') ev.nudges.push({id: e.id, mine: e.mine, at: e.at, t: b.t, e: b.e, n: b.n});
     else if (e.kind === 'tomb') ev.tomb[b.x] = 1;
-    else if (e.kind === 'draw') { ev.draw = {id: e.id, t: b.t, p: b.p, by: e.mine}; ev.resp = {}; }
+    else if (e.kind === 'draw') { ev.draw = {...b, id: e.id, by: e.mine}; ev.resp = {}; }
     else if (e.kind === 'resp') { if (ev.draw && b.d === ev.draw.id) ev.resp[who] = b.r; }
     else if (e.kind === 'timer') ev.timer = b;
     else if (e.kind === 'sig') ev.sig[who] = {s: b.s, at: e.at};
     else if (e.kind === 'chk') ev.chk[who] = {...b, at: e.at};
     else if (e.kind === 'match') ev.match[who] = b.a;
     if (b.n && !e.mine) pname = b.n;
+    if (liveOn && !e.mine && window.KA_CHROME && Date.now() - new Date(e.at).getTime() < 40000 && !(e.kind === 'msg' && tab === 'chat') && !(e.kind === 'nudge' && tab === 'nudge')) { const dsc = KA_CHROME.describe(e); if (dsc) KA_CHROME.notify(dsc); }
     paint();
   }
   const send = (k, o) => C().couple.send(k, {...o, n: me()}).catch(x => KX.toast(x.message));
@@ -93,15 +95,7 @@
       document.getElementById('ms').onclick = go; document.getElementById('mi').onkeydown = e => { if (e.key === 'Enter') go(); };
       p.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { const id = +b.dataset.del; await send('tomb', {x: id}); ev.tomb[id] = 1; C().couple.del(id).catch(() => {}); paint(); });
     } else if (tab === 'live') {
-      const d = ev.draw, my = ev.sig.me, th = ev.sig.them, stop = (my && my.s === 'r') || (th && th.s === 'r');
-      const left = ev.timer ? Math.max(0, Math.round((ev.timer.end - Date.now()) / 1000)) : 0;
-      p.innerHTML = (stop ? `<div class="kx-card kx-center" style="border-color:#ef4444"><div style="font-size:48px">🔴</div><div class="kx-big">STOP — pause everything</div><p class="kx-muted">${(my && my.s === 'r') ? 'You' : esc(pname || 'Your partner')} asked to stop. Check in, no questions asked.</p>${my && my.s === 'r' ? '<button class="kx-btn" data-sig="g">I\'m okay to continue</button>' : '<p class="kx-muted">Wait for them to say they\'re ready.</p>'}</div>` : '') +
-        `<div class="kx-card"><div class="kx-muted">How are you feeling? <b>You ${sigIcon[(my || {}).s] || '⚪'}</b> · <b>${esc(pname || 'Partner')} ${sigIcon[(th || {}).s] || '⚪'}</b></div><div class="kx-row" style="margin-top:8px"><button class="kx-btn sm ghost" data-sig="g">🟢 Good</button><button class="kx-btn sm ghost" data-sig="y">🟡 Slow down</button><button class="kx-btn sm ghost" data-sig="r">🔴 Stop</button></div></div>
-        <div class="kx-card kx-play">${d ? `<span class="kx-chip">${esc(d.p)}</span><div class="kx-big" style="font-size:clamp(19px,4.2vw,24px)">${esc(fill(d.t))}</div><div class="kx-muted">You: ${ev.resp.me || '…'} · ${esc(pname || 'Partner')}: ${ev.resp.them || '…'}</div><div class="kx-row" style="justify-content:center"><button class="kx-btn" data-r="done">Done ✓</button><button class="kx-btn ghost" data-r="pass">Pass</button></div>` : '<div class="kx-big" style="font-size:20px">Draw a card for both of you</div><p class="kx-muted">You will both see the same card at the same time.</p>'}
-        <div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="dr">🃏 Draw shared card</button><button class="kx-btn ghost" id="tm">⏱ 3 min timer for both</button></div>${left ? `<div class="kx-big" id="tleft" style="margin-top:10px">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div>` : ''}</div><p class="kx-note">Cards follow your Heat level (${KX.HEAT[KX.heat()]}). Anyone can pass or stop at any time.</p>`;
-      p.querySelectorAll('[data-sig]').forEach(b => b.onclick = () => send('sig', {s: b.dataset.sig}));
-      p.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { send('resp', {d: d.id, r: b.dataset.r}); if (b.dataset.r === 'done') window.KA_TRACK && KA_TRACK.log('together', 'Did a shared card', d.p); });
-      document.getElementById('dr').onclick = drawCard; document.getElementById('tm').onclick = () => send('timer', {end: Date.now() + 180000});
+      livePane(p);
     } else if (tab === 'chk') {
       const m = ev.chk.me, t = ev.chk.them;
       const bar = (l, v) => `<div style="margin:6px 0"><span class="kx-muted">${l}</span> <b>${v}/5</b><div style="height:8px;border-radius:6px;background:#12152a"><div style="height:8px;border-radius:6px;width:${v * 20}%;background:linear-gradient(90deg,#e8637a,#f5c842)"></div></div></div>`;
@@ -125,11 +119,49 @@
       p.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mine[todo] = b.dataset.m; LS.set('ka_match_mine', mine); send('match', {a: mine}); paint(); });
     }
   }
-  function drawCard() {
-    fetch('../data/packs/index.json').then(r => r.json()).then(idx => {
-      const h = KX.heat(); const p = pick(idx.filter(x => x.h <= h));
-      return fetch('../data/packs/' + p.id + '.json').then(r => r.json()).then(items => send('draw', {t: pick(items), p: p.l}));
-    }).catch(() => KX.toast('Could not draw'));
+  const GAMES = [['card', '🃏 Card'], ['tod', '🎭 Truth or Dare'], ['wyp', '⚖️ Would you prefer'], ['dice', '🎲 Dice'], ['rp', '🎬 Roleplay']];
+  let gsel = LS.get('ka_tg_game', 'card') || 'card';
+  const cache = {};
+  const getj = async u => cache[u] || (cache[u] = await (await fetch(u)).json());
+  async function drawGame(g) {
+    try {
+      if (g === 'card') { const idx = await getj('../data/packs/index.json'); const pk = pick(idx.filter(x => x.h <= KX.heat())); const items = await getj('../data/packs/' + pk.id + '.json'); if (!items.length) return KX.toast('Try again'); return send('draw', {g, t: pick(items), p: pk.l}); }
+      if (g === 'tod') return;  // chosen with the two buttons below
+      if (g === 'wyp') { const pr = pick(KA_DATA.wyp || []); if (!pr) return KX.toast('Nothing to show with your settings'); return send('draw', {g, t: pr[0] + '  ⚖️  ' + pr[1], a: pr[0], b: pr[1], p: 'Would you prefer'}); }
+      if (g === 'dice') { const D = await getj('../data/dice_faces.json'); const set = D.sex || D.bdsm || Object.values(D)[0] || []; if (set.length < 2) return KX.toast('Nothing to roll with your settings'); return send('draw', {g, p: 'Dice', t: pick(set) + '  +  ' + pick(set)}); }
+      if (g === 'rp') { const R = await getj('../data/roleplay.json'); const o = pick(R); if (!o) return KX.toast('Roleplay is hidden in your settings'); return send('draw', {g, p: 'Roleplay', t: o.t, r: o.p, tip: o.tip}); }
+    } catch (e) { KX.toast('Could not draw'); }
+  }
+  function drawTod(kind) { const arr = kind === 'truth' ? KA_DATA.truth : KA_DATA.dare; const x = pick(arr || []); if (!x) return KX.toast('Nothing to show with your settings'); send('draw', {g: 'tod', k: kind, p: kind === 'truth' ? 'Truth' : 'Dare', t: x}); }
+  function livePane(p) {
+    const d = ev.draw, my = ev.sig.me, th = ev.sig.them, stop = (my && my.s === 'r') || (th && th.s === 'r');
+    const left = ev.timer ? Math.max(0, Math.round((ev.timer.end - Date.now()) / 1000)) : 0;
+    let card = '<div class="kx-big" style="font-size:20px">Pick a game, then draw for both of you</div><p class="kx-muted">You both see the same thing at the same time.</p>';
+    if (d) {
+      const g = d.g || 'card', mine = d.by;
+      let extra = '', main = `<div class="kx-big tg-pop" style="font-size:clamp(19px,4.2vw,24px)">${esc(fill(d.t || ''))}</div>`;
+      if (g === 'tod') extra = `<div class="kx-muted">${mine ? 'For ' + esc(pname || 'your partner') : 'For you'}</div>`;
+      if (g === 'wyp') {
+        const mr = ev.resp.me, tr = ev.resp.them, both = mr && tr;
+        main = `<div class="kx-big tg-pop" style="font-size:20px">Would you prefer…</div><div class="kx-row" style="justify-content:center"><button class="kx-btn ${mr === 'a' ? '' : 'ghost'}" data-w="a" ${mr ? 'disabled' : ''}>${esc(fill(d.a))}</button><button class="kx-btn ${mr === 'b' ? '' : 'ghost'}" data-w="b" ${mr ? 'disabled' : ''}>${esc(fill(d.b))}</button></div>` +
+          (both ? `<div class="kx-big tg-pop" style="font-size:20px;margin-top:10px">${mr === tr ? '🎉 You both chose the same!' : '😏 You chose differently: talk about why'}</div><div class="kx-muted">You: ${mr === 'a' ? 'first' : 'second'} · ${esc(pname || 'Partner')}: ${tr === 'a' ? 'first' : 'second'}</div>` : (mr ? '<div class="kx-muted">Waiting for ' + esc(pname || 'your partner') + '…</div>' : '<div class="kx-muted">Pick one. The answers appear when you both have chosen.</div>'));
+      }
+      if (g === 'dice') main = `<div class="kx-big tg-roll" style="font-size:clamp(20px,5vw,28px)">🎲 ${esc(d.t)}</div>`;
+      if (g === 'rp' && d.r) main = `<div class="kx-big tg-pop" style="font-size:20px">${esc(d.t)}</div><div class="kx-card" style="margin-top:8px"><b>Your part:</b> ${esc(fill(d.by ? d.r[0] : (d.r[1] || d.r[0])))}</div><div class="kx-muted">${esc(pname || 'Your partner')} reads the other part. Agree limits and a stop word first.</div>`;
+      card = `<span class="kx-chip">${esc(d.p || '')}</span>${main}${extra}` + (g === 'wyp' ? '' : `<div class="kx-muted">You: ${ev.resp.me || '…'} · ${esc(pname || 'Partner')}: ${ev.resp.them || '…'}</div><div class="kx-row" style="justify-content:center"><button class="kx-btn" data-r="done">Done ✓</button><button class="kx-btn ghost" data-r="pass">Pass</button></div>`);
+    }
+    p.innerHTML = (stop ? `<div class="kx-card kx-center" style="border-color:#ef4444"><div style="font-size:48px">🔴</div><div class="kx-big">STOP — pause everything</div><p class="kx-muted">${(my && my.s === 'r') ? 'You' : esc(pname || 'Your partner')} asked to stop. Check in, no questions asked.</p>${my && my.s === 'r' ? '<button class="kx-btn" data-sig="g">I\'m okay to continue</button>' : '<p class="kx-muted">Wait for them to say they\'re ready.</p>'}</div>` : '') +
+      `<div class="kx-card"><div class="kx-muted">How are you feeling? <b>You ${sigIcon[(my || {}).s] || '⚪'}</b> · <b>${esc(pname || 'Partner')} ${sigIcon[(th || {}).s] || '⚪'}</b></div><div class="kx-row" style="margin-top:8px"><button class="kx-btn sm ghost" data-sig="g">🟢 Good</button><button class="kx-btn sm ghost" data-sig="y">🟡 Slow down</button><button class="kx-btn sm ghost" data-sig="r">🔴 Stop</button></div></div>
+      <div class="kx-row" style="margin:6px 0">${GAMES.map(g => `<button class="kx-btn sm ${gsel === g[0] ? '' : 'ghost'}" data-g="${g[0]}">${g[1]}</button>`).join('')}</div>
+      <div class="kx-card kx-play">${card}
+        <div class="kx-row" style="justify-content:center;margin-top:10px">${gsel === 'tod' ? '<button class="kx-btn gold" data-tod="truth">💬 Truth</button><button class="kx-btn gold" data-tod="dare">🔥 Dare</button>' : '<button class="kx-btn gold" id="dr">' + ({card: '🃏 Draw a card', wyp: '⚖️ New question', dice: '🎲 Roll the dice', rp: '🎬 New scenario'}[gsel]) + '</button>'}<button class="kx-btn ghost" id="tm">⏱ 3 min timer for both</button></div>${left ? `<div class="kx-big" id="tleft" style="margin-top:10px">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div>` : ''}</div><p class="kx-note">Follows your Settings and Heat level (${KX.HEAT[KX.heat()]}). Anyone can pass or stop at any time.</p>`;
+    p.querySelectorAll('[data-sig]').forEach(b => b.onclick = () => send('sig', {s: b.dataset.sig}));
+    p.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { gsel = b.dataset.g; LS.set('ka_tg_game', gsel); livePane(p); });
+    p.querySelectorAll('[data-tod]').forEach(b => b.onclick = () => drawTod(b.dataset.tod));
+    p.querySelectorAll('[data-w]').forEach(b => b.onclick = () => send('resp', {d: d.id, r: b.dataset.w}));
+    p.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { send('resp', {d: d.id, r: b.dataset.r}); if (b.dataset.r === 'done') window.KA_TRACK && KA_TRACK.log('together', 'Played together · ' + (d.p || 'card'), String(d.t || '').slice(0, 80)); });
+    const dr = document.getElementById('dr'); if (dr) dr.onclick = () => drawGame(gsel);
+    document.getElementById('tm').onclick = () => send('timer', {end: Date.now() + 180000});
   }
   let ticker = null;
   function paint() {
@@ -141,7 +173,7 @@
     if (g) { started = false; C() && C().couple.stop(); app.innerHTML = g; if (s.user && s.vault === 'ready') bindLink(); return; }
     app.innerHTML = main(); bindLink(); paint();
     if (!started) {
-      started = true; pname = pname || '';
+      started = true; pname = pname || ''; liveOn = false; setTimeout(() => { liveOn = true; }, 3500);
       C().couple.live(apply, names => { partnerOn = names.length > 0; if (names[0] && names[0].n) pname = names[0].n; const dot = app.querySelector('.kx-card span'); draw2(); }, me());
     }
     clearInterval(ticker); ticker = setInterval(() => { const t = document.getElementById('tleft'); if (t && ev.timer) { const l = Math.max(0, Math.round((ev.timer.end - Date.now()) / 1000)); t.textContent = Math.floor(l / 60) + ':' + String(l % 60).padStart(2, '0'); if (!l) { t.textContent = '⏰ Time!'; if (navigator.vibrate) navigator.vibrate(300); } } }, 500);

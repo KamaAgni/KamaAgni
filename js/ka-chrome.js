@@ -8,13 +8,13 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var G = 'games/';
   var MENU = [
-    ['Tonight', [['🕯️', 'Guided Session', G + 'kamaagni-session.html'], ['🎓', 'Intimacy Experts', G + 'kamaagni-experts.html'], ['💞', 'Together (partner)', G + 'kamaagni-together.html'], ['💌', 'Secret Envelope', G + 'kamaagni-secret.html'], ['🗓️', 'Plan Tonight', G + 'kamaagni-tonight.html']]],
+    ['Tonight', [['🕯️', 'Guided Session', G + 'kamaagni-session.html'], ['🎓', 'Intimacy Experts', G + 'kamaagni-experts.html'], ['💞', 'Together (partner)', G + 'kamaagni-together.html'], ['🎉', 'Free-time Fun', G + 'kamaagni-fun.html'], ['💌', 'Secret Envelope', G + 'kamaagni-secret.html'], ['🗓️', 'Plan Tonight', G + 'kamaagni-tonight.html']]],
     ['Play', [['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Intimacy Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html']]],
     ['Explore', [['🃏', 'Task Deck', G + 'kamaagni-task-deck.html'], ['⛓️', 'BDSM Journey', G + 'kamaagni-journey.html'], ['🏆', 'Challenges', G + 'kamaagni-challenges.html'], ['🎭', 'Roleplay Studio', G + 'kamaagni-roleplay.html'], ['🧭', 'Kink Explorer', G + 'kamaagni-kink-explorer.html'], ['🧘', 'Position Selector', G + 'intimacy_Position_Selector_page.html'], ['👄', 'Oral Selector', G + 'intimacy_Oral_Position_Selector_page.html']]],
     ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['📅', 'Mission Week', G + 'kamaagni-mission-week.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
     ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
   ];
-  var NAV = [['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🕘', 'History', G + 'kamaagni-history.html']];
+  var NAV = [['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎉', 'Fun', G + 'kamaagni-fun.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html']];
   var u = function (p) { return BASE + p; };
   var hideLib = window.KA_CONFIG && window.KA_CONFIG.LIBRARY === false;
 
@@ -143,24 +143,57 @@
   paint();
 
   /* ---- calm settings ---- */
-  function calm() { try { var c = JSON.parse(localStorage.getItem('ka_calm')) || {}; return { guard: c.guard !== false, limit: c.limit || 60, nudges: c.nudges !== false }; } catch (e) { return { guard: true, limit: 60, nudges: true }; } }
-  /* ---- partner nudges: badge + soft toast, only 💌 events from the partner ---- */
-  var onTogether = /kamaagni-together/.test(location.pathname), nTimer = null, unseen = 0;
-  function toast(t) { var d = doc.createElement('div'); d.setAttribute('role', 'status'); d.style.cssText = 'position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:2147483000;max-width:90vw;padding:12px 18px;border-radius:16px;background:#12152a;border:1px solid rgba(232,99,122,.6);color:#fff;font:600 14px "DM Sans",system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5)'; d.textContent = t; doc.body.appendChild(d); setTimeout(function () { d.remove(); }, 5000); }
+  function calm() { try { var c = JSON.parse(localStorage.getItem('ka_calm')) || {}; return { guard: c.guard !== false, limit: c.limit || 60, nudges: c.nudges !== false, sound: c.sound !== false }; } catch (e) { return { guard: true, limit: 60, nudges: true, sound: true }; } }
+  /* ---- animated partner notifications ---- */
+  var ncss = doc.createElement('style');
+  ncss.textContent = '@keyframes kn-in{0%{transform:translate(-50%,-140%) scale(.9);opacity:0}60%{transform:translate(-50%,6px) scale(1.03);opacity:1}100%{transform:translate(-50%,0) scale(1)}}@keyframes kn-glow{0%,100%{box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 0 0 rgba(232,99,122,.55)}50%{box-shadow:0 8px 30px rgba(0,0,0,.5),0 0 0 12px rgba(232,99,122,0)}}@keyframes kn-ico{0%,100%{transform:rotate(0) scale(1)}20%{transform:rotate(-14deg) scale(1.25)}40%{transform:rotate(12deg) scale(1.25)}60%{transform:rotate(-8deg)}80%{transform:rotate(6deg)}}@keyframes kn-float{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-130px) scale(1.2);opacity:0}}@keyframes kn-shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-4px) rotate(-8deg)}40%{transform:translateX(4px) rotate(8deg)}60%{transform:translateX(-3px) rotate(-5deg)}80%{transform:translateX(3px) rotate(5deg)}}@keyframes kn-stop{0%,100%{background:#2a0d12}50%{background:#7f1d1d}}' +
+    '.kn{position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:2147483200;width:min(92vw,380px);display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:18px;background:#12152a;border:1px solid rgba(232,99,122,.65);color:#fff;font:600 14px "DM Sans",system-ui,sans-serif;animation:kn-in .55s cubic-bezier(.2,.9,.3,1.2) both,kn-glow 1.6s ease-out 2;cursor:pointer;box-sizing:border-box}.kn.stop{border-color:#ef4444;animation:kn-in .55s both,kn-stop .7s 4}' +
+    '.kn .i{font-size:30px;line-height:1;animation:kn-ico 1s ease .3s 2;flex:none}.kn .t{min-width:0}.kn .t b{display:block;font-size:12px;color:#f4a0ae;letter-spacing:.04em;margin-bottom:2px;font-weight:700}.kn .t span{display:block;color:#dce9ff;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.kn .f{position:absolute;bottom:60%;font-size:18px;pointer-events:none;animation:kn-float 1.8s ease-out forwards}' +
+    '#kh-pt.ring{animation:kn-shake .6s ease 3}';
+  doc.head.appendChild(ncss);
+  var actx = null;
+  function chime(kind) { if (!calm().sound) return; try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); var o = actx.createOscillator(), g = actx.createGain(), t = actx.currentTime, f = kind === 'stop' ? [440, 330] : [660, 880]; o.type = 'sine'; o.frequency.setValueAtTime(f[0], t); o.frequency.setValueAtTime(f[1], t + .12); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.12, t + .02); g.gain.exponentialRampToValueAtTime(.0001, t + .45); o.connect(g); g.connect(actx.destination); o.start(t); o.stop(t + .5); } catch (e) {} }
+  function notify(o) {
+    var old = doc.querySelectorAll('.kn'); old.forEach(function (n) { n.remove(); });
+    var d = doc.createElement('div'); d.className = 'kn' + (o.kind === 'stop' ? ' stop' : ''); d.setAttribute('role', 'status'); d.setAttribute('aria-live', 'polite');
+    d.innerHTML = '<span class="i">' + esc(o.icon || '💌') + '</span><div class="t"><b>' + esc(o.title || 'Your partner') + '</b><span>' + esc(o.text || '') + '</span></div>';
+    if (o.kind === 'nudge' || o.kind === 'chk') { for (var k = 0; k < 7; k++) { var h = doc.createElement('i'); h.className = 'f'; h.textContent = ['💗', '💖', '✨', '💞'][k % 4]; h.style.left = (12 + k * 12) + '%'; h.style.animationDelay = (k * .12) + 's'; d.appendChild(h); } }
+    d.onclick = function () { if (o.href) location.href = u(o.href); else d.remove(); };
+    doc.body.appendChild(d);
+    var pt = doc.getElementById('kh-pt'); if (pt) { pt.classList.remove('ring'); void pt.offsetWidth; pt.classList.add('ring'); }
+    chime(o.kind); try { if (navigator.vibrate) navigator.vibrate(o.kind === 'stop' ? [200, 80, 200, 80, 200] : [60, 40, 90]); } catch (e) {}
+    setTimeout(function () { if (d.parentNode) { d.style.transition = 'opacity .4s,transform .4s'; d.style.opacity = '0'; d.style.transform = 'translate(-50%,-30px)'; setTimeout(function () { d.remove(); }, 450); } }, o.kind === 'stop' ? 9000 : 5500);
+  }
+  var TOG = 'games/kamaagni-together.html';
+  function describe(e) {
+    var b = e.body || {}, n = b.n || 'Your partner';
+    switch (e.kind) {
+      case 'nudge': return { icon: b.e || '💌', title: n, text: b.t || 'Thinking of you', kind: 'nudge', href: TOG };
+      case 'msg': return { icon: '💬', title: n + ' wrote', text: b.t, href: TOG };
+      case 'draw': return { icon: '🔥', title: n + ' drew a card', text: 'Join in. Open Together → Play', href: TOG };
+      case 'chk': return { icon: '💗', title: n + ' checked in', text: 'See how you both feel this week', kind: 'chk', href: TOG };
+      case 'sig': return b.s === 'r' ? { icon: '🛑', title: n + ' pressed STOP', text: 'Pause and check in', kind: 'stop', href: TOG } : (b.s === 'y' ? { icon: '🟡', title: n, text: 'Slow down a little', href: TOG } : null);
+      case 'fun': return b.say ? { icon: b.ic || '🎉', title: n, text: b.say, href: 'games/kamaagni-fun.html' } : null;
+      default: return null;
+    }
+  }
+  var unseen = 0;
   function checkNudges() {
     var C = window.KA_CLOUD, s = C && C.state(); if (!s || !s.couple || !s.couple.partnerJoined || s.vault !== 'ready' || doc.hidden) return;
     C.couple.list(0).then(function (evs) {
       var seen = +localStorage.getItem('ka_cloud_nudge') || 0, tomb = {}, mx = 0, fresh = [];
       evs.forEach(function (e) { mx = Math.max(mx, e.id); if (e.kind === 'tomb' && e.body) tomb[e.body.x] = 1; });
-      evs.forEach(function (e) { if (e.kind === 'nudge' && !e.mine && e.body && !tomb[e.id] && e.id > seen) fresh.push(e); });
+      evs.forEach(function (e) { if (!e.mine && e.body && !tomb[e.id] && e.id > seen && describe(e)) fresh.push(e); });
       if (onTogether) { localStorage.setItem('ka_cloud_nudge', String(mx)); fresh = []; }
+      var first = localStorage.getItem('ka_cloud_nudge') === null; if (first) fresh = fresh.slice(-5);
       var prev = unseen; unseen = calm().nudges ? fresh.length : 0;
       var pd = doc.getElementById('kh-pd'); if (pd) { pd.textContent = unseen ? (unseen > 9 ? '9+' : unseen) : ''; pd.classList.toggle('n', !!unseen); }
-      if (unseen > prev && calm().nudges) toast((fresh[fresh.length - 1].body.e || '💌') + ' ' + (fresh[fresh.length - 1].body.n || 'Your partner') + ': ' + (fresh[fresh.length - 1].body.t || 'thinking of you'));
+      if (unseen > prev && calm().nudges) { var last = fresh[fresh.length - 1], dsc = describe(last); notify(dsc); }
     }, function () {});
   }
+  var onTogether = /kamaagni-together|kamaagni-fun/.test(location.pathname);
   var st2 = doc.createElement('style'); st2.textContent = '.kh-dot.n{width:auto;min-width:16px;height:16px;border-radius:9px;background:#e8637a;color:#fff;font:700 10px "DM Sans",sans-serif;line-height:12px;text-align:center;padding:0 3px;top:2px;right:2px}'; doc.head.appendChild(st2);
-  nTimer = setInterval(checkNudges, 25000); setTimeout(checkNudges, 4000); window.addEventListener('ka:cloud', function () { setTimeout(checkNudges, 800); });
+  setInterval(checkNudges, 9000); setTimeout(checkNudges, 3500); window.addEventListener('ka:cloud', function () { setTimeout(checkNudges, 800); });
 
   /* ---- balance guard: one gentle, skippable pause per day ---- */
   (function () {
@@ -181,5 +214,5 @@
     }
   })();
 
-  window.KA_CHROME = { openAccount: openAcct, MENU: MENU };
+  window.KA_CHROME = { openAccount: openAcct, MENU: MENU, notify: notify, describe: describe };
 })();
