@@ -22,6 +22,8 @@
     ['Gentle & romantic', 'Hide anal, BDSM, pain, humiliation, third parties, cum play, extreme, breath play.', () => ({off: {anal: 1, bdsm: 1, pain: 1, breath: 1, humil: 1, group: 1, cum: 1, extreme: 1, tease: 1}})],
     ['Vanilla only', 'Hide every adventurous topic. Cuddles, kisses, touch, talking, classic positions.', () => ({off: Object.fromEntries(F.TOPICS.filter(t => !['alcohol', 'photo'].includes(t.id)).map(t => [t.id, 1]))})]
   ];
+  const calm = () => { const c = LS.get('ka_calm', {}) || {}; return {guard: c.guard !== false, limit: c.limit || 60, nudges: c.nudges !== false}; };
+  const setCalm = o => LS.set('ka_calm', {...calm(), ...o});
   function draw() {
     const f = F.get(), on = id => !f.off[id];
     const pages = (window.KA_CHROME ? KA_CHROME.MENU : []).flatMap(g => g[1]).filter(i => /games\//.test(i[2]) && !/settings|history|together|experts|learn/.test(i[2]));
@@ -35,12 +37,20 @@
         <div class="kx-row" style="margin-top:8px">${f.words.map((w, i) => `<button class="kx-chip" data-wr="${i}" style="cursor:pointer">${esc(w)} ✕</button>`).join('') || '<span class="kx-muted">None yet.</span>'}</div></div>
       <div class="kx-card"><b>Hide whole games</b><div class="kx-list" style="margin-top:8px">${pages.map(i => { const n = i[2].split('/').pop().replace('.html', ''); return `<div class="kx-item"><span class="kx-it">${i[0]} ${esc(i[1])}</span>${sw(!f.pages[n], 'data-pg="' + n + '" aria-label="' + esc(i[1]) + '"')}</div>`; }).join('')}</div>
         <p class="kx-note">The Position Selector uses numbered illustrations that can't be filtered by topic, so use the switch above if you want it hidden.</p></div>
+      <div class="kx-card"><b>Healthy use</b><p class="kx-muted" style="margin:4px 0 8px">KamaAgni is meant to bring you closer offline. These are your controls.</p>
+        <div class="kx-list"><div class="kx-item"><span class="kx-it"><b>Daily "time to be together" reminder</b><br><span class="kx-muted">One gentle, skippable pause after ${calm().limit} minutes a day.</span></span>${sw(calm().guard, 'data-cg="1" aria-label="Daily reminder"')}</div>
+        <div class="kx-item"><span class="kx-it"><b>Reminder after</b></span><span class="kx-row">${[30, 60, 90].map(m => `<button class="kx-btn sm ${calm().limit === m ? '' : 'ghost'}" data-cl="${m}">${m} min</button>`).join('')}</span></div>
+        <div class="kx-item"><span class="kx-it"><b>Partner nudge alerts</b><br><span class="kx-muted">Turn off to stop banners and badges. You can still read them in Together.</span></span>${sw(calm().nudges, 'data-cn="1" aria-label="Nudge alerts"')}</div></div>
+        <p class="kx-note">If it ever feels hard to control how much you use sexual content, or it affects your relationship, work or mood, a GP, psychologist or sex therapist can help without judgement.</p></div>
       <div class="kx-card"><div class="kx-row"><button class="kx-btn ghost sm" id="rs">Reset to defaults</button><a class="kx-btn ghost sm" href="kamaagni-history.html">My history &amp; data</a></div><p class="kx-note">Changes save instantly and follow your account to other devices.</p></div>`;
     const q = (s, fn) => app.querySelectorAll(s).forEach(fn);
     q('[data-t]', b => b.onclick = () => { const x = F.get(); if (x.off[b.dataset.t]) delete x.off[b.dataset.t]; else x.off[b.dataset.t] = 1; F.save(x); draw(); });
     q('[data-pg]', b => b.onclick = () => { const x = F.get(); if (x.pages[b.dataset.pg]) delete x.pages[b.dataset.pg]; else x.pages[b.dataset.pg] = 1; F.save(x); draw(); });
     q('[data-pr]', b => b.onclick = () => { const x = F.get(); x.off = PRESETS[+b.dataset.pr][2]().off; F.save(x); draw(); KX.toast('Applied'); });
     q('[data-h]', b => b.onclick = () => { LS.set('ka_heat', +b.dataset.h); draw(); });
+    q('[data-cg]', b => b.onclick = () => { setCalm({guard: !calm().guard}); draw(); });
+    q('[data-cn]', b => b.onclick = () => { setCalm({nudges: !calm().nudges}); draw(); });
+    q('[data-cl]', b => b.onclick = () => { setCalm({limit: +b.dataset.cl}); draw(); });
     q('[data-wr]', b => b.onclick = () => { const x = F.get(); x.words.splice(+b.dataset.wr, 1); F.save(x); draw(); });
     const add = () => { const v = document.getElementById('wd').value.trim().toLowerCase(); if (!v) return; const x = F.get(); if (!x.words.includes(v)) x.words.push(v); F.save(x); draw(); };
     document.getElementById('wa').onclick = add; document.getElementById('wd').onkeydown = e => { if (e.key === 'Enter') add(); };

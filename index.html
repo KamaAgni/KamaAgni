@@ -1361,7 +1361,7 @@ var greet=hr<5?'Late night':hr<12?'Good morning':hr<18?'Good afternoon':'Good ev
 $('d-hi').innerHTML='<span>'+greet+(A&&B?', '+esc(A)+' &amp; '+esc(B):'')+'</span>';
 var T=window.KA_TRACK,act=T?T.get():{},st=T?T.streak():0,lv=T?T.level(act.xp||0):null;
 var chips='';
-if(lv){chips+='<span class="d-chip">🔥 '+st+' day'+(st===1?'':'s')+' streak</span>';
+if(lv){chips+='<span class="d-chip" title="One rest day never breaks your rhythm">🔥 '+st+' day'+(st===1?'':'s')+' rhythm</span>';
 chips+='<span class="d-chip d-lvl">'+lv.icon+' Level '+lv.n+' · '+lv.name+' <span style="color:#8a99b8;font-weight:600">'+lv.xp+' XP'+(lv.to?' / '+lv.to:'')+'</span><span class="bar"><i style="width:'+lv.pct+'%"></i></span></span>';}
 $('d-stats').innerHTML=chips;
 var heat=LS('ka_heat',2);

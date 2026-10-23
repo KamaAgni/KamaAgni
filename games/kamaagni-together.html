@@ -17,14 +17,15 @@
   const {LS, esc, top, pick} = KX; const app = document.getElementById('app');
   const C = () => window.KA_CLOUD, S = () => (C() ? C().state() : {enabled: false});
   const me = () => KX.names()[0];
-  let tab = LS.get('ka_tg_tab', 'chat') || 'chat', started = false, partnerOn = false, pname = '';
-  const ev = {msgs: [], tomb: {}, draw: null, resp: {}, timer: null, sig: {}, chk: {}, match: {}};
+  let tab = LS.get('ka_tg_tab', 'nudge') || 'nudge', started = false, partnerOn = false, pname = '';
+  const ev = {nudges: [], msgs: [], tomb: {}, draw: null, resp: {}, timer: null, sig: {}, chk: {}, match: {}};
   const fill = t => t.replace(/\{A\}/g, KX.names()[0]).replace(/\{B\}/g, pname || 'your partner');
   const HASH = (location.hash.match(/join=([^&]+)/) || [])[1];
 
   function apply(e) {
     const b = e.body; if (!b) return; const who = e.mine ? 'me' : 'them';
     if (e.kind === 'msg') ev.msgs.push({id: e.id, mine: e.mine, at: e.at, t: b.t, n: b.n});
+    else if (e.kind === 'nudge') ev.nudges.push({id: e.id, mine: e.mine, at: e.at, t: b.t, e: b.e, n: b.n});
     else if (e.kind === 'tomb') ev.tomb[b.x] = 1;
     else if (e.kind === 'draw') { ev.draw = {id: e.id, t: b.t, p: b.p, by: e.mine}; ev.resp = {}; }
     else if (e.kind === 'resp') { if (ev.draw && b.d === ev.draw.id) ev.resp[who] = b.r; }
@@ -64,7 +65,7 @@
     if (g('lv')) g('lv').onclick = () => confirm('Unlink from your partner? Shared messages are deleted.') && C0.leave().then(draw);
   }
 
-  const TABS = [['chat', '💬 Chat'], ['live', '🔥 Play'], ['chk', '💗 Check-in'], ['match', '🤝 Match']];
+  const TABS = [['nudge', '💌 Nudges'], ['chat', '💬 Chat'], ['live', '🔥 Play'], ['chk', '💗 Check-in'], ['match', '🤝 Match']];
   function main() {
     const s = S(), live = partnerOn;
     return top('Together', '') + `<div class="kx-card" style="padding:12px 14px"><div class="kx-row" style="justify-content:space-between"><span><span style="color:${live ? '#4ade80' : '#6c7a95'}">●</span> ${esc(pname || 'Your partner')} is <b>${live ? 'here now' : 'away'}</b></span><button class="kx-btn ghost sm" id="lv">Unlink</button></div></div>
@@ -73,7 +74,17 @@
   const sigIcon = {g: '🟢', y: '🟡', r: '🔴'};
   function pane() {
     const p = document.getElementById('pane'); if (!p) return;
-    if (tab === 'chat') {
+    if (tab === 'nudge') {
+      const NU = [['💌', 'Thinking of you'], ['😏', 'I have plans for you tonight'], ['🕯️', 'Tonight?'], ['🫶', 'Thank you for today'], ['🌹', 'You looked amazing'], ['🔥', 'Can\'t stop thinking about last time'], ['😘', 'Miss you'], ['🤗', 'I need a hug']];
+      const list = ev.nudges.filter(m => !ev.tomb[m.id]).slice().reverse();
+      p.innerHTML = `<div class="kx-card"><b>Send a little spark</b><p class="kx-muted">One tap. They get a soft notification the next time they open the site.</p><div class="kx-row">${NU.map((n, i) => `<button class="kx-btn sm ghost" data-nu="${i}">${n[0]} ${n[1]}</button>`).join('')}</div>
+        <div class="kx-row" style="margin-top:10px"><input class="kx-input" id="nc" maxlength="120" placeholder="Or write your own" style="flex:1"><button class="kx-btn" id="ns">Send</button></div></div>
+        <div class="kx-card"><b>Recent</b><div class="kx-list" style="margin-top:8px">${list.map(m => `<div class="kx-item" style="${m.mine ? 'border-color:var(--rose)' : ''}"><span class="kx-it">${esc(m.e || '💌')} ${esc(m.t)}<br><span class="kx-muted" style="font-size:12px">${m.mine ? 'You' : esc(m.n || 'Partner')} · ${new Date(m.at).toLocaleString([], {weekday: 'short', hour: 'numeric', minute: '2-digit'})}</span></span>${m.mine ? `<button class="kx-btn ghost sm" data-del="${m.id}" aria-label="Delete">🗑</button>` : ''}</div>`).join('') || '<p class="kx-muted kx-center">No nudges yet.</p>'}</div></div>`;
+      p.querySelectorAll('[data-nu]').forEach(b => b.onclick = () => { const n = NU[+b.dataset.nu]; send('nudge', {e: n[0], t: n[1]}); window.KA_TRACK && KA_TRACK.log('together', 'Sent a nudge', n[1]); KX.toast('Sent'); });
+      const go = () => { const i = document.getElementById('nc'), v = i.value.trim(); if (!v) return; i.value = ''; send('nudge', {e: '💌', t: v}); };
+      document.getElementById('ns').onclick = go; document.getElementById('nc').onkeydown = e => { if (e.key === 'Enter') go(); };
+      p.querySelectorAll('[data-del]').forEach(b => b.onclick = async () => { const id = +b.dataset.del; await send('tomb', {x: id}); ev.tomb[id] = 1; C().couple.del(id).catch(() => {}); paint(); });
+    } else if (tab === 'chat') {
       const ms = ev.msgs.filter(m => !ev.tomb[m.id]);
       p.innerHTML = `<div class="kx-card"><div class="kx-list" id="ml" style="max-height:48vh;overflow:auto">${ms.map(m => `<div class="kx-item" style="${m.mine ? 'border-color:var(--rose)' : ''}"><span class="kx-it"><span class="kx-muted" style="font-size:12px">${m.mine ? 'You' : esc(m.n || 'Partner')} · ${new Date(m.at).toLocaleString([], {weekday: 'short', hour: 'numeric', minute: '2-digit'})}</span><br>${esc(m.t)}</span>${m.mine ? `<button class="kx-btn ghost sm" data-del="${m.id}" aria-label="Delete">🗑</button>` : ''}</div>`).join('') || '<p class="kx-muted kx-center">No messages yet. Say something sweet 💌</p>'}</div>
         <div class="kx-row" style="margin-top:10px"><input class="kx-input" id="mi" placeholder="Write a note…" maxlength="500" style="flex:1"><button class="kx-btn" id="ms">Send</button></div><p class="kx-note">End-to-end encrypted. You can delete your own messages for both of you.</p></div>`;
@@ -122,7 +133,7 @@
   }
   let ticker = null;
   function paint() {
-    if (tab === 'live' || tab === 'chk' || tab === 'match' || tab === 'chat') { const a = document.activeElement; if (a && a.tagName === 'INPUT' && a.value) return; pane(); }
+    if (tab === 'nudge' || tab === 'live' || tab === 'chk' || tab === 'match' || tab === 'chat') { const a = document.activeElement; if (a && a.tagName === 'INPUT' && a.value) return; pane(); }
     document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { tab = b.dataset.tab; LS.set('ka_tg_tab', tab); document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('ghost', x !== b)); pane(); });
   }
   function draw() {

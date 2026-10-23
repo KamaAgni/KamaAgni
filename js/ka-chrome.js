@@ -134,12 +134,52 @@
     dot.style.display = '';
     if (s.user) { ic.textContent = (s.user.email || '?').charAt(0).toUpperCase(); dot.className = 'kh-dot ' + (s.vault === 'ready' && !s.err ? 'ok' : 'warn'); fs.textContent = s.vault === 'ready' ? (s.syncing ? '☁️ Syncing…' : '☁️ Encrypted & synced ' + ago(s.last)) : '🔒 Vault locked: open account menu'; }
     else { ic.textContent = '👤'; dot.className = 'kh-dot'; fs.textContent = '💾 Saved on this device · sign in to sync'; }
-    pt.style.display = s.couple ? '' : 'none'; pd.className = 'kh-dot ' + (s.couple && s.couple.partnerJoined ? 'ok' : 'warn');
+    pt.style.display = s.couple ? '' : 'none'; pd.className = 'kh-dot ' + (s.couple && s.couple.partnerJoined ? 'ok' : 'warn') + (typeof unseen !== 'undefined' && unseen ? ' n' : '');
     if (acct.classList.contains('show') && !acct.querySelector('input:focus')) renderAcct();
   }
   window.addEventListener('ka:cloud', paint);
   /* load the cloud layer (skips itself when no backend is configured) */
   var sc = doc.createElement('script'); sc.src = BASE + 'js/ka-cloud.js'; sc.onload = paint; doc.body.appendChild(sc);
   paint();
+
+  /* ---- calm settings ---- */
+  function calm() { try { var c = JSON.parse(localStorage.getItem('ka_calm')) || {}; return { guard: c.guard !== false, limit: c.limit || 60, nudges: c.nudges !== false }; } catch (e) { return { guard: true, limit: 60, nudges: true }; } }
+  /* ---- partner nudges: badge + soft toast, only 💌 events from the partner ---- */
+  var onTogether = /kamaagni-together/.test(location.pathname), nTimer = null, unseen = 0;
+  function toast(t) { var d = doc.createElement('div'); d.setAttribute('role', 'status'); d.style.cssText = 'position:fixed;top:66px;left:50%;transform:translateX(-50%);z-index:2147483000;max-width:90vw;padding:12px 18px;border-radius:16px;background:#12152a;border:1px solid rgba(232,99,122,.6);color:#fff;font:600 14px "DM Sans",system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.5)'; d.textContent = t; doc.body.appendChild(d); setTimeout(function () { d.remove(); }, 5000); }
+  function checkNudges() {
+    var C = window.KA_CLOUD, s = C && C.state(); if (!s || !s.couple || !s.couple.partnerJoined || s.vault !== 'ready' || doc.hidden) return;
+    C.couple.list(0).then(function (evs) {
+      var seen = +localStorage.getItem('ka_cloud_nudge') || 0, tomb = {}, mx = 0, fresh = [];
+      evs.forEach(function (e) { mx = Math.max(mx, e.id); if (e.kind === 'tomb' && e.body) tomb[e.body.x] = 1; });
+      evs.forEach(function (e) { if (e.kind === 'nudge' && !e.mine && e.body && !tomb[e.id] && e.id > seen) fresh.push(e); });
+      if (onTogether) { localStorage.setItem('ka_cloud_nudge', String(mx)); fresh = []; }
+      var prev = unseen; unseen = calm().nudges ? fresh.length : 0;
+      var pd = doc.getElementById('kh-pd'); if (pd) { pd.textContent = unseen ? (unseen > 9 ? '9+' : unseen) : ''; pd.classList.toggle('n', !!unseen); }
+      if (unseen > prev && calm().nudges) toast((fresh[fresh.length - 1].body.e || '💌') + ' ' + (fresh[fresh.length - 1].body.n || 'Your partner') + ': ' + (fresh[fresh.length - 1].body.t || 'thinking of you'));
+    }, function () {});
+  }
+  var st2 = doc.createElement('style'); st2.textContent = '.kh-dot.n{width:auto;min-width:16px;height:16px;border-radius:9px;background:#e8637a;color:#fff;font:700 10px "DM Sans",sans-serif;line-height:12px;text-align:center;padding:0 3px;top:2px;right:2px}'; doc.head.appendChild(st2);
+  nTimer = setInterval(checkNudges, 25000); setTimeout(checkNudges, 4000); window.addEventListener('ka:cloud', function () { setTimeout(checkNudges, 800); });
+
+  /* ---- balance guard: one gentle, skippable pause per day ---- */
+  (function () {
+    var tick = setInterval(function () {
+      if (doc.hidden) return; var c = calm(); if (!c.guard) return;
+      var u; try { u = JSON.parse(localStorage.getItem('ka_cloud_use')) || {}; } catch (e) { u = {}; }
+      var day = new Date().toDateString(); if (u.d !== day) u = { d: day, s: 0, shown: 0 };
+      u.s += 10; localStorage.setItem('ka_cloud_use', JSON.stringify(u));
+      if (u.s >= c.limit * 60 && u.shown < 1) { u.shown = 1; localStorage.setItem('ka_cloud_use', JSON.stringify(u)); showPause(c.limit); }
+    }, 10000);
+    function showPause(min) {
+      if (doc.getElementById('ka-pause')) return;
+      var d = doc.createElement('div'); d.id = 'ka-pause'; d.setAttribute('role', 'dialog'); d.style.cssText = 'position:fixed;inset:0;z-index:2147483400;background:rgba(5,6,15,.92);display:flex;align-items:center;justify-content:center;padding:22px;font-family:"DM Sans",system-ui,sans-serif;color:#dce9ff;text-align:center';
+      d.innerHTML = '<div class="ka-card" style="max-width:400px"><div style="font-size:44px">🕯️</div><h2>Time to be together</h2><p>You have spent about ' + min + ' minutes here today. The best part happens off the screen: put the phone down and enjoy each other.</p><button class="ka-bt" id="kp-ok">Good idea</button><button class="ka-bt g" id="kp-more" style="margin-top:8px">Keep going</button><p style="font-size:12px;margin-top:12px">You can change this reminder in Settings → Healthy use.</p></div>';
+      doc.body.appendChild(d);
+      d.querySelector('#kp-ok').onclick = function () { location.href = u('index.html'); d.remove(); };
+      d.querySelector('#kp-more').onclick = function () { d.remove(); };
+    }
+  })();
+
   window.KA_CHROME = { openAccount: openAcct, MENU: MENU };
 })();

@@ -49,3 +49,9 @@ Navratri/Diwali dates change every year: add next year's entry to `LUNAR_FESTIVA
 - **Settings** (`games/kamaagni-settings.html`): switch topics on/off (anal, oral, BDSM, pain, breath play, humiliation, public, third parties, toys, cum play, extreme, roleplay, photos/sexting, alcohol, edging), presets, your own hide-words, hide individual games. Implemented in `js/ka-filter.js`: filters fetched data, built-in decks, embedded game decks, menus and whole pages. Breath play and extreme topics are off by default. Saved in `ka_filter` and synced with the account.
 - Sessions follow Talk → Touch → Play → Afterglow → Reflect; new Slow Touch (sensate focus) programme; "The science" tab in Experts lists the research used and its limits.
 - The Position Selector is illustration-only and cannot be filtered by topic; hide the whole game instead.
+
+## v10 — healthy return loop
+- Partner **Nudges** (one-tap encrypted sparks) with a header badge and soft banner; mute in Settings → Healthy use.
+- Forgiving **rhythm** (one rest day never breaks it); no lost-streak screens or guilt messages.
+- **Balance guard**: one gentle skippable "time to be together" pause per day (30/60/90 min, can be turned off).
+- Home: "Remember this" (a past great night) and "Make it a ritual" prompts. Science tab lists the habit research used.

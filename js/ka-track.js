@@ -12,9 +12,9 @@
     return { n: i + 1, name: LEVELS[i][1], icon: LEVELS[i][2], xp: xp, from: LEVELS[i][0], to: nxt ? nxt[0] : null, pct: nxt ? Math.round((xp - LEVELS[i][0]) / (nxt[0] - LEVELS[i][0]) * 100) : 100 };
   }
   function streak(a) {
-    var days = a.days || {}, d = new Date(), s = 0;
-    if (!days[today(d)]) d.setDate(d.getDate() - 1);          // grace: streak survives until end of today
-    while (days[today(d)]) { s++; d.setDate(d.getDate() - 1); }
+    /* forgiving rhythm: one rest day in a row never breaks it (research: broken streaks make people quit) */
+    var days = a.days || {}, d = new Date(), s = 0, gap = 0, n = 0;
+    while (n++ < 400) { if (days[today(d)]) { s++; gap = 0; } else if (++gap > 1) break; d.setDate(d.getDate() - 1); }
     return s;
   }
   function award(name, xp) {                                   // call from any page: KA_TRACK.award('session', 25)
