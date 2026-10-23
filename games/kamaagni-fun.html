@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
@@ -22,7 +22,7 @@
   const ACT = [['wheel', '🎡', 'Date wheel'], ['deep', '💭', 'Deep questions'], ['fant', '🧩', 'Fantasy builder'], ['story', '✍️', 'Story builder'], ['quiz', '🎯', 'Know-me quiz'], ['ttl', '🕵️', 'Two truths & a lie']];
   let act = LS.get('ka_fun_tab', 'wheel') || 'wheel';
   const st = {story: [], quiz: {}, ttl: {}, inbox: [], tomb: {}};
-  let wheel = null, dq = null, dqLvl = 'Warm', fant = null, spinning = false, local = {story: [], q: null, ttl: null};
+  let dqN = 0, fbN = 0, qN = 0, wheelSet = null, wheel = null, dq = null, dqLvl = 'Warm', fant = null, spinning = false, local = {story: [], q: null, ttl: null};
 
   const send = (o) => C().couple.send('fun', {...o, n: me()}).catch(x => KX.toast(x.message));
   function apply(e) {
@@ -43,20 +43,20 @@
   function view() {
     if (act === 'wheel') {
       const cats = Object.keys(D.wheel);
-      return `<div class="kx-card kx-play"><div class="kx-muted">Free evening and no idea what to do? Spin.</div>
-        <div class="kx-big ${spinning ? 'tg-roll' : 'tg-pop'}" id="wo" style="font-size:clamp(19px,4.2vw,24px);min-height:84px">${wheel ? esc(wheel.c) + '<br><span style="font-size:.8em">' + esc(wheel.t) + '</span>' : '🎡'}</div>
+      return `<div class="kx-card kx-play" data-nofx="1"><div class="kx-muted">Free evening and no idea what to do? Spin.</div>
+        <div id="wh"></div><div class="kx-big ${spinning ? '' : 'tg-pop'}" id="wo" style="font-size:clamp(19px,4.2vw,24px);min-height:84px;${spinning ? 'opacity:0' : ''}">${wheel && !spinning ? esc(wheel.c) + '<br><span style="font-size:.8em">' + esc(wheel.t) + '</span>' : ''}</div>
         <div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="sp">Spin the wheel</button>${wheel ? shareBtn('Date idea', wheel.t) + '<button class="kx-btn ghost sm" id="sv">♡ Save</button>' : ''}</div></div>`;
     }
     if (act === 'deep') {
       return `<div class="kx-card"><div class="kx-row">${Object.keys(D.deep).map(k => `<button class="kx-btn sm ${dqLvl === k ? '' : 'ghost'}" data-lv="${k}">${k}</button>`).join('')}</div>
-        <div class="kx-card kx-play" style="margin-top:10px"><div class="kx-big ${dq ? 'tg-pop' : ''}" style="font-size:clamp(19px,4.2vw,24px);min-height:84px">${dq ? esc(dq) : '💭<br><span style="font-size:.7em">Take turns answering. No judging, no fixing, just listening.</span>'}</div>
-        <div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="dn">Next question</button>${dq ? shareBtn('Question', dq) : ''}</div></div></div>`;
+        <div class="kx-card kx-play" style="margin-top:10px" ${dq ? 'data-fx-key="dq' + dqN + '"' : 'data-nofx="1"'}><div class="kx-big" style="font-size:clamp(19px,4.2vw,24px);min-height:84px">${dq ? esc(dq) : '💭<br><span style="font-size:.7em">Take turns answering. No judging, no fixing, just listening.</span>'}</div>
+        <div class="kx-row" style="justify-content:center">${window.KA_FX ? KA_FX.deckHTML() : ''}<button class="kx-btn gold" id="dn">Next question</button>${dq ? shareBtn('Question', dq) : ''}</div></div></div>`;
     }
     if (act === 'fant') {
       const parts = fant ? [['Setting', fant.setting], ['Roles', fant.role], ['Twist', fant.twist], ['Sensation', fant.sense]] : [];
-      return `<div class="kx-card kx-play"><div class="kx-muted">Build a scene together. Agree your limits and stop word first, and skip anything that isn't a yes for both.</div>
+      return `<div class="kx-card kx-play" ${fant ? 'data-fx-key="fb' + fbN + '"' : 'data-nofx="1"'}><div class="kx-muted">Build a scene together. Agree your limits and stop word first, and skip anything that isn't a yes for both.</div>
         ${fant ? `<div class="kx-list" style="margin-top:10px">${parts.map(p => `<div class="kx-item tg-pop"><span class="kx-it"><span class="kx-muted">${p[0]}</span><br><b>${esc(p[1])}</b></span><button class="kx-btn ghost sm" data-re="${p[0]}" aria-label="Reroll">🎲</button></div>`).join('')}</div>` : '<div class="kx-big">🧩</div>'}
-        <div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="fb">${fant ? 'Reroll all' : 'Build a scene'}</button>${fant ? shareBtn('Scene', parts.map(p => p[1]).join(' · ')) : ''}</div></div>`;
+        <div class="kx-row" style="justify-content:center;margin-top:10px">${window.KA_FX ? KA_FX.deckHTML() : ''}<button class="kx-btn gold" id="fb">${fant ? 'Reroll all' : 'Build a scene'}</button>${fant ? shareBtn('Scene', parts.map(p => p[1]).join(' · ')) : ''}</div></div>`;
     }
     if (act === 'story') {
       const lines = linked() ? st.story.filter(l => !st.tomb[l.id]) : local.story;
@@ -67,7 +67,7 @@
         <div class="kx-row" style="margin-top:8px">${lines.length > 3 ? '<button class="kx-btn ghost sm" id="sj">📓 Save to journal</button>' : ''}${!linked() && lines.length ? '<button class="kx-btn ghost sm" id="sc">Clear</button>' : ''}</div></div>`;
     }
     if (act === 'quiz') {
-      if (!linked()) { const q = local.q; return `<div class="kx-card kx-play"><div class="kx-muted">Face-to-face: one person secretly picks their answer, the other guesses out loud.</div><div class="kx-big tg-pop" style="font-size:20px;margin-top:8px">${q ? esc(q.q) : '🎯'}</div>${q ? '<div class="kx-list">' + q.o.map(o => `<div class="kx-item"><span class="kx-it">${esc(o)}</span></div>`).join('') + '</div>' : ''}<div class="kx-row" style="justify-content:center;margin-top:8px"><button class="kx-btn gold" id="qn">${q ? 'Next question' : 'Start'}</button></div><p class="kx-note">Link with your partner in Together to play it on two phones, with the reveal.</p></div>`; }
+      if (!linked()) { const q = local.q; return `<div class="kx-card kx-play" ${q ? 'data-fx-key="lq' + qN + '"' : 'data-nofx="1"'}><div class="kx-muted">Face-to-face: one person secretly picks their answer, the other guesses out loud.</div><div class="kx-big tg-pop" style="font-size:20px;margin-top:8px">${q ? esc(q.q) : '🎯'}</div>${q ? '<div class="kx-list">' + q.o.map(o => `<div class="kx-item"><span class="kx-it">${esc(o)}</span></div>`).join('') + '</div>' : ''}<div class="kx-row" style="justify-content:center;margin-top:8px"><button class="kx-btn gold" id="qn">${q ? 'Next question' : 'Start'}</button></div><p class="kx-note">Link with your partner in Together to play it on two phones, with the reveal.</p></div>`; }
       const r = st.quiz[st.quizLast || ''] || null, iAsk = r && r.asker === 'me', guessed = r && r.guess != null;
       let body = '<div class="kx-muted">One of you answers a question about themselves; the other guesses. Then you swap.</div>';
       if (r && r.q) {
@@ -76,7 +76,7 @@
         else body += `<div class="kx-big tg-pop" style="font-size:20px;margin-top:8px">${esc(r.q)}</div><p class="kx-muted">What did ${esc(pname || 'your partner')} pick?</p><div class="kx-list">${r.o.map((o, i) => `<button class="kx-item" data-qg="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it">${esc(o)}</span></button>`).join('')}</div>`;
       }
       const opts = (!r || guessed) ? `<div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="qa">${r ? 'Ask a new question' : 'Ask a question'}</button></div>` : '';
-      return `<div class="kx-card kx-play">${body}${opts}</div>` + (st.pickQ ? `<div class="kx-card"><b>Pick your honest answer</b><div class="kx-big" style="font-size:18px;margin:6px 0">${esc(st.pickQ.q)}</div><div class="kx-list">${st.pickQ.o.map((o, i) => `<button class="kx-item" data-qs="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it">${esc(o)}</span></button>`).join('')}</div></div>` : '');
+      return `<div class="kx-card kx-play" ${r && r.q ? 'data-fx-key="q' + r.r + (guessed ? 'g' : '') + '"' : 'data-nofx="1"'}>${body}${opts}</div>` + (st.pickQ ? `<div class="kx-card"><b>Pick your honest answer</b><div class="kx-big" style="font-size:18px;margin:6px 0">${esc(st.pickQ.q)}</div><div class="kx-list">${st.pickQ.o.map((o, i) => `<button class="kx-item" data-qs="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it">${esc(o)}</span></button>`).join('')}</div></div>` : '');
     }
     if (act === 'ttl') {
       if (!linked()) return `<div class="kx-card"><b>Two truths and a lie</b><p class="kx-muted">Each person says three statements about themselves, two true and one false. The other guesses the lie. Winner picks the next activity. Spice it up with intimate truths if you like.</p><p class="kx-note">Link with your partner in Together to play it on two phones.</p></div>`;
@@ -88,7 +88,7 @@
         else body += `<p class="kx-muted" style="margin-top:8px">Which one is the lie?</p><div class="kx-list">${r.s.map((s, i) => `<button class="kx-item" data-tg="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it">${esc(s)}</span></button>`).join('')}</div>`;
       }
       const form = (!r || done) ? `<div style="margin-top:10px"><input class="kx-input" id="t1" maxlength="120" placeholder="Statement 1"><input class="kx-input" id="t2" maxlength="120" placeholder="Statement 2" style="margin-top:6px"><input class="kx-input" id="t3" maxlength="120" placeholder="Statement 3" style="margin-top:6px"><div class="kx-muted" style="margin:6px 0 4px">Which one is the lie?</div><div class="kx-row">${[1, 2, 3].map(n => `<button class="kx-btn sm ghost" data-lie="${n - 1}" id="lie${n}">${n}</button>`).join('')}</div><button class="kx-btn gold" id="ts" style="margin-top:8px">Send to ${esc(pname || 'my partner')}</button></div>` : '';
-      return `<div class="kx-card kx-play">${body}${form}</div>`;
+      return `<div class="kx-card kx-play" ${r && r.s ? 'data-fx-key="t' + r.r + (done ? 'g' : '') + '"' : 'data-nofx="1"'}>${body}${form}</div>`;
     }
   }
   let lieSel = -1;
@@ -96,19 +96,22 @@
     const q = (s, fn) => app.querySelectorAll(s).forEach(fn), g = id => document.getElementById(id);
     q('[data-act]', b => b.onclick = () => { act = b.dataset.act; LS.set('ka_fun_tab', act); draw(); });
     q('[data-share]', b => b.onclick = () => { const [ti, t] = b.dataset.share.split('|'); send({g: 'share', ti, t, say: 'sent you: ' + t.slice(0, 60), ic: '💞'}); KX.toast('Sent'); window.KA_TRACK && KA_TRACK.log('together', 'Shared an idea', t.slice(0, 60)); });
-    if (g('sp')) g('sp').onclick = () => { const cats = Object.keys(D.wheel); const all = cats.flatMap(c => f(D.wheel[c]).map(t => ({c, t}))); if (!all.length) return KX.toast('Nothing to show with your settings'); spinning = true; let n = 0; const iv = setInterval(() => { wheel = pick(all); draw(); if (++n > 9) { clearInterval(iv); spinning = false; draw(); window.KA_TRACK && KA_TRACK.log('play', 'Date wheel', wheel.t.slice(0, 70)); } }, 90); };
+    const ICON = {'At home': '🏠', 'Out': '🌳', 'Adventurous': '🎲', 'Free': '🌿'};
+    const wh = g('wh');
+    if (wh && window.KA_FX) { if (wheelSet) KA_FX.wheel(wh, wheelSet.map(x => ICON[x.c] || '✨'), wheel && !spinning ? wheelSet.indexOf(wheel) : null, {instant: true}); else KA_FX.wheel(wh, Array.from({length: 12}, (_, i) => ['🏠', '🌳', '🎲', '🌿'][i % 4]), null); }
+    if (g('sp')) g('sp').onclick = () => { if (spinning) return; const cats = Object.keys(D.wheel); const all = cats.flatMap(c => f(D.wheel[c]).map(t => ({c, t}))); if (!all.length) return KX.toast('Nothing to show with your settings'); wheelSet = shuffle(all).slice(0, 12); const idx = Math.floor(Math.random() * wheelSet.length); spinning = true; wheel = wheelSet[idx]; const o = g('wo'); if (o) o.style.opacity = 0; KA_FX.wheel(wh, wheelSet.map(x => ICON[x.c] || '✨'), idx).then(() => { spinning = false; window.KA_TRACK && KA_TRACK.log('play', 'Date wheel', wheel.t.slice(0, 70)); draw(); }); };
     if (g('sv')) g('sv').onclick = () => { KX.fav('cards', wheel.t); KX.toast('Saved'); };
     q('[data-lv]', b => b.onclick = () => { dqLvl = b.dataset.lv; dq = null; draw(); });
-    if (g('dn')) g('dn').onclick = () => { const l = f(D.deep[dqLvl]); dq = l.length ? pick(l) : 'Nothing to show with your settings'; draw(); };
+    if (g('dn')) g('dn').onclick = () => { const l = f(D.deep[dqLvl]); dq = l.length ? pick(l) : 'Nothing to show with your settings'; dqN++; window.KA_FX && KA_FX.pulseDeck(); draw(); };
     const build = (key) => { const L = f(D.fantasy[key]); return L.length ? pick(L) : '—'; };
-    if (g('fb')) g('fb').onclick = () => { fant = {setting: build('setting'), role: build('role'), twist: build('twist'), sense: build('sense')}; draw(); window.KA_TRACK && KA_TRACK.log('play', 'Fantasy builder', ''); };
+    if (g('fb')) g('fb').onclick = () => { fant = {setting: build('setting'), role: build('role'), twist: build('twist'), sense: build('sense')}; fbN++; draw(); window.KA_TRACK && KA_TRACK.log('play', 'Fantasy builder', ''); };
     q('[data-re]', b => b.onclick = () => { const k = {Setting: 'setting', Roles: 'role', Twist: 'twist', Sensation: 'sense'}[b.dataset.re]; fant[k] = build(k); draw(); });
     const addLine = () => { const i = g('si'), t = i.value.trim(); if (!t) return; i.value = ''; if (linked()) send({g: 'story', t, say: 'added a line to your story', ic: '✍️'}); else { local.story.push({who: 'me', t}); draw(); } };
     if (g('ss')) { g('ss').onclick = addLine; g('si').onkeydown = e => { if (e.key === 'Enter') addLine(); }; }
     q('[data-sdel]', b => b.onclick = async () => { const id = +b.dataset.sdel; await C().couple.send('tomb', {x: id, n: me()}); st.tomb[id] = 1; C().couple.del(id).catch(() => {}); draw(); });
     if (g('sj')) g('sj').onclick = () => { const lines = linked() ? st.story.filter(l => !st.tomb[l.id]) : local.story; const j = LS.get('ka_journal', []); j.push({id: Date.now(), d: window.KA_TRACK ? KA_TRACK.today() : new Date().toISOString().slice(0, 10), r: 5, g: ['Story'], n: lines.map(l => l.t).join(' ').slice(0, 600)}); LS.set('ka_journal', j); KX.toast('Saved to journal'); };
     if (g('sc')) g('sc').onclick = () => { local.story = []; draw(); };
-    if (g('qn')) g('qn').onclick = () => { local.q = pick(f(D.quiz)); draw(); };
+    if (g('qn')) g('qn').onclick = () => { local.q = pick(f(D.quiz)); qN++; draw(); };
     if (g('qa')) g('qa').onclick = () => { st.pickQ = pick(f(D.quiz)); draw(); };
     q('[data-qs]', b => b.onclick = () => { const p = st.pickQ; st.pickQ = null; send({g: 'quiz', k: 'q', r: Date.now(), q: p.q, o: p.o, ans: +b.dataset.qs, say: 'asked you a "know me" question', ic: '🎯'}); });
     q('[data-qg]', b => b.onclick = () => { const r = st.quiz[st.quizLast]; send({g: 'quiz', k: 'g', r: r.r, gi: +b.dataset.qg, say: 'guessed your answer. See the result!', ic: '🎯'}); window.KA_TRACK && KA_TRACK.log('play', 'Know-me quiz', ''); });
@@ -118,6 +121,7 @@
     if (g('sl')) g('sl').scrollTop = g('sl').scrollHeight;
   }
   function draw(soft) {
+    if (spinning) return;
     if (soft) { const a = document.activeElement; if (a && a.tagName === 'INPUT' && a.value) return; }
     const inbox = st.inbox.filter(i => !st.tomb[i.id] && i.who === 'them').slice(-3).reverse();
     app.innerHTML = top('Free-time Fun', 'Things to do together when you have an hour and no plan.') +

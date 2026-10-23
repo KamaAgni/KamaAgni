@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
 <title>KamaAgni — Dice Sets</title>
 <link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
 </head><body>
+<style>.tg-pop{animation:tgpop .5s ease both}@keyframes tgpop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}</style>
 <main class="kx app" id="app"></main>
 <script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
 <script>
@@ -23,7 +24,7 @@
     if (S[2] > h) { cur = 'sex'; }
     app.innerHTML = top('Dice Sets', 'Roll two dice. Do both faces together, or take turns.') + '<div id="hb"></div>' +
       `<div class="kx-tabs">${SETS.filter(s => s[2] <= h).map(s => `<button data-s="${s[0]}" class="${s[0] === cur ? 'on' : ''}">${s[1]}</button>`).join('')}</div>
-      <div class="kx-card kx-play" id="res" style="min-height:260px"><div class="kx-turn">${esc(S[3])}</div>
+      <div class="kx-card kx-play" data-nofx="1" id="res" style="min-height:260px"><div class="kx-turn">${esc(S[3])}</div>
         <div class="kx-row" style="justify-content:center;gap:14px" id="fc"><div class="kx-big" style="font-size:26px">Tap roll</div></div></div>
       <div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn" id="rl">🎲 Roll</button><button class="kx-btn ghost" id="sv">♡ Save</button></div>
       <p class="kx-note">Unlock the intense sets with the heat bar. Pass any roll you do not both want.</p>`;
@@ -35,13 +36,14 @@
   function roll() {
     if (rolling) return; rolling = true;
     const pool = D[cur].filter(f => !/^\+ ?ROLL AGAIN$/.test(f));
-    const fc = document.getElementById('fc'); let n = 0;
-    const tick = setInterval(() => {
-      faces = [pick(pool), pick(pool)];
-      fc.innerHTML = faces.map(f => `<div class="kx-opt" style="width:auto;min-width:130px;padding:18px 14px;font-size:20px">${esc(f)}</div>`).join('<span class="kx-or">+</span>');
-      if (navigator.vibrate) { try { navigator.vibrate(6); } catch (e) {} }
-      if (++n > 9) { clearInterval(tick); rolling = false; }
-    }, 70);
+    if (!pool.length) { rolling = false; return KX.toast('Nothing to roll with your settings'); }
+    const fc = document.getElementById('fc'); faces = [pick(pool), pick(pool)];
+    const show = () => { fc.innerHTML = faces.map(f => `<div class="kx-opt tg-pop" style="width:auto;min-width:130px;padding:18px 14px;font-size:20px">${esc(f)}</div>`).join('<span class="kx-or">+</span>'); rolling = false; window.KA_TRACK && KA_TRACK.log('play', 'Rolled dice', faces.join(' + ').slice(0, 80)); };
+    if (!window.KA_FX) return show();
+    fc.style.flexDirection = 'column';
+    fc.innerHTML = '<div id="dh3"></div>';
+    if (navigator.vibrate) { try { navigator.vibrate([20, 30, 20, 30, 40]); } catch (e) {} }
+    KA_FX.dice(document.getElementById('dh3'), [KA_FX.rnd(), KA_FX.rnd()]).then(() => { fc.style.flexDirection = ''; show(); });
   }
   view();
 })();

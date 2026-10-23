@@ -63,3 +63,8 @@ Navratri/Diwali dates change every year: add next year's entry to `LUNAR_FESTIVA
 
 ## v11.1 — updates show immediately
 Service worker is now network-first (bypasses the HTTP cache, 5 s timeout, offline fallback) and the page reloads once when a new version installs. The footer shows the app version (`v11`) so you can confirm which version you are running. GitHub Pages itself can take 1-10 minutes to publish a commit.
+
+## v12 — realistic animations + Together game fix
+- `js/ka-fx.js`: card pile + lift/flip deal (automatic for every `.kx-play` card, with a deck graphic and shuffle sound), 3D dice with pips that tumble and bounce (Together dice, Dice Sets), spinning prize wheel (Date wheel). Respects reduced-motion and the sound setting.
+- Together → Play: each game keeps its own prompt; switching games no longer shows the previous game's card, and your partner's screen switches to the game you draw.
+- Note: `kamaagni-kinky-dice.html` was edited by hand; do not regenerate it with `build/pages5.py`.
