@@ -125,18 +125,6 @@
     }
     .home-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
 
-    /* ─── User Status ───────────────────────────────────────── */
-    #userStatus {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--muted);
-    }
-    #userStatus .username {
-      font-weight: 700;
-      color: var(--text);
-    }
 
     /* ─── Hero Header ───────────────────────────────────────── */
     .hero {
@@ -733,59 +721,6 @@
     .confirm-card .confirm-actions { display: flex; gap: 10px; }
     .confirm-card .confirm-actions .btn { flex: 1; justify-content: center; }
 
-    /* ─── Auth Modal ────────────────────────────────────────── */
-    .auth-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      padding: 32px 28px;
-      max-width: 400px;
-      width: 100%;
-      position: relative;
-      animation: modalIn 0.3s ease;
-      text-align: center;
-    }
-
-    .auth-card h3 {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 28px;
-      color: var(--accent);
-      margin-bottom: 6px;
-    }
-    .auth-card .auth-subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
-
-    .auth-field {
-      width: 100%;
-      padding: 11px 14px;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 15px;
-      font-family: 'DM Sans', sans-serif;
-      margin-bottom: 12px;
-      outline: none;
-      transition: border-color var(--transition);
-    }
-    .auth-field:focus { border-color: rgba(232,99,122,0.5); }
-    .auth-field::placeholder { color: var(--muted); }
-
-    .auth-toggle-link {
-      display: inline-block;
-      margin-top: 16px;
-      font-size: 13px;
-      color: var(--accent);
-      text-decoration: none;
-      cursor: pointer;
-    }
-    .auth-toggle-link:hover { text-decoration: underline; }
-
-    .auth-note {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 14px;
-      opacity: 0.7;
-    }
 
     /* ─── Keyboard hint ─────────────────────────────────────── */
     .kbd-hint {
@@ -828,14 +763,9 @@
   </style>
 
   <style id="kamaagni-responsive">
-    #ka-back{position:fixed;top:14px;left:16px;z-index:999;font-size:13px;color:rgba(255,255,255,0.45);text-decoration:none;letter-spacing:.05em;padding:6px 12px;border-radius:999px;border:1px solid rgba(255,255,255,0.1);background:rgba(5,6,15,0.6);backdrop-filter:blur(8px);transition:color .2s,border-color .2s;white-space:nowrap}
-    #ka-back:hover{color:#f4a0ae;border-color:rgba(244,160,174,0.4)}
-    @media(max-width:768px){#ka-back{font-size:12px;padding:5px 10px;top:10px;left:10px}}
-    @media(max-width:480px){#ka-back{font-size:11px;padding:4px 9px}}
-  </style>
+    @media(max-width:768px){    @media(max-width:480px){  </style>
 </head>
 <body>
-<!-- <a id="ka-back" href="../index.html">← Home</a> -->
 
 
 <!-- Toast Container -->
@@ -843,11 +773,6 @@
 
 <div class="app">
 
-  <!-- Top Bar -->
-  <div class="topbar">
-    <a href="../index.html" class="home-btn">← Home</a>
-    <div id="userStatus"></div>
-  </div>
 
   <!-- ══════════════ DICE SECTION ══════════════ -->
   <div id="diceSection" class="section-panel active">
@@ -1048,21 +973,6 @@
   </div>
 </div>
 
-<!-- ══════════════ AUTH MODAL ══════════════ -->
-<div id="userAuthModal" class="modal-overlay" role="dialog" aria-modal="true">
-  <div class="auth-card">
-    <button class="modal-close-btn" id="authModalClose">&times;</button>
-    <h3 id="authTitle">Sign Up</h3>
-    <p class="auth-subtitle">Keep your journey private and synced across visits.</p>
-    <form id="authForm" novalidate>
-      <input type="email" id="authEmail" class="auth-field" placeholder="Email address" autocomplete="email" required>
-      <input type="password" id="authPassword" class="auth-field" placeholder="Password" autocomplete="current-password" required>
-      <button type="submit" id="authSubmitBtn" class="btn btn-green" style="width:100%; justify-content:center;">Sign Up</button>
-    </form>
-    <a class="auth-toggle-link" id="toggleAuthMode">Switch to Login</a>
-    <p class="auth-note">⚠️ Demo mode only. Data is stored locally in your browser.</p>
-  </div>
-</div>
 
 <script>
 /* ══════════════════════════════════════════════════════
@@ -1134,29 +1044,23 @@ function imagePathFor(posId) {
 /* ══════════════════════════════════════════════════════
    AUTH
 ══════════════════════════════════════════════════════ */
-const LOGGED_IN_KEY = 'current_user_id';
-const ALL_USERS_KEY = 'registered_users';
 const BASE_HISTORY_KEY = 'position_roll_history_v3';
+/* The old browser-only demo login (plaintext passwords) is gone. Accounts now live in the shared KamaAgni header.
+   One-time clean-up: keep any history a demo user had, then delete the stored demo users. */
+(function legacyCleanup() {
+  try {
+    const uid = localStorage.getItem('current_user_id');
+    if (uid && !localStorage.getItem(BASE_HISTORY_KEY)) {
+      const old = localStorage.getItem(BASE_HISTORY_KEY + '_' + uid);
+      if (old) localStorage.setItem(BASE_HISTORY_KEY, old);
+    }
+    ['current_user_id', 'registered_users'].forEach(k => localStorage.removeItem(k));
+  } catch (e) {}
+})();
 
-function getCurrentUser() {
-  const uid = localStorage.getItem(LOGGED_IN_KEY);
-  if (!uid) return null;
-  const users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
-  return users[uid] || null;
-}
+function getCurrentUser() { return null; }
 
-function getHistoryKey() {
-  const u = getCurrentUser();
-  return u ? `${BASE_HISTORY_KEY}_${u.id}` : BASE_HISTORY_KEY;
-}
-
-function migrateGuestHistory(uid) {
-  const guest = localStorage.getItem(BASE_HISTORY_KEY);
-  if (!guest) return;
-  const userKey = `${BASE_HISTORY_KEY}_${uid}`;
-  if (!localStorage.getItem(userKey)) localStorage.setItem(userKey, guest);
-  localStorage.removeItem(BASE_HISTORY_KEY);
-}
+function getHistoryKey() { return BASE_HISTORY_KEY; }
 
 /* ══════════════════════════════════════════════════════
    HISTORY STATE
@@ -1220,81 +1124,6 @@ function updateProgress() {
   document.getElementById('progressPct').textContent = `${pct}%`;
   document.getElementById('progressFill').style.width = `${pct}%`;
 }
-
-/* ══════════════════════════════════════════════════════
-   USER UI
-══════════════════════════════════════════════════════ */
-function renderUserUI() {
-  const u = getCurrentUser();
-  const el = document.getElementById('userStatus');
-  if (u) {
-    el.innerHTML = `<span class="username">${u.email.split('@')[0]}</span><button id="logoutBtn" class="btn btn-ghost btn-sm">Logout</button>`;
-    document.getElementById('logoutBtn').addEventListener('click', () => {
-      localStorage.removeItem(LOGGED_IN_KEY);
-      showToast('Logged out successfully.', 'info');
-      setTimeout(() => location.reload(), 800);
-    });
-  } else {
-    el.innerHTML = `<button id="authLinkBtn" class="btn btn-ghost btn-sm">Sign Up / Login</button>`;
-    document.getElementById('authLinkBtn').addEventListener('click', openAuthModal);
-  }
-}
-
-/* ══════════════════════════════════════════════════════
-   AUTH MODAL
-══════════════════════════════════════════════════════ */
-const userAuthModal = document.getElementById('userAuthModal');
-const authTitle = document.getElementById('authTitle');
-const authSubmitBtn = document.getElementById('authSubmitBtn');
-const toggleAuthMode = document.getElementById('toggleAuthMode');
-const authEmail = document.getElementById('authEmail');
-const authPassword = document.getElementById('authPassword');
-let isLoginMode = false;
-
-function openAuthModal() { userAuthModal.classList.add('open'); isLoginMode = false; syncAuthMode(); }
-function closeAuthModal() { userAuthModal.classList.remove('open'); authEmail.value = ''; authPassword.value = ''; }
-
-function syncAuthMode() {
-  authTitle.textContent = isLoginMode ? 'Login' : 'Sign Up';
-  authSubmitBtn.textContent = isLoginMode ? 'Login' : 'Sign Up';
-  toggleAuthMode.textContent = isLoginMode ? 'Switch to Sign Up' : 'Switch to Login';
-}
-
-document.getElementById('authForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const email = authEmail.value.trim();
-  const password = authPassword.value;
-  let users = JSON.parse(localStorage.getItem(ALL_USERS_KEY) || '{}');
-  const uid = btoa(email);
-
-  if (isLoginMode) {
-    if (users[uid] && users[uid].password === password) {
-      localStorage.setItem(LOGGED_IN_KEY, uid);
-      migrateGuestHistory(uid);
-      closeAuthModal();
-      renderUserUI();
-      showToast(`Welcome back, ${email.split('@')[0]}!`, 'success');
-    } else {
-      showToast('Login failed. Please check your email and password.', 'info');
-    }
-  } else {
-    if (users[uid]) {
-      showToast('Email already registered. Please login.', 'info');
-    } else {
-      users[uid] = { email, password, id: uid };
-      localStorage.setItem(ALL_USERS_KEY, JSON.stringify(users));
-      localStorage.setItem(LOGGED_IN_KEY, uid);
-      migrateGuestHistory(uid);
-      closeAuthModal();
-      renderUserUI();
-      showToast('Account created! Your journey is now saved.', 'success');
-    }
-  }
-});
-
-document.getElementById('authModalClose').addEventListener('click', closeAuthModal);
-toggleAuthMode.addEventListener('click', (e) => { e.preventDefault(); isLoginMode = !isLoginMode; syncAuthMode(); });
-userAuthModal.addEventListener('click', (e) => { if (e.target === userAuthModal) closeAuthModal(); });
 
 /* ══════════════════════════════════════════════════════
    DICE
@@ -1699,7 +1528,6 @@ document.addEventListener('keydown', e => {
     else if (e.key === 'Escape') closeModal();
   }
   if (confirmModal.classList.contains('open') && e.key === 'Escape') confirmModal.classList.remove('open');
-  if (userAuthModal.classList.contains('open') && e.key === 'Escape') closeAuthModal();
 });
 
 /* ══════════════════════════════════════════════════════
@@ -1756,7 +1584,6 @@ if (savedFolderPref !== null) applyFolderPref(savedFolderPref === 'true');
    INIT
 ══════════════════════════════════════════════════════ */
 applyFaces();
-renderUserUI();
 updateProgress();
 switchView('dice');
 </script>

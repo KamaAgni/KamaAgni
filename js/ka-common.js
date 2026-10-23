@@ -30,8 +30,7 @@
     });
   }
   function top(title, sub) {
-    return `<div class="kx-top"><a class="kx-back" href="../index.html">← Home</a></div>
-      <h1 class="kx-title"><span>${esc(title)}</span></h1><p class="kx-sub">${esc(sub)}</p>`;
+    return `<h1 class="kx-title"><span>${esc(title)}</span></h1><p class="kx-sub">${esc(sub)}</p>`;
   }
   window.KX = { LS, esc, pick, shuffle, names, heat, heatBar, top, toast, fav, HEAT };
 })();

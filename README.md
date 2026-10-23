@@ -72,3 +72,8 @@ Service worker is now network-first (bypasses the HTTP cache, 5 s timeout, offli
 ## v13
 - Position Selector and Oral Position Selector: "Load More" replaced by automatic infinite scroll (loads ~900px before the bottom).
 - Free-time Fun: no more repeated flashing. The page only redraws when content actually changes, entrance animations play once per new item, and scroll position is kept.
+
+## v14 (deploy-ready clean-up)
+- Removed the old browser-only "Sign Up / Login" demo (it stored plaintext passwords) from both Position Selector pages. Accounts now live only in the shared header. Any history a demo user had is kept; the demo users are deleted on first load.
+- Removed every duplicate "← Home" / back-to-home button (old game pages, About, shared page titles). Home is the logo/menu in the shared header; in-game "← Back" buttons that move between steps stay.
+- Verified: all pages x 3 screen sizes have one header + footer, no JS errors, no 404s, no horizontal overflow.
