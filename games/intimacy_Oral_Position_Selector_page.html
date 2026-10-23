@@ -996,6 +996,8 @@
 
     <div class="data-grid" id="galleryGrid"></div>
     <button id="galleryLoadMore" class="btn btn-ghost" style="display:none;">Load More</button>
+    <div id="gallerySentinel" aria-hidden="true" style="height:1px;margin-top:40px"></div>
+    <div id="galleryEnd" class="empty-state" style="display:none;padding:18px 0;font-size:13px;opacity:.7">That's every position ✨</div>
   </div>
 
 </div><!-- /.app -->
@@ -1504,10 +1506,25 @@ function renderGallery(reset = true) {
   });
 
   galleryPage++;
-  loadMoreBtn.style.display = galleryPage * PAGE_SIZE < positionData.length ? 'block' : 'none';
+  const more = galleryPage * PAGE_SIZE < positionData.length;
+  loadMoreBtn.style.display = (more && !('IntersectionObserver' in window)) ? 'block' : 'none';   // button only as a fallback
+  const endEl = document.getElementById('galleryEnd'); if (endEl) endEl.style.display = more ? 'none' : 'block';
+  if (more && window.__galleryIO) requestAnimationFrame(() => { __galleryIO.io.unobserve(__galleryIO.sentinel); __galleryIO.io.observe(__galleryIO.sentinel); });
 }
 
-document.getElementById('galleryLoadMore').addEventListener('click', () => renderGallery(false));
+/* Infinite scroll: keep loading ~900px before the bottom so there is never a wait or a button */
+(function () {
+  const btn = document.getElementById('galleryLoadMore'), sentinel = document.getElementById('gallerySentinel');
+  btn.addEventListener('click', () => renderGallery(false));            // fallback for very old browsers
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(entries => {
+    if (entries.some(e => e.isIntersecting) && galleryPage * PAGE_SIZE < positionData.length && document.getElementById('galleryGrid').children.length) {
+      renderGallery(false);
+    }
+  }, { rootMargin: '900px 0px' });
+  io.observe(sentinel);
+  window.__galleryIO = { io, sentinel };
+})();
 
 /* ══════════════════════════════════════════════════════
    VIEW SWITCHING

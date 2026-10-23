@@ -68,3 +68,7 @@ Service worker is now network-first (bypasses the HTTP cache, 5 s timeout, offli
 - `js/ka-fx.js`: card pile + lift/flip deal (automatic for every `.kx-play` card, with a deck graphic and shuffle sound), 3D dice with pips that tumble and bounce (Together dice, Dice Sets), spinning prize wheel (Date wheel). Respects reduced-motion and the sound setting.
 - Together → Play: each game keeps its own prompt; switching games no longer shows the previous game's card, and your partner's screen switches to the game you draw.
 - Note: `kamaagni-kinky-dice.html` was edited by hand; do not regenerate it with `build/pages5.py`.
+
+## v13
+- Position Selector and Oral Position Selector: "Load More" replaced by automatic infinite scroll (loads ~900px before the bottom).
+- Free-time Fun: no more repeated flashing. The page only redraws when content actually changes, entrance animations play once per new item, and scroll position is kept.

@@ -120,14 +120,24 @@
     q('[data-tg]', b => b.onclick = () => { const r = st.ttl[st.ttlLast]; send({g: 'ttl', k: 'g', r: r.r, gi: +b.dataset.tg, say: 'guessed your lie. See the result!', ic: '🕵️'}); window.KA_TRACK && KA_TRACK.log('play', 'Two truths and a lie', ''); });
     if (g('sl')) g('sl').scrollTop = g('sl').scrollHeight;
   }
+  let lastView = '', lastHtml = '';
   function draw(soft) {
     if (spinning) return;
     if (soft) { const a = document.activeElement; if (a && a.tagName === 'INPUT' && a.value) return; }
     const inbox = st.inbox.filter(i => !st.tomb[i.id] && i.who === 'them').slice(-3).reverse();
-    app.innerHTML = top('Free-time Fun', 'Things to do together when you have an hour and no plan.') +
-      `<div class="kx-row" style="margin-bottom:8px">${ACT.map(a => `<button class="kx-btn sm ${act === a[0] ? '' : 'ghost'}" data-act="${a[0]}">${a[1]} ${a[2]}</button>`).join('')}</div>` + view() +
+    const strip = h => h.replace(/\btg-pop\b/g, '').replace(/\btg-roll\b/g, '');
+    const v = view(), vSig = act + '|' + strip(v);
+    const same = vSig === lastView;                 // same game content -> never replay the entrance animation
+    lastView = vSig;
+    const html = top('Free-time Fun', 'Things to do together when you have an hour and no plan.') +
+      `<div class="kx-row" style="margin-bottom:8px">${ACT.map(a => `<button class="kx-btn sm ${act === a[0] ? '' : 'ghost'}" data-act="${a[0]}">${a[1]} ${a[2]}</button>`).join('')}</div>` + (same ? strip(v) : v) +
       (inbox.length ? `<div class="kx-card"><b>💞 From ${esc(pname || 'your partner')}</b><div class="kx-list" style="margin-top:8px">${inbox.map(i => `<div class="kx-item"><span class="kx-it"><span class="kx-chip">${esc(i.ti)}</span> ${esc(i.t)}</span></div>`).join('')}</div></div>` : '') +
       `<p class="kx-note">${linked() ? '🟢 Linked: play live with ' + esc(pname || 'your partner') : 'Not linked: everything works face to face. Link in Together to play on two phones.'}</p>`;
+    if (strip(html) === lastHtml) return;           // nothing changed -> do not touch the DOM (no flash)
+    lastHtml = strip(html);
+    const y = window.scrollY;
+    app.innerHTML = html;
+    if (same) window.scrollTo(0, y);
     bind();
   }
   function start() { if (started || !linked()) return; started = true; liveOn = false; setTimeout(() => { liveOn = true; }, 3500); C().couple.live(apply, () => {}, me()); }
