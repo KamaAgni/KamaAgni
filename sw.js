@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v14';
+const CACHE = 'kamaagni-v15';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -74,17 +74,27 @@ self.addEventListener('activate', event => event.waitUntil(
     .then(() => self.clients.claim())
 ));
 
+/* Network-first: always try the live site (bypassing the browser's HTTP cache) so updates show on the next load;
+   fall back to the saved copy when offline or very slow. */
 self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
+  const req = event.request;
+  if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  if (url.origin !== location.origin) return;                       // let the browser handle third-party requests
   event.respondWith((async () => {
-    const cached = await caches.match(event.request);
-    const network = fetch(event.request).then(response => {
-      if (response && response.ok && response.type === 'basic') {
-        caches.open(CACHE).then(cache => cache.put(event.request, response.clone()));
-      }
-      return response;
-    }).catch(() => null);
-    if (cached) { event.waitUntil(network); return cached; }
-    return (await network) || (event.request.mode === 'navigate' ? caches.match(p('index.html')) : Response.error());
+    const cache = await caches.open(CACHE);
+    try {
+      const fresh = await Promise.race([
+        fetch(req, { cache: 'no-cache' }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('slow')), 5000))
+      ]);
+      if (fresh && fresh.ok && fresh.type === 'basic') cache.put(req, fresh.clone());
+      return fresh;
+    } catch (e) {
+      const hit = await cache.match(req, { ignoreSearch: req.mode === 'navigate' });
+      if (hit) return hit;
+      if (req.mode === 'navigate') { const home = await cache.match(p('index.html')); if (home) return home; }
+      return Response.error();
+    }
   })());
 });

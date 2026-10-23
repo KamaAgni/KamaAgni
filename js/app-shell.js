@@ -75,6 +75,19 @@
     // root is always "one directory up" from this script's own URL.
     const scriptURL = doc.currentScript && doc.currentScript.src;
     const siteRoot = scriptURL ? new URL('../', scriptURL).href : './';
-    addEventListener('load', () => navigator.serviceWorker.register(siteRoot + 'sw.js', {scope: siteRoot}).catch(console.warn), {once:true});
+    addEventListener('load', () => {
+      navigator.serviceWorker.register(siteRoot + 'sw.js', {scope: siteRoot, updateViaCache: 'none'}).then(reg => {
+        const check = () => { try { reg.update(); } catch (e) {} };
+        check(); doc.addEventListener('visibilitychange', () => { if (!doc.hidden) check(); });
+      }).catch(console.warn);
+      // when a newer version takes over, reload once so the new files show immediately
+      let had = !!navigator.serviceWorker.controller, done = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!had) { had = true; return; }
+        if (done) return; done = true;
+        try { if (sessionStorage.getItem('ka_sw_reload') === String(Math.floor(Date.now() / 30000))) return; sessionStorage.setItem('ka_sw_reload', String(Math.floor(Date.now() / 30000))); } catch (e) {}
+        location.reload();
+      });
+    }, {once:true});
   }
 })();

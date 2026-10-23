@@ -60,3 +60,6 @@ Navratri/Diwali dates change every year: add next year's entry to `LUNAR_FESTIVA
 - **Notifications** (`KA_CHROME.notify`): animated banner (bounce-in, glow, floating hearts for nudges/check-ins, red pulse for STOP), header 💞 wobble, soft chime + vibration (toggle in Settings → Healthy use). Fires for messages, nudges, shared draws, check-ins, STOP/slow-down signals and Fun-hub moves, on any page.
 - **Together → Play**: shared Card, Truth or Dare, Would You Prefer (reveal when both chose), Dice, Roleplay parts, with Done/Pass and history logging. The original single-page Ludo/Dice-board/Cards/Poker/Position games keep their own layouts and are not mirrored live.
 - **Free-time Fun** (`games/kamaagni-fun.html`, `data/fun.json`): Date wheel, Deep questions, Fantasy builder, Story builder, Know-me quiz, Two truths & a lie. Solo/face-to-face when not linked; live and synced when linked. All content respects Settings filters.
+
+## v11.1 — updates show immediately
+Service worker is now network-first (bypasses the HTTP cache, 5 s timeout, offline fallback) and the page reloads once when a new version installs. The footer shows the app version (`v11`) so you can confirm which version you are running. GitHub Pages itself can take 1-10 minutes to publish a commit.
