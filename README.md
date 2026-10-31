@@ -77,3 +77,60 @@ Service worker is now network-first (bypasses the HTTP cache, 5 s timeout, offli
 - Removed the old browser-only "Sign Up / Login" demo (it stored plaintext passwords) from both Position Selector pages. Accounts now live only in the shared header. Any history a demo user had is kept; the demo users are deleted on first load.
 - Removed every duplicate "← Home" / back-to-home button (old game pages, About, shared page titles). Home is the logo/menu in the shared header; in-game "← Back" buttons that move between steps stay.
 - Verified: all pages x 3 screen sizes have one header + footer, no JS errors, no 404s, no horizontal overflow.
+
+## v15
+- New game: **Seduction Showdown** (games/kamaagni-showdown.html), a two-player card battle on one phone: draft cards, build contender line-ups with add-ons and twists, winner of each round claims reward challenges, partner can bail twice, final reward for the overall winner. All card text is original; heat level and topic filters apply to rewards.
+
+## v16
+- Seduction Showdown: choose **One phone** (hand-over screens) or **Two phones** (live over your linked Together connection; each phone shows only its own hand, the other shows "waiting"). Added a full **How to play** guide (setup screen and 📖 Guide during a game) and an ✕ End game button that ends it for both.
+
+## v17
+- Connect Foreplay: **One phone** or **Two phones** (live over Together, only the player whose turn it is can drop a disc, challenges are identical on both screens), How to Play now opens as an overlay at any time, End game for both, challenge text follows your heat level and topic filters.
+
+## v18
+- Connect Foreplay gameplay upgrade (ideas from the published description of the commercial app, all content original): **winner's advantage** (winner decides who does each challenge and can re-draw one; the other player can always pass), **Naughtiness** setting (Sweet = 2 rounds, Spicy = 3, Wild = hottest 2), **challenge type toggles**, and an optional **self-control finale** ("who held out longest"). Works in one-phone and two-phone modes.
+
+## v19 (stage 1 of the quality overhaul)
+- **Velvet Night theme** (css/ka-theme.css) and **motion kit** (js/ka-motion.js) load on every page: aurora background, glass cards, gradient buttons with ripple + haptics, one-time page reveal (never replays on re-render), particle bursts (`KA_MOTION.burst`).
+- **Games hub** (play.html + js/ka-catalog.js): mood buttons, "Surprise me" slot reveal, search, filters (players, vibe, time, heat), favourites, Continue row. Add new games by adding one line to the catalogue.
+
+
+## v20: Games overhaul, stage 2 and 3
+- New shared engine: `js/ka-reveal.js` (both answer privately, then reveal), plus `js/ka-duo.js` / `js/ka-ui.js`. Every card game now has: mode choice (one phone / two phones live), heat level, category or pack picker, how-to-play guide, flip cards, timers where needed, and a results screen.
+- Rebuilt on the engine: Truth or Dare (316 truths + 300 dares in 8+8 categories), Would You Prefer (171 pairs, 7 categories), Never Have I Ever (new, 77 statements), Hornopoly (6 packs, scoring, timers), Kinky Dice (5 sets incl. new gentle Love dice, 1 to 3 dice), Love Coupons (98 coupons, 5 categories, write your own), Desire Match (two-phone private answers; only a scrambled yes/maybe summary is shared, limits never), Connection Cards (90 original cards, pick 1 of 3, combos and levels).
+- Content decks live in `data/deck/*.json` and are generated from `build/content/*.py`.
+- Fixes: Connection Cards phone layout, stray "Offline mode" label, Ludo uses your couple names.
+
+
+## v22: New games, rituals and plans (research-driven)
+Research sources reviewed: the 75-games round-up, 30 intimate games for couples, Adventure Challenge In Bed (scratch-off + hints + keepsake), Sexopoly and Monogamy (levels + winner's fantasy), Foreplay in a Row (Connect), Date Night Poker, 5 Second Rule, Tapple After Dark, the Aron-style closeness questions, Gottman rituals, sensate focus, soul gazing, the 6-second kiss and the 20-second hug.
+New pages: Connection Rituals (24 guided timers, streaks, 7-day plan, calendar export), Date Night Kits (16 plans, calendar export), Scratch-Off Book (104 challenges with budget/place/time hints and a Memory Book), Who's Most Likely To, How Well Do You Know Me, Quick-Fire (Name Three, Letter Rush, Charades, Touch Twister), Fantasy Box, Mystery Doors, Bedroom Menu, Intimate Bingo, Tic-Tac-Tease, Body Map. The Games hub has a Today strip (ritual, question, streak).
+Hidden-topic filters (Settings) apply to the inline content of every new page.
+Page titles no longer have a dash after KamaAgni.
+
+## v23
+- Pause / safe-word button (⏸) in the header on every page: green / slow down / stop check-in, aftercare link, sound toggle. Local only, nothing is sent to the partner.
+- Sound effects on celebrations (generated in-browser, mute in the pause panel).
+- Home-screen install prompt (Android/desktop banner, iOS how-to hint) after a few visits.
+- Share-as-image card (`KA_SHARE`), used by the Progress page.
+- Progress page: "your year together" recap and extra badges.
+
+## v24
+- **Our Own Cards** (games/kamaagni-custom.html): write your own cards for Truth or Dare, Would You Prefer, Never Have I Ever, Who's Most Likely, Know Me, Connection Cards, Love Coupons, Scratch-Off, Kinky Dice, Bedroom Menu, Bingo, Quick-Fire and Task Deck. Stored in `ka_custom`, merged into decks by `js/ka-custom.js`.
+- Truth or Dare: forfeit ladder and forfeit tokens when passes run out.
+- Love Coupons: expiry dates and printable wallet. Tic-Tac-Tease: 3×3, 4×4, 5×5 boards.
+- Rituals: voice guidance, calming music, 8 more rituals. Date Kits: 8 more kits, venue finder, print.
+- Scratch Book: seasonal tickets. Desire Match: "plan this" button and earlier rounds. Bingo: themes.
+- Hornopoly: optional board with dice. Kinky Dice: "Plan my night".
+- Fantasy Box: shared two-phone box with a consent check. Kink Explorer, Body Map, Bedroom Menu: compare with partner via codes (no server needed).
+- Task Deck: custom pack and Task of the day. Walkthrough (❓) for Showdown, Connect, Ludo, Dice, Poker, Position selectors.
+
+## v25
+- **Live in Together:** Poker (own hand private per phone, setup options for length, heat, clothing), Couples Ludo (shared board, turn lock, pop-ups mirrored), Intimacy Dice and both Position Selectors (shared roll, alternating turns). Layers: `js/ka-live-poker.js`, `ka-live-ludo.js`, `ka-live-mirror.js`.
+- **Showdown and Connect Foreplay** now use the shared `KA_DUO` engine instead of their own network code.
+- **Quick-Fire** two-phone (Name Three, Letter Rush, Charades with hidden card) and custom categories.
+- **Mystery Doors** rebuilt: two-phone contestant and banker (banker sees prizes and chooses offers), door-swap offers.
+- **Scratch Book:** photo attachments in the Memory Book (stored on the device), shared book across two phones, "scratch one together".
+- **Rituals:** guided sessions run in sync on both phones.
+- **Body Map:** redrawn figure, custom zones, "over time" chart.
+- **Progress:** weekly, weekday and activity charts.

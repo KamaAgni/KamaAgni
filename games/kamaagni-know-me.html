@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni How Well Do You Know Me</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-reveal.js"></script>
+<script>
+KA_REVEAL.run(document.getElementById('app'), {
+  id: 'know', key: 'ka_know_v1', g: 'know', title: 'How Well Do You Know Me', sub: 'The newlywed game. Answer for yourself, then guess your partner.', icon: '🔎', know: true,
+  deckUrl: '../data/deck/know.json', card: it => ({q: it[0], opts: [it[1], it[2]]}), or: 'OR',
+  same: '🏆 You both guessed right!', diff: '🙈 You both guessed wrong!', half: '😏 One of you knows the other well.', ask: 'Time to pay attention.', scoreLabel: 'Right guesses',
+  startLabel: 'Deal the first card', guideTitle: 'How to play How Well Do You Know Me',
+  guide: `<h3>The idea</h3><p>The classic newlywed game. Each card asks something about a person with two options.</p>
+  <h3>Each card</h3><ol><li>First tap what <b>you</b> would choose, privately.</li><li>Then tap what you think your <b>partner</b> chose.</li><li>When both of you are done, you see who guessed right. One point for every right guess.</li></ol>
+  <h3>Winning</h3><p>The one who knows their partner best wins. The winner picks tonight's treat.</p>
+  <h3>Two phones</h3><p>Link in Together first. You both answer at the same time on your own phones.</p>`,
+  note: 'There are no wrong answers about yourself. Only about your partner.'
+});
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

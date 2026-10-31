@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Body Map</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, LS} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_bodymap_v1';
+// id,label,side,x,y,ideas[[text,heat]]
+const Z = [
+['hair','Hair & scalp','f',100,16,[['Run your fingers through their hair slowly',1],['Give a scalp massage with your fingertips',1],['Gently tug their hair while kissing',3]]],
+['lips','Lips & face','f',100,50,[['Trace their lips with a fingertip before a slow kiss',1],['Kiss their cheeks, nose and eyelids',1],['Tease with an almost-kiss and wait',2]]],
+['ears','Ears','f',130,42,[['Whisper something sweet close to the ear',1],['Kiss and breathe along the earlobe',2],['Nibble softly and whisper something naughty',3]]],
+['neck','Neck','f',100,72,[['Kiss slowly down one side of the neck',1],['Breathe warm air on the neck',2],['Kiss and nibble the neck while holding their wrists',3]]],
+['shoulders','Shoulders & collarbones','f',62,90,[['Massage the shoulders for two minutes',1],['Trace a line along the collarbone with your lips',2],['Kiss from the shoulder to the neck slowly',2]]],
+['chest','Chest & breasts','f',100,112,[['Rest your head on their chest and listen to their heartbeat',1],['Trace small circles over the skin',2],['Kiss, lick and tease with attention to their reactions',3]]],
+['belly','Stomach','f',100,152,[['Draw a heart on their stomach',1],['Kiss slowly around the navel',2],['Run your nails lightly downwards while looking at them',3]]],
+['hips','Hips & pelvis','f',100,190,[['Hold their hips and pull them close',2],['Kiss the hip bones',2],['Tease along the line of the underwear',3]]],
+['arms','Arms & wrists','f',38,150,[['Trace the inside of their arm with a fingertip',1],['Kiss the inside of the wrist',1],['Hold their wrists lightly above their head',3]]],
+['hands','Hands & fingers','f',30,206,[['Hold hands and trace the palm',1],['Kiss each fingertip',1],['Take a finger into your mouth slowly',2]]],
+['inner','Inner thighs','f',90,240,[['Trace feather-light lines along the inner thigh',2],['Kiss slowly up the inner thigh',3],['Tease just short of the top and stop',3]]],
+['thighs','Thighs','f',72,255,[['Massage the thighs with warm oil',2],['Rest your head in their lap while they stroke your hair',1],['Kiss up the outer thigh',2]]],
+['knees','Knees & calves','f',78,320,[['Rub the calves slowly',1],['Kiss behind the knee (turn them over)',2],['Trace ankle to knee with your lips',2]]],
+['feet','Feet','f',80,392,[['Give a foot massage with warm oil',1],['Kiss and massage the arch',2],['Worship the feet slowly',3]]],
+['bneck','Back of neck','b',100,72,[['Kiss the back of the neck',1],['Breathe on the nape and whisper',2],['Hold the back of the neck firmly while kissing',3]]],
+['blades','Shoulder blades','b',78,98,[['Massage the shoulder blades',1],['Trace a path with your fingertip and lips',2],['Scratch lightly with your nails',3]]],
+['spine','Spine','b',100,130,[['Run one finger down the spine',1],['Kiss slowly down the spine',2],['Trace with ice and kiss the water away',3]]],
+['lback','Lower back','b',100,178,[['Press with your thumbs in slow circles',1],['Kiss the dimples of the lower back',2],['Pin them gently by the lower back and kiss',3]]],
+['glutes','Bottom','b',100,208,[['Squeeze gently through clothes',2],['Kiss and caress',2],['Playful spank with a yes',3]]],
+['bknees','Back of knees','b',78,318,[['Kiss behind the knees',2],['Trace with a feather',2],['Tease with warm breath',2]]]
+];
+const RT = [['love','💗','Love it'],['maybe','😌','Maybe'],['no','🚫','No']];
+const byId = Object.fromEntries(Z.map(z => [z[0], z]));
+let st = LS.get(KEY, {r: [{}, {}], who: 0, side: 'f', phase: 'rate', sel: null}); const save = () => LS.set(KEY, st);
+const CZ = LS.get('ka_bodymap_zones', []); const saveCZ = () => LS.set('ka_bodymap_zones', CZ);
+CZ.forEach(z => { Z.push(z); byId[z[0]] = z; });
+const HIS = LS.get('ka_bodymap_hist', []);
+function addZone(side) {
+  const name = (prompt('Name your zone (for example: Birthmark, Tattoo, Collarbone)', '') || '').trim().slice(0, 30); if (!name) return;
+  KX.toast('Now tap the body where it is'); const sv = document.getElementById('bsvg'); if (!sv) return;
+  sv.style.outline = '2px dashed #ffb84d';
+  sv.addEventListener('click', function f(e) { if (e.target.classList.contains('kd-zn')) return; sv.removeEventListener('click', f); const b = sv.getBoundingClientRect(), x = Math.round((e.clientX - b.left) / b.width * 200), y = Math.round((e.clientY - b.top) / b.height * 420); const z = ['c' + Date.now(), name, side, x, y, [['Spend a slow few minutes here, they choose the touch', 1], ['Kiss it softly and tell them what you love about it', 1], ['Trace it with a fingertip and a feather', 2]]]; Z.push(z); byId[z[0]] = z; CZ.push(z); saveCZ(); render(); }, {once: false});
+}
+const GUIDE = `<h3>The idea</h3><p>A body map of where you love to be touched and kissed. Each of you marks the zones privately as <b>Love it</b>, <b>Maybe</b> or <b>No</b>. Then you see your shared map and get ideas for the zones you both love.</p>
+<h3>Steps</h3><ol><li>Partner 1 taps zones and picks a rating.</li><li>Hand over. Partner 2 does the same.</li><li>View your shared map. Glowing zones are loved by both. "No" zones stay private and are never shown.</li></ol><p>Ideas follow your heat level.</p>`;
+function figure(side, colors, onSel) {
+  const hs = Z.filter(z => z[2] === side).map(z => `<circle class="kd-zn ${colors(z[0])}" data-z="${z[0]}" cx="${z[3]}" cy="${z[4]}" r="${z[0] === 'hair' || z[0] === 'lips' || z[0] === 'ears' ? 11 : 13}"></circle>`).join('');
+  return `<svg viewBox="0 0 200 420" class="kd-body" id="bsvg"><defs><linearGradient id="bg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="rgba(255,150,190,.22)"/><stop offset="1" stop-color="rgba(140,110,255,.14)"/></linearGradient></defs>${side === 'f' ? '' : '<g></g>'}<g fill="none" stroke="rgba(255,255,255,.22)" stroke-linecap="round" stroke-linejoin="round"><g stroke="url(#bg1)" stroke-width="15"><path d="M60 98L40 155L30 208"/><path d="M140 98l20 57 10 53"/></g><g stroke="url(#bg1)" stroke-width="25"><path d="M84 232L78 322L76 396"/><path d="M116 232l6 90 2 74"/></g><path d="M62 94Q100 78 138 94Q146 142 127 188Q135 207 133 236L67 236Q65 207 73 188Q54 142 62 94Z" fill="url(#bg1)" stroke-width="1.5"/><rect x="91" y="62" width="18" height="22" rx="8" fill="url(#bg1)" stroke-width="1"/><ellipse cx="100" cy="38" rx="21" ry="26" fill="url(#bg1)" stroke-width="1.5"/>${side === 'f' ? '<path d="M93 33h.1M107 33h.1M95 47q5 4 10 0" stroke-width="2.5" stroke="rgba(255,255,255,.35)"/>' : '<path d="M100 74v150" stroke-width="1" stroke="rgba(255,255,255,.18)" stroke-dasharray="3 5"/>'}</g>${hs}</svg>`;
+}
+function render() {
+  const n = KX.names(), w = st.who, h = KX.heat();
+  if (st.phase === 'rate') {
+    const mine = st.r[w], col = id => mine[id] ? 'z-' + mine[id] : '';
+    app.innerHTML = '<h1 class="kx-title"><span>Body Map</span></h1>' + U.bar([[esc(n[w]) + ' is rating', 'h2']], {guide: true}) + `<div class="kd-tabs"><button class="${st.side === 'f' ? 'on' : ''}" data-s="f">Front</button><button class="${st.side === 'b' ? 'on' : ''}" data-s="b">Back</button></div><div class="kx-card" data-nofx="1" style="text-align:center">${figure(st.side, col)}<div id="zp" class="kx-muted">Tap a zone, then choose a rating.</div></div><div class="kd-pass"><button class="kx-btn gold" id="dn">${w === 0 ? 'Done, pass the phone' : 'Done, show our map'}</button></div>`;
+    app.insertAdjacentHTML('beforeend', '<div class="kx-row" style="margin-top:12px"><button class="kx-btn sm ghost" id="az">➕ Add a custom zone</button></div>');
+    document.getElementById('az').onclick = () => addZone(st.side);
+    app.insertAdjacentHTML('beforeend', '<div class="kx-card" style="margin-top:14px"><b>On two phones?</b><p class="kx-muted" style="margin:4px 0 10px">Rate on your own phone, then swap codes. Only "Love it" and "Maybe" are in the code. Your "No" answers are never shared.</p><div class="kx-row"><button class="kx-btn sm" id="bc">📋 Copy my code</button></div><textarea class="kx-input" id="bp" rows="2" placeholder="Paste your partner\'s code" style="margin-top:10px"></textarea><button class="kx-btn sm ghost" id="bm" style="margin-top:8px">Show our map</button></div>');
+    document.getElementById('bc').onclick = async () => { const c = 'KB1:' + Object.entries(mine).filter(e => e[1] === 'love' || e[1] === 'maybe').map(e => e[1][0] + e[0]).join('.'); try { await navigator.clipboard.writeText(c); KX.toast('Code copied. Send it to your partner.'); } catch (e) { prompt('Copy this code', c); } };
+    document.getElementById('bm').onclick = () => { const v = document.getElementById('bp').value.trim(); if (!/^KB1:/.test(v)) { KX.toast('That does not look like a code'); return; } const o = {}; v.slice(4).split('.').filter(Boolean).forEach(x => { const id = x.slice(1); if (byId[id]) o[id] = x[0] === 'l' ? 'love' : 'maybe'; }); st.r[1 - w] = o; st.phase = 'result'; save(); render(); };
+    U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Body Map works'});
+    app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { st.side = b.dataset.s; save(); render(); });
+    app.querySelectorAll('[data-z]').forEach(c => c.onclick = () => { const z = byId[c.dataset.z]; document.getElementById('zp').innerHTML = `<b style="font-size:17px">${esc(z[1])}</b><div class="kd-pass">${RT.map(r => `<button class="kx-btn ${mine[z[0]] === r[0] ? 'gold' : 'ghost'} sm" data-rt="${r[0]}">${r[1]} ${r[2]}</button>`).join('')}</div>`; document.querySelectorAll('[data-rt]').forEach(b => b.onclick = () => { mine[z[0]] = b.dataset.rt; save(); render(); }); });
+    document.getElementById('dn').onclick = () => { if (w === 0) { st.who = 1; save(); app.innerHTML = '<h1 class="kx-title"><span>Body Map</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Hide the screen</div><div class="kx-big" style="margin:12px auto">Pass the phone to ' + esc(n[1]) + '</div><button class="kx-btn gold" id="go">I am ' + esc(n[1]) + '</button></div>'; document.getElementById('go').onclick = render; } else { st.phase = 'map'; st.sel = null; save(); render(); } };
+  } else {
+    const both = id => { const a = st.r[0][id], b = st.r[1][id]; if (a === 'love' && b === 'love') return 'z-both'; if ((a === 'love' && b === 'maybe') || (a === 'maybe' && b === 'love') || (a === 'maybe' && b === 'maybe')) return 'z-maybe'; return ''; };
+    const lov = Z.filter(z => both(z[0]) === 'z-both'), may = Z.filter(z => both(z[0]) === 'z-maybe');
+    { const day = new Date().toISOString().slice(0, 10), snap = {d: day, l: lov.length, m: may.length, z: lov.map(z => z[1])}; const k = HIS.findIndex(x => x.d === day); if (k >= 0) HIS[k] = snap; else HIS.push(snap); if (HIS.length > 24) HIS.shift(); LS.set('ka_bodymap_hist', HIS); }
+    app.innerHTML = '<h1 class="kx-title"><span>Our Body Map</span></h1><p class="kx-sub">Glowing = you both love it. Amber = worth exploring. Tap a zone for ideas.</p>' + `<div class="kd-tabs"><button class="${st.side === 'f' ? 'on' : ''}" data-s="f">Front</button><button class="${st.side === 'b' ? 'on' : ''}" data-s="b">Back</button></div><div class="kx-card" data-nofx="1" style="text-align:center">${figure(st.side, both)}<div id="zp">${st.sel ? ideas(st.sel, h) : '<span class="kx-muted">' + lov.length + ' shared favourites · ' + may.length + ' to explore</span>'}</div></div><div class="kd-pass"><button class="kx-btn ghost" id="rs">Start over</button></div>`;
+    app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { st.side = b.dataset.s; save(); render(); });
+    app.querySelectorAll('[data-z]').forEach(c => c.onclick = () => { st.sel = c.dataset.z; try { KA_TRACK.log('play', 'Body Map', byId[st.sel][1]); } catch (e) {} render(); });
+    app.insertAdjacentHTML('beforeend', '<div class="kx-sec">Over time</div><div class="kx-card">' + (HIS.length > 1 ? '<svg viewBox="0 0 300 110" style="width:100%"><g>' + HIS.slice(-10).map((h, i, a) => { const mx = Math.max(1, ...a.map(x => x.l + x.m)), w = 300 / a.length; return '<rect x="' + (i * w + 6) + '" y="' + (95 - 80 * h.m / mx - 80 * h.l / mx) + '" width="' + (w - 12) + '" height="' + (80 * h.l / mx) + '" rx="4" fill="#ff5d8f"/><rect x="' + (i * w + 6) + '" y="' + (95 - 80 * h.m / mx) + '" width="' + (w - 12) + '" height="' + (80 * h.m / mx) + '" rx="4" fill="#ffb84d"/><text x="' + (i * w + w / 2) + '" y="108" font-size="8" fill="#aaa" text-anchor="middle">' + h.d.slice(5) + '</text>'; }).join('') + '</g></svg><p class="kx-muted" style="font-size:12px">Pink: zones you both love. Amber: worth exploring. One bar per time you checked.</p>' : '<p class="kx-muted">Check your map again in a few weeks to see how it changes.</p>') + (HIS.length > 1 ? (() => { const a = HIS[HIS.length - 2].z, b = HIS[HIS.length - 1].z, nw = b.filter(x => !a.includes(x)); return nw.length ? '<p>New shared favourites since last time: <b>' + nw.map(esc).join(', ') + '</b></p>' : ''; })() : '') + '</div>');
+    document.getElementById('rs').onclick = () => { st = {r: [{}, {}], who: 0, side: 'f', phase: 'rate', sel: null}; save(); render(); };
+  }
+}
+function ideas(id, h) { const z = byId[id]; return `<b style="font-size:17px">${esc(z[1])}</b><ul class="kd-ul" style="text-align:left">${KF(z[5]).filter(x => x[1] <= h).map(x => '<li>' + esc(x[0]) + '</li>').join('')}</ul>`; }
+render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -3,6 +3,9 @@
    2. tracks which saved settings changed so cloud sync can upload them */
 (function () {
   var d = document.documentElement, seen = false;
+  /* load the shared theme in <head> before first paint (no flash of the old look) */
+  try { var cs = document.currentScript, base = (cs && cs.src || '').replace(/js\/ka-boot\.js.*$/, '');
+    if (base && !document.getElementById('ka-theme-css')) { var l = document.createElement('link'); l.id = 'ka-theme-css'; l.rel = 'stylesheet'; l.href = base + 'css/ka-theme.css'; document.head.appendChild(l); d.classList.add('ka-chrome'); } } catch (e) {}
   try { seen = !!(localStorage.getItem('ka_intro_seen') || sessionStorage.getItem('ka_intro_seen')); } catch (e) {}
   if (seen) d.classList.add('ka-skip-intro');
 

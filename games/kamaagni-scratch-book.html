@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Scratch-Off Book</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(async () => {
+'use strict';
+const {esc, shuffle, LS} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_scratch_v1';
+let DK; try { DK = await (await fetch('../data/deck/scratch.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; }
+const all = []; DK.cats.forEach(c => DK.items[c.id].forEach((it, i) => all.push({id: c.id + i, c: c.id, cl: c.l, ci: c.i, h: c.h, t: it.t, b: it.b, p: it.p, m: it.m})));
+let st = LS.get(KEY, {order: shuffle(all.map(x => x.id)), seen: {}, done: {}, notes: {}, cat: 'all', b: 'any', p: 'any', view: 'book'}); let PH = LS.get('ka_scratch_photos', {}); const savePh = () => { try { LS.set('ka_scratch_photos', PH); } catch (e) { KX.toast('Photo storage is full. Remove some photos.'); } };
+let S = null, lastPick = 0;
+const D = KA_UI && KA_DUO.init({g: 'scratch', key: 'ka_scratch_duo', get: () => S, onState: (m, first) => { S = m; Object.assign(st.done, m.done); Object.assign(st.seen, m.seen); Object.assign(st.notes, m.notes); LS.set(KEY, st); if (first) { S.done = {...st.done, ...S.done}; S.seen = {...st.seen, ...S.seen}; S.notes = {...st.notes, ...S.notes}; D.save(S); }
+    if (m.pick && m.pick.at !== lastPick) { lastPick = m.pick.at; if (!document.getElementById('kd-guide')) ticket(m.pick.id); else home(); } else if (!document.getElementById('kd-guide')) home(); },
+  onQuit: () => { S = null; home(); }, onLink: () => {},
+  merge: (cur, m) => { const o = JSON.parse(JSON.stringify(cur)); Object.keys(m.done || {}).forEach(k => { o.done[k] = Math.max(o.done[k] || 0, m.done[k]); }); Object.keys(m.seen || {}).forEach(k => { if (m.seen[k]) o.seen[k] = 1; }); Object.keys(m.notes || {}).forEach(k => { if (!o.notes[k]) o.notes[k] = m.notes[k]; }); if (m.pick && (!o.pick || m.pick.at > o.pick.at)) o.pick = m.pick; o.seq = Math.max(o.seq || 0, m.seq || 0); return o; }});
+S = D && D.load(); if (S && S.mode !== 'two') S = null;
+const save = () => { LS.set(KEY, st); if (S) { S.done = st.done; S.seen = st.seen; S.notes = st.notes; D.save(S); } };
+const resize = (file, cb) => { const img = new Image(), fr = new FileReader(); fr.onload = () => { img.onload = () => { const m = 520, k = Math.min(1, m / Math.max(img.width, img.height)), c = document.createElement('canvas'); c.width = Math.round(img.width * k); c.height = Math.round(img.height * k); c.getContext('2d').drawImage(img, 0, 0, c.width, c.height); cb(c.toDataURL('image/jpeg', .6)); }; img.src = fr.result; }; fr.readAsDataURL(file); };
+const byId = Object.fromEntries(all.map(x => [x.id, x]));
+const BUD = {free: '🆓 Free', low: '💲 Low cost', some: '💲💲 Some spend'}, PL = {home: '🏠 At home', out: '🌳 Out and about'}, TM = {quick: '⚡ Quick', evening: '🌙 An evening'};
+const GUIDE = `<h3>The idea</h3><p>A scratch-off book of ${all.length} couples challenges. Each ticket hides a challenge until you scratch it. Tap a ticket, scratch the foil with your finger or mouse, then do it together.</p>
+<h3>Hints</h3><p>After you scratch you see hints: budget, place and time. Filter tickets by category, budget or place so you only see what suits tonight.</p>
+<h3>No take-backs (kind of)</h3><p>The fun is in not knowing. If a challenge truly does not suit you both, tap Swap. You can use it as a prompt to talk about what you would like instead.</p>
+<h3>Keepsake</h3><p>Tick a challenge as done and add a note. Your Memory Book on the second tab keeps them all.</p>`;
+function home() {
+  const h = KX.heat(), list = st.order.map(id => byId[id]).filter(x => x && x.h <= h && (st.cat === 'all' || x.c === st.cat) && (st.b === 'any' || x.b === st.b) && (st.p === 'any' || x.p === st.p));
+  const doneN = Object.keys(st.done).length;
+  app.innerHTML = '<h1 class="kx-title"><span>Scratch-Off Book</span></h1><p class="kx-sub">Scratch a ticket, do the challenge, keep the memory.</p>' + U.bar([[doneN + ' / ' + all.filter(x => x.h <= h).length + ' done', 'h2']], {guide: true}) +
+    `<div class="kd-tabs"><button class="${st.view === 'book' ? 'on' : ''}" data-view="book">🎟 Tickets</button><button class="${st.view === 'mem' ? 'on' : ''}" data-view="mem">📖 Memory Book</button></div>` +
+    (st.view === 'book' ? `<div class="kd-chips">${[['all', '✨ All', ''], ...DK.cats.filter(c => c.h <= h).map(c => [c.id, c.i + ' ' + c.l, ''])].map(c => `<button class="kx-chip-btn ${st.cat === c[0] ? 'on' : ''}" data-cat="${c[0]}">${esc(c[1])}</button>`).join('')}</div>
+    <div class="kd-chips">${[['any', 'Any budget'], ['free', '🆓 Free'], ['low', '💲 Low'], ['some', '💲💲 Some']].map(c => `<button class="kx-chip-btn ${st.b === c[0] ? 'on' : ''}" data-b="${c[0]}">${c[1]}</button>`).join('')}${[['any', 'Anywhere'], ['home', '🏠 Home'], ['out', '🌳 Out']].map(c => `<button class="kx-chip-btn ${st.p === c[0] ? 'on' : ''}" data-p="${c[0]}">${c[1]}</button>`).join('')}</div>
+    <div class="kd-pass" style="margin:10px 0"><button class="kx-btn gold sm" id="rnd">🎲 Surprise me</button><button class="kx-btn ghost sm" id="shb">${S ? '📱📱 Shared book on · stop' : '📱📱 Shared book'}</button>${S ? '<button class="kx-btn ghost sm" id="tgt">🎟 Scratch one together</button>' : ''}</div>
+    <div class="kd-tix">${list.map(x => `<button class="kd-tk ${st.done[x.id] ? 'done' : st.seen[x.id] ? 'seen' : ''}" data-t="${x.id}"><span>${x.ci}</span><em>${st.done[x.id] ? '✓' : st.seen[x.id] ? 'open' : 'scratch'}</em></button>`).join('') || '<p class="kx-muted">No tickets match. Loosen a filter.</p>'}</div>` :
+    '<div class="kd-cpns">' + (Object.keys(st.done).length ? Object.keys(st.done).sort((a, b) => st.done[b] - st.done[a]).map(id => { const x = byId[id]; return `<div class="kd-cpn h${x.h}"><div class="kd-cpn-l"><span class="kd-cpn-i">${x.ci}</span><span class="kx-chip">${new Date(st.done[id]).toLocaleDateString()}</span></div><div class="kd-cpn-t">${esc(x.t)}</div>${st.notes[id] ? '<div class="kx-muted">“' + esc(st.notes[id]) + '”</div>' : ''}${PH[id] ? '<img src="' + PH[id] + '" alt="Memory photo" style="width:100%;border-radius:12px;margin-top:8px">' : ''}<label class="kx-btn sm ghost" style="margin-top:8px;display:inline-block;cursor:pointer">📷 ${PH[id] ? 'Change' : 'Add'} photo<input type="file" accept="image/*" data-ph="${id}" style="display:none"></label>${PH[id] ? `<button class="kx-btn sm ghost" data-rp="${id}" style="margin:8px 0 0 6px">Remove</button>` : ''}</div>`; }).join('') : '<p class="kx-muted">Your completed challenges will appear here.</p>') + '</div>');
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Scratch-Off Book works'});
+  app.querySelectorAll('[data-ph]').forEach(f => f.onchange = () => { const file = f.files[0]; if (!file) return; resize(file, d => { PH[f.dataset.ph] = d; savePh(); home(); }); });
+  app.querySelectorAll('[data-rp]').forEach(b => b.onclick = () => { delete PH[b.dataset.rp]; savePh(); home(); });
+  const sb = document.getElementById('shb'); if (sb) sb.onclick = () => { if (S) { D.quit(S); S = null; home(); return; } if (!D.linked()) { KX.toast('Link your partner in Together first'); return; } S = {mode: 'two', gid: Date.now(), seq: 0, phase: 'play', done: {...st.done}, seen: {...st.seen}, notes: {...st.notes}, pick: null}; D.setMe(0); D.save(S); home(); };
+  const tg = document.getElementById('tgt'); if (tg) tg.onclick = () => { const open = list.filter(x => !st.done[x.id]); if (!open.length) return; const id = open[Math.floor(Math.random() * open.length)].id; S.pick = {id, at: Date.now()}; lastPick = S.pick.at; D.save(S); ticket(id); };
+  app.querySelectorAll('[data-view]').forEach(b => b.onclick = () => { st.view = b.dataset.view; save(); home(); });
+  app.querySelectorAll('[data-cat]').forEach(b => b.onclick = () => { st.cat = b.dataset.cat; save(); home(); });
+  app.querySelectorAll('[data-b]').forEach(b => b.onclick = () => { st.b = b.dataset.b; save(); home(); });
+  app.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { st.p = b.dataset.p; save(); home(); });
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => ticket(b.dataset.t));
+  const r = document.getElementById('rnd'); if (r) r.onclick = () => { const open = list.filter(x => !st.done[x.id]); if (open.length) ticket(open[Math.floor(Math.random() * open.length)].id); };
+}
+function ticket(id) {
+  const x = byId[id]; if (!x) return; const seen = !!st.seen[id];
+  const o = document.createElement('div'); o.id = 'kd-guide';
+  o.innerHTML = `<div class="kd-gin" style="text-align:center"><button class="kd-gx" aria-label="Close">✕</button><div class="kx-turn">${x.ci} ${esc(x.cl)}</div><div class="kd-scr"><div class="kd-scr-t" id="st"><span class="kx-big" style="font-size:22px">${esc(x.t)}</span><div class="kd-hints"><span class="kx-chip">${BUD[x.b]}</span><span class="kx-chip">${PL[x.p]}</span><span class="kx-chip">${TM[x.m]}</span></div></div><canvas id="sc"></canvas></div><div id="act" class="kd-pass" style="margin-top:14px"></div></div>`;
+  document.body.appendChild(o); document.body.style.overflow = 'hidden';
+  const close = () => { o.remove(); document.body.style.overflow = ''; home(); };
+  o.querySelector('.kd-gx').onclick = close;
+  const cv = o.querySelector('#sc'), box = cv.parentElement; let revealed = seen;
+  const actions = () => {
+    st.seen[id] = 1; save();
+    o.querySelector('#act').innerHTML = `<button class="kx-btn gold" id="d1">✓ We did it</button><button class="kx-btn ghost" id="sw">🔄 Swap</button><button class="kx-btn ghost" id="sv">♡ Save</button>`;
+    o.querySelector('#d1').onclick = () => { const n = prompt('Add a note for your Memory Book (optional):', ''); st.done[id] = Date.now(); if (n) st.notes[id] = n.slice(0, 160); save(); try { KA_TRACK.log('play', 'Scratch-Off Book', x.t.slice(0, 70)); } catch (e) {} window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 40}); close(); };
+    o.querySelector('#sw').onclick = () => { st.seen[id] = 0; st.order = st.order.filter(i => i !== id).concat(id); save(); close(); };
+    o.querySelector('#sv').onclick = e => { KX.fav('cards', x.t); e.target.textContent = '♥ Saved'; };
+  };
+  if (seen) { cv.remove(); actions(); return; }
+  requestAnimationFrame(() => {
+    const W = cv.width = box.clientWidth, H = cv.height = box.clientHeight, g = cv.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, W, H); gr.addColorStop(0, '#b8860b'); gr.addColorStop(.5, '#ffe28a'); gr.addColorStop(1, '#c79a2b'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.fillStyle = 'rgba(80,50,0,.5)'; g.font = '700 18px DM Sans, sans-serif'; g.textAlign = 'center'; g.fillText('SCRATCH HERE', W / 2, H / 2 + 6);
+    for (let i = 0; i < 160; i++) { g.fillStyle = 'rgba(255,255,255,' + Math.random() * .25 + ')'; g.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+    g.globalCompositeOperation = 'destination-out'; g.fillStyle = '#000'; let down = false, n = 0;
+    const pos = e => { const r = cv.getBoundingClientRect(), t = e.touches ? e.touches[0] : e; return [t.clientX - r.left, t.clientY - r.top]; };
+    const scr = e => { if (!down || revealed) return; e.preventDefault(); const [x0, y0] = pos(e); g.beginPath(); g.arc(x0, y0, 22, 0, 7); g.fill(); if (++n % 10 === 0) check(); };
+    const check = () => { const d = g.getImageData(0, 0, W, H).data; let c = 0; for (let i = 3; i < d.length; i += 64) if (d[i] === 0) c++; if (c / (d.length / 64) > .45) reveal(); };
+    const reveal = () => { if (revealed) return; revealed = true; cv.style.transition = 'opacity .5s'; cv.style.opacity = '0'; setTimeout(() => cv.remove(), 500); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 20, y: innerHeight * .4}); actions(); };
+    cv.addEventListener('pointerdown', e => { down = true; cv.setPointerCapture && cv.setPointerCapture(e.pointerId); scr(e); }); cv.addEventListener('pointermove', scr); cv.addEventListener('pointerup', () => { down = false; check(); }); cv.style.touchAction = 'none';
+    o.querySelector('#act').innerHTML = '<button class="kx-btn ghost sm" id="rv">Reveal</button>'; o.querySelector('#rv').onclick = reveal;
+  });
+}
+home();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

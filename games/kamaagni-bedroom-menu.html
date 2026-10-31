@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Bedroom Menu</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_menu_v1';
+const M = [
+ ['Starters','🥂',[['Slow kisses on the neck',1],['A shoulder massage',1],['Whispered compliments',1],['Dance in the kitchen',1],['Hand-holding and eye contact',1],['A long hug',1],['Back scratches',1],['Feather-light touches',2],['A glass of wine and flirty talk',1]]],
+ ['Mains','🍽️',[['Slow and sensual lovemaking',1],['A full body massage that ends wherever you like',2],['A long makeout session',1],['Teasing with no finish for 15 minutes',2],['Playful and fast',2],['A new position from the selector',2],['Oral, taking turns',3],['Roleplay of your choice',3],['Blindfold and surprise',3],['A guided "you tell me what to do" session',3]]],
+ ['Sides','🍟',[['Dirty talk',2],['Music and candles',1],['A shower together',2],['Silk or lace',2],['Ice and feather',2],['Massage oil',2],['A toy',3],['A mirror',3]]],
+ ['Desserts','🍰',[['Cuddles and kisses',1],['Feeding each other something sweet',1],['A warm bath together',1],['Pillow talk',1],['Slow dancing before bed',1],['A massage for the other person',1]]],
+ ['Chef\'s Specials','⭐',[['You choose, I say yes',2],['A fantasy from the box',3],['Take charge for 20 minutes',3],['An hour of nothing but worship',3],['Surprise me completely',3],['Role reversal for the night',3]]]
+];
+{ const cu = window.KA_CUSTOM ? KA_CUSTOM.get('menu') : []; if (cu.length) M.push(['Our own', '✍️', cu.map(t => [t, 1])]); }
+let st = {order: [[], []], who: 0, phase: 'order'};
+const GUIDE = `<h3>The idea</h3><p>Order your evening from a menu. Each of you picks what you fancy tonight. Then the kitchen (you two) serves both orders in turn.</p>
+<h3>How it works</h3><ol><li>Partner 1 orders from the menu in secret. Pick as many or as few as you like.</li><li>Partner 2 does the same.</li><li>The two orders appear as a combined tasting menu. Take turns serving each course.</li></ol><p>Items above your heat level are hidden. Say "not tonight" any time.</p>`;
+function render() {
+  const n = KX.names(), h = KX.heat(), w = st.who;
+  if (st.phase === 'order') {
+    app.innerHTML = '<h1 class="kx-title"><span>Bedroom Menu</span></h1><p class="kx-sub">Order your evening. Pick what you fancy tonight.</p>' + U.bar([[esc(n[w]) + ' is ordering', 'h2']], {guide: true}) +
+      '<div class="kx-card" data-nofx="1">' + M.map(s => `<div class="kx-sec">${s[1]} ${esc(s[0])}</div><div class="kd-chips" style="flex-wrap:wrap">${KF(s[2]).filter(x => x[1] <= h).map(x => `<button class="kx-chip-btn ${st.order[w].includes(x[0]) ? 'on' : ''}" data-i="${esc(x[0])}">${esc(x[0])}</button>`).join('')}</div>`).join('') + `<div class="kd-pass" style="margin-top:14px"><button class="kx-btn gold" id="dn">${w === 0 ? 'Done, pass the phone' : 'Done, serve the menu'}</button></div></div>`;
+    app.insertAdjacentHTML('beforeend', '<div class="kx-card" style="margin-top:14px"><b>Ordering on two phones?</b><p class="kx-muted" style="margin:4px 0 10px">Order on your own phone, then swap codes to see the shared tasting menu.</p><div class="kx-row"><button class="kx-btn sm" id="mc">📋 Copy my order code</button></div><textarea class="kx-input" id="mp" rows="2" placeholder="Paste your partner\'s code" style="margin-top:10px"></textarea><button class="kx-btn sm ghost" id="mm" style="margin-top:8px">Show our menu</button></div>');
+    document.getElementById('mc').onclick = async () => { const c = 'KM1:' + btoa(unescape(encodeURIComponent(JSON.stringify(st.order[w])))); try { await navigator.clipboard.writeText(c); KX.toast('Code copied. Send it to your partner.'); } catch (e) { prompt('Copy this code', c); } };
+    document.getElementById('mm').onclick = () => { const v = document.getElementById('mp').value.trim(); try { if (!/^KM1:/.test(v)) throw 0; const o = JSON.parse(decodeURIComponent(escape(atob(v.slice(4))))); if (!Array.isArray(o)) throw 0; st.order[1 - w] = o.filter(x => typeof x === 'string').slice(0, 60); st.phase = 'result'; render(); } catch (e) { KX.toast('That does not look like a code'); } };
+    U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Bedroom Menu works'});
+    app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const i = b.dataset.i, o = st.order[w], k = o.indexOf(i); k < 0 ? o.push(i) : o.splice(k, 1); b.classList.toggle('on'); });
+    document.getElementById('dn').onclick = () => { if (w === 0) { st.who = 1; app.innerHTML = '<h1 class="kx-title"><span>Bedroom Menu</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Hide the screen</div><div class="kx-big" style="margin:12px auto">Pass the phone to ' + esc(n[1]) + '</div><button class="kx-btn gold" id="go">I am ' + esc(n[1]) + '</button></div>'; document.getElementById('go').onclick = render; } else { st.phase = 'serve'; render(); } };
+  } else {
+    const courses = M.map(s => [s[0], s[1], [...st.order[0].filter(x => s[2].some(y => y[0] === x)).map(x => [x, 0]), ...st.order[1].filter(x => s[2].some(y => y[0] === x)).map(x => [x, 1])]]).filter(c => c[2].length);
+    app.innerHTML = '<h1 class="kx-title"><span>Tonight\'s Tasting Menu</span></h1><p class="kx-sub">Serve the courses in order. Tick each when done.</p><div class="kx-card" data-nofx="1">' + (courses.length ? courses.map(c => `<div class="kx-sec">${c[1]} ${esc(c[0])}</div><div class="kx-list">${c[2].map(x => `<label class="kx-item"><input type="checkbox" class="kx-check"><span class="kx-it">${esc(x[0])}<br><span class="kx-muted">Ordered by ${esc(n[x[1]])}</span></span></label>`).join('')}</div>`).join('') : '<p class="kx-muted">Nothing ordered. A cuddle is always on the house.</p>') + '<div class="kd-pass" style="margin-top:14px"><button class="kx-btn gold" id="nw">New menu</button></div></div>';
+    try { KA_TRACK.log('play', 'Bedroom Menu', courses.length + ' courses'); } catch (e) {}
+    document.getElementById('nw').onclick = () => { st = {order: [[], []], who: 0, phase: 'order'}; render(); };
+  }
+}
+render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

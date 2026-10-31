@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Who's Most Likely To</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-reveal.js"></script>
+<script>
+KA_REVEAL.run(document.getElementById('app'), {
+  id: 'who', key: 'ka_who_v1', g: 'who', title: "Who's Most Likely To", sub: 'Point at the one you think fits. Both answer in secret, then reveal.', icon: '👉',
+  deckUrl: '../data/deck/who.json', who: true, card: it => ({q: String(it), opts: ['A', 'B']}), or: '·',
+  same: '🤝 You agree!', diff: '😏 You see it differently!', ask: 'Defend your pick.', scoreLabel: 'Agreed',
+  startLabel: 'Deal the first card', guideTitle: "How to play Who's Most Likely To",
+  guide: `<h3>The idea</h3><p>A question like "Who is most likely to cry at a wedding?" appears. You both secretly point at one of the two of you: yourself or your partner.</p>
+  <h3>Each card</h3><ol><li>Read the question.</li><li>Tap a name. On one phone you hand over between answers. On two phones you both answer at once.</li><li>See the reveal. Agree or disagree, then defend your pick.</li></ol>
+  <h3>Make it yours</h3><ul><li>Choose categories from sweet to wild.</li><li>Cards above your heat level never appear.</li></ul>`,
+  note: 'It is all in fun. Nobody is the winner, except the one who laughs hardest.'
+});
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

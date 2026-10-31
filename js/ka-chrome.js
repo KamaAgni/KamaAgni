@@ -9,12 +9,13 @@
   var G = 'games/';
   var MENU = [
     ['Tonight', [['🕯️', 'Guided Session', G + 'kamaagni-session.html'], ['🎓', 'Intimacy Experts', G + 'kamaagni-experts.html'], ['💞', 'Together (partner)', G + 'kamaagni-together.html'], ['🎉', 'Free-time Fun', G + 'kamaagni-fun.html'], ['💌', 'Secret Envelope', G + 'kamaagni-secret.html'], ['🗓️', 'Plan Tonight', G + 'kamaagni-tonight.html']]],
-    ['Play', [['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Intimacy Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html']]],
+    ['Play', [['🎮', 'All Games (pick for me)', 'play.html'], ['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Connection Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['⚔️', 'Seduction Showdown', G + 'kamaagni-showdown.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html'], ['🙋', 'Never Have I Ever', G + 'kamaagni-never-have-i-ever.html'], ['👉', "Who's Most Likely", G + 'kamaagni-whos-most-likely.html'], ['🔎', 'How Well Do You Know Me', G + 'kamaagni-know-me.html'], ['⏱️', 'Quick-Fire', G + 'kamaagni-quick-fire.html'], ['🎰', 'Intimate Bingo', G + 'kamaagni-bingo.html'], ['❌', 'Tic-Tac-Tease', G + 'kamaagni-tic-tac-tease.html'], ['🚪', 'Mystery Doors', G + 'kamaagni-mystery-doors.html'], ['🎟️', 'Scratch-Off Book', G + 'kamaagni-scratch-book.html']]],
+    ['Rituals & plans', [['🧘', 'Connection Rituals', G + 'kamaagni-rituals.html'], ['🕯️', 'Date Night Kits', G + 'kamaagni-date-kits.html'], ['✍️', 'Our Own Cards', G + 'kamaagni-custom.html'], ['🍽️', 'Bedroom Menu', G + 'kamaagni-bedroom-menu.html'], ['🎁', 'Fantasy Box', G + 'kamaagni-fantasy-box.html'], ['🗺️', 'Body Map', G + 'kamaagni-body-map.html']]],
     ['Explore', [['🃏', 'Task Deck', G + 'kamaagni-task-deck.html'], ['⛓️', 'BDSM Journey', G + 'kamaagni-journey.html'], ['🏆', 'Challenges', G + 'kamaagni-challenges.html'], ['🎭', 'Roleplay Studio', G + 'kamaagni-roleplay.html'], ['🧭', 'Kink Explorer', G + 'kamaagni-kink-explorer.html'], ['🧘', 'Position Selector', G + 'intimacy_Position_Selector_page.html'], ['👄', 'Oral Selector', G + 'intimacy_Oral_Position_Selector_page.html']]],
     ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['📅', 'Mission Week', G + 'kamaagni-mission-week.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
     ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
   ];
-  var NAV = [['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎉', 'Fun', G + 'kamaagni-fun.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html']];
+  var NAV = [['🎮', 'Games', 'play.html'], ['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎉', 'Fun', G + 'kamaagni-fun.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html']];
   var u = function (p) { return BASE + p; };
   var hideLib = window.KA_CONFIG && window.KA_CONFIG.LIBRARY === false;
 
@@ -50,6 +51,10 @@
   ].join('\n');
   doc.head.appendChild(css);
   root.classList.add('ka-chrome');
+  /* Velvet Night theme + motion kit, loaded last so every page shares one look */
+  (function () { if (!doc.getElementById('ka-theme-css')) { var l = doc.createElement('link'); l.id = 'ka-theme-css'; l.rel = 'stylesheet'; l.href = BASE + 'css/ka-theme.css'; doc.head.appendChild(l); }
+    var m = doc.createElement('script'); m.src = BASE + 'js/ka-motion.js'; m.defer = true; doc.head.appendChild(m);
+    var x = doc.createElement('script'); x.src = BASE + 'js/ka-extras.js'; x.defer = true; doc.head.appendChild(x); })();
 
   /* ---- header ---- */
   var hdr = doc.createElement('header'); hdr.id = 'ka-hdr'; hdr.setAttribute('role', 'banner');
@@ -124,7 +129,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v14</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v25</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */

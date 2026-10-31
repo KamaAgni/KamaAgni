@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="theme-color" content="#05060f"/>
-<title>KamaAgni — Truth or Dare</title>
+<meta name="theme-color" content="#07060f"/>
+<title>KamaAgni Truth or Dare</title>
 <link rel="stylesheet" href="../css/fonts.css"/>
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
@@ -12,64 +12,133 @@
 <main class="kx app" id="app"></main>
 <script src="../js/ka-data.js"></script>
 <script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
 <script>
-(() => {
-  const {esc, names, top, shuffle} = KX;
-  const app = document.getElementById('app');
-  const decks = {truth: shuffle(KA_DATA.truth), dare: shuffle(KA_DATA.dare)};
-  const idx = {truth: 0, dare: 0};
-  let turn = 0, skips = [2, 2];
-  function menu(msg) {
-    const nm = names()[turn];
-    app.innerHTML = top('Truth or Dare', 'Honest answers, playful dares. Pass is always allowed.') + `
-      <div class="kx-card kx-play">
-        <div class="kx-turn">${esc(nm)}'s turn</div>
-        <div class="kx-big">${esc(msg || 'Truth, or Dare?')}</div>
-        <div class="kx-row" style="justify-content:center">
-          <button class="kx-btn indigo" data-k="truth">💬 Truth</button>
-          <button class="kx-btn" data-k="dare">🔥 Dare</button>
-          <button class="kx-btn gold" id="brave">⚔️ Brave</button></div>
-        <p class="kx-muted">Passes left — ${esc(names()[0])}: ${skips[0]} · ${esc(names()[1])}: ${skips[1]}</p>
-      </div>`;
-    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => card(b.dataset.k));
-    document.getElementById('brave').onclick = braveMenu;
+(async () => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI; const app = document.getElementById('app');
+const KEY = 'ka_tod_v2';
+let DECK = {};
+try { const [t, d] = await Promise.all(['truth', 'dare'].map(n => fetch('../data/deck/' + n + '.json').then(r => r.json()))); DECK = {truth: t, dare: d}; }
+catch (e) { app.innerHTML = '<div class="kx-card">Could not load the cards. Open this page from your hosted site.</div>'; return; }
+const CATS = [...DECK.truth.cats.map(c => ({...c, id: 't:' + c.id, ty: 'truth'})), ...DECK.dare.cats.map(c => ({...c, id: 'd:' + c.id, ty: 'dare'}))];
+
+const LADDER = [
+ ['Give a sincere compliment.', 'Kiss their hand.', 'Share a 20-second hug.'],
+ ['Give a 1-minute shoulder or hand massage.', 'Whisper something you love about them.', 'Feed them a bite of something sweet.'],
+ ['Kiss them somewhere they choose.', 'Let them pick your next dare.', 'Slow dance for one song, no talking.'],
+ ['Take off one item of clothing, your choice.', 'Give a slow kiss on the neck for 20 seconds.', 'Do whatever your partner asks for 30 seconds (within your limits).']
+];
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const forfeit = (n, heat) => { const cap = heat >= 3 ? 3 : heat >= 2 ? 2 : 1; return pick(KF(LADDER[Math.min(cap, n - 1)])); };
+let S = null, timerStop = null, pools = {truth: [], dare: []}, pi = {truth: 0, dare: 0};
+const D = KA_DUO.init({g: 'tod', key: KEY, get: () => S, onState: (st) => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
+S = D.load(); if (S && S.mode === 'two' && !D.linked()) { /* linked later */ }
+const N = () => D.names(S);
+const two = () => !!(S && S.mode === 'two');
+const mine = () => !two() || S.turn === D.me;
+const save = () => D.save(S);
+
+function buildPools() {
+  const sel = new Set(S.cats);
+  ['truth', 'dare'].forEach(ty => {
+    const dk = DECK[ty], out = [];
+    dk.cats.forEach(c => { if (!sel.has(ty[0] + ':' + c.id) || c.h > S.heat) return; (dk.items[c.id] || []).forEach(t => out.push({ty, c: c.id, cl: c.l, h: c.h, t})); });
+    pools[ty] = shuffle(out); pi[ty] = 0;
+  });
+}
+function draw(ty) {
+  if (!pools[ty].length) { const o = ty === 'truth' ? 'dare' : 'truth'; if (!pools[o].length) return {ty, c: '', cl: '', h: 1, t: 'No cards left. Turn on more categories in the setup.'}; ty = o; }
+  if (pi[ty] >= pools[ty].length) { pools[ty] = shuffle(pools[ty]); pi[ty] = 0; }
+  return pools[ty][pi[ty]++];
+}
+
+function start(o) {
+  const sec = o.extras.len === 'free' ? 0 : +o.extras.len;
+  S = {mode: o.mode, gid: Date.now(), seq: 0, phase: 'choose', turn: Math.random() < .5 ? 0 : 1, cats: o.cats, heat: o.heat, total: sec, round: 1,
+       passes: [+o.extras.pass, +o.extras.pass], maxp: +o.extras.pass, fo: o.extras.fo !== 'off', tok: [0, 0], timer: o.extras.timer === 'on', cur: null, stats: {truth: 0, dare: 0, pass: 0}, names: [(LS.get('ka_couple', {}) || {}).p1 || 'Partner 1', (LS.get('ka_couple', {}) || {}).p2 || 'Partner 2']};
+  D.setMe(0); buildPools(); save(); render();
+}
+
+const GUIDE = `<h3>The idea</h3><p>Take turns. On your turn, choose <b>Truth</b> (answer honestly), <b>Dare</b> (do it), or <b>Random</b>. Your partner enjoys the show.</p>
+<h3>Each turn</h3><ol><li>Pick Truth, Dare or Random. A card flips over.</li><li>Answer or do it. Dares with a time show a timer you can start.</li><li>Tap <b>Done</b> to pass the turn on, or <b>Pass</b> if you would rather skip. Passes are limited, but you can always use the Settings heat level to keep things comfortable.</li><li>Tap ♡ to save a card you want to remember.</li></ol>
+<h3>Categories and heat</h3><p>Choose which kinds of cards to include before you start. Cards above your heat level never appear. The "Classic mix" has the original KamaAgni cards.</p>
+<h3>Two phones</h3><p>Link in Together first. Start the game on one phone and the other joins by itself. Only the person whose turn it is gets buttons; the other watches the card live.</p>
+<h3>Ground rules</h3><ul><li>Everything is optional, and "no" is always okay.</li><li>Keep it kind. Never push your partner for an answer.</li><li>Agree on a safe word before the heat goes up.</li></ul>`;
+
+function setup() {
+    KA_UI.setup(app, {
+    id: 'tod', title: 'Truth or Dare', sub: 'Honest answers, playful dares. Pass is always allowed.', modes: ['one', 'two'], duo: D,
+    catsLabel: 'What goes in the deck?', cats: CATS.map(c => ({...c, g: c.ty === 'truth' ? '💬 Truth cards' : '🔥 Dare cards'})),
+    extras: [
+      {id: 'len', label: 'How long?', def: 'free', opts: [['free', 'Free play'], ['10', '10 turns each'], ['20', '20 turns each']]},
+      {id: 'pass', label: 'Passes per person', def: '3', opts: [['2', '2'], ['3', '3'], ['5', '5'], ['99', 'Unlimited']]},
+      {id: 'fo', label: 'When passes run out', def: 'on', opts: [['on', 'Pass costs a forfeit'], ['off', 'No more passes']]},
+      {id: 'timer', label: 'Timers on timed dares', def: 'on', opts: [['on', 'On'], ['off', 'Off']]}
+    ],
+    startLabel: 'Deal the first card', guideTitle: 'How to play Truth or Dare', guide: GUIDE, start,
+    note: 'Both partners must agree to everything. Say "pass" at any time.'
+  });
+}
+
+function bar() {
+  const n = N();
+  return U.bar([['Turn ' + S.round + (S.total ? '/' + S.total : ''), ''], ['🛡 ' + n[0] + ' ' + (S.passes[0] > 90 ? '∞' : S.passes[0]) + ' · ' + n[1] + ' ' + (S.passes[1] > 90 ? '∞' : S.passes[1]), 'h2'], two() ? ['📱📱 Two phones', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true});
+}
+function who() { const n = N(), t = S.turn; return `<div class="kd-turn p${t}"><i></i>${esc(n[t])}'s turn</div>`; }
+
+function render() {
+  if (timerStop) { timerStop(); timerStop = null; }
+  if (!S) return setup();
+  if (!pools.truth.length && !pools.dare.length) buildPools();
+  if (S.phase === 'end') return endView();
+  const n = N(), act = mine();
+  let body = '';
+  if (S.phase === 'choose') {
+    const ff = S.forfeit ? `<div class="kx-card" style="border-color:#ffb84d;text-align:left"><b>🎟 Forfeit token #${S.forfeit.n} for ${esc(n[S.forfeit.w])}</b><p style="margin:6px 0 0">${esc(S.forfeit.t)}</p><button class="kx-btn ghost" id="ffd" style="margin-top:8px">Done</button></div>` : '';
+    body = ff + `<div class="kx-card" data-nofx="1" style="text-align:center">${who()}
+      <div class="kx-big" style="margin:16px auto">${act ? 'Truth, or Dare?' : esc(n[S.turn]) + ' is choosing…'}</div>
+      ${act ? `<div class="kx-row" style="justify-content:center"><button class="kx-btn indigo" data-ty="truth">💬 Truth</button><button class="kx-btn" data-ty="dare">🔥 Dare</button><button class="kx-btn gold" data-ty="rand">🎲 Random</button></div>` : '<p class="kx-muted">Your screen updates by itself.</p>'}</div>`;
+  } else {
+    const c = S.cur, secs = S.timer ? U.parseSecs(c.t) : 0;
+    const ty = c.ty === 'truth' ? '💬 Truth' : '🔥 Dare';
+    body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who()}<div style="margin:14px 0 4px">${U.card('<span>' + (c.ty === 'truth' ? '💬' : '🔥') + '</span>', `<span class="kx-chip h${c.h}">${ty} · ${esc(c.cl)}</span><div class="kx-big">${esc(c.t)}</div>${secs && act ? '<div id="tm"></div>' : ''}`, 'tone-' + c.h)}</div>
+      ${act ? `<div class="kd-pass"><button class="kx-btn gold" id="dn">✓ Done</button><button class="kx-btn ghost" id="ps" ${S.passes[S.turn] <= 0 && !S.fo ? 'disabled' : ''}>⏭ Pass</button><button class="kx-btn ghost" id="sv">♡ Save</button></div>` : `<p class="kx-muted" style="margin-top:12px">${esc(n[S.turn])} is on it. Cheer them on.</p>`}</div>`;
   }
-  let brave = null;
-  async function braveMenu() {
-    if (!brave) { try { brave = (await (await fetch('../data/extras.json')).json()).brave; } catch { KX.toast('Could not load Brave cards (open from your hosted site)'); return; } }
-    app.innerHTML = top('Truth or Dare', 'Brave mode: the loser draws a challenge. Intense. Agree your safe word first.') + `
-      <div class="kx-card kx-play"><span class="kx-chip h3">Brave · Wild</span><div class="kx-big">Who is taking the challenge?</div>
-        <div class="kx-row" style="justify-content:center"><button class="kx-btn" data-b="hers">Her challenge</button><button class="kx-btn indigo" data-b="his">His challenge</button><button class="kx-btn ghost" data-b="both">Either</button></div>
-        <button class="kx-btn ghost sm" id="bk">← Back</button></div>`;
-    document.getElementById('bk').onclick = () => menu();
-    app.querySelectorAll('[data-b]').forEach(b => b.onclick = () => braveCard(b.dataset.b));
+  app.innerHTML = '<h1 class="kx-title"><span>Truth or Dare</span></h1>' + bar() + body;
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play Truth or Dare', two: two(), quit: () => { D.quit(S); S = null; render(); }});
+  const ffd = document.getElementById('ffd'); if (ffd) ffd.onclick = () => { S.forfeit = null; save(); render(); };
+  app.querySelectorAll('[data-ty]').forEach(b => b.onclick = () => {
+    let ty = b.dataset.ty; if (ty === 'rand') ty = Math.random() < .5 ? 'truth' : 'dare';
+    const c = draw(ty); S.cur = {ty: c.ty, c: c.c, cl: c.cl, h: c.h, t: c.t}; S.phase = 'card'; S.stats[c.ty]++; save(); render();
+  });
+  if (S.phase === 'card') {
+    const c = S.cur; U.flip(app, 120);
+    const tm = document.getElementById('tm'); if (tm) timerStop = U.timer(tm, U.parseSecs(c.t));
+    const dn = document.getElementById('dn');
+    if (dn) {
+      dn.onclick = () => { try { KA_TRACK.log('play', 'Truth or Dare', c.t.slice(0, 70)); } catch (e) {} next(); };
+      document.getElementById('ps').onclick = () => {
+        if (S.passes[S.turn] > 0) { S.passes[S.turn]--; S.stats.pass++; S.forfeit = null; }
+        else { S.tok = S.tok || [0, 0]; S.tok[S.turn]++; S.stats.pass++; S.forfeit = {w: S.turn, t: forfeit(S.tok[S.turn], S.heat), n: S.tok[S.turn]}; }
+        next(); };
+      document.getElementById('sv').onclick = e => { KX.fav('cards', c.t); e.target.textContent = '♥ Saved'; };
+    }
   }
-  function braveCard(k) {
-    const list = brave[k].filter(x => x.length > 6), text = list[Math.floor(Math.random() * list.length)];
-    app.innerHTML = top('Truth or Dare', '') + `
-      <div class="kx-card kx-play"><span class="kx-chip h3">Brave · ${k === 'his' ? 'His' : k === 'hers' ? 'Her' : 'Either'}</span>
-        <div class="kx-big" style="font-size:clamp(19px,4.2vw,25px)">${esc(text)}</div>
-        <div class="kx-row" style="justify-content:center"><button class="kx-btn" id="bd">Done ✓</button><button class="kx-btn ghost" id="bp">Not brave enough (pass)</button></div></div>`;
-    document.getElementById('bd').onclick = () => braveMenu();
-    document.getElementById('bp').onclick = () => braveMenu();
-  }
-  function card(k) {
-    const d = decks[k]; if (idx[k] >= d.length) { decks[k] = shuffle(KA_DATA[k]); idx[k] = 0; }
-    const text = decks[k][idx[k]++];
-    app.innerHTML = top('Truth or Dare', '') + `
-      <div class="kx-card kx-play">
-        <span class="kx-chip ${k === 'dare' ? 'h3' : 'h1'}">${k}</span>
-        <div class="kx-big">${esc(text)}</div>
-        <div class="kx-row" style="justify-content:center">
-          <button class="kx-btn" id="done">Done ✓</button>
-          <button class="kx-btn ghost" id="pass" ${skips[turn] ? '' : 'disabled'}>Pass (${skips[turn]})</button>
-          <button class="kx-btn ghost" id="sv">♡</button></div>
-      </div>`;
-    document.getElementById('done').onclick = () => { turn = 1 - turn; menu(); };
-    document.getElementById('pass').onclick = () => { skips[turn]--; turn = 1 - turn; menu('Passed — no judgement.'); };
-    document.getElementById('sv').onclick = e => { KX.fav('cards', text); e.target.textContent = '♥'; };
-  }
-  menu();
+}
+function next() {
+  S.turn = 1 - S.turn; S.count = (S.count || 0) + 1; S.round = Math.floor(S.count / 2) + 1;
+  S.cur = null; S.phase = S.total && S.count >= S.total * 2 ? 'end' : 'choose'; save(); render();
+}
+function endView() {
+  const n = N();
+  app.innerHTML = '<h1 class="kx-title"><span>Truth or Dare</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">That was fun</div><div class="kx-big" style="margin:10px auto">💞 ' + (S.stats.truth + S.stats.dare) + ' cards played</div>' +
+    `<p class="kx-muted">${S.stats.truth} truths · ${S.stats.dare} dares · ${S.stats.pass} passes</p><div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn gold" id="ag">Play again</button><a class="kx-btn ghost" href="../play.html">More games</a></div></div>`;
+  window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40});
+  document.getElementById('ag').onclick = () => { D.clear(); S = null; render(); };
+}
+render();
 })();
 </script>
 <script src="../js/ka-features.js"></script>

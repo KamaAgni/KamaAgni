@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KamaAgni — Connect Foreplay</title>
+<title>KamaAgni Connect Foreplay</title>
 <link rel="manifest" href="../manifest.json"/>
 <meta name="theme-color" content="#05060f"/>
 <link rel="apple-touch-icon" href="../assets/icons/icon-192.png"/>
@@ -162,12 +162,24 @@
     background:none; border:none; color:var(--gold); text-decoration:underline;
     font-size:13px; padding:0; cursor:pointer; width:auto; font-weight:600;
   }
-  @media(max-width:480px){</style>
+  @media(max-width:480px){  .mode-pick{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:6px 0 10px}
+  .mode-pick button{text-align:left;padding:12px;border-radius:14px;border:1px solid rgba(230,181,104,.25);background:rgba(255,255,255,.03);color:var(--cream);font:inherit;cursor:pointer}
+  .mode-pick button.on{border-color:var(--ember);box-shadow:0 0 0 2px rgba(255,106,43,.3)}.mode-pick button:disabled{opacity:.5;cursor:not-allowed}
+  .mode-pick b{display:block;font-size:15px}.mode-pick span{font-size:12px;color:var(--ash)}
+  #cf-rules{position:fixed;inset:0;z-index:2147482500;background:rgba(18,7,10,.95);overflow:auto;padding:70px 12px 40px}
+  #cf-rules .cf-rin{max-width:640px;margin:0 auto}
+  .cf-ctl,.cf-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .cf-chip{padding:6px 10px;border-radius:999px;border:1px solid rgba(230,181,104,.3);background:transparent;color:var(--cream);font:inherit;font-size:12px;cursor:pointer}
+  .cf-chip.on{background:rgba(255,106,43,.22);border-color:var(--ember)}.cf-chip:disabled{opacity:.45;cursor:not-allowed}
+  .challenge-item.passed .challenge-text{opacity:.55;text-decoration:line-through}.challenge-item.passed .cf-ctl{text-decoration:none}
+  .cf-crown{margin-top:14px;padding:12px;border:1px solid rgba(230,181,104,.25);border-radius:14px}
+</style>
 </head>
 <body>
 <div id="embers"></div>
 <div id="app"></div>
 
+<script src="../js/ka-duo.js"></script>
 <script>
 /* ---------------- Embers background ---------------- */
 (function(){
@@ -263,6 +275,7 @@ const TIERS = [
   }
 ];
 
+function tierOptions(a){ const F = window.KA_FILTER; if(!F) return a; const k = a.filter(t=>F.ok(t)); return k.length ? k : ['Share a long, slow kiss and tell each other what you like about it.']; }
 function randomFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
 /* ---------------- Connect-4 mechanics ---------------- */
@@ -296,13 +309,45 @@ function boardFull(grid){
 }
 
 /* ---------------- Game State ---------------- */
+const KEY = 'ka_connect_v1';
+const LSget = (k,d)=>{ try{ const v = localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } };
+const LSset = (k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+const myName = ()=> LSget(KEY+'_n','') || ((LSget('ka_couple',{})||{}).p1) || '';
+const esc = t => String(t==null?'':t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let S = null;
-let savedGame = null;
+let myIdx = LSget(KEY+'_me', 0);
+const two = ()=> !!(S && S.mode==='two');
+const D = KA_DUO.init({g:'cf', key:KEY, get:()=>S,
+  onState:(st, first)=>{ const before = S ? actor() : -1; myIdx = D.me; S = st; if(!first && actor()===myIdx && before!==myIdx) toast('Your turn'); render(); },
+  onQuit:()=>{ S = null; localStorage.removeItem(KEY); render(); },
+  onLink:()=>{ if(!S) render(); }});
+const linked = ()=> D.linked();
+/* display name of player i */
+function PN(i){
+  if(!two()) return S.players[i];
+  return i===myIdx ? (myName() || S.players[i]) : (D.partner || S.players[i]);
+}
+/* who may act now. null = host only */
+function actor(){
+  if(!S) return -1;
+  return S.phase==='board' ? S.turn : 0;
+}
+function save(){ D.save(S); }
+function toast(m){ if(window.KA && KA.toast) KA.toast(m); }
+{ const sv = LSget(KEY,null); if(sv && sv.tiers && sv.phase && sv.phase!=='final') S = sv; }
+function quitGame(){
+  if(!confirm('End this game for both players?')) return;
+  D.quit(S); S=null; localStorage.removeItem(KEY);
+  render();
+}
 
-function initGame(nameA, nameB){
+function initGame(nameA, nameB, mode, opt){
+  opt = opt || (S && S.opt) || {heat:2, off:[], fin:true};
+  const tiers = opt.heat===1 ? [0,1] : opt.heat===3 ? [1,2] : [0,1,2];
   S = {
+    mode: mode||'one', gid: Date.now(), seq: 0, texts: null, opt, tiers, asg: null, rr: false, passed: [],
     phase:'board',
-    tierIndex:0,
+    tierIndex:tiers[0],
     players:[nameA, nameB],
     turn:0,
     grid:emptyGrid(),
@@ -317,7 +362,7 @@ function dropDisc(col){
   const row = lowestEmptyRow(grid, col);
   if(row===-1) return;
   const tier = TIERS[S.tierIndex];
-  const typeKeys = Object.keys(tier.types);
+  let typeKeys = Object.keys(tier.types).filter(k=>!(S.opt.off||[]).includes(k)); if(!typeKeys.length) typeKeys = Object.keys(tier.types);
   const type = randomFrom(typeKeys);
   grid[row][col] = {player:S.turn, type};
 
@@ -325,6 +370,8 @@ function dropDisc(col){
   if(line){
     S.winLine = line;
     S.winner = S.turn;
+    S.asg = [0,1,2,3].map(()=>'l'); S.rr = false; S.passed = [];
+    S.texts = line.map(([r,c])=> randomFrom(tierOptions(tier.types[grid[r][c].type].options)));
     S.phase = 'round-win';
     return;
   }
@@ -335,13 +382,16 @@ function dropDisc(col){
   S.turn = 1 - S.turn;
 }
 
+function playAgain(){ const a=S.players[0], b=S.players[1], m=S.mode; if(m==='two'){ myIdx=0; LSset(KEY+'_me',0); } initGame(a,b,m,S.opt); save(); render(); }
 function nextRound(){
-  if(S.tierIndex >= TIERS.length-1){
+  const pos = S.tiers.indexOf(S.tierIndex);
+  if(pos >= S.tiers.length-1){
     S.finalWinner = S.winner;
     S.phase = 'final';
+    try{ window.KA_TRACK && KA_TRACK.log('play','Connect Foreplay','Finished all rounds'); }catch(e){}
     return;
   }
-  S.tierIndex++;
+  S.tierIndex = S.tiers[pos+1];
   S.grid = emptyGrid();
   S.winLine = null;
   S.winner = null;
@@ -390,29 +440,57 @@ function logo(){
 
 function setupScreen(){
   const wrap = el('div','panel');
+  const cp = LSget('ka_couple',{})||{};
   wrap.innerHTML = `
     <div class="eyebrow">Before you begin</div>
-    <p class="muted" style="margin-bottom:18px;">Two players, one board, three rounds that get hotter as you go. Connect four discs in a row — horizontally, vertically, or diagonally — to win the round and set your challenges.</p>
-    <label>Player One (goes first)</label>
-    <input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
-    <label>Player Two</label>
-    <input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
+    <p class="muted" style="margin-bottom:14px;">Two players, one board, three rounds that get hotter as you go. Connect four discs in a row, horizontally, vertically or diagonally, to win the round and set your challenges.</p>
+    <label>How do you want to play?</label>
+    <div class="mode-pick" id="mode">
+      <button type="button" class="on" data-m="one"><b>📱 One phone</b><span>Share this phone and take turns tapping the board.</span></button>
+      <button type="button" data-m="two" ${linked()?'':'disabled'}><b>📱📱 Two phones</b><span>${linked()?'Each of you plays on your own phone, live. Your partner joins by themselves.':'Needs a linked partner. Sign in and link in Together first.'}</span></button>
+    </div>
+    ${linked()?'':'<p class="muted" style="font-size:12px;margin:6px 0 0"><a href="kamaagni-together.html" style="color:var(--gold)">Open Together to link</a></p>'}
+    <label>Naughtiness</label>
+    <div class="mode-pick" id="heat" style="grid-template-columns:repeat(3,1fr)">${[[1,'🌸 Sweet','Spark + Blaze'],[2,'🔥 Spicy','All three rounds'],[3,'🌋 Wild','Blaze + Inferno']].map(h=>`<button type="button" data-h="${h[0]}"><b>${h[1]}</b><span>${h[2]}</span></button>`).join('')}</div>
+    <details style="margin:10px 0"><summary style="cursor:pointer;color:var(--gold)">Challenge types (tap to turn off)</summary>
+      <div id="types" style="margin-top:8px">${TIERS.map(t=>`<div class="muted" style="margin:6px 0 2px">${t.label}</div><div class="cf-row">${Object.entries(t.types).map(([k,v])=>`<button type="button" class="cf-chip on" data-t="${k}">${v.icon} ${k}</button>`).join('')}</div>`).join('')}</div>
+    </details>
+    <label style="display:flex;gap:8px;align-items:center;text-transform:none;letter-spacing:0"><input type="checkbox" id="fin" checked style="width:auto"> Self-control finale: who holds out longest?</label>
+    <label id="la">Player One (goes first)</label>
+    <input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16" value="${esc(myName()||cp.p1||'')}">
+    <div id="bwrap"><label>Player Two</label>
+    <input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16" value="${esc(cp.p2||'')}"></div>
     <button class="btn-primary" id="startBtn">Light the Board</button>
     <div class="center" style="margin-top:12px;">
       <button class="link-btn" id="rulesBtn">How to Play →</button>
     </div>
   `;
+  let mode='one', heat = [1,2,3].includes(+LSget('ka_heat',2)) ? +LSget('ka_heat',2) : 2; const off = new Set();
+  const syncHeat=()=>wrap.querySelectorAll('[data-h]').forEach(b=>b.classList.toggle('on', +b.dataset.h===heat)); syncHeat();
+  wrap.querySelectorAll('[data-h]').forEach(b=> b.onclick=()=>{ heat=+b.dataset.h; LSset('ka_heat',heat); syncHeat(); });
+  wrap.querySelectorAll('[data-t]').forEach(b=> b.onclick=()=>{ const k=b.dataset.t; if(off.has(k)){ off.delete(k); b.classList.add('on'); } else { off.add(k); b.classList.remove('on'); } });
+  const sync=()=>{ wrap.querySelector('#bwrap').style.display = mode==='two'?'none':''; wrap.querySelector('#la').textContent = mode==='two'?'Your name (you go first, your partner joins after)':'Player One (goes first)'; };
+  wrap.querySelectorAll('[data-m]').forEach(b=> b.onclick=()=>{ if(b.disabled) return; mode=b.dataset.m; wrap.querySelectorAll('[data-m]').forEach(x=>x.classList.toggle('on',x===b)); sync(); });
   wrap.querySelector('#startBtn').onclick = ()=>{
     const a = wrap.querySelector('#nameA').value.trim() || 'Player One';
     const b = wrap.querySelector('#nameB').value.trim() || 'Player Two';
-    initGame(a,b);
-    render();
+    if(mode==='two' && !linked()) return toast('Link with your partner in Together first');
+    myIdx = 0; LSset(KEY+'_me',0); LSset(KEY+'_n', a);
+    const tiers = heat===1?[0,1]:heat===3?[1,2]:[0,1,2];
+    for(const ti of tiers){ if(Object.keys(TIERS[ti].types).filter(k=>!off.has(k)).length<2) return toast('Keep at least 2 challenge types on in '+TIERS[ti].label); }
+    initGame(a,b,mode,{heat, off:[...off], fin: wrap.querySelector('#fin').checked}); save(); render();
   };
-  wrap.querySelector('#rulesBtn').onclick = ()=>{
-    S = {phase:'rules', prevSetup:true};
-    render();
-  };
+  wrap.querySelector('#rulesBtn').onclick = openRules;
   return wrap;
+}
+
+function openRules(){
+  let g = document.getElementById('cf-rules'); if(g) g.remove();
+  g = el('div'); g.id='cf-rules';
+  const inner = el('div','cf-rin'); inner.appendChild(rulesScreen());
+  g.appendChild(inner); document.body.appendChild(g); document.body.style.overflow='hidden';
+  const close = ()=>{ g.remove(); document.body.style.overflow=''; };
+  g.querySelector('.btn-primary').onclick = close; g.onclick = e=>{ if(e.target===g) close(); };
 }
 
 function rulesScreen(){
@@ -454,6 +532,32 @@ function rulesScreen(){
   s5.innerHTML = `<h3>Draws</h3><p>If all 42 spaces fill up and neither player has four in a row, it's a draw — no challenges this time. Clear the board and replay the same round.</p>`;
   wrap.appendChild(s5);
 
+  const s8 = el('div','rules-section');
+  s8.innerHTML = `<h3>The winner's advantage</h3>
+    <ul>
+      <li>The round winner <strong>decides who does each challenge</strong>: themselves, their partner, or both.</li>
+      <li>The winner can <strong>re-draw one</strong> challenge per round.</li>
+      <li>The other player can <strong>pass</strong> on any challenge, always.</li>
+    </ul>
+    <h3>Make it yours</h3>
+    <ul>
+      <li><strong>Naughtiness:</strong> Sweet (Spark + Blaze), Spicy (all three rounds) or Wild (Blaze + Inferno).</li>
+      <li><strong>Challenge types:</strong> turn off any type you do not want. Topic filters in Settings also apply.</li>
+      <li><strong>Self-control finale:</strong> after the last round, see who held out longest.</li>
+    </ul>`;
+  wrap.appendChild(s8);
+
+  const s7 = el('div','rules-section');
+  s7.innerHTML = `<h3>One phone or two phones</h3>
+    <ul>
+      <li><strong>One phone:</strong> share the device. Tap a column on your turn, then pass it back.</li>
+      <li><strong>Two phones:</strong> both sign in and link in <em>Together</em> first. Start the game from one phone and the other joins by itself. You can only tap the board on your own turn; the other phone shows who is up. The challenges show on both screens.</li>
+      <li>Either of you can end the game with <strong>End game</strong>.</li>
+    </ul>
+    <h3>Ground rules</h3>
+    <ul><li>Everything is optional. Say "pass" at any time and skip a challenge, no explanation needed.</li><li>Challenge heat follows your Settings (heat level and topic filters).</li></ul>`;
+  wrap.appendChild(s7);
+
   const s6 = el('div','rules-section');
   s6.innerHTML = `<h3>Quick Tips</h3>
     <ul>
@@ -463,15 +567,18 @@ function rulesScreen(){
     </ul>`;
   wrap.appendChild(s6);
 
-  const btn = el('button','btn-primary','Back');
-  btn.onclick = ()=>{ S = savedGame; savedGame = null; render(); };
+  const btn = el('button','btn-primary','Got it');
   wrap.appendChild(btn);
   return wrap;
 }
 
+function hostOnly(btn){
+  if(two() && myIdx!==0){ const p = el('p','muted','Waiting for '+PN(0)+' to continue…'); return p; }
+  return btn;
+}
 function turnRow(){
   const wrap = el('div','turn-row');
-  S.players.forEach((name,i)=>{
+  [0,1].forEach((i)=>{ const name = PN(i);
     const col = el('div','turn-col'+(S.turn===i?' active':''));
     const discColor = i===0 ? 'linear-gradient(135deg, var(--flame), var(--ember-deep))' : 'linear-gradient(135deg, #f6e0a8, var(--gold-deep))';
     col.innerHTML = `<span class="turn-disc" style="background:${discColor}"></span><span class="turn-name">${name}</span>`;
@@ -486,11 +593,14 @@ function boardScreen(){
 
   const panel1 = el('div','panel');
   panel1.appendChild(el('div','tier-banner', tier.label));
-  panel1.appendChild(el('div','tier-sub', tier.sub));
+  panel1.appendChild(el('div','tier-sub', 'Round '+(S.tiers.indexOf(S.tierIndex)+1)+' of '+S.tiers.length+' · '+tier.sub.split('—')[1].trim()));
   panel1.appendChild(turnRow());
   const rulesLink = el('div','center', '<button class="link-btn" id="inGameRules">How to Play →</button>');
-  rulesLink.querySelector('#inGameRules').onclick = ()=>{ savedGame = S; S = {phase:'rules'}; render(); };
+  rulesLink.querySelector('#inGameRules').onclick = openRules;
   panel1.appendChild(rulesLink);
+  const mine = !two() || S.turn===myIdx;
+  panel1.appendChild(el('div','center muted', (two()? '<span class="badge" style="margin:0 6px 0 0">📱📱 Two phones</span>':'') + (mine ? 'Your move: tap a column.' : 'Waiting for '+esc(PN(S.turn))+'…') + ' <button class="link-btn" id="quitBtn" style="margin-left:8px">End game</button>'));
+  panel1.querySelector('#quitBtn').onclick = quitGame;
   frag.appendChild(panel1);
 
   const boardPanel = el('div','panel');
@@ -498,7 +608,7 @@ function boardScreen(){
   const board = el('div','board');
   for(let c=0;c<COLS;c++){
     const colEl = el('div','col');
-    colEl.onclick = ()=>{ dropDisc(c); render(); };
+    colEl.onclick = ()=>{ if(two() && S.turn!==myIdx) return toast('Wait for '+PN(S.turn)+' to play'); dropDisc(c); save(); render(); };
     for(let r=ROWS-1;r>=0;r--){
       const cell = S.grid[r][c];
       const slot = el('div','slot'+(cell?` p${cell.player}`:' empty'));
@@ -522,29 +632,37 @@ function boardScreen(){
 
 function roundWinScreen(){
   const tier = TIERS[S.tierIndex];
-  const winnerName = S.players[S.winner];
+  const w = S.winner, l = 1-w, wn = PN(w), ln = PN(l);
+  const iAmW = !two() || myIdx===w, iAmL = !two() || myIdx===l;
   const wrap = el('div','panel');
   wrap.appendChild(el('div','badge', `${tier.label} — Round Won`));
-  wrap.appendChild(el('h2', '', `${winnerName} connected four!`));
-  wrap.appendChild(el('p','muted', 'Both of you complete these four challenges together, based on the markers in the winning line:'));
-
+  wrap.appendChild(el('h2', '', `${esc(wn)} connected four!`));
+  wrap.appendChild(el('p','muted', `<b>Winner's advantage:</b> ${esc(wn)} decides who does each challenge and can re-draw one. ${esc(ln)} can pass on any challenge, no questions asked.`));
   const list = el('ul','challenge-list');
-  S.winLine.forEach(([r,c])=>{
-    const cell = S.grid[r][c];
-    const type = cell.type;
-    const meta = tier.types[type];
-    const text = randomFrom(meta.options);
-    const item = el('li','challenge-item');
+  S.winLine.forEach(([r,c],i)=>{
+    const type = S.grid[r][c].type, meta = tier.types[type];
+    const text = (S.texts && S.texts[i]) || randomFrom(tierOptions(meta.options));
+    const who = S.asg[i], passed = S.passed.includes(i);
+    const item = el('li','challenge-item'+(passed?' passed':''));
     item.innerHTML = `<span class="challenge-icon">${meta.icon}</span>
-      <span class="challenge-text"><span class="challenge-tag">${type}</span>${text}</span>`;
+      <span class="challenge-text"><span class="challenge-tag">${type}</span>${esc(text)}
+      <span class="cf-ctl">
+        ${['w','l','b'].map(k=>`<button type="button" class="cf-chip ${who===k?'on':''}" data-r="${i}:${k}" ${(!iAmW||passed)?'disabled':''}>${k==='w'?esc(wn)+' does it':k==='l'?esc(ln)+' does it':'Both'}</button>`).join('')}
+        <button type="button" class="cf-chip" data-rr="${i}" ${(!iAmW||S.rr||passed)?'disabled':''}>🔄 Re-draw${S.rr?' (used)':''}</button>
+        <button type="button" class="cf-chip ${passed?'on':''}" data-pass="${i}" ${(!iAmL)?'disabled':''}>🛡 ${passed?'Passed':'Pass'}</button>
+      </span></span>`;
     list.appendChild(item);
   });
   wrap.appendChild(list);
+  list.querySelectorAll('[data-r]').forEach(b=> b.onclick=()=>{ const [i,k]=b.dataset.r.split(':'); S.asg[+i]=k; save(); render(); });
+  list.querySelectorAll('[data-rr]').forEach(b=> b.onclick=()=>{ const i=+b.dataset.rr, [r,c]=S.winLine[i], opts=tierOptions(tier.types[S.grid[r][c].type].options).filter(t=>t!==S.texts[i]); if(opts.length) S.texts[i]=randomFrom(opts); S.rr=true; save(); render(); });
+  list.querySelectorAll('[data-pass]').forEach(b=> b.onclick=()=>{ const i=+b.dataset.pass; S.passed = S.passed.includes(i) ? S.passed.filter(x=>x!==i) : S.passed.concat(i); save(); render(); });
 
-  const isLastTier = S.tierIndex >= TIERS.length-1;
-  const btn = el('button','btn-primary', isLastTier ? 'Finish the Game' : `Continue to ${TIERS[S.tierIndex+1].label}`);
-  btn.onclick = ()=>{ nextRound(); render(); };
-  wrap.appendChild(btn);
+  const isLastTier = S.tierIndex === S.tiers[S.tiers.length-1];
+  const nxt = isLastTier ? 'Finish the Game' : 'Continue to '+TIERS[S.tiers[S.tiers.indexOf(S.tierIndex)+1]].label;
+  const btn = el('button','btn-primary', nxt);
+  btn.onclick = ()=>{ nextRound(); save(); render(); };
+  wrap.appendChild(hostOnly(btn));
   return wrap;
 }
 
@@ -554,21 +672,33 @@ function drawScreen(){
     <h2>No one connected four</h2>
     <p class="muted">The board filled up with no winner. Clear it and try this round again.</p>`;
   const btn = el('button','btn-primary','Replay This Round');
-  btn.onclick = ()=>{ replayTier(); render(); };
-  wrap.appendChild(btn);
+  btn.onclick = ()=>{ replayTier(); save(); render(); };
+  wrap.appendChild(hostOnly(btn));
   return wrap;
 }
 
 function finalScreen(){
-  const winnerName = S.players[S.finalWinner];
+  const last = TIERS[S.tiers[S.tiers.length-1]];
   const wrap = el('div','panel final-screen');
-  wrap.innerHTML = `<div class="badge">Inferno Complete</div>
-    <h2>${winnerName} won the final round 🔥</h2>
-    <p class="muted">You've made it through Spark, Blaze, and Inferno. Take things wherever you both want to go from here.</p>`;
+  wrap.innerHTML = `<div class="badge">${last.label} Complete</div>
+    <h2>${esc(PN(S.finalWinner))} won the final round 🔥</h2>
+    <p class="muted">You've made it through ${S.tiers.map(i=>TIERS[i].label).join(', ')}. Take things wherever you both want to go from here.</p>`;
+  if(S.opt.fin){
+    const c = el('div','cf-crown');
+    const res = S.crown;
+    if(res===undefined || res===null){
+      c.innerHTML = `<h3>👑 Self-control crown</h3><p class="muted">The classic finale: who held out longest? Be honest.</p>
+        <div class="cf-row">${[0,1].map(i=>`<button type="button" class="cf-chip" data-g="${i}" ${two()&&myIdx!==i?'disabled':''}>${esc(PN(i))} gave in</button>`).join('')}<button type="button" class="cf-chip" data-g="b">Neither, both held out</button></div>`;
+    } else {
+      c.innerHTML = `<h3>👑 Self-control crown</h3><p>${res==='b' ? '🤝 Both of you held out. Shared crown!' : '👑 '+esc(PN(1-res))+' held out longest. '+esc(PN(res))+' owes them a favour.'}</p>`;
+    }
+    wrap.appendChild(c);
+    c.querySelectorAll('[data-g]').forEach(b=> b.onclick=()=>{ S.crown = b.dataset.g==='b' ? 'b' : +b.dataset.g; save(); render(); });
+  }
   const restart = el('button','btn-primary','Play Again');
   restart.style.marginTop='16px';
-  restart.onclick = ()=>{ initGame(S.players[0], S.players[1]); render(); };
-  wrap.appendChild(restart);
+  restart.onclick = ()=>{ playAgain(); };
+  wrap.appendChild(hostOnly(restart));
   return wrap;
 }
 

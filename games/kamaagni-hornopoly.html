@@ -1,45 +1,116 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
-<title>KamaAgni — Hornopoly</title>
-<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Hornopoly</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
 </head><body>
 <main class="kx app" id="app"></main>
-<script src="../js/ka-common.js"></script><script src="../js/ka-data.js"></script>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
 <script>
-
 (async () => {
-  const {LS, esc, top, pick, shuffle, heat, heatBar} = KX;
-  const app = document.getElementById('app');
-  const [A, B] = KX.names();
-  let dk = {};
-  try {
-    for (const id of ['hornopoly', 'hornobdsm', 'questions']) dk[id] = await (await fetch('../data/packs/' + id + '.json')).json();
-  } catch { app.innerHTML = top('Hornopoly', '') + '<div class="kx-card kx-center">Could not load. Open this page from your hosted site.</div>'; return; }
-  let st = {turn: 0, score: [0, 0], deck: 'hornopoly', pile: [], card: null};
-  const fill = (t, who) => { const a = who === 0 ? A : B, b = who === 0 ? B : A; return t.replace(/\{A\}/g, a).replace(/\{B\}/g, b); };
-  function setup() {
-    const h = heat();
-    app.innerHTML = top('Hornopoly', 'The card game of Hornopoly, no board needed. Take turns drawing; the active player is {A}.'.replace('{A}', A)) + '<div id="hb"></div>' +
-      `<div class="kx-tabs"><button data-d="hornopoly" class="${st.deck === 'hornopoly' ? 'on' : ''}">🃏 Game cards</button>${h >= 3 ? `<button data-d="hornobdsm" class="${st.deck === 'hornobdsm' ? 'on' : ''}">⛓ BDSM cards</button>` : ''}<button data-d="questions" class="${st.deck === 'questions' ? 'on' : ''}">❓ Questions</button></div>
-      <div class="kx-card kx-center"><div class="kx-turn">Score</div><div class="kx-row" style="justify-content:space-around"><div><div class="kx-big" style="font-size:30px">${st.score[0]}</div><div class="kx-muted">${esc(A)}</div></div><div><div class="kx-big" style="font-size:30px">${st.score[1]}</div><div class="kx-muted">${esc(B)}</div></div></div></div>
-      <div class="kx-card kx-play" style="margin-top:12px" id="cd"><div class="kx-turn">${esc(st.turn === 0 ? A : B)}'s turn</div>
-        <div class="kx-big" style="font-size:22px">${st.card ? esc(fill(st.card, st.turn)) : 'Draw a card'}</div></div>
-      <div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn" id="dr">🃏 Draw</button>${st.card ? '<button class="kx-btn gold" id="dn">Done +1</button><button class="kx-btn ghost" id="pa">Pass</button>' : ''}${st.card && /\((\d+)(?:-\d+)? ?min/.test(st.card) ? '<button class="kx-btn gold" id="tm">⏱ Timer</button>' : ''}</div>
-      <p class="kx-note">Agree on a safe word. Respect each other's limits. Pass any card you do not both want.</p>`;
-    heatBar(document.getElementById('hb'), () => { if (heat() < 3 && st.deck === 'hornobdsm') st.deck = 'hornopoly'; setup(); });
-    app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { st.deck = b.dataset.d; st.pile = []; st.card = null; setup(); });
-    document.getElementById('dr').onclick = () => { if (!st.pile.length) st.pile = shuffle(dk[st.deck]); st.card = st.pile.pop(); setup(); };
-    const dn = document.getElementById('dn'); if (dn) dn.onclick = () => { st.score[st.turn]++; st.turn = 1 - st.turn; st.card = null; setup(); };
-    const pa = document.getElementById('pa'); if (pa) pa.onclick = () => { st.turn = 1 - st.turn; st.card = null; setup(); };
-    const tm = document.getElementById('tm'); if (tm) tm.onclick = () => { const m = st.card.match(/\((\d+)(?:-(\d+))?/); window.KA && KA.timer(+(m[2] || m[1]) * 60, 'Hornopoly'); };
+'use strict';
+const {esc, shuffle, LS} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_horno_v2';
+const PACKS = [
+  {id: 'foreplaycards', l: 'Foreplay starters', i: '💋', h: 1, n: 'Slow, sensual openers', g: '🌸 Gentle'},
+  {id: 'questions', l: 'Bedroom questions', i: '❓', h: 2, n: 'Talk about what you like', g: '🌸 Gentle'},
+  {id: 'kinkycards', l: 'Kinky cards', i: '😏', h: 2, n: 'Playful, a little naughty', g: '🔥 Spicy'},
+  {id: 'hornopoly', l: 'Hornopoly game cards', i: '🃏', h: 3, n: 'Timed power-play challenges', g: '🌋 Wild'},
+  {id: 'hornobdsm', l: 'BDSM cards', i: '⛓️', h: 3, n: 'Intense. Bratty and bossy', g: '🌋 Wild'},
+  {id: 'warmup', l: 'Warm-up orders', i: '👑', h: 3, n: 'Short commands to get going', g: '🌋 Wild'}
+];
+const DATA = {};
+try { await Promise.all(PACKS.map(p => fetch('../data/packs/' + p.id + '.json').then(r => r.json()).then(d => { DATA[p.id] = d.filter(x => typeof x === 'string' && x.length > 8 && !/\bWould like You\b/.test(x)); }))); }
+catch (e) { app.innerHTML = '<div class="kx-card">Could not load the cards. Open this page from your hosted site.</div>'; return; }
+let S = null, pool = [], pi = 0, stop = null;
+const D = KA_DUO.init({g: 'horno', key: KEY, get: () => S, onState: st => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
+S = D.load();
+const N = () => D.names(S), two = () => !!(S && S.mode === 'two'), mine = () => !two() || S.turn === D.me;
+const fill = (t, who) => { const n = N(), a = n[who], b = n[1 - who]; return t.replace(/\{A\}/g, a).replace(/\{B\}/g, b); };
+function build() {
+  const sel = new Set(S.cats), out = [];
+  PACKS.forEach(p => { if (sel.has(p.id) && p.h <= S.heat) DATA[p.id].forEach(t => out.push({p: p.id, pl: p.l, h: p.h, t})); });
+  pool = shuffle(out); pi = 0;
+}
+function draw() { if (!pool.length) build(); if (!pool.length) return {p: '', pl: '', h: 1, t: 'No cards left. Turn on more packs in the setup.'}; if (pi >= pool.length) { pool = shuffle(pool); pi = 0; } return pool[pi++]; }
+function start(o) {
+  S = {mode: o.mode, gid: Date.now(), seq: 0, phase: 'draw', turn: Math.random() < .5 ? 0 : 1, cats: o.cats, heat: o.heat, goal: o.extras.goal === 'free' ? 0 : +o.extras.goal, score: [0, 0], passes: [+o.extras.pass, +o.extras.pass], board: o.extras.board === 'on', pos: [0, 0], timer: o.extras.timer === 'on', cur: null, count: 0, names: [(LS.get('ka_couple', {}) || {}).p1 || 'Partner 1', (LS.get('ka_couple', {}) || {}).p2 || 'Partner 2']};
+  D.setMe(0); build(); D.save(S); render();
+}
+const GUIDE = `<h3>The idea</h3><p>Hornopoly is a card game with no board. Take turns drawing a card and doing what it says together. Complete a card to score a point. The first to your target score wins (or just play freely).</p>
+<h3>Your turn</h3><ol><li>Draw a card. {A} on the card is you, {B} is your partner.</li><li>Do it, answer it, or start the timer if the card has a time.</li><li>Tap <b>Done</b> to score, or <b>Pass</b> to skip. Passes are limited.</li></ol>
+<h3>Packs</h3><p>Choose the packs you want. Gentle packs are for warming up, wild packs are timed power-play. Packs above your heat level stay hidden.</p>
+<h3>Two phones</h3><p>Link in Together first. Only the player whose turn it is gets the buttons. The other screen follows live.</p>
+<h3>Ground rules</h3><ul><li>Agree on a safe word before you start.</li><li>Everything is optional. "No" ends a card with no questions asked.</li></ul>`;
+function setup() {
+  U.setup(app, {id: 'horno', title: 'Hornopoly', sub: 'The card game of Hornopoly, no board needed. Pick your packs and play.', modes: ['one', 'two'], duo: D,
+    catsLabel: 'Which packs?', cats: PACKS.map(p => ({id: p.id, l: p.l, i: p.i, n: p.n + ' · ' + DATA[p.id].length + ' cards', h: p.h, g: p.g})),
+    extras: [{id: 'goal', label: 'Play to', def: 'free', opts: [['free', 'Free play'], ['5', '5 points'], ['10', '10 points'], ['15', '15 points']]},
+             {id: 'pass', label: 'Passes each', def: '3', opts: [['2', '2'], ['3', '3'], ['5', '5'], ['99', 'Unlimited']]},
+             {id: 'board', label: 'Game board', def: 'off', opts: [['off', 'Cards only'], ['on', 'Board with dice']]},
+             {id: 'timer', label: 'Timers on timed cards', def: 'on', opts: [['on', 'On'], ['off', 'Off']]}],
+    startLabel: 'Start Hornopoly', guideTitle: 'How to play Hornopoly', guide: GUIDE, start, note: 'Both partners must agree to everything. Say "pass" at any time.'});
+}
+const TILES = ['card','kiss','card','bonus','card','massage','card','pass','card','swap','card','kiss','card','bonus','card','compliment','card','pass','card','rest'];
+const TI = {card: '🃏', kiss: '💋', bonus: '⭐', massage: '💆', pass: '🛡', swap: '🔁', compliment: '💬', rest: '🛋'};
+const TXT = {kiss: 'Kiss your partner for 30 seconds. No hands needed.', bonus: 'Bonus! Take a free point.', massage: 'Give your partner a 1-minute massage wherever they choose.', pass: 'Safe harbour: you gain an extra pass.', swap: 'Double turn! Roll again.', compliment: 'Say three things you love about your partner.', rest: 'Rest stop. Sip some water, check in with each other, then continue.'};
+const boardHtml = () => '<div style="display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:10px 0">' + TILES.map((t, i) => '<div style="aspect-ratio:1;border-radius:8px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:14px;position:relative">' + TI[t] + '<span style="font-size:10px;line-height:1">' + (S.pos[0] === i ? '<b style="color:#ff8fb0">●</b>' : '') + (S.pos[1] === i ? '<b style="color:#8fd0ff">●</b>' : '') + '</span></div>').join('') + '</div>';
+const secs = t => { const m = t.match(/\((\d+)(?:\s*-\s*(\d+))?\s*min/i); return m ? +(m[2] || m[1]) * 60 : 0; };
+function bar() { const n = N(); return U.bar([['🏆 ' + n[0] + ' ' + S.score[0] + ' · ' + n[1] + ' ' + S.score[1] + (S.goal ? ' / ' + S.goal : ''), 'h2'], ['🛡 ' + (S.passes[S.turn] > 90 ? '∞' : S.passes[S.turn]), ''], two() ? ['📱📱 Two phones', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true}); }
+function render() {
+  if (stop) { stop(); stop = null; }
+  if (!S) return setup();
+  if (!pool.length) build();
+  if (S.phase === 'end') return endView();
+  const n = N(), act = mine(), t = S.turn;
+  const who = `<div class="kd-turn p${t}"><i></i>${esc(n[t])}'s turn</div>`;
+  let body;
+  if (S.phase === 'draw') body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who}<div class="kx-big" style="margin:16px auto">${act ? 'Draw a card' : esc(n[t]) + ' is drawing…'}</div>${S.board ? boardHtml() : ''}${act ? '<button class="kx-btn gold" id="dr">' + (S.board ? '🎲 Roll the dice' : '🃏 Draw') + '</button>' : '<p class="kx-muted">Your screen updates by itself.</p>'}</div>`;
+  else if (S.phase === 'tile') body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who}${boardHtml()}<div class="kx-big" style="margin:8px auto">🎲 ${S.roll} · ${TI[S.tile]}</div><p>${esc(S.msg)}</p>${act ? '<button class="kx-btn gold" id="tn">Continue</button>' : ''}</div>`;
+  else { const c = S.cur, sc = S.timer ? secs(c.t) : 0;
+    body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who}<div style="margin:14px 0 4px">${U.card('<span>🃏</span>', `<span class="kx-chip h${c.h}">${esc(c.pl)}</span><div class="kx-big" style="font-size:${c.t.length > 160 ? 17 : 20}px">${esc(fill(c.t, t))}</div>${sc && act ? '<div id="tm"></div>' : ''}`, 'tone-' + c.h)}</div>
+      ${act ? `<div class="kd-pass"><button class="kx-btn gold" id="dn">✓ Done +1</button><button class="kx-btn ghost" id="ps" ${S.passes[t] <= 0 ? 'disabled' : ''}>⏭ Pass</button><button class="kx-btn ghost" id="sv">♡ Save</button></div>` : `<p class="kx-muted" style="margin-top:12px">${esc(n[t])} is on it.</p>`}</div>`; }
+  app.innerHTML = '<h1 class="kx-title"><span>Hornopoly</span></h1>' + bar() + body;
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play Hornopoly', two: two(), quit: () => { D.quit(S); S = null; render(); }});
+  const dr = document.getElementById('dr'); if (dr) dr.onclick = () => {
+    if (!S.board) { S.cur = draw(); S.phase = 'card'; D.save(S); render(); return; }
+    const roll = 1 + Math.floor(Math.random() * 6); S.roll = roll; S.pos[t] = (S.pos[t] + roll) % TILES.length; const tile = TILES[S.pos[t]]; S.tile = tile;
+    if (tile === 'card') { S.cur = draw(); S.phase = 'card'; }
+    else { S.msg = TXT[tile]; if (tile === 'bonus') S.score[t]++; if (tile === 'pass') S.passes[t]++; S.phase = 'tile'; }
+    D.save(S); render(); };
+  const tn = document.getElementById('tn'); if (tn) tn.onclick = () => { if (S.tile === 'swap') { S.cur = null; S.phase = 'draw'; D.save(S); render(); } else next(); };
+  if (S.phase === 'card') {
+    const c = S.cur; U.flip(app, 120);
+    const tm = document.getElementById('tm'); if (tm) stop = U.timer(tm, secs(c.t));
+    const dn = document.getElementById('dn');
+    if (dn) {
+      dn.onclick = () => { S.score[t]++; try { KA_TRACK.log('play', 'Hornopoly', c.t.slice(0, 70)); } catch (e) {} next(); };
+      document.getElementById('ps').onclick = () => { S.passes[t]--; next(); };
+      document.getElementById('sv').onclick = e => { KX.fav('cards', fill(c.t, t)); e.target.textContent = '♥ Saved'; };
+    }
   }
-  setup();
+}
+function next() { S.count++; S.cur = null; const won = S.goal && (S.score[0] >= S.goal || S.score[1] >= S.goal); S.turn = 1 - S.turn; S.phase = won ? 'end' : 'draw'; D.save(S); render(); }
+function endView() {
+  const n = N(), w = S.score[0] === S.score[1] ? -1 : (S.score[0] > S.score[1] ? 0 : 1);
+  app.innerHTML = '<h1 class="kx-title"><span>Hornopoly</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Game over</div><div class="kx-big" style="margin:10px auto">' + (w < 0 ? '🤝 A tie' : '🏆 ' + esc(n[w]) + ' wins') + '</div><p class="kx-muted">' + esc(n[0]) + ' ' + S.score[0] + ' · ' + esc(n[1]) + ' ' + S.score[1] + ' · ' + S.count + ' cards</p><p class="kx-muted">The winner picks how you both celebrate. 😏</p><div class="kx-row" style="justify-content:center;margin-top:14px"><button class="kx-btn gold" id="ag">Play again</button><a class="kx-btn ghost" href="../play.html">More games</a></div></div>';
+  window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 60});
+  document.getElementById('ag').onclick = () => { D.clear(); S = null; render(); };
+}
+render();
 })();
-
 </script>
-<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script><script src="../js/ka-track.js"></script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
 <script src="../js/ka-chrome.js"></script>
 </body></html>

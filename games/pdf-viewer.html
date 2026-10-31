@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
-<title>KamaAgni — Reader</title>
+<title>KamaAgni Reader</title>
 <link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
 <style>
 body{padding-bottom:0}
@@ -40,7 +40,7 @@ body{padding-bottom:0}
   else return bad('No file selected.');
   var fname=decodeURIComponent((p||u).split('/').pop());
   document.getElementById('ttl').textContent=name||fname.replace(/\.pdf$/i,'');
-  document.title='KamaAgni — '+(name||fname);
+  document.title='KamaAgni '+(name||fname);
   var scale=1, pdf=null, boxes=[], rendered={}, token=0;
   document.getElementById('dl').onclick=function(){
     var b=this; b.textContent='Downloading…'; b.disabled=true;

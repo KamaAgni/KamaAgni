@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Tic-Tac-Tease</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_ttt_v1';
+let DK; let S = null;
+const D = KA_DUO.init({g: 'ttt', key: KEY, get: () => S, onState: st => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
+const linesFor = (n, k) => { const out = []; for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) for (const [dx, dy] of [[1,0],[0,1],[1,1],[1,-1]]) { const l = []; for (let q = 0; q < k; q++) { const xx = x + dx * q, yy = y + dy * q; if (xx < 0 || yy < 0 || xx >= n || yy >= n) break; l.push(yy * n + xx); } if (l.length === k) out.push(l); } return out; };
+const winner = b => { const n = S.size || 3, k = S.need || 3; for (const l of linesFor(n, k)) { const v = b[l[0]]; if (v != null && l.every(i => b[i] === v)) return v; } return b.every(x => x != null) ? 'draw' : null; };
+const N = () => D.names(S), two = () => !!(S && S.mode === 'two'), mine = () => !two() || S.turn === D.me;
+(async () => { try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; } S = D.load(); render(); })();
+function prizes() { const sel = new Set(S.cats), out = []; DK.cats.forEach(c => { if (sel.has(c.id) && c.h <= S.heat) DK.items[c.id].forEach(t => out.push({t, h: c.h, cl: c.l})); }); return out.length ? out : [{t: 'A kiss of your choice', h: 1, cl: 'Sweet'}]; }
+function start(o) { S = {size: +o.extras.size, need: +o.extras.size === 3 ? 3 : 4, mode: o.mode, gid: Date.now(), seq: 0, phase: 'play', cats: o.cats, heat: o.heat, best: +o.extras.best, board: Array(+o.extras.size * +o.extras.size).fill(null), turn: 0, first: 0, wins: [0, 0], round: 1, prize: null, names: [(LS.get('ka_couple', {}) || {}).p1 || 'Partner 1', (LS.get('ka_couple', {}) || {}).p2 || 'Partner 2']}; D.setMe(0); D.save(S); render(); }
+const GUIDE = `<h3>The idea</h3><p>Classic noughts and crosses. The twist: every round winner picks a prize from three hidden coupons, and the loser delivers it.</p>
+<h3>Play</h3><ol><li>Take turns placing your mark.</li><li>Get three in a row to win the round.</li><li>The winner flips one of three prize cards and the loser does it.</li><li>First to win the target number of rounds wins the game and a bonus coupon.</li></ol>
+<h3>Two phones</h3><p>Link in Together first. Each phone plays one mark. The board syncs live.</p>`;
+function setup() { U.setup(app, {id: 'ttt', title: 'Tic-Tac-Tease', sub: 'Three in a row wins a prize from the coupon deck.', modes: ['one', 'two'], duo: D, catsLabel: 'Prize categories', cats: DK.cats.map(c => ({id: c.id, l: c.l, i: c.i, n: DK.items[c.id].length + ' prizes', h: c.h, g: c.h === 1 ? '🌸 Gentle' : c.h === 2 ? '🔥 Spicy' : '🌋 Wild'})), extras: [{id: 'size', label: 'Board', def: '3', opts: [['3', '3×3 (classic)'], ['4', '4×4 (get 4)'], ['5', '5×5 (get 4)']]}, {id: 'best', label: 'Play to', def: '3', opts: [['2', 'First to 2'], ['3', 'First to 3'], ['5', 'First to 5']]}], startLabel: 'Start', guideTitle: 'How Tic-Tac-Tease works', guide: GUIDE, start}); }
+function render() {
+  if (!DK) return; if (!S) return setup();
+  const n = N(), act = mine(), t = S.turn;
+  const head = '<h1 class="kx-title"><span>Tic-Tac-Tease</span></h1>' + U.bar([['❌ ' + esc(n[0]) + ' ' + S.wins[0], t === 0 && S.phase === 'play' ? 'h2' : ''], ['⭕ ' + esc(n[1]) + ' ' + S.wins[1], t === 1 && S.phase === 'play' ? 'h2' : ''], ['First to ' + S.best, ''], two() ? ['📱📱', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true});
+  const bind = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How Tic-Tac-Tease works', two: two(), quit: () => { D.quit(S); S = null; render(); }});
+  if (S.phase === 'end') { const w = S.wins[0] > S.wins[1] ? 0 : 1; app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Champion</div><div class="kx-big" style="margin:10px auto">🏆 ' + esc(n[w]) + '</div><p class="kx-muted">Bonus: ' + esc(S.bonus || '') + '</p><div class="kd-pass"><button class="kx-btn gold" id="ag">Play again</button></div></div>'; bind(); window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 60}); document.getElementById('ag').onclick = () => { D.clear(); S = null; render(); }; return; }
+  if (S.phase === 'prize') {
+    const w = S.rw, pa = S.picks; app.innerHTML = head + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">${esc(n[w])} won the round</div><div class="kx-big" style="margin:8px auto">${S.chosen == null ? 'Flip a prize card' : esc(pa[S.chosen].t)}</div>${S.chosen == null ? `<div class="kd-hand">${pa.map((p, i) => `<button class="kd-hc tone-${p.h}" data-pk="${i}" ${w === (two() ? D.me : w) ? '' : 'disabled'}><b>🎟</b><em>Tap to flip</em></button>`).join('')}</div>` : `<p class="kx-muted">${esc(n[1 - w])} delivers it.</p><div class="kd-pass">${(two() ? D.me === 0 : true) ? '<button class="kx-btn gold" id="nx">Next round</button>' : '<span class="kx-muted">Waiting for ' + esc(n[0]) + '…</span>'}</div>`}</div>`; bind();
+    app.querySelectorAll('[data-pk]').forEach(b => b.onclick = () => { S.chosen = +b.dataset.pk; D.save(S); try { KA_TRACK.log('play', 'Tic-Tac-Tease', S.picks[S.chosen].t.slice(0, 60)); } catch (e) {} render(); });
+    const nx = document.getElementById('nx'); if (nx) nx.onclick = () => { if (S.wins[0] >= S.best || S.wins[1] >= S.best) { S.phase = 'end'; S.bonus = pick(prizes()).t; } else { S.phase = 'play'; S.board = Array((S.size || 3) * (S.size || 3)).fill(null); S.round++; S.first = 1 - S.first; S.turn = S.first; S.picks = null; S.chosen = null; } D.save(S); render(); }; return; }
+  app.innerHTML = head + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])} (${t === 0 ? '❌' : '⭕'})${act ? ', your move' : ''}</div><div class="kd-ttt" style="grid-template-columns:repeat(${S.size || 3},1fr);max-width:${S.size > 3 ? 380 : 330}px">${S.board.map((c, i) => `<button class="kd-tc" data-i="${i}" ${c != null || !act ? 'disabled' : ''}>${c === 0 ? '❌' : c === 1 ? '⭕' : ''}</button>`).join('')}</div></div>`; bind();
+  app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { const i = +b.dataset.i; if (S.board[i] != null || !act) return; S.board[i] = S.turn; const w = winner(S.board); try { navigator.vibrate && navigator.vibrate(15); } catch (e) {}
+    if (w === 'draw') { S.board = Array((S.size || 3) * (S.size || 3)).fill(null); S.first = 1 - S.first; S.turn = S.first; KX.toast('Draw! Fresh board.'); }
+    else if (w != null) { S.wins[w]++; S.phase = 'prize'; S.rw = w; S.picks = shuffle(prizes()).slice(0, 3); S.chosen = null; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); }
+    else S.turn = 1 - S.turn;
+    D.save(S); render(); });
+}
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

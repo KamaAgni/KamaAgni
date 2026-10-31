@@ -1,9 +1,9 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
-<title>KamaAgni — Progress</title>
+<title>KamaAgni Progress</title>
 <link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
 </head><body>
 <main class="kx app" id="app"></main>
@@ -30,6 +30,32 @@
    (lv?'<div class="kx-card kx-center"><div style="font-size:44px">'+lv.icon+'</div><div class="kx-big">Level '+lv.n+' · '+lv.name+'</div><div class="kx-prog"><i style="width:'+lv.pct+'%"></i></div><p class="kx-muted">'+lv.xp+' XP'+(lv.to?' · '+(lv.to-lv.xp)+' to next level':'')+' · 🔥 '+strk+' day streak</p></div><div style="height:12px"></div>':'')+'<div class="kx-card kx-center"><div class="kx-big">'+total+' moments together</div><div class="kx-prog"><i style="width:'+Math.min(100,total)+'%"></i></div><p class="kx-muted">Goal: 100 for the Devoted badge</p></div>'+
    '<div class="kx-sec">Your numbers</div><div class="kx-list">'+stats.map(s=>'<div class="kx-item"><span style="font-size:22px">'+s[0]+'</span><span class="kx-it">'+esc(s[1])+'</span><b>'+s[2]+'</b></div>').join('')+'</div>'+
    '<div class="kx-sec">Badges</div><div class="kx-list">'+badges.map(b=>'<div class="kx-item'+(b[2]?'':' done')+'"><span style="font-size:22px">'+(b[2]?b[0]:'🔒')+'</span><span class="kx-it">'+esc(b[1])+'</span></div>').join('')+'</div>';
+  /* year together recap + extra badges */
+  try{
+    const H=LS.get('ka_hist',[])||[],yr=new Date().getFullYear(),mine=H.filter(h=>new Date(h.t).getFullYear()===yr);
+    const byT={};mine.forEach(h=>{byT[h.a]=(byT[h.a]||0)+1});
+    const topG=Object.entries(byT).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const days=new Set(mine.map(h=>new Date(h.t).toDateString())).size;
+    const mon={};mine.forEach(h=>{const m=new Date(h.t).toLocaleString('en',{month:'long'});mon[m]=(mon[m]||0)+1});
+    const bm=Object.entries(mon).sort((a,b)=>b[1]-a[1])[0];
+    const nm=KX.names().join(' & ');
+    const lines=[mine.length+' moments logged',days+' different days together',topG.length?'Favourite: '+topG.map(t=>t[0]).join(', '):'Start playing to fill this in'];
+    if(bm)lines.push('Busiest month: '+bm[0]);
+    const extra=[['🎲','Played 5 different games',Object.keys(byT).length>=5],['🌙','10 days together',days>=10],['💫','50 moments this year',mine.length>=50],['🏆','100 moments this year',mine.length>=100],['🧘','Ritual keepers',mine.filter(h=>/ritual/i.test(h.y+h.a)).length>=5]];
+    const app=document.getElementById('app');
+    app.insertAdjacentHTML('beforeend','<div class="kx-sec">Your '+yr+' together</div><div class="kx-card kx-center"><div class="kx-big">'+mine.length+'</div><p class="kx-muted">'+lines.slice(1).map(esc).join(' · ')+'</p><button class="kx-btn" id="pg-share">📤 Share as image</button></div><div class="kx-sec">More badges</div><div class="kx-list">'+extra.map(b=>'<div class="kx-item'+(b[2]?'':' done')+'"><span style="font-size:22px">'+(b[2]?b[0]:'🔒')+'</span><span class="kx-it">'+esc(b[1])+'</span></div>').join('')+'</div>');
+    { // charts
+      const bars=(vals,labels,color)=>{const mx=Math.max(1,...vals),w=300/vals.length;return '<svg viewBox="0 0 300 120" style="width:100%" role="img" aria-label="chart">'+vals.map((v,i)=>'<rect x="'+(i*w+3)+'" y="'+(100-90*v/mx)+'" width="'+(w-6)+'" height="'+(90*v/mx)+'" rx="3" fill="'+color+'"/><text x="'+(i*w+w/2)+'" y="'+(97-90*v/mx)+'" font-size="8" fill="#ccc" text-anchor="middle">'+(v||'')+'</text><text x="'+(i*w+w/2)+'" y="113" font-size="7" fill="#999" text-anchor="middle">'+esc(labels[i])+'</text>').join('')+'</svg>'};
+      const now=Date.now(),wk=12,weeks=Array(wk).fill(0),labs=[];
+      H.forEach(h=>{const a=Math.floor((now-h.t)/(7*864e5));if(a>=0&&a<wk)weeks[wk-1-a]++});
+      for(let i=0;i<wk;i++){const d=new Date(now-(wk-1-i)*7*864e5);labs.push((d.getMonth()+1)+'/'+d.getDate())}
+      const dow=Array(7).fill(0);H.forEach(h=>dow[new Date(h.t).getDay()]++);
+      const typ={};H.forEach(h=>{const k=h.y||'play';typ[k]=(typ[k]||0)+1});
+      const tl=Object.entries(typ).sort((a,b)=>b[1]-a[1]).slice(0,6);
+      app.insertAdjacentHTML('beforeend','<div class="kx-sec">Activity charts</div><div class="kx-card"><b>Moments per week (last 12 weeks)</b>'+bars(weeks,labs,'#ff5d8f')+'</div><div class="kx-card"><b>Which days you connect</b>'+bars(dow,['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],'#ffb84d')+'</div><div class="kx-card"><b>What you do together</b>'+(tl.length?tl.map(t=>'<div class="kx-item"><span class="kx-it">'+esc(t[0])+'</span><b>'+t[1]+'</b></div>').join(''):'<p class="kx-muted">Play something to see this fill in.</p>')+'</div>');
+    }
+    document.getElementById('pg-share').onclick=()=>KA_SHARE&&KA_SHARE.share({kicker:'Our '+yr+' together',title:nm,big:String(mine.length),lines:lines.slice(1)});
+  }catch(e){}
 })();
 </script>
 <script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>

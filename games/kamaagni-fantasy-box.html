@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Fantasy Box</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_fantasy_v1';
+let st = LS.get(KEY, {box: [], hist: []}); const save = () => LS.set(KEY, st);
+const names = KX.names;
+const IDEAS = ['A slow massage with a warm oil I choose','Meet as strangers in a hotel bar','A whole evening where I only say yes','Being blindfolded and surprised with touch','A long bath with candles and nothing else','Taking turns leading for ten minutes each','A night of dirty talk only','Dressing up for you in something you have never seen','Making love somewhere new in the house','Watching you get ready, slowly','A full night of teasing, no finish','Writing a steamy short story together','Having you choose my outfit','A photo shoot just for the two of us','A tickle fight that ends in a long kiss','A surprise date in the middle of the week','A weekend away with no phones','Learning something new in bed together','An evening of pure worship: all about you','Trying one of the positions from the selector'];
+const GUIDE = `<h3>The idea</h3><p>Each of you writes fantasies, wishes or ideas on private slips and drops them into one shared box. Nobody sees who wrote what. Later, draw one at random and decide together what to do with it.</p>
+<h3>Writing</h3><p>Hand the phone to one partner at a time. Slips are stored only on this device. Start with "mild to spicy". Nothing is a promise.</p>
+<h3>Drawing</h3><p>Draw a slip. Choose: <b>Do it</b>, <b>Talk about it</b>, <b>Park it</b> (come back later) or <b>Not for me</b> (it leaves the box, no questions asked).</p>
+<h3>Ground rules</h3><ul><li>Every fantasy is allowed to be written. Not every fantasy has to be done.</li><li>A "no" is always respected.</li><li>Never ask who wrote a slip.</li></ul>`;
+let view = 'home', writer = null;
+
+/* ---- Two-phone shared box with a consent check ---- */
+let S = null;
+const D = KA_DUO.init({g: 'fantasy', key: 'ka_fantasy_duo', get: () => S, onState: st => { S = st; if (S && S.mode === 'two') duo(); }, onQuit: () => { S = null; view = 'home'; home(); }, onLink: () => { if (view === 'home') home(); },
+  merge: (cur, st) => {
+    const m = JSON.parse(JSON.stringify(cur));
+    (st.box || []).forEach(x => { if (!m.box.some(y => y.id === x.id)) m.box.push(x); });
+    (st.gone || []).forEach(g => { if (!m.gone.includes(g)) m.gone.push(g); });
+    m.box = m.box.filter(x => !m.gone.includes(x.id));
+    if ((st.r || 0) > (m.r || 0)) { m.r = st.r; m.cur = st.cur; m.ready = st.ready; m.res = st.res; m.hist = st.hist; }
+    else if ((st.r || 0) === (m.r || 0)) { m.ready = [Math.max(m.ready[0], st.ready[0]), Math.max(m.ready[1], st.ready[1])]; m.res = [m.res[0] != null ? m.res[0] : st.res[0], m.res[1] != null ? m.res[1] : st.res[1]]; if (!m.cur && st.cur) m.cur = st.cur; }
+    m.seq = Math.max(m.seq || 0, st.seq || 0); return m;
+  }});
+S = D.load(); if (S && S.mode !== 'two') S = null;
+const nm2 = () => D.names(S);
+const dsave = () => { D.save(S); };
+function duo() {
+  view = 'duo'; const n = nm2(), me = D.me, ot = 1 - me, mine = S.box.filter(x => x.w === me).length;
+  let body;
+  if (S.cur) {
+    const mr = S.res[me], tr = S.res[ot];
+    body = '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Your slip</div><div style="margin:12px 0">' + U.card('<span>🎁</span>', '<div class="kx-big">' + esc(S.cur.t) + '</div>') + '</div>' +
+      (mr == null ? '<p class="kx-muted">Choose privately. A "no" from either of you takes it out of the box, no questions.</p><div class="kd-pass"><button class="kx-btn gold" data-r="do">🔥 Do it</button><button class="kx-btn" data-r="talk">💬 Talk</button><button class="kx-btn ghost" data-r="park">🅿 Park</button><button class="kx-btn ghost" data-r="no">🚫 Not for me</button></div>' : '<p class="kx-muted">You answered. ' + (tr == null ? 'Waiting for ' + esc(n[ot]) + '…' : 'Both answered.') + '</p>') + '</div>';
+  } else if (S.ready[me]) {
+    body = '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Consent check</div><div class="kx-big" style="margin:10px auto">' + (S.ready[ot] ? 'Drawing…' : 'Waiting for ' + esc(n[ot]) + ' to say they are ready') + '</div><p class="kx-muted">A slip is drawn only when you both say you are ready.</p><button class="kx-btn ghost" id="cn">Cancel</button></div>';
+  } else {
+    body = '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Shared box</div><div class="kx-big" style="margin:8px auto">' + S.box.length + ' slips</div><p class="kx-muted">You wrote ' + mine + '. Slips from both phones sit in one box. No one sees who wrote what.</p><div class="kd-pass"><button class="kx-btn" id="wr">✍ Write a slip</button><button class="kx-btn gold" id="rd" ' + (S.box.length ? '' : 'disabled') + '>🎲 I am ready to draw</button></div></div>' +
+      (S.hist.length ? '<div class="kx-sec">Memory shelf</div><div class="kx-list">' + S.hist.slice(-6).reverse().map(h => '<div class="kx-item"><span class="kx-it">' + esc(h.t) + '<br><span class="kx-muted">' + esc(h.r) + '</span></span></div>').join('') + '</div>' : '');
+  }
+  app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1>' + U.bar([['📱📱 Two phones', 'h1'], [S.box.length + ' in the box', 'h2']], {guide: true, quit: true}) + body;
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Fantasy Box works', two: true, quit: () => { D.quit(S); S = null; view = 'home'; home(); }});
+  const q = id => document.getElementById(id);
+  if (q('wr')) q('wr').onclick = () => { U.guide('Write a slip', '<textarea id="ts" class="kx-input" rows="4" maxlength="200" placeholder="A wish, a fantasy or an idea"></textarea><button class="kx-btn gold" id="tsa" style="margin-top:10px">Drop in the box</button>'); q('tsa').onclick = () => { const v = q('ts').value.trim(); if (!v) return; S.box.push({t: v, w: me, id: Date.now() + '' + me + Math.floor(Math.random() * 99)}); dsave(); const gd = document.getElementById('kd-guide'); if (gd) gd.remove(); duo(); }; };
+  if (q('rd')) q('rd').onclick = () => { S.ready[me] = 1; dsave(); duo(); };
+  if (q('cn')) q('cn').onclick = () => { S.ready = [0, 0]; dsave(); duo(); };
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { S.res[me] = b.dataset.r; dsave(); duo(); });
+  if (me === 0 && !S.cur && S.ready[0] && S.ready[1] && S.box.length) { S.cur = pick(S.box); dsave(); duo(); return; }
+  if (me === 0 && S.cur && S.res[0] != null && S.res[1] != null) {
+    const r = S.res, c = S.cur; let out = '';
+    if (r.includes('no')) { S.gone.push(c.id); }
+    else if (r[0] === 'do' && r[1] === 'do') { S.gone.push(c.id); out = 'Did it ' + new Date().toLocaleDateString(); }
+    else if (r.includes('talk')) out = 'Talked about it ' + new Date().toLocaleDateString();
+    else out = 'Parked';
+    S.box = S.box.filter(x => !S.gone.includes(x.id)); if (out) S.hist.push({t: c.t, r: out});
+    S.cur = null; S.ready = [0, 0]; S.res = [null, null]; S.r++; try { KA_TRACK.log('play', 'Fantasy Box (two phones)', out); } catch (e) {} dsave(); duo();
+  }
+}
+function startDuo() {
+  if (!D.linked()) { KX.toast('Link your partner in Together first'); return; }
+  S = {mode: 'two', gid: Date.now(), seq: 0, phase: 'play', box: [], gone: [], ready: [0, 0], res: [null, null], hist: [], r: 0}; D.setMe(0); dsave(); duo();
+}
+
+function home() {
+  const n = names(), cnt = st.box.length;
+  app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1><p class="kx-sub">Write private slips, drop them in the box and draw one when the mood is right.</p>' + U.bar([[cnt + ' in the box', 'h2'], [st.hist.length + ' tried', '']], {guide: true}) +
+    `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Add to the box</div><div class="kd-pass"><button class="kx-btn" id="w0">✍ ${esc(n[0])} writes</button><button class="kx-btn" id="w1">✍ ${esc(n[1])} writes</button></div><div class="kx-turn" style="margin-top:16px">Pull one out</div><div class="kd-pass"><button class="kx-btn gold" id="dr" ${cnt ? '' : 'disabled'}>🎁 Draw a slip</button></div><div class="kx-turn" style="margin-top:16px">Two phones</div><div class="kd-pass"><button class="kx-btn ghost" id="dp">📱📱 Shared box with consent check</button></div><p class="kx-note">Slips never leave this device. Nobody can see who wrote what.</p></div>` +
+    (st.hist.length ? '<div class="kx-sec">Memory shelf</div><div class="kx-list">' + st.hist.slice(-8).reverse().map(h => `<div class="kx-item"><span class="kx-it">${esc(h.t)}<br><span class="kx-muted">${esc(h.r)}</span></span></div>`).join('') + '</div>' : '');
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Fantasy Box works'});
+  [0, 1].forEach(i => document.getElementById('w' + i).onclick = () => { writer = i; write(); });
+  document.getElementById('dr').onclick = draw;
+  const dd = document.getElementById('dp'); if (dd) dd.onclick = startDuo;
+}
+function write() {
+  const n = names(), h = KX.heat();
+  app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1><div class="kx-card" data-nofx="1"><div class="kx-turn">Private: ' + esc(n[writer]) + '</div><p class="kx-muted">Write a wish, fantasy or idea. Keep it kind. Your partner will not see who wrote it.</p><textarea class="kx-input" id="tx" rows="4" maxlength="240" placeholder="e.g. A slow evening where you tease me for an hour"></textarea><div class="kd-pass"><button class="kx-btn gold" id="ad">➕ Drop in the box</button><button class="kx-btn ghost" id="id">💡 Give me an idea</button><button class="kx-btn ghost" id="dn">Done, hide the screen</button></div><div class="kx-note" id="mc"></div></div>';
+  document.getElementById('id').onclick = () => { document.getElementById('tx').value = pick(KF(IDEAS)); };
+  document.getElementById('ad').onclick = () => { const v = document.getElementById('tx').value.trim(); if (!v) return; st.box.push({t: v, w: writer, id: Date.now() + Math.random()}); save(); document.getElementById('tx').value = ''; document.getElementById('mc').textContent = '✓ Dropped in. You can add more.'; };
+  document.getElementById('dn').onclick = home;
+}
+function draw() {
+  const s = pick(st.box);
+  const open = () => { app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Your slip</div><div style="margin:12px 0">' + U.card('<span>🎁</span>', '<div class="kx-big" style="font-size:22px">' + esc(s.t) + '</div>', 'tone-2') + '</div><div class="kd-pass"><button class="kx-btn gold" id="a">✓ Do it</button><button class="kx-btn" id="b">💬 Talk about it</button></div><div class="kd-pass"><button class="kx-btn ghost" id="c">🅿 Park it</button><button class="kx-btn ghost" id="d">🙅 Not for me</button></div></div>'; U.flip(app, 150); window.KA_MOTION && KA_MOTION.burst({kind: 'embers', n: 20});
+    const done = (r, rm) => { if (rm) st.box = st.box.filter(x => x.id !== s.id); if (r) st.hist.push({t: s.t, r}); save(); try { KA_TRACK.log('play', 'Fantasy Box', r || ''); } catch (e) {} home(); };
+    document.getElementById('a').onclick = () => done('Did it ' + new Date().toLocaleDateString(), true);
+    document.getElementById('b').onclick = () => done('Talked about it ' + new Date().toLocaleDateString(), false);
+    document.getElementById('c').onclick = () => home();
+    document.getElementById('d').onclick = () => done('', true);
+  }; open();
+}
+if (S) duo(); else home();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

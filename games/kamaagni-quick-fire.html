@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Quick-Fire</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_quick_v1';
+const N3 = [ // [category, heat]
+['Name 3 romantic songs',1],['Name 3 places to kiss',1],['Name 3 things that make a date night special',1],['Name 3 romantic films',1],['Name 3 things you love about your partner',1],['Name 3 flirty pet names',1],['Name 3 places for a first kiss',1],['Name 3 things in a florist',1],['Name 3 ways to say "I love you" without words',1],['Name 3 foods that feel romantic',1],['Name 3 cuddly things',1],['Name 3 things you do on a lazy Sunday together',1],['Name 3 things to do in a bath together',2],['Name 3 pieces of lingerie or sleepwear',2],['Name 3 places in the house to make out',2],['Name 3 things you can use for a massage',2],['Name 3 sexy songs',2],['Name 3 places on the body you like to be kissed',2],['Name 3 things you would take on a romantic weekend away',2],['Name 3 sexy film moments',2],['Name 3 things you could use to blindfold someone',2],['Name 3 flavours of massage oil',2],['Name 3 sexy things you can do with a feather',2],['Name 3 nights that were hot',2],['Name 3 things to whisper in an ear',2],['Name 3 sexy costumes',3],['Name 3 positions that start with the letter S or R',3],['Name 3 things you can do with ice',3],['Name 3 things you could do with a scarf',3],['Name 3 words for how good it feels',3],['Name 3 toys',3],['Name 3 places you have not done it yet',3],['Name 3 things you would do on a very long night',3],['Name 3 sexy commands',3],['Name 3 things to do in a hotel room',3]];
+const LR = [['A romantic movie',1],['A love song',1],['A kind of flower',1],['A place to kiss',1],['Something warm',1],['A cuddly animal',1],['Something sweet to eat',1],['A pet name',1],['Something you wear to bed',2],['A sexy song',2],['Something soft',2],['Something you can taste',2],['A place for a date',2],['A body part you love',2],['Something you could use on skin',2],['A word for kiss',2],['A fantasy',3],['Something you do in the bedroom',3],['A naughty word',3],['A toy',3],['A costume',3],['A position',3]];
+const CH = [ // charades: act it out silently
+['A kiss in the rain',1],['Slow dancing',1],['Proposing',1],['A first date',1],['Cooking dinner together',1],['A romantic walk on the beach',1],['Taking a selfie together',1],['Falling in love at first sight',1],['Texting your crush',1],['A wedding dance',1],['A massage',2],['A striptease',2],['A candlelit dinner',2],['A bubble bath',2],['A sexy photo shoot',2],['A lap dance',2],['Getting ready for a date',2],['Whispering a secret',2],['A pillow fight',1],['A hot shower together',2],['A love scene from a film',3],['Waking up the morning after',3],['A first kiss',2],['Being caught kissing',2],['A sneaky quickie',3],['A role-play meeting',3],['A tease',3],['Giving a command',3]];
+const LETTERS = 'ABCDEFGHIJKLMNOPRSTUVW'.split('');
+{ const C = k => window.KA_CUSTOM ? KA_CUSTOM.get(k) : []; C('quick').forEach(t => N3.push([t, 1])); C('quicklr').forEach(t => LR.push([t, 1])); C('quickch').forEach(t => CH.push([t, 1])); }
+let st = LS.get(KEY, {tab: 'n3', score: [0, 0], turn: 0, rounds: 0});
+let S = {tab: 'n3', turn: 0, score: [0, 0], cur: null, left: 0, iv: 0, used: new Set(), over: false, goal: 5, deck: []};
+const names = KX.names;
+const GUIDES = {
+ n3: `<h3>Name Three (5-second rule)</h3><p>A category appears. The hot-seat player has 5 seconds to name three things in it. Say them out loud.</p><ol><li>Reader taps Start. The timer runs 5 seconds.</li><li>If you name three in time, tap ✓ for a point. If not, tap ✗ and your partner gets a go.</li><li>Challenge any answer you doubt. Majority rules (or the rule: when it is only two of you, laugh and let it slide).</li></ol>`,
+ lr: `<h3>Letter Rush</h3><p>A category appears. Take turns naming something in it that starts with an unused letter. Tap the letter you used. It is out for the round. You have 10 seconds a turn.</p><ol><li>Press Start. Name something, tap its letter.</li><li>Run out of time or repeat a letter and you lose the round.</li><li>First to the target wins the game.</li></ol>`,
+ tw: `<h3>Touch Twister</h3><p>Spin to find which body part of yours goes on which zone of your partner. Hold it for the timer, then spin again. It is a flirty way to end up tangled together.</p><ol><li>Tap Spin.</li><li>Do exactly what it says and hold for 20 seconds.</li><li>Swap who spins. Zones follow your heat level.</li></ol>`,
+ ch: `<h3>Charades</h3><p>Act out the card without speaking. Your partner has 60 seconds to guess. One point if they get it.</p><ol><li>Actor taps Show card and acts.</li><li>Guesser shouts out answers. Tap ✓ when right.</li><li>Swap each round. First to the target wins.</li></ol>`};
+function head() { const n = names(); return '<h1 class="kx-title"><span>Quick-Fire</span></h1><p class="kx-sub">Fast party games for two. Beat the clock and win a treat.</p><div class="kx-row" style="margin-bottom:8px"><button class="kx-btn sm ghost" id="duo2">📱📱 Play on two phones</button></div>' + `<div class="kd-tabs">${[['n3', '🖐 Name Three'], ['lr', '🔤 Letter Rush'], ['ch', '🎭 Charades'], ['tw', '🌀 Twister']].map(t => `<button class="${S.tab === t[0] ? 'on' : ''}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>`; }
+function scoreBar() { const n = names(); return U.bar([[esc(n[0]) + ' ' + S.score[0], S.turn === 0 ? 'h2' : ''], [esc(n[1]) + ' ' + S.score[1], S.turn === 1 ? 'h2' : ''], ['First to ' + S.goal, '']], {guide: true}); }
+function pool(list) { const h = KX.heat(); return shuffle(KF(list).filter(x => x[1] <= h)); }
+function stop() { clearInterval(S.iv); S.iv = 0; }
+function tabs() { const d2 = document.getElementById('duo2'); if (d2) d2.onclick = () => { stop(); duoStart(); }; app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { stop(); S.tab = b.dataset.t; S.cur = null; S.over = false; S.score = [0, 0]; S.deck = []; render(); }); U.bindBar(app, {guide: GUIDES[S.tab], guideTitle: 'How to play'}); app.querySelectorAll('[data-goal]').forEach(b => b.onclick = () => { S.goal = +b.dataset.goal; render(); }); }
+const goalRow = () => `<div class="kd-chips">${[3, 5, 7, 10].map(g => `<button class="kx-chip-btn ${S.goal === g ? 'on' : ''}" data-goal="${g}">First to ${g}</button>`).join('')}</div>`;
+function win() { const n = names(), w = S.score[0] >= S.goal ? 0 : 1; stop(); app.innerHTML = head() + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Winner</div><div class="kx-big" style="margin:10px auto">🏆 ' + esc(n[w]) + '</div><p class="kx-muted">' + S.score[0] + ' : ' + S.score[1] + '. The winner picks tonight\'s treat. 😏</p><div class="kd-pass"><button class="kx-btn gold" id="ag">Play again</button></div></div>'; window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 60}); try { KA_TRACK.log('play', 'Quick-Fire', S.tab); } catch (e) {} tabs(); document.getElementById('ag').onclick = () => { S.score = [0, 0]; S.cur = null; S.deck = []; render(); }; }
+function nextCard(list) { if (!S.deck.length) S.deck = pool(list); S.cur = S.deck.pop(); }
+function render() {
+  stop(); const n = names(), t = S.turn;
+  if (S.tab === 'n3') {
+    if (S.score[0] >= S.goal || S.score[1] >= S.goal) return win();
+    if (!S.cur) nextCard(N3);
+    app.innerHTML = head() + scoreBar() + goalRow() + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])} in the hot seat</div><div class="kx-big" style="margin:16px auto">${esc(S.cur[0])}</div><div class="kd-bigtime" id="cd">5</div><div class="kd-pass"><button class="kx-btn gold" id="go">▶ Start 5 seconds</button></div><div class="kd-pass" id="jd" style="display:none"><button class="kx-btn gold" id="ok">✓ Got three</button><button class="kx-btn ghost" id="no">✗ Missed</button></div></div>`;
+    tabs(); document.getElementById('go').onclick = e => { e.target.style.display = 'none'; let l = 5; const d = document.getElementById('cd'); S.iv = setInterval(() => { l--; d.textContent = Math.max(l, 0); if (l <= 0) { stop(); d.textContent = '⏰'; document.getElementById('jd').style.display = 'flex'; try { navigator.vibrate && navigator.vibrate(120); } catch (x) {} } }, 1000); document.getElementById('jd').style.display = 'flex'; };
+    document.getElementById('ok').onclick = () => { stop(); S.score[t]++; S.turn = 1 - t; S.cur = null; render(); };
+    document.getElementById('no').onclick = () => { stop(); S.turn = 1 - t; S.cur = null; render(); };
+  } else if (S.tab === 'lr') {
+    if (S.score[0] >= S.goal || S.score[1] >= S.goal) return win();
+    if (!S.cur) { nextCard(LR); S.used = new Set(); S.over = false; }
+    const secs = 10; app.innerHTML = head() + scoreBar() + goalRow() + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])}'s turn</div><div class="kx-big" style="margin:12px auto">${esc(S.cur[0])}</div><div class="kd-bigtime" id="cd" style="font-size:44px">${secs}</div><div class="kd-lets">${LETTERS.map(l => `<button class="kd-let" data-l="${l}" ${S.used.has(l) ? 'disabled' : ''}>${l}</button>`).join('')}</div><div class="kd-pass"><button class="kx-btn ghost sm" id="skp">New category</button></div></div>`;
+    tabs(); let l = secs; const d = document.getElementById('cd');
+    const lose = () => { stop(); S.score[1 - t]++; S.turn = 1 - t; S.cur = null; try { navigator.vibrate && navigator.vibrate(150); } catch (x) {} KX.toast(n[t] + ' ran out of time'); render(); };
+    S.iv = setInterval(() => { l--; d.textContent = l; if (l <= 0) lose(); }, 1000);
+    app.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { S.used.add(b.dataset.l); S.turn = 1 - t; render(); });
+    document.getElementById('skp').onclick = () => { S.cur = null; render(); };
+  } else if (S.tab === 'tw') {
+    const h = KX.heat(), P = ['left hand','right hand','lips','left foot','right foot','nose','forehead','knee'], T = {1: ['shoulder','cheek','hand','hair','ear','back','forearm'], 2: ['neck','thigh','stomach','hip','inner arm','collarbone','calf'], 3: ['chest','inner thigh','lower back','wherever they choose','spot you tease them about']};
+    const zs = KF([].concat(T[1], h >= 2 ? T[2] : [], h >= 3 ? T[3] : []));
+    app.innerHTML = head() + U.bar([['Touch Twister', 'h2']], {guide: true}) + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])} spins</div><div class="kx-big" id="tr" style="margin:16px auto">Tap Spin</div><div class="kd-bigtime" id="cd" style="font-size:44px">20</div><div class="kd-pass"><button class="kx-btn gold" id="sp">🌀 Spin</button></div></div>`;
+    tabs(); document.getElementById('sp').onclick = () => { stop(); const tr = document.getElementById('tr'), d = document.getElementById('cd'); let k = 0; const spin = setInterval(() => { tr.textContent = pick(P) + ' → partner\'s ' + pick(zs); if (++k > 10) { clearInterval(spin); S.turn = 1 - t; try { navigator.vibrate && navigator.vibrate(40); } catch (x) {} let l = 20; S.iv = setInterval(() => { l--; d.textContent = Math.max(l, 0); if (l <= 0) { stop(); d.textContent = '✓'; } }, 1000); try { KA_TRACK.log('play', 'Touch Twister', tr.textContent.slice(0, 60)); } catch (x) {} } }, 90); };
+  } else {
+    if (S.score[0] >= S.goal || S.score[1] >= S.goal) return win();
+    if (!S.cur) nextCard(CH);
+    app.innerHTML = head() + scoreBar() + goalRow() + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])} acts it out</div><div id="cc"><div class="kx-big" style="margin:16px auto">Pass the phone to ${esc(n[t])}</div><button class="kx-btn gold" id="sh">👀 Show card</button></div></div>`;
+    tabs(); document.getElementById('sh').onclick = () => { document.getElementById('cc').innerHTML = `<div class="kx-big" style="margin:14px auto">${esc(S.cur[0])}</div><div class="kx-muted">No words, only acting</div><div class="kd-bigtime" id="cd" style="font-size:44px">60</div><div class="kd-pass"><button class="kx-btn gold" id="ok">✓ Guessed</button><button class="kx-btn ghost" id="no">✗ Time up</button></div>`; let l = 60; const d = document.getElementById('cd'); S.iv = setInterval(() => { l--; d.textContent = Math.max(l, 0); if (l <= 0) { stop(); try { navigator.vibrate && navigator.vibrate(150); } catch (x) {} } }, 1000); document.getElementById('ok').onclick = () => { stop(); S.score[t]++; S.turn = 1 - t; S.cur = null; render(); }; document.getElementById('no').onclick = () => { stop(); S.turn = 1 - t; S.cur = null; render(); }; };
+  }
+}
+/* ---- Two-phone mode ---- */
+let T = null, tiv = 0;
+const DD = KA_DUO.init({g: 'quick', key: 'ka_quick_duo', get: () => T, onState: st => { T = st; T.rcv = Date.now(); duoRender(); }, onQuit: () => { clearInterval(tiv); T = null; render(); }, onLink: () => {}});
+T = DD.load(); if (T && T.mode !== 'two') T = null;
+const KIND = {n3: ['🖐 Name Three', N3, 5], lr: ['🔤 Letter Rush', LR, 10], ch: ['🎭 Charades', CH, 60]};
+const tpool = k => shuffle(KF(KIND[k][1]).filter(x => x[1] <= KX.heat()));
+function ncard() { if (!T.deck || !T.deck.length) T.deck = tpool(T.kind); T.cur = T.deck.pop(); }
+function duoStart() {
+  if (!DD.linked()) { KX.toast('Link your partner in Together first'); return; }
+  app.innerHTML = '<h1 class="kx-title"><span>Quick-Fire</span></h1><div class="kx-card" data-nofx="1"><div class="kx-turn">Two phones</div><p class="kx-muted">Pick a game. Your partner\'s phone joins automatically.</p>' + Object.keys(KIND).map(k => `<button class="kx-btn gold" data-k="${k}" style="display:block;width:100%;margin:8px 0">${KIND[k][0]}</button>`).join('') + '<button class="kx-btn ghost" id="bk">← Back</button></div>';
+  document.getElementById('bk').onclick = render;
+  app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { T = {mode: 'two', gid: Date.now(), seq: 0, phase: 'ready', kind: b.dataset.k, turn: 0, score: [0, 0], goal: 5, deck: [], cur: null, t0: 0, rcv: 0, round: 0}; DD.setMe(0); ncard(); DD.save(T); duoRender(); });
+}
+function dsave() { DD.save(T); duoRender(); }
+function duoRender() {
+  clearInterval(tiv); if (!T) return render();
+  const n = DD.names(T), me = DD.me, t = T.turn, act = me === t, secs = KIND[T.kind][2];
+  const bar = U.bar([[esc(n[0]) + ' ' + T.score[0], t === 0 ? 'h2' : ''], [esc(n[1]) + ' ' + T.score[1], t === 1 ? 'h2' : ''], ['📱📱 First to ' + T.goal, 'h1']], {guide: true, quit: true});
+  const hd = '<h1 class="kx-title"><span>Quick-Fire</span></h1>' + bar;
+  const bind = () => U.bindBar(app, {guide: GUIDES[T.kind], guideTitle: 'How to play', two: true, quit: () => { DD.quit(T); clearInterval(tiv); T = null; render(); }});
+  if (T.phase === 'end') {
+    const w = T.score[0] >= T.goal ? 0 : 1; app.innerHTML = hd + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Winner</div><div class="kx-big" style="margin:10px auto">🏆 ' + esc(n[w]) + '</div><p class="kx-muted">' + T.score[0] + ' : ' + T.score[1] + '. The winner picks tonight\'s treat.</p>' + (me === 0 ? '<button class="kx-btn gold" id="pa">Play again</button>' : '') + '</div>'; bind();
+    window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 50}); const pa = document.getElementById('pa'); if (pa) pa.onclick = () => { T.score = [0, 0]; T.phase = 'ready'; T.deck = []; ncard(); dsave(); }; return;
+  }
+  const hide = T.kind === 'ch' && !act;   // charades card only visible to the actor
+  const card = hide ? 'Guess what ' + esc(n[t]) + ' is acting out' : esc(T.cur[0]);
+  let ctl = '';
+  if (T.phase === 'ready') ctl = act ? '<button class="kx-btn gold" id="st">▶ Start ' + secs + ' seconds</button>' : '<p class="kx-muted">' + esc(n[t]) + ' is getting ready…</p>';
+  else ctl = '<div class="kd-bigtime" id="cd">' + secs + '</div>' + (!act ? '<div class="kd-pass"><button class="kx-btn gold" id="ok">✓ ' + (T.kind === 'ch' ? 'Guessed' : T.kind === 'lr' ? 'Valid' : 'Got all three') + '</button><button class="kx-btn ghost" id="no">✗ ' + (T.kind === 'ch' ? 'Missed' : 'Failed') + '</button></div>' : '<p class="kx-muted">' + (T.kind === 'ch' ? 'Act it out. No words.' : 'Say your answer out loud.') + '</p>');
+  app.innerHTML = hd + `<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p${t}"><i></i>${esc(n[t])}${T.kind === 'ch' ? ' acts it out' : ' in the hot seat'}</div><div class="kx-big" style="margin:14px auto">${card}</div>${ctl}</div>`; bind();
+  const st = document.getElementById('st'); if (st) st.onclick = () => { T.phase = 'run'; T.t0 = Date.now(); T.rcv = Date.now(); dsave(); };
+  if (T.phase === 'run') {
+    const start = act ? T.t0 : (T.rcv || Date.now()), cd = document.getElementById('cd');
+    const tick = () => { const l = Math.max(0, Math.ceil(secs - (Date.now() - start) / 1000)); if (cd) cd.textContent = l > 0 ? l : '⏰'; if (l <= 0) { clearInterval(tiv); try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} } };
+    tick(); tiv = setInterval(tick, 250);
+  }
+  const fin = ok => {
+    const other = 1 - t;
+    if (T.kind === 'lr') { if (ok) { T.turn = other; T.phase = 'ready'; } else { T.score[other]++; T.turn = other; T.phase = 'ready'; ncard(); } }
+    else { if (ok) T.score[T.kind === 'ch' ? t : t]++; T.turn = other; T.phase = 'ready'; ncard(); }
+    if (T.score[0] >= T.goal || T.score[1] >= T.goal) { T.phase = 'end'; try { KA_TRACK.log('play', 'Quick-Fire (two phones)', KIND[T.kind][0]); } catch (e) {} }
+    dsave();
+  };
+  const ok = document.getElementById('ok'), no = document.getElementById('no'); if (ok) ok.onclick = () => fin(true); if (no) no.onclick = () => fin(false);
+}
+
+if (T) duoRender(); else render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -22,7 +22,7 @@
   /* 3. How-to-play */
   var HELP = {
     'intimacy_dice_game_single_page.html': ['Intimacy Dice', 'Choose a heat level, then roll. Three dice give you an action, a place on the body and a style. Do it together for about a minute. Save favourites with the heart. Pass any roll you do not both want.'],
-    'intimacy_cards_game_single_page.html': ['Intimacy Cards', 'Draw cards, do what they say, and earn connection points. Chain card types (touch, gaze, vocal, sensory) for combo bonuses. Raise the level when you both feel ready. Save your favourite cards with the heart.'],
+    'intimacy_cards_game_single_page.html': ['Connection Cards', 'Pick one of three cards each turn, do it together and earn Connection. Chain card types (touch, eyes, words, senses) for combo bonuses and level up. Save favourites with the heart.'],
     'intimacy_ludo_dice_game_single_page.html': ['Intimacy Ludo', 'Take turns rolling the dice and moving your pieces round the board. Land on a square and do the challenge for your partner. First to get home wins — and picks the reward.'],
     'intimacy_Position_Selector_page.html': ['Position Selector', 'Filter by what you like, spin, and try the position that comes up. Mark favourites to build your own list. Skip anything uncomfortable.'],
     'intimacy_Oral_Position_Selector_page.html': ['Oral Selector', 'Filter, spin, and take turns. Communicate, go slowly and stop any time you need to.'],

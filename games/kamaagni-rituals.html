@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Connection Rituals</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, LS} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_rituals_v1';
+let R = [
+ // [id, title, icon, group, minutes, heat, why, steps[[text, secs, breath?]]]
+ ['kiss6','6-Second Kiss','💋','Daily micro',1,1,'A short, deliberate kiss at every goodbye and hello. Gottman-style "rituals of connection" are small repeated moments that add up.',[['Stop what you are doing and face each other.',8],['Kiss for a slow count of six. Eyes closed.',6],['Open your eyes. Smile and hold the gaze.',6]]],
+ ['hug20','20-Second Hug','🫂','Daily micro',1,1,'A long hug lets the body settle. Many couples report it feels like a reset after a hard day.',[['Step in and wrap your arms fully around each other.',5],['Hold. Let your shoulders drop. Breathe slowly.',20,true],['Say one thing you are glad about today.',10]]],
+ ['thanks','Daily Appreciation','🙏','Daily micro',5,1,'Specific thanks (not general praise) tends to make the other person feel seen. It is one of the simplest habits in relationship research.',[['Take turns. Name one specific thing your partner did today or this week that you appreciated.',60],['Partner: just say "thank you" and take it in. No deflecting.',20],['Switch roles.',60],['Share a long hug.',20]]],
+ ['checkin','10-Minute Evening Check-in','🌙','Daily micro',10,1,'A short daily check-in keeps small things from piling up. Phones away, one person talks at a time.',[['Put phones in another room. Sit close.',20],['Person A: share one high and one low from today. Partner only listens, no advice.',150],['Person B: share one high and one low. Partner only listens.',150],['Each name one thing you appreciated about the other.',60],['Finish with 30 seconds of silent eye contact or a hug.',30]]],
+ ['couch','No-Phone Couch Session','🛋️','Daily micro',30,1,'Even having a phone nearby can reduce the quality of conversation. Give each other undivided time.',[['Put both phones in another room.',20],['Sit in contact: legs, shoulders or hands touching.',20],['Talk, read aloud, listen to music or just sit. No screens.',1500],['Say what you enjoyed about the time.',60]]],
+ ['gaze4','Soul Gazing (4 minutes)','👁️','Gaze & breath',5,1,'Sustained mutual eye contact is used in closeness research to build intimacy. It feels odd at first, then calming.',[['Sit close, knees almost touching, facing each other.',20],['Look into each other\'s eyes. No talking. If you laugh, that is fine, just come back.',240],['Share one word for how you feel.',30]]],
+ ['forehead','7-Breath Forehead Connection','🌬️','Gaze & breath',3,1,'Slow breathing together helps the body switch into a calmer state. Inhale for 4, exhale for 6.',[['Stand or sit with foreheads touching. Rest your hands on each other\'s arms.',15],['Breathe together. In for 4, out for 6. Seven times.',70,true],['Open your eyes slowly. No words yet.',10]]],
+ ['sync','Synchronised Breathing','🌊','Gaze & breath',5,1,'Sit back to back or chest to chest and match your breathing. A quiet way to arrive in the moment together.',[['Sit back to back, hands resting at your sides.',15],['Match your breathing. Notice the rise and fall against each other.',240,true],['Turn around and hold hands for a moment.',20]]],
+ ['mirror','Mirror Me','🪞','Gaze & breath',3,1,'Slow mirrored movement builds attunement. One leads, the other follows, then swap.',[['Face each other. Person A moves slowly, Person B mirrors.',75],['Swap leader.',75],['Finish with both hands pressed palm to palm.',15]]],
+ ['sensate1','Sensate Focus: Round 1','🤲','Touch',20,1,'Sensate focus is a classic couples exercise from sex therapy. The point is to notice touch with no goal and no pressure. This round is non-sexual: avoid breasts and genitals.',[['Agree the ground rules: no talking about performance, no goal, stop any time.',30],['Person A lies back. Person B explores hands, arms, face, hair, back and legs for 8 minutes. Vary the pressure and speed.',480],['A: notice what you feel. Share one thing in a sentence.',45],['Swap. Person A now touches for 8 minutes.',480],['Talk for a minute about what you noticed. No judging.',60]]],
+ ['sensate2','Sensate Focus: Round 2','🌿','Touch',25,2,'Once Round 1 feels easy, widen the map. Still no goal. If either of you feels pressure, go back to Round 1.',[['Agree your limits for tonight. Say one area you want to explore and one that is off-limits.',45],['Person A receives. Person B explores slowly with hands and lips. Include the areas you agreed. 10 minutes.',600],['A: share what felt best.',45],['Swap. Person A now explores for 10 minutes.',600],['Cuddle and talk for a few minutes.',120]]],
+ ['handmass','Hand & Arm Massage','🖐️','Touch',10,1,'A simple, low-pressure massage that anyone can do. Warm some oil or lotion in your hands first.',[['Warm some lotion between your palms.',15],['Massage one hand and arm slowly. Ask for pressure feedback.',240],['Swap hands, then swap roles.',300]]],
+ ['massageswap','Massage Swap','💆','Touch',40,1,'Equal time for each of you keeps it generous on both sides.',[['Dim the lights and put on a slow playlist.',30],['Person A massages back, shoulders and neck.',900],['Check in: more or less pressure?',20],['Swap.',900],['Cuddle for a couple of minutes.',120]]],
+ ['bomb','Ticking Bomb','⏳','Touch',20,2,'A foreplay-only timer. No penetration until it ends. The wait builds anticipation.',[['Set the rule: foreplay only until the timer ends.',20],['Go! Kiss, touch, tease. Nothing else.',900],['Time is up. Slow down and decide together what happens next.',60]]],
+ ['signals','Red, Amber, Green Signals','🚦','Touch',10,2,'Use colour words in the moment so nobody has to guess. Green means more, amber means slow down, red means stop. Red ends the round with a hug, always.',[['Agree the three words together and say them out loud.',30],['Take turns touching for 3 minutes. The receiver uses green, amber or red only.',180],['Swap. Same rules.',180],['Talk about what felt good.',60]]],
+ ['listen','Uninterrupted Listening','👂','Deep talk',20,1,'Based on the Imago-style dialogue: speaker talks, listener mirrors back, then validates. It slows down arguments and builds feeling heard.',[['Decide who speaks first. Topic: something on your mind, no blaming.',20],['Speaker talks for 4 minutes. Listener stays quiet.',240],['Listener says back what they heard: "What I hear is…" Speaker corrects if needed.',90],['Listener says: "That makes sense because…" and names the feeling.',45],['Swap roles.',420]]],
+ ['fears','Fears & Dreams','💭','Deep talk',30,1,'Share three fears and three dreams you have not said out loud. Reply with curiosity only. Based on the "love maps" idea of knowing each other\'s inner world.',[['Each write three fears and three dreams on separate paper.',180],['Take turns sharing one item. Reply with "Tell me more." No fixing.',900],['Hold hands in silence for one minute.',60],['Say thank you for trusting each other.',15]]],
+ ['lovemap','Love Map Update','🗺️','Deep talk',15,1,'Guess your partner\'s current worries, joys and stressors. Then check. The misses are the conversation.',[['Each write down: your partner\'s biggest worry right now, their best friend, one thing they are looking forward to.',120],['Swap papers and see how close you were.',180],['Talk about the misses.',600]]],
+ ['stateus','State of Us (weekly)','📋','Deep talk',25,1,'Once a week, a calm check-in on the relationship, inspired by relationship "check-up" research. Keep it kind.',[['What made me feel loved this week? Take turns.',150],['What do I need more of? Take turns.',150],['Is anything unresolved? Pick one thing only.',300],['Agree one small action each for next week.',120],['Finish by saying one thing you are committed to.',30]]],
+ ['curious','Curiosity Interview','🎤','Deep talk',15,1,'One of you interviews the other with open questions. Curiosity is attractive.',[['Interviewer asks: "What is a memory that shaped who you are?" then follows up with real interest.',240],['Ask: "What do you quietly feel proud of?"',240],['Swap roles.',420]]],
+ ['questions','Closeness Questions','🧩','Deep talk',60,1,'Three sets of twelve questions that start light and get more personal. Inspired by the structured-closeness studies. Both of you answer each one.',null],
+ ['memory','Memory Lane','📷','Experiences',45,1,'Revisit a meaningful place or look through photos. Ask what each of you was feeling back then.',[['Choose a place or a set of photos that matter to you both.',60],['Share what you remember most.',900],['Ask: "What were you thinking and feeling then?"',900],['Say what you would like to carry forward.',120]]],
+ ['gratwalk','Gratitude Walk','🚶','Experiences',20,1,'Walk side by side with no destination. Side-by-side conversation can feel easier than face-to-face.',[['Leave phones on silent. Start walking, hand in hand.',60],['Take turns: something you appreciate about your partner.',360],['Take turns: something you appreciate about your shared life.',360],['Take turns: something you appreciate about the world.',360]]],
+ ['microdate','Surprise Micro-Date','🎁','Experiences',60,1,'Novelty keeps relationships fresh. Take turns planning a spontaneous outing under an hour and under $20. The other person agrees without knowing the plan.',[['Planner: choose a small, new activity and give only a time to leave.',60],['Go on the micro-date. Be present.',3300],['Talk about the best moment.',180]]],
+ ['gratitude3','Three Good Things','📝','Daily micro',4,1,'Naming three good things from the day, and why they happened, is a well-studied gratitude practice. Doing it together turns it into shared memory.',[['Each privately think of three good things from today.',30],['Take turns sharing the first one and why it happened.',60],['Share the second and third.',90],['Thank each other for one of them.',20]]],
+ ['stress6','Stress-Reducing Conversation','🌧️','Weekly reset',20,1,'Gottman research suggests couples do better when they support each other with outside stress, rather than solving it. Listening comes first.',[['Decide who goes first. The other person only listens.',20],['Speaker: describe one stressful thing from outside the relationship. Listener: no advice, only questions.',300],['Listener: say "That makes sense" and name what you heard. Ask "What do you need from me?"',60],['Swap roles.',300],['Finish with a hug.',20,true]]],
+ ['dream','Dreams Conversation','🌠','Weekly reset',15,1,'Sharing dreams and what they mean to you builds a sense of being on the same team.',[['Pick one dream, big or small, that you each hold.',20],['Speaker: tell the story behind it. Listener: ask what it would mean to you.',240],['Swap.',240],['Name one small step you could take together this month.',90]]],
+ ['body_scan','Partner Body Scan','🧘','Sensual',12,2,'Slow, attentive touch without a goal lowers pressure and builds awareness. This is based on sensate focus, a technique used in sex therapy.',[['Choose who receives first. Receiver lies comfortably. Giver sits close. Both breathe.',40,true],['Giver: light touch on the back and shoulders. Receiver: say "more", "less" or "different" as you like.',180],['Giver: touch the arms and hands slowly. No goal, only noticing.',150],['Giver: legs and feet at your own pace, only where the receiver is happy.',150],['Swap roles and repeat the same flow.',300],['Share one thing you liked.',60]]],
+ ['sensate0','Sensate Focus: Non-Genital','🌿','Sensual',20,2,'The first stage of sensate focus: touching for curiosity, not arousal. Often used to reduce performance pressure.',[['Agree: nothing sexual is expected, no pressure to perform or finish.',30],['Giver explores touch on the body, avoiding intimate areas. Receiver only notices sensation.',360],['Swap roles.',360],['Talk about what felt good, with no judging.',120]]],
+ ['slowdance','One-Song Slow Dance','🎶','Daily micro',5,1,'Dancing together releases tension and builds physical closeness without needing words.',[['Choose one song you both like. Put it on.',30],['Hold each other close, sway, and breathe in time.',210,true],['Whisper one thing you love about them.',20]]],
+ ['sunrise','Evening Wind-Down Together','🌙','Weekly reset',10,1,'Going to bed at the same time, without screens, is linked with better connection and sleep.',[['Phones away. Lights low.',30],['Take turns saying one thing that went well and one thing that was hard.',240],['Cuddle for two minutes in silence.',120,true],['Say goodnight with a kiss.',10]]],
+ ['sorry','Repair Conversation','🕊️','Weekly reset',12,1,'Repair attempts are a key habit in couples who stay close. Naming your part without defending it helps both of you feel safe again.',[['Pick one small tension to address. Agree to stay kind.',20],['Speaker: describe how it felt, using "I felt…". Listener: reflect it back.',180],['Listener: name your part in it, with no "but".',90],['Swap.',270],['Agree on one change. Hug.',30,true]]],
+];
+const QS = [
+ ['Set I: Warm-up',['If you could have dinner with anyone from history, who and why?','What would a perfect day look like for you?','When did you last sing to yourself? To someone else?','What is something you are really good at that people do not expect?','What is your favourite way to spend a rainy day?','What is one small thing that reliably makes you happy?','If you could master any skill instantly, what would it be?','What was the best meal you ever had?','Which place makes you feel most like yourself?','What is something you are looking forward to this month?','What is a small habit of mine you secretly like?','What would you do with a free week and no obligations?']],
+ ['Set II: Going deeper',['What is a memory you would relive exactly as it was?','What does closeness feel like to you?','What is one thing you wish you had said to someone but never did?','What do you value most in a friend?','What is a moment in our relationship you think about often?','How do you like to be comforted when you are upset?','What is something you have changed your mind about?','What is the kindest thing someone has done for you?','What is a role you play in your family that you did not choose?','What is one fear you are slowly outgrowing?','How do you like to be supported when you are stressed?','What is something you are proud of that you rarely mention?']],
+ ['Set III: Vulnerable',['What do you need more of in your life right now?','What is one thing I do that makes you feel loved?','What is a hurt you are still carrying that you would like help with?','What is a fantasy about our future you have not shared?','When do you feel most distant from me, and what would help?','What would you want me to know if you could not say it later?','What are you most afraid of losing?','What is something you are embarrassed to want?','What do you hope we are doing in ten years?','What is one thing about intimacy you wish we talked about more?','What is a risk you want us to take together?','What do you love most about us, right now?']]
+];
+const DAYS = [['Mon','thanks'],['Tue','hug20,kiss6'],['Wed','checkin'],['Thu','questions'],['Fri','gratwalk'],['Sat','lovemap,microdate'],['Sun','stateus,gaze4']];
+const GROUPS = ['Daily micro','Gaze & breath','Touch','Deep talk','Experiences','Weekly reset','Sensual'];
+R = R.filter(Boolean);
+const byId = Object.fromEntries(R.map(r => [r[0], r]));
+let st = LS.get(KEY, {log: [], week: {}, tab: 'all'}); const save = () => LS.set(KEY, st);
+let stopT = null;
+let S = null;
+const D = KA_DUO.init({g: 'ritual', key: 'ka_ritual_duo', get: () => S, onState: (m, first) => { S = m; if (m.phase === 'run' && byId[m.id]) run(m.id, m); else if (m.phase === 'end') { endShared(); } }, onQuit: () => { S = null; if (stopT) { stopT(); stopT = null; } home(); }, onLink: () => {}});
+S = D.load(); if (S && S.mode !== 'two') S = null;
+function endShared() { const id = S && S.id; if (stopT) { stopT(); stopT = null; } S = null; D.clear(); if (id) { st.log.push({id, d: dayKey(new Date()), t: Date.now()}); save(); } home(); KX.toast('Ritual complete. Well done.'); }
+const dayKey = d => d.toISOString().slice(0, 10);
+function streak() { const days = new Set(st.log.map(l => l.d)); let n = 0, d = new Date(); if (!days.has(dayKey(d))) d.setDate(d.getDate() - 1); while (days.has(dayKey(d))) { n++; d.setDate(d.getDate() - 1); } return n; }
+function weekCount() { const t = Date.now() - 7 * 864e5; return st.log.filter(l => l.t > t).length; }
+const AMB = { ac: null, nodes: [], on() { try { const a = this.ac = this.ac || new (window.AudioContext || window.webkitAudioContext)(); if (a.state === 'suspended') a.resume(); const m = a.createGain(); m.gain.value = 0; m.gain.linearRampToValueAtTime(.06, a.currentTime + 3); m.connect(a.destination); [130.8, 196, 261.6, 329.6].forEach((f, i) => { const o = a.createOscillator(), g = a.createGain(), l = a.createOscillator(), lg = a.createGain(); o.type = 'sine'; o.frequency.value = f; g.gain.value = .25; l.frequency.value = .08 + i * .03; lg.gain.value = .12; l.connect(lg); lg.connect(g.gain); o.connect(g); g.connect(m); o.start(); l.start(); this.nodes.push(o, l); }); this.m = m; } catch (e) {} }, off() { try { this.nodes.forEach(n => n.stop()); this.nodes = []; if (this.m) this.m.disconnect(); } catch (e) {} } };
+function say(t) { try { if (!st.voice || !window.speechSynthesis) return; speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(t); u.rate = .9; u.pitch = 1; speechSynthesis.speak(u); } catch (e) {} }
+function beep() { try { const a = new (window.AudioContext || window.webkitAudioContext)(), o = a.createOscillator(), g = a.createGain(); o.frequency.value = 660; g.gain.value = .08; o.connect(g); g.connect(a.destination); o.start(); setTimeout(() => { o.stop(); a.close(); }, 180); } catch (e) {} try { navigator.vibrate && navigator.vibrate(60); } catch (e) {} }
+const fmt = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+function home() {
+  if (stopT) { stopT(); stopT = null; }
+  const tab = st.tab || 'all', list = R.filter(r => tab === 'all' || r[3] === tab);
+  const mon = Date.now() - 6 * 864e5, doneDays = new Set(st.log.map(l => l.d));
+  app.innerHTML = '<h1 class="kx-title"><span>Connection Rituals</span></h1><p class="kx-sub">Short, guided practices couples use to feel closer. Pick one, press start, follow the timer.</p>' +
+    `<div class="kx-card" data-nofx="1"><div class="kd-stats"><div><b>${streak()}</b><span>day streak</span></div><div><b>${weekCount()}</b><span>this week</span></div><div><b>${st.log.length}</b><span>total</span></div></div></div>` +
+    `<div class="kd-chips">${[['all','✨ All'], ...GROUPS.map(g => [g, g]), ['week', '📅 7-day challenge']].map(c => `<button class="kx-chip-btn ${tab === c[0] ? 'on' : ''}" data-tab="${esc(c[0])}">${esc(c[1])}</button>`).join('')}</div>` +
+    (tab === 'week' ? weekView() : `<div class="kd-rit">${KF(list).filter(r => r[5] <= KX.heat()).map(r => `<button class="kd-rc" data-r="${r[0]}"><span class="kd-ri">${r[2]}</span><b>${esc(r[1])}</b><em>${r[4]} min · ${esc(r[3])}</em></button>`).join('')}</div>`) +
+    '<div class="kd-pass" style="margin-top:14px"><button class="kx-btn ghost sm" id="rm">📅 Add a reminder to my calendar</button></div>';
+  app.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => { st.tab = b.dataset.tab; save(); home(); });
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => detail(b.dataset.r));
+  app.querySelectorAll('[data-wd]').forEach(b => b.onclick = () => { const k = b.dataset.wd; st.week[k] = !st.week[k]; save(); home(); });
+  document.getElementById('rm').onclick = () => reminder();
+}
+function weekView() {
+  const done = DAYS.filter(d => st.week[d[0]]).length;
+  return `<div class="kx-card" data-nofx="1"><div class="kx-turn">Your 7-day closeness week</div><div class="kd-meter" style="margin:10px 0"><i style="width:${done / 7 * 100}%"></i><span>${done} / 7 days</span></div>` +
+    DAYS.map(d => `<div class="kd-day ${st.week[d[0]] ? 'on' : ''}"><button class="kd-chk" data-wd="${d[0]}">${st.week[d[0]] ? '✓' : ''}</button><b>${d[0]}</b><span>${d[1].split(',').map(id => `<a href="#" data-r="${id}">${esc(byId[id][1])}</a>`).join(' + ')}</span></div>`).join('') +
+    `<p class="kx-note">Tap a ritual to start it. Tick the day when you have done it. About 15 to 35 minutes a day.</p></div>`;
+}
+function detail(id) {
+  const r = byId[id];
+  U.guide(r[1], `<p><b>${r[4]} min</b> · ${esc(r[3])}</p><p>${esc(r[6])}</p>` + (r[7] ? '<h3>What you will do</h3><ol>' + r[7].map(s => '<li>' + esc(s[0]) + '</li>').join('') + '</ol>' : '<h3>What you will do</h3><p>Take turns reading a question aloud. Both of you answer. Do the three sets in order and finish with four minutes of silent eye contact.</p>') + '<p class="kx-note">Optional and consent-first. Stop any time.</p>');
+  // Add start button into the guide overlay
+  const ov = document.getElementById('kd-guide'); if (!ov) return;
+  const box = ov.querySelector('.kd-gin'); const row = document.createElement('div'); row.className = 'kd-pass'; row.style.margin = '12px 0';
+  row.innerHTML = '<button class="kx-btn gold" id="rs">▶ Start guided session</button>' + (r[0] !== 'questions' ? '<button class="kx-btn ghost" id="rd">📱📱 Start on both phones</button>' : ''); box.insertBefore(row, document.getElementById('kd-gc'));
+  const rd = document.getElementById('rd'); if (rd) rd.onclick = () => { if (!D.linked()) { KX.toast('Link your partner in Together first'); return; } S = {mode: 'two', gid: Date.now(), seq: 0, phase: 'run', id, i: 0, left: r[7][0][1], paused: false}; D.setMe(0); D.save(S); ov.remove(); document.body.style.overflow = ''; run(id, S); };
+  document.getElementById('rs').onclick = () => { ov.remove(); document.body.style.overflow = ''; r[0] === 'questions' ? qs() : run(id); };
+}
+function run(id, from) {
+  if (stopT) { stopT(); stopT = null; }
+  const r = byId[id], steps = r[7]; let i = from ? from.i : 0, left = from ? from.left : steps[0][1], paused = from ? !!from.paused : false, iv = 0;
+  const bc = () => { if (S) { S.i = i; S.left = left; S.paused = paused; D.save(S); } };
+  const finish = () => { clearInterval(iv); if (S) { S.phase = 'end'; D.save(S); S = null; D.clear(); } AMB.off(); try { speechSynthesis.cancel(); } catch (e) {} const d = new Date(); st.log.push({id, d: dayKey(d), t: Date.now()}); save(); try { KA_TRACK.log('play', 'Ritual: ' + r[1], r[4] + ' min'); } catch (e) {}
+    app.innerHTML = '<h1 class="kx-title"><span>' + esc(r[1]) + '</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Well done</div><div class="kx-big" style="margin:10px auto">💞 Ritual complete</div><p class="kx-muted">' + streak() + '-day streak · ' + weekCount() + ' rituals this week</p><div class="kd-pass"><button class="kx-btn gold" id="hm">Back to rituals</button></div></div>'; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); document.getElementById('hm').onclick = home; };
+  const draw = () => {
+    const s = steps[i], tot = s[1], pct = (1 - left / tot) * 100;
+    app.innerHTML = '<h1 class="kx-title"><span>' + esc(r[1]) + '</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Step ' + (i + 1) + ' of ' + steps.length + '</div>' +
+      (s[2] ? '<div class="kd-breath"><i></i><span id="bw">Breathe</span></div>' : '<div class="kd-bigtime" id="bt">' + fmt(left) + '</div>') +
+      '<div class="kx-big" style="font-size:20px;margin:10px auto">' + esc(s[0]) + '</div>' + (s[2] ? '<div class="kd-bigtime" id="bt" style="font-size:30px">' + fmt(left) + '</div>' : '') +
+      '<div class="kd-meter" style="margin:12px 0"><i id="pb" style="width:' + pct + '%"></i></div>' +
+      '<div class="kd-pass"><button class="kx-btn ghost sm" id="bk">◀ Back</button><button class="kx-btn gold" id="pp">' + (paused ? '▶ Resume' : '⏸ Pause') + '</button><button class="kx-btn ghost sm" id="nx2">Skip ▶</button></div><div class="kd-pass"><button class="kx-btn ghost sm" id="vo">' + (st.voice ? '🗣 Voice on' : '🗣 Voice off') + '</button><button class="kx-btn ghost sm" id="am">' + (st.amb ? '🎵 Music on' : '🎵 Music off') + '</button><button class="kx-btn ghost sm" id="ex">✕ End</button></div></div>';
+    document.getElementById('bk').onclick = () => { if (i > 0) { i--; left = steps[i][1]; bc(); draw(); } };
+    document.getElementById('nx2').onclick = () => { next(); bc(); };
+    document.getElementById('pp').onclick = () => { paused = !paused; bc(); draw(); };
+    document.getElementById('ex').onclick = () => { clearInterval(iv); if (S) { D.quit(S); S = null; } AMB.off(); try { speechSynthesis.cancel(); } catch (e) {} home(); };
+    document.getElementById('vo').onclick = () => { st.voice = !st.voice; save(); if (st.voice) say(steps[i][0]); else try { speechSynthesis.cancel(); } catch (e) {} draw(); };
+    document.getElementById('am').onclick = () => { st.amb = !st.amb; save(); if (st.amb) AMB.on(); else AMB.off(); draw(); };
+  };
+  const next = () => { if (i >= steps.length - 1) return finish(); i++; left = steps[i][1]; beep(); draw(); say(steps[i][0]); };
+  draw(); say(steps[0][0]); if (st.amb) AMB.on(); stopT = () => { clearInterval(iv); AMB.off(); };
+  iv = setInterval(() => {
+    if (paused) return; left--; const s = steps[i], tot = s[1];
+    if (left <= 0) { next(); if (S && S.phase !== 'end') bc(); return; }
+    const bt = document.getElementById('bt'), pb = document.getElementById('pb'), bw = document.getElementById('bw');
+    if (bt) bt.textContent = fmt(left); if (pb) pb.style.width = (1 - left / tot) * 100 + '%';
+    if (bw) { const ph = (tot - left) % 10; bw.textContent = ph < 4 ? 'Breathe in…' : 'Breathe out…'; }
+  }, 1000);
+}
+function qs() {
+  let set = 0, q = 0;
+  const draw = () => {
+    const S = QS[set], done = set >= 3;
+    if (done) { app.innerHTML = '<h1 class="kx-title"><span>Closeness Questions</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Final step</div><div class="kx-big" style="margin:10px auto">Four minutes of silent eye contact</div><p class="kx-muted">Sit close and look at each other. No talking.</p><div id="tm"></div><div class="kd-pass"><button class="kx-btn gold" id="fin">Finish</button></div></div>'; U.timer(document.getElementById('tm'), 240); document.getElementById('fin').onclick = () => { st.log.push({id: 'questions', d: dayKey(new Date()), t: Date.now()}); save(); home(); }; return; }
+    app.innerHTML = '<h1 class="kx-title"><span>Closeness Questions</span></h1><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + esc(S[0]) + ' · ' + (q + 1) + '/12</div><div class="kx-big" style="margin:16px auto;font-size:22px">' + esc(S[1][q]) + '</div><p class="kx-muted">Both of you answer. Take your time.</p><div class="kd-pass"><button class="kx-btn ghost sm" id="pv">◀</button><button class="kx-btn gold" id="nq">Next ▶</button><button class="kx-btn ghost sm" id="ex">✕</button></div></div>';
+    document.getElementById('pv').onclick = () => { if (q > 0) q--; else if (set > 0) { set--; q = 11; } draw(); };
+    document.getElementById('nq').onclick = () => { if (q < 11) q++; else { set++; q = 0; } draw(); };
+    document.getElementById('ex').onclick = home;
+  }; draw();
+}
+function reminder() {
+  U.guide('Add a reminder', '<p>Pick a ritual, a time and how often. You will get a calendar file (.ics) that opens in Google, Apple or Outlook calendar.</p><div class="kd-form"><label>Ritual<select id="rr">' + R.map(r => '<option value="' + r[0] + '">' + esc(r[1]) + '</option>').join('') + '</select></label><label>Time<input type="time" id="rt" value="20:00"></label><label>How often<select id="rf"><option value="DAILY">Every day</option><option value="WEEKLY">Every week</option></select></label><button class="kx-btn gold" id="rg">Download calendar file</button></div>');
+  document.getElementById('rg').onclick = () => {
+    const r = byId[document.getElementById('rr').value], t = document.getElementById('rt').value.split(':'), f = document.getElementById('rf').value, d = new Date(); d.setDate(d.getDate() + 1); d.setHours(+t[0], +t[1], 0, 0);
+    const z = x => x.getFullYear() + String(x.getMonth() + 1).padStart(2, '0') + String(x.getDate()).padStart(2, '0') + 'T' + String(x.getHours()).padStart(2, '0') + String(x.getMinutes()).padStart(2, '0') + '00', e = new Date(d.getTime() + r[4] * 60000);
+    const ics = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//KamaAgni//EN','BEGIN:VEVENT','UID:' + Date.now() + '@kamaagni','DTSTAMP:' + z(new Date()),'DTSTART:' + z(d),'DTEND:' + z(e),'RRULE:FREQ=' + f,'SUMMARY:' + r[1] + ' (KamaAgni)','DESCRIPTION:' + r[6].replace(/[,;]/g, ' '),'BEGIN:VALARM','TRIGGER:-PT10M','ACTION:DISPLAY','DESCRIPTION:Time for your ritual','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type: 'text/calendar'})); a.download = 'kamaagni-ritual.ics'; a.click(); KX.toast('Calendar file downloaded');
+  };
+}
+if (S && S.phase === 'run' && byId[S.id]) run(S.id, S); else home();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

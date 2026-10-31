@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta name="robots" content="noindex,nofollow"/>
-<meta property="og:title" content="KamaAgni — games for couples (18+)"/>
+<meta property="og:title" content="KamaAgni games for couples (18+)"/>
 <meta property="og:description" content="A private game space for consenting adult couples."/>
 <meta property="og:image" content="assets/icons/icon-512.png"/>
   <script src="js/ka-boot.js"></script><script src="js/ka-filter.js"></script><script src="js/ka-fx.js"></script>
@@ -740,6 +740,7 @@ body::after {
       <div class="d-moods" id="d-moods"></div>
       <div class="d-row">
         <a class="d-go" href="games/kamaagni-session.html">🔥 Start tonight's session</a>
+        <a class="d-link" href="play.html">🎮 All games</a>
         <a class="d-link" href="games/kamaagni-secret.html">💌 Send a secret</a>
         <button class="d-link" id="d-sur" type="button">🎲 Surprise me</button>
         <button class="d-link" id="d-cal" type="button">📅 Date-night reminder</button>
@@ -796,7 +797,7 @@ body::after {
         <div class="card-icon">🃏</div>
         <div>
           <span class="card-tag indigo">Cards</span>
-          <div class="card-title">Intimacy Cards</div>
+          <div class="card-title">Connection Cards</div>
           <p class="card-desc">Draw a card and let it guide your next move. Deeper connection through playful prompts.</p>
         </div>
         <a href="games/intimacy_cards_game_single_page.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
@@ -844,6 +845,16 @@ body::after {
           <p class="card-desc">Two options, no third choice. Take turns picking.</p>
         </div>
         <a href="games/kamaagni-would-you-prefer.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">⚔️</div>
+        <div>
+          <span class="card-tag rose">Cards</span>
+          <div class="card-title">Seduction Showdown</div>
+          <p class="card-desc">Build a line-up, outscore your partner, win the reward.</p>
+        </div>
+        <a href="games/kamaagni-showdown.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
       </div>
 
       <div class="game-card">
@@ -1367,7 +1378,7 @@ $('d-stats').innerHTML=chips;
 var heat=LS('ka_heat',2);
 var M=[['romantic','🌸','Romantic'],['playful','😈','Playful'],['wild','🔥','Wild'],['gentle','🛁','Tired & gentle'],['apart','📱','Apart tonight']].filter(function(m){return m[0]!=='wild'||heat>=3});
 $('d-moods').innerHTML=M.map(function(m){return '<a class="d-mood" href="games/kamaagni-session.html?mood='+m[0]+'"><b>'+m[1]+'</b>'+m[2]+'</a>'}).join('');
-var NAMES={intimacy_dice_game_single_page:'Intimacy Dice',intimacy_cards_game_single_page:'Intimacy Cards',intimacy_ludo_dice_game_single_page:'Intimacy Ludo',intimacy_Position_Selector_page:'Position Selector',intimacy_Oral_Position_Selector_page:'Oral Selector','kamaagni-connect-foreplay':'Connect & Foreplay','kamaagni-poker-quick':'Quick Poker','kamaagni-desire-match':'Desire Match','kamaagni-would-you-prefer':'Would You Prefer','kamaagni-truth-or-dare':'Truth or Dare','kamaagni-bucket-list':'Bucket List','kamaagni-mission-week':'Mission Week','kamaagni-love-coupons':'Love Coupons','kamaagni-task-deck':'Task Deck','kamaagni-kink-explorer':'Kink Explorer','kamaagni-learn':'Learn','kamaagni-tonight':'Plan Tonight','kamaagni-journal':'Our Journal','kamaagni-roleplay':'Roleplay Studio','kamaagni-journey':'BDSM Journey','kamaagni-challenges':'Challenges','kamaagni-kinky-dice':'Dice Sets','kamaagni-hornopoly':'Hornopoly','kamaagni-prompts':'Reflection Prompts','kamaagni-secret':'Secret Envelope','kamaagni-session':'Guided Session'};
+var NAMES={intimacy_dice_game_single_page:'Intimacy Dice','kamaagni-showdown':'Seduction Showdown',intimacy_cards_game_single_page:'Connection Cards','kamaagni-rituals':'Connection Rituals','kamaagni-date-kits':'Date Night Kits','kamaagni-scratch-book':'Scratch-Off Book','kamaagni-whos-most-likely':"Who\'s Most Likely",'kamaagni-know-me':'How Well Do You Know Me','kamaagni-quick-fire':'Quick-Fire','kamaagni-fantasy-box':'Fantasy Box','kamaagni-mystery-doors':'Mystery Doors','kamaagni-bedroom-menu':'Bedroom Menu','kamaagni-bingo':'Intimate Bingo','kamaagni-tic-tac-tease':'Tic-Tac-Tease','kamaagni-body-map':'Body Map','kamaagni-never-have-i-ever':'Never Have I Ever',intimacy_ludo_dice_game_single_page:'Intimacy Ludo',intimacy_Position_Selector_page:'Position Selector',intimacy_Oral_Position_Selector_page:'Oral Selector','kamaagni-connect-foreplay':'Connect & Foreplay','kamaagni-poker-quick':'Quick Poker','kamaagni-desire-match':'Desire Match','kamaagni-would-you-prefer':'Would You Prefer','kamaagni-truth-or-dare':'Truth or Dare','kamaagni-bucket-list':'Bucket List','kamaagni-mission-week':'Mission Week','kamaagni-love-coupons':'Love Coupons','kamaagni-task-deck':'Task Deck','kamaagni-kink-explorer':'Kink Explorer','kamaagni-learn':'Learn','kamaagni-tonight':'Plan Tonight','kamaagni-journal':'Our Journal','kamaagni-roleplay':'Roleplay Studio','kamaagni-journey':'BDSM Journey','kamaagni-challenges':'Challenges','kamaagni-kinky-dice':'Dice Sets','kamaagni-hornopoly':'Hornopoly','kamaagni-prompts':'Reflection Prompts','kamaagni-secret':'Secret Envelope','kamaagni-session':'Guided Session'};
 var nx='',last=act.last,pages=act.pages||{};
 if(last&&NAMES[last]&&last!=='kamaagni-session')nx+='<a href="games/'+last+'.html">Pick up where you left off<b>'+NAMES[last]+' →</b></a>';
 var unseen=Object.keys(NAMES).filter(function(k){return !pages[k]});

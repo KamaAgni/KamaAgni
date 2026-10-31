@@ -1,10 +1,11 @@
 <!doctype html>
 <html lang="en"><head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta name="theme-color" content="#05060f"/>
-<title>KamaAgni — Love Coupons</title>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Love Coupons</title>
 <link rel="stylesheet" href="../css/fonts.css"/>
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
@@ -12,48 +13,69 @@
 <main class="kx app" id="app"></main>
 <script src="../js/ka-data.js"></script>
 <script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
 <script>
-(() => {
-  const {LS, esc, top, pick, heat, heatBar, HEAT, names} = KX;
-  const app = document.getElementById('app');
-  let st = LS.get('ka_coupons', {used: {}, custom: []});
-  const save = () => LS.set('ka_coupons', st);
-  let tab = 'wallet';
-  const all = () => [...KA_DATA.coupons.map(c => ({...c, id: 'b:' + c.t})), ...st.custom.map(t => ({h: 1, t, id: 'c:' + t, custom: true}))];
-  function render() {
-    app.innerHTML = top('Love Coupons', 'Little promises, redeemed whenever you choose.') + `<div id="hb"></div>
-      <div class="kx-tabs"><button data-t="wallet" class="${tab === 'wallet' ? 'on' : ''}">🎟 Wallet</button><button data-t="draw" class="${tab === 'draw' ? 'on' : ''}">🎲 Draw one</button><button data-t="make" class="${tab === 'make' ? 'on' : ''}">✍ Write your own</button></div><div id="body"></div>`;
-    heatBar(document.getElementById('hb'), render);
-    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
-    const body = document.getElementById('body'), h = heat();
-    const cp = c => `<div class="kx-coupon ${st.used[c.id] ? 'used' : ''}"><span class="kx-chip h${c.h}">${HEAT[c.h]}${c.custom ? ' · custom' : ''}</span>
-      <div class="kx-ct">${esc(c.t)}</div>
-      <div class="kx-row"><button class="kx-btn sm gold" data-u="${esc(c.id)}">${st.used[c.id] ? 'Redeemed ' + esc(st.used[c.id]) + ' · undo' : 'Redeem'}</button>
-      <button class="kx-btn sm ghost" data-s="${esc(c.id)}">Send</button></div></div>`;
-    const bind = () => {
-      const byId = Object.fromEntries(all().map(c => [c.id, c]));
-      body.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const id = b.dataset.u; if (st.used[id]) delete st.used[id]; else st.used[id] = new Date().toLocaleDateString(); save(); render(); });
-      body.querySelectorAll('[data-s]').forEach(b => b.onclick = async () => {
-        const text = '🎟 Love coupon: ' + byId[b.dataset.s].t;
-        try { if (navigator.share) { await navigator.share({text}); return; } await navigator.clipboard.writeText(text); KX.toast('Copied — paste it to your partner'); } catch {}
-      });
-    };
-    if (tab === 'wallet') {
-      const list = all().filter(c => c.h <= h);
-      body.innerHTML = `<div class="kx-muted" style="margin-bottom:12px">${list.filter(c => !st.used[c.id]).length} unused · ${list.filter(c => st.used[c.id]).length} redeemed</div><div class="kx-list">${list.map(cp).join('')}</div>`;
-    } else if (tab === 'draw') {
-      const pool = all().filter(c => c.h <= h && !st.used[c.id]);
-      body.innerHTML = pool.length ? `<div id="drawn"></div><div class="kx-center" style="margin-top:14px"><button class="kx-btn" id="dr">Draw a coupon</button></div>` : '<p class="kx-muted kx-center">All coupons at this heat level are redeemed.</p>';
-      const dr = document.getElementById('dr');
-      if (dr) dr.onclick = () => { document.getElementById('drawn').innerHTML = cp(pick(pool)); body.querySelectorAll('[data-u],[data-s]').forEach(() => 0); bind(); };
-    } else {
-      body.innerHTML = `<div class="kx-card"><p class="kx-muted" style="margin-bottom:10px">Write a coupon for ${esc(names()[1])} or ${esc(names()[0])} — a promise, a fantasy, a favour.</p>
-        <input class="kx-input" id="nc" maxlength="140" placeholder="e.g. A full-body massage with your favourite playlist"><button class="kx-btn" id="add">Add to wallet</button></div>`;
-      document.getElementById('add').onclick = () => { const v = document.getElementById('nc').value.trim(); if (v) { st.custom.push(v); save(); tab = 'wallet'; render(); } };
-    }
-    bind();
+(async () => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_coupons_v2';
+let DK;
+try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; }
+/* wallet state: used {id:date}, custom [{t,h}], cat filter, tab */
+let st = LS.get(KEY, null);
+if (!st) { const o = LS.get('ka_coupons', {used: {}, custom: []}); st = {used: {}, custom: (o.custom || []).map(t => ({t, h: 1})), cat: 'all', tab: 'wallet'}; Object.keys(o.used || {}).forEach(k => { st.used['b:' + k.replace(/^b:/, '')] = o.used[k]; }); }
+const save = () => LS.set(KEY, st);
+const heat = () => KX.heat();
+const all = () => {
+  const out = [];
+  DK.cats.forEach(c => (DK.items[c.id] || []).forEach(t => out.push({id: 'b:' + t, t, h: c.h, c: c.id, cl: c.l, ci: c.i})));
+  st.custom.forEach(x => out.push({id: 'c:' + x.t, t: x.t, ex: x.ex || '', h: x.h || 1, c: 'mine', cl: 'Written by us', ci: '✍', custom: true}));
+  return out;
+};
+const GUIDE = `<h3>The idea</h3><p>A love coupon is a small promise you give your partner. They keep it in their wallet and redeem it whenever they like.</p>
+<h3>Three ways to use it</h3><ul><li><b>Wallet:</b> browse every coupon at your heat level. Tap Redeem when you use one.</li><li><b>Draw one:</b> a surprise coupon from the unused ones.</li><li><b>Write your own:</b> add a personal promise.</li></ul>
+<h3>Send it</h3><p>Tap Send to share a coupon as a message, or copy it to paste.</p>
+<h3>Heat</h3><p>Coupons above your heat level stay hidden. Change your level any time in Settings.</p>`;
+function cp(c) {
+  const used = st.used[c.id]; const exp = c.ex ? (c.ex < new Date().toISOString().slice(0, 10) ? 'Expired ' + c.ex : 'Expires ' + c.ex) : '';
+  return `<div class="kd-cpn ${used ? 'used' : ''} h${c.h}"><div class="kd-cpn-l"><span class="kd-cpn-i">${c.ci}</span><span class="kx-chip h${c.h}">${esc(c.cl)}</span></div><div class="kd-cpn-t">${esc(c.t)}</div>${exp ? `<div class="kx-muted" style="font-size:12px;margin:4px 0">⏳ ${esc(exp)}</div>` : ''}
+    <div class="kx-row"><button class="kx-btn sm gold" data-u="${esc(c.id)}">${used ? 'Redeemed ' + esc(used) + ' · undo' : '🎟 Redeem'}</button><button class="kx-btn sm ghost" data-s="${esc(c.id)}">Send</button>${c.custom ? `<button class="kx-btn sm ghost" data-x="${esc(c.id)}">Delete</button>` : ''}</div></div>`;
+}
+function render() {
+  const h = heat(), list0 = all().filter(c => c.h <= h), cats = [{id: 'all', l: 'All', i: '🎟'}, ...DK.cats.filter(c => c.h <= h).map(c => ({id: c.id, l: c.l, i: c.i})), ...(st.custom.length ? [{id: 'mine', l: 'Ours', i: '✍'}] : [])];
+  if (!cats.some(c => c.id === st.cat)) st.cat = 'all';
+  const list = list0.filter(c => st.cat === 'all' || c.c === st.cat), unused = list.filter(c => !st.used[c.id]);
+  app.innerHTML = '<h1 class="kx-title"><span>Love Coupons</span></h1>' + U.bar([[unused.length + ' unused', ''], [(list0.length - list0.filter(c => !st.used[c.id]).length) + ' redeemed', 'h2']], {guide: true, quit: false}) +
+    `<div class="kd-tabs">${[['wallet', '🎟 Wallet'], ['draw', '🎲 Draw'], ['make', '✍ Write']].map(t => `<button class="${st.tab === t[0] ? 'on' : ''}" data-t="${t[0]}">${t[1]}</button>`).join('')}</div>
+    ${st.tab !== 'make' ? `<div class="kd-chips">${cats.map(c => `<button class="kx-chip-btn ${st.cat === c.id ? 'on' : ''}" data-c="${c.id}">${c.i} ${esc(c.l)}</button>`).join('')}</div>` : ''}<div id="body"></div>`;
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How Love Coupons work', two: false});
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { st.tab = b.dataset.t; save(); render(); });
+  app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cat = b.dataset.c; save(); render(); });
+  const body = document.getElementById('body'), byId = Object.fromEntries(all().map(c => [c.id, c]));
+  const bind = () => {
+    body.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const id = b.dataset.u; if (st.used[id]) delete st.used[id]; else { st.used[id] = new Date().toLocaleDateString(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 18}); try { KA_TRACK.log('play', 'Love Coupons', byId[id].t.slice(0, 70)); } catch (e) {} } save(); render(); });
+    body.querySelectorAll('[data-s]').forEach(b => b.onclick = async () => { const text = '🎟 Love coupon: ' + byId[b.dataset.s].t; try { if (navigator.share) { await navigator.share({text}); return; } await navigator.clipboard.writeText(text); KX.toast('Copied. Paste it to your partner'); } catch (e) {} });
+    body.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const id = b.dataset.x; st.custom = st.custom.filter(x => 'c:' + x.t !== id); delete st.used[id]; save(); render(); });
+  };
+  if (st.tab === 'wallet') body.innerHTML = `<div class="kx-row" style="justify-content:flex-end;margin-bottom:8px"><button class="kx-btn sm ghost" id="prt">🖨 Print unused</button></div><div class="kd-cpns">${list.map(cp).join('') || '<p class="kx-muted">Nothing here at your heat level.</p>'}</div>`;
+  else if (st.tab === 'draw') {
+    body.innerHTML = unused.length ? '<div id="drawn"></div><div class="kd-pass" style="margin-top:14px"><button class="kx-btn gold" id="dr">🎲 Draw a coupon</button></div>' : '<p class="kx-muted" style="text-align:center">Every coupon here is redeemed. Pick another category.</p>';
+    const dr = document.getElementById('dr');
+    if (dr) dr.onclick = () => { const c = pick(unused); document.getElementById('drawn').innerHTML = '<div class="ka-pop">' + cp(c) + '</div>'; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 14, y: innerHeight * .4}); bind(); };
+  } else {
+    body.innerHTML = `<div class="kx-card"><p class="kx-muted" style="margin-bottom:10px">Write a promise, a fantasy or a favour for your partner.</p><input class="kx-input" id="nc" maxlength="140" placeholder="e.g. A full-body massage with your favourite playlist"><label class="kx-muted" style="display:block;margin-top:8px;font-size:13px">Optional expiry date <input type="date" class="kx-input" id="nex"></label>
+      <div class="kx-row" style="margin:10px 0">${[[1, '🌸 Sweet'], [2, '🔥 Spicy'], [3, '🌋 Wild']].map(x => `<label class="kx-chip-btn"><input type="radio" name="nh" value="${x[0]}" ${x[0] === 1 ? 'checked' : ''} style="display:none">${x[1]}</label>`).join('')}</div><button class="kx-btn gold" id="add">Add to wallet</button></div>`;
+    body.querySelectorAll('input[name=nh]').forEach(r => r.onchange = () => body.querySelectorAll('.kx-chip-btn').forEach(l => l.classList.toggle('on', l.contains(r) && r.checked)));
+    document.getElementById('add').onclick = () => { const v = document.getElementById('nc').value.trim(); if (!v) return; st.custom.push({t: v, h: +body.querySelector('input[name=nh]:checked').value, ex: (document.getElementById('nex') || {}).value || ''}); st.tab = 'wallet'; st.cat = 'mine'; save(); render(); };
   }
-  render();
+  const prt = document.getElementById('prt');
+  if (prt) prt.onclick = () => {
+    const w = window.open('', '_blank'); if (!w) { KX.toast('Allow pop-ups to print'); return; }
+    w.document.write('<title>Love coupons</title><style>body{font-family:Georgia,serif;margin:20px}.c{border:2px dashed #c2185b;border-radius:12px;padding:16px;margin:10px 0;break-inside:avoid}.t{font-size:18px}.m{color:#777;font-size:12px}</style><h2>🎟 Love coupons for ' + esc(KX.names().join(' & ')) + '</h2>' + unused.map(c => '<div class="c"><div class="t">' + esc(c.t) + '</div><div class="m">' + esc(c.cl) + (c.ex ? ' · expires ' + esc(c.ex) : '') + '</div></div>').join('')); w.document.close(); setTimeout(() => w.print(), 300);
+  };
+  bind();
+}
+render();
 })();
 </script>
 <script src="../js/ka-features.js"></script>

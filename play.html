@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="js/ka-boot.js"></script><script src="js/ka-filter.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<title>KamaAgni Games</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="assets/icons/icon-192.png"/>
+<link rel="stylesheet" href="css/fonts.css"/>
+<link rel="stylesheet" href="css/premium.css"/>
+<link rel="stylesheet" href="css/ka-shared.css"/>
+<style>
+.hub{max-width:1040px}
+.hub-today{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 16px}.hub-today>div{padding:14px 16px;border-radius:20px;border:1px solid var(--kv-line2);background:linear-gradient(135deg,rgba(255,93,143,.14),rgba(139,108,255,.1))}.hub-ritual{display:flex;gap:12px;align-items:center;margin-top:8px;color:inherit;text-decoration:none}.hub-ritual .em{font-size:30px}.hub-ritual small{opacity:.7}.hub-t2 p{margin:6px 0 0;font-family:'Cormorant Garamond',serif;font-size:19px;line-height:1.3}@media(min-width:760px){.hub-today{grid-template-columns:1fr 1fr}}
+.hub-mood{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:4px 0 18px}
+.hub-mood button{position:relative;overflow:hidden;text-align:left;padding:16px 16px 14px;border-radius:20px;border:1px solid var(--kv-line2);background:var(--kv-glass);color:var(--kv-ink);font:inherit;cursor:pointer;transition:transform .25s var(--kv-ease),border-color .25s,box-shadow .25s}
+.hub-mood button:hover{transform:translateY(-4px);border-color:var(--kv-rose);box-shadow:var(--kv-glow)}
+.hub-mood b{display:block;font-family:'Cinzel',serif;font-size:15px;letter-spacing:.04em;margin-top:6px}.hub-mood span{font-size:12px;color:var(--kv-mute)}
+.hub-mood .em{font-size:30px;display:inline-block;animation:hubfloat 4s ease-in-out infinite}
+@keyframes hubfloat{50%{transform:translateY(-5px) rotate(-4deg)}}
+.hub-bar{margin:0 0 8px}.hub-flt summary{list-style:none;cursor:pointer;margin:10px 0 0;padding:10px 14px;border-radius:14px;border:1px solid var(--kv-line2);background:rgba(255,255,255,.04);font-size:13px;font-weight:700;display:flex;justify-content:space-between}.hub-flt summary::-webkit-details-marker{display:none}.hub-flt[open] summary{border-color:var(--kv-rose)}
+.hub-search{width:100%;padding:13px 16px 13px 42px;border-radius:16px;border:1px solid var(--kv-line2);background:rgba(255,255,255,.05) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%239a91ad' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 14px center;color:var(--kv-ink);font:inherit;font-size:15px;outline:none}
+.hub-search:focus{border-color:var(--kv-rose);box-shadow:var(--kv-glow)}
+.hub-chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}.hub-chips::-webkit-scrollbar{display:none}
+.hub-chips .lbl{flex:none;align-self:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--kv-mute);font-weight:700;margin-right:2px}
+.hub-chips button{flex:none;padding:8px 14px;border-radius:999px;border:1px solid var(--kv-line2);background:rgba(255,255,255,.04);color:var(--kv-ink);font:inherit;font-size:13px;font-weight:600;cursor:pointer;min-height:38px;transition:all .2s}
+.hub-chips button.on{background:linear-gradient(135deg,rgba(255,93,143,.32),rgba(139,108,255,.26));border-color:var(--kv-rose)}
+.hub-sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 10px}
+.hub-sec h2{font-family:'Cinzel',serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--kv-rose2)}.hub-sec span{font-size:12px;color:var(--kv-mute)}
+.hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.gc{position:relative;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;border:1px solid var(--kv-line);background:var(--kv-glass);box-shadow:var(--kv-shadow);transition:transform .3s var(--kv-ease),border-color .3s,box-shadow .3s;color:inherit}
+.gc:hover{transform:translateY(-6px);border-color:var(--kv-rose);box-shadow:var(--kv-glow)}
+.gc .art{height:92px;display:flex;align-items:center;justify-content:center;font-size:44px;position:relative;overflow:hidden}
+.gc .art::before{content:"";position:absolute;inset:0;background:var(--g);opacity:.85}
+.gc .art::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 30% 120%,rgba(0,0,0,.5),transparent 60%)}
+.gc .art i{position:relative;z-index:1;font-style:normal;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45));transition:transform .4s var(--kv-ease)}
+.gc:hover .art i{transform:scale(1.18) rotate(-6deg)}
+.gc .bd{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.gc h3{font-family:'Cinzel',serif;font-size:16px;letter-spacing:.03em;line-height:1.25}
+.gc p{font-size:13px;color:var(--kv-mute);line-height:1.5;flex:1}
+.gc .meta{display:flex;flex-wrap:wrap;gap:6px}
+.gc .meta span{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid var(--kv-line2);color:var(--kv-ink);background:rgba(255,255,255,.04)}
+.gc .meta .two{border-color:rgba(70,215,198,.5);color:#8ff0e3}
+.gc .new{position:absolute;top:10px;left:10px;z-index:2;font-size:10px;font-weight:800;letter-spacing:.12em;padding:4px 9px;border-radius:999px;background:linear-gradient(135deg,#ffc861,#ff7a3d);color:#2a1400}
+.gc .cont{position:absolute;top:10px;right:46px;z-index:2;font-size:10px;font-weight:800;letter-spacing:.1em;padding:4px 9px;border-radius:999px;background:rgba(70,215,198,.9);color:#032b27}
+.gc .star{position:absolute;top:6px;right:6px;z-index:3;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.35);color:#fff;font-size:18px;cursor:pointer;backdrop-filter:blur(6px)}
+.gc .star.on{color:#ffc861}
+.gc .go{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:700;color:var(--kv-rose2)}
+.hub-empty{text-align:center;padding:40px 10px;color:var(--kv-mute)}
+.hub-note{font-size:12px;color:var(--kv-mute);text-align:center;margin:14px 0}
+@media(max-width:600px){.hub-grid{grid-template-columns:repeat(2,1fr);gap:10px}.gc .art{height:70px;font-size:34px}.gc .bd{padding:10px 11px 12px}.gc h3{font-size:13.5px}.gc p{font-size:12px}.gc .meta span{font-size:10px;padding:2px 7px}.gc .go span:first-child{display:none}.gc .go{justify-content:flex-end}}
+/* surprise modal */
+#sm{position:fixed;inset:0;z-index:2147482600;background:rgba(7,6,15,.92);display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(10px)}
+#sm.show{display:flex}
+#sm .box{width:min(420px,100%);text-align:center;border-radius:26px;border:1px solid var(--kv-line2);background:var(--kv-glass);padding:26px 22px;box-shadow:var(--kv-shadow)}
+#sm .reel{height:130px;overflow:hidden;position:relative;margin:10px 0 14px;mask-image:linear-gradient(transparent,#000 25%,#000 75%,transparent);-webkit-mask-image:linear-gradient(transparent,#000 25%,#000 75%,transparent)}
+#sm .reel div{display:flex;flex-direction:column;align-items:center;gap:0;transition:transform 1.6s cubic-bezier(.12,.7,.15,1)}
+#sm .reel .r{height:130px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:54px;gap:2px}
+#sm .reel .r span{font-family:'Cinzel',serif;font-size:17px}
+</style>
+</head><body>
+<main class="kx hub" id="app"></main>
+<div id="sm" role="dialog" aria-label="Surprise me"><div class="box"><div class="kx-turn">Tonight's pick</div><div class="reel"><div id="reel"></div></div><h2 id="smt" style="font-family:Cinzel,serif;font-size:20px;margin-bottom:4px"></h2><p id="smd" class="kx-muted" style="margin-bottom:14px"></p><div class="kx-row" style="justify-content:center"><a class="kx-btn" id="smgo" href="#">Play this</a><button class="kx-btn ghost" id="smre">🎲 Another</button><button class="kx-btn ghost" id="smx">Close</button></div></div></div>
+<script src="js/ka-data.js"></script>
+<script src="js/ka-common.js"></script>
+<script src="js/ka-catalog.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, LS, shuffle} = KX; const app = document.getElementById('app');
+const ART = {sweet: 'linear-gradient(135deg,#ff9ec0,#c46bff)', playful: 'linear-gradient(135deg,#ff7a3d,#ff5d8f)', wild: 'linear-gradient(135deg,#ff3d6e,#7a1fff)', learn: 'linear-gradient(135deg,#46d7c6,#6c7ef8)', plan: 'linear-gradient(135deg,#ffc861,#ff7a3d)'};
+const VIBE = {sweet: '💗 Romantic', playful: '😜 Playful', wild: '🔥 Wild', learn: '📖 Learn', plan: '🗓️ Plan'};
+const f = Object.assign({q: '', mode: 'all', vibe: 'all', time: 'all'}, LS.get('ka_hub', {}) || {});
+let favs = LS.get('ka_fav_games', []) || [];
+const heat = () => KX.heat();
+const linked = () => { const c = window.KA_CLOUD; const s = c ? c.state() : {}; return !!(s.user && s.vault === 'ready' && s.couple && s.couple.partnerJoined && s.couple.hasKey); };
+const base = u => u.replace(/^.*\//, '');
+const hidden = g => !!(window.KA_FILTER && KA_FILTER.pageHidden(base(g.u)));
+const saved = g => { if (!g.key) return false; try { const s = JSON.parse(localStorage.getItem(g.key)); return !!(s && s.phase && s.phase !== 'end' && s.phase !== 'final'); } catch (e) { return false; } };
+const lastPlayed = () => { try { return (JSON.parse(localStorage.getItem('ka_hist')) || []).filter(x => x.y === 'play').map(x => x.a); } catch (e) { return []; } };
+
+function match(g) {
+  if (hidden(g)) return false;
+  if (g.h[0] > heat()) return false;
+  if (f.mode !== 'all' && !g.modes.includes(f.mode)) return false;
+  if (f.vibe !== 'all' && g.v !== f.vibe) return false;
+  if (f.time === 'q' && g.m > 15) return false; if (f.time === 'm' && (g.m <= 15 || g.m > 30)) return false; if (f.time === 'l' && g.m <= 30) return false;
+  if (f.q) { const t = (g.t + ' ' + g.d + ' ' + g.tag + ' ' + VIBE[g.v]).toLowerCase(); if (!f.q.toLowerCase().split(/\s+/).every(w => t.includes(w))) return false; }
+  return true;
+}
+function card(g) {
+  const modes = g.modes.map(m => m === 'one' ? '<span>📱 One phone</span>' : m === 'two' ? '<span class="two">📱📱 Two phones</span>' : '<span>👤 Solo</span>').join('');
+  const fl = '🔥'.repeat(Math.min(3, Math.max(1, Math.min(g.h[1], heat()))));
+  return `<a class="gc" href="${g.u}" data-id="${g.id}" aria-label="${esc(g.t)}">
+    ${g.isNew ? '<div class="new">NEW</div>' : ''}${saved(g) ? '<div class="cont">CONTINUE</div>' : ''}
+    <button class="star ${favs.includes(g.id) ? 'on' : ''}" data-fav="${g.id}" aria-label="Favourite">${favs.includes(g.id) ? '★' : '☆'}</button>
+    <div class="art" style="--g:${ART[g.v]}"><i>${g.i}</i></div>
+    <div class="bd"><h3>${esc(g.t)}</h3><p>${esc(g.d)}</p>
+      <div class="meta">${modes}<span>⏱ ${g.m} min</span><span>${fl}</span></div>
+      <div class="go"><span>${esc(g.tag)} · ${VIBE[g.v].split(' ')[1]}</span><span>Play →</span></div></div></a>`;
+}
+function chips(lbl, key, opts) { return `<div class="hub-chips" data-k="${key}"><span class="lbl">${lbl}</span>${opts.map(o => `<button type="button" data-v="${o[0]}" class="${f[key] === o[0] ? 'on' : ''}">${o[1]}</button>`).join('')}</div>`; }
+
+
+const DAILY_R = [['🙏','Daily Appreciation','5 min'],['🫂','20-Second Hug','1 min'],['🌙','10-Minute Evening Check-in','10 min'],['👁️','Soul Gazing (4 minutes)','5 min'],['🤲','Sensate Focus: Round 1','20 min'],['💆','Massage Swap','40 min'],['🌬️','7-Breath Forehead Connection','3 min'],['🗺️','Love Map Update','15 min'],['🎤','Curiosity Interview','15 min'],['🚶','Gratitude Walk','20 min']];
+const DAILY_Q = ['What is one small thing I did recently that made you feel loved?','What is a moment this week you would like to relive?','What would make tomorrow feel like a treat?','Where would you love us to go for a surprise weekend?','What is your favourite way I touch you?','What is something new you would like us to try this month?','What song reminds you of us?','What is something I do that always makes you smile?','What is one thing you wish we did more often?','If we had a free evening, what would you plan?','What is a compliment you rarely hear but would love?','What is your favourite memory of our early days?','What makes you feel most desired?','What is one thing you are looking forward to together?','How can I make your week easier?'];
+function today() {
+  const d = Math.floor(Date.now() / 864e5), r = DAILY_R[d % DAILY_R.length], q = DAILY_Q[d % DAILY_Q.length];
+  let st = {}; try { st = JSON.parse(localStorage.getItem('ka_rituals_v1')) || {}; } catch (e) {}
+  const days = new Set((st.log || []).map(l => l.d)); let n = 0, x = new Date(); if (!days.has(x.toISOString().slice(0, 10))) x.setDate(x.getDate() - 1); while (days.has(x.toISOString().slice(0, 10))) { n++; x.setDate(x.getDate() - 1); }
+  return `<div class="hub-today"><div class="hub-t1"><span class="kx-turn">Today for you two</span><a class="hub-ritual" href="games/kamaagni-rituals.html"><span class="em">${r[0]}</span><span><b>${r[1]}</b><br><small>${r[2]} · ritual of the day${n ? ' · 🔥 ' + n + '-day streak' : ''}</small></span></a></div><div class="hub-t2"><span class="kx-turn">Question of the day</span><p>${q}</p></div></div>`;
+}
+function render(keepFocus) {
+  const list = KA_CATALOG.filter(match), all = KA_CATALOG.filter(g => !hidden(g));
+  const cont = list.filter(saved), fv = list.filter(g => favs.includes(g.id) && !saved(g));
+  const rest = list.filter(g => !saved(g) && !favs.includes(g.id));
+  const lp = lastPlayed(); rest.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+  const heatHidden = all.filter(g => g.h[0] > heat()).length;
+  const nact = ['mode', 'vibe', 'time'].filter(k => f[k] !== 'all').length;
+  const wasOpen = (document.getElementById('flt') || {}).open;
+  app.innerHTML = `<h1 class="kx-title"><span>Games</span></h1><p class="kx-sub">Pick a mood, or let us surprise you. Everything is optional, and pass is always allowed.</p>
+  ${today()}
+  <div class="hub-mood">
+    <button data-mood="sweet"><span class="em">💗</span><b>Romantic</b><span>Slow, close, tender</span></button>
+    <button data-mood="playful"><span class="em">😜</span><b>Playful</b><span>Laughs and flirting</span></button>
+    <button data-mood="wild"><span class="em">🔥</span><b>Wild</b><span>Turn the heat up</span></button>
+    <button data-mood="any"><span class="em">🎲</span><b>Surprise me</b><span>We pick for you</span></button>
+  </div>
+  <div class="hub-bar"><input class="hub-search" id="q" type="search" placeholder="Search ${all.length} games…" value="${esc(f.q)}" autocomplete="off" aria-label="Search games">
+   <details class="hub-flt" id="flt"><summary><span>⚙️ Filters ${nact ? '· ' + nact + ' on' : ''}</span><span>${list.length} games</span></summary>${chips('Players', 'mode', [['all', 'All'], ['one', '📱 One phone'], ['two', '📱📱 Two phones'], ['solo', '👤 Solo']])}
+   ${chips('Vibe', 'vibe', [['all', 'Any'], ['sweet', '💗 Romantic'], ['playful', '😜 Playful'], ['wild', '🔥 Wild'], ['learn', '📖 Learn'], ['plan', '🗓️ Plan']])}
+   ${chips('Time', 'time', [['all', 'Any'], ['q', 'Under 15 min'], ['m', '15 to 30'], ['l', '30+ min']])}
+   <div class="hub-chips" id="heatrow"></div></details></div>
+  ${f.mode === 'two' && !linked() ? '<div class="kx-card" style="margin-bottom:14px"><b>📱📱 Two phones needs a link.</b><p class="kx-muted">Sign in and link with your partner once in <a href="games/kamaagni-together.html" style="color:var(--kv-rose2)">Together</a>, then every two-phone game works.</p></div>' : ''}
+  ${cont.length ? `<div class="hub-sec"><h2>Continue</h2><span>Pick up where you left off</span></div><div class="hub-grid">${cont.map(card).join('')}</div>` : ''}
+  ${fv.length ? `<div class="hub-sec"><h2>Your favourites</h2></div><div class="hub-grid">${fv.map(card).join('')}</div>` : ''}
+  <div class="hub-sec"><h2>${cont.length || fv.length ? 'More games' : 'All games'}</h2><span>${list.length} shown</span></div>
+  ${rest.length ? `<div class="hub-grid">${rest.map(card).join('')}</div>` : (list.length ? '' : '<div class="hub-empty">Nothing matches. Try clearing a filter.<br><br><button class="kx-btn ghost sm" id="clr">Clear filters</button></div>')}
+  ${heatHidden ? `<p class="hub-note">${heatHidden} more game${heatHidden > 1 ? 's' : ''} appear at a higher heat level. Change it above.</p>` : ''}`;
+  const fl = document.getElementById('flt'); fl.open = wasOpen !== undefined ? wasOpen : matchMedia('(min-width:760px)').matches;
+  KX.heatBar(document.getElementById('heatrow'), () => render());
+  bind(keepFocus);
+}
+function bind(keepFocus) {
+  const q = document.getElementById('q');
+  q.oninput = () => { f.q = q.value; LS.set('ka_hub', f); clearTimeout(bind.t); bind.t = setTimeout(() => render(true), 160); };
+  if (keepFocus) { q.focus(); q.setSelectionRange(q.value.length, q.value.length); }
+  app.querySelectorAll('.hub-chips[data-k] button').forEach(b => b.onclick = () => { f[b.parentElement.dataset.k] = b.dataset.v; LS.set('ka_hub', f); render(); });
+  app.querySelectorAll('[data-fav]').forEach(b => b.onclick = e => { e.preventDefault(); e.stopPropagation(); const id = b.dataset.fav; favs = favs.includes(id) ? favs.filter(x => x !== id) : favs.concat(id); LS.set('ka_fav_games', favs); window.KA_MOTION && KA_MOTION.tick(); render(); });
+  app.querySelectorAll('[data-mood]').forEach(b => b.onclick = () => surprise(b.dataset.mood));
+  const c = document.getElementById('clr'); if (c) c.onclick = () => { Object.assign(f, {q: '', mode: 'all', vibe: 'all', time: 'all'}); LS.set('ka_hub', f); render(); };
+}
+
+/* Surprise me: slot-machine reveal */
+let pool = [], cur = null;
+function surprise(mood) {
+  pool = KA_CATALOG.filter(g => !hidden(g) && g.h[0] <= heat() && (mood === 'any' || g.v === mood || (mood === 'sweet' && g.v === 'learn' && false)));
+  if (f.mode !== 'all') pool = pool.filter(g => g.modes.includes(f.mode));
+  if (!pool.length) pool = KA_CATALOG.filter(g => !hidden(g));
+  spin();
+}
+function spin() {
+  const sm = document.getElementById('sm'), reel = document.getElementById('reel'); sm.classList.add('show');
+  let pick = pool[Math.floor(Math.random() * pool.length)]; if (cur && pool.length > 1) while (pick.id === cur.id) pick = pool[Math.floor(Math.random() * pool.length)];
+  cur = pick; const seq = shuffle(pool).slice(0, 12).concat([pick]);
+  reel.innerHTML = seq.map(g => `<div class="r">${g.i}<span>${esc(g.t)}</span></div>`).join(''); reel.style.transition = 'none'; reel.style.transform = 'translateY(0)';
+  document.getElementById('smt').textContent = ''; document.getElementById('smd').textContent = '';
+  const done = () => { document.getElementById('smt').textContent = pick.t; document.getElementById('smd').textContent = pick.d; document.getElementById('smgo').href = pick.u; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 26, y: innerHeight * .4}); };
+  if (window.KA_MOTION && KA_MOTION.reduced) { reel.style.transform = `translateY(-${(seq.length - 1) * 130}px)`; return done(); }
+  requestAnimationFrame(() => requestAnimationFrame(() => { reel.style.transition = 'transform 1.8s cubic-bezier(.12,.7,.15,1)'; reel.style.transform = `translateY(-${(seq.length - 1) * 130}px)`; setTimeout(done, 1850); }));
+}
+document.getElementById('smx').onclick = () => document.getElementById('sm').classList.remove('show');
+document.getElementById('smre').onclick = spin;
+document.getElementById('sm').onclick = e => { if (e.target.id === 'sm') e.target.classList.remove('show'); };
+window.addEventListener('ka:filter', () => render()); window.addEventListener('ka:cloud', () => { if (f.mode === 'two') render(); });
+render();
+})();
+</script>
+<script src="js/ka-features.js"></script>
+<script src="js/app-shell.js"></script>
+<script src="js/ka-config.js"></script><script src="js/ka-gate.js"></script>
+<script src="js/ka-track.js"></script>
+<script src="js/ka-chrome.js"></script>
+</body></html>

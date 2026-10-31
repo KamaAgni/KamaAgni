@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
-<title>KamaAgni — Kink Explorer</title>
+<title>KamaAgni Kink Explorer</title>
 <link rel="stylesheet" href="../css/fonts.css"/>
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
@@ -28,6 +28,9 @@
       <input class="kx-input" id="q" type="search" placeholder="Search (e.g. bondage, gag, spanking)" value="${esc(q)}">
       <div class="kx-tabs"><button data-f="all" class="${f === 'all' ? 'on' : ''}">All (${kinks.length})</button><button data-f="y" class="${f === 'y' ? 'on' : ''}">Curious</button><button data-f="m" class="${f === 'm' ? 'on' : ''}">Maybe</button><button data-f="n" class="${f === 'n' ? 'on' : ''}">Not for me</button></div>
       <div class="kx-list" id="l"></div>
+      <div class="kx-card" style="margin-top:16px"><b>Compare with your partner</b><p class="kx-muted" style="margin:4px 0 10px">Swap codes. You only see what you both marked Curious or Maybe. Anything marked Not for me is never shown or sent, and the code can't be read back into names.</p>
+        <div class="kx-row"><button class="kx-btn sm" id="cc">📋 Copy my code</button></div>
+        <textarea class="kx-input" id="pc" rows="2" placeholder="Paste your partner's code here" style="margin-top:10px"></textarea><button class="kx-btn sm ghost" id="cm" style="margin-top:8px">See what we both like</button><div id="cr" style="margin-top:10px"></div></div>
       <p class="kx-note">Tip: use Desire Match to compare with your partner without revealing a "no".</p>`;
     const l = kinks.filter(k => k.n.toLowerCase().includes(q.toLowerCase()) && (f === 'all' || st[k.n] === f));
     document.getElementById('l').innerHTML = l.map(k => `<div class="kx-card" style="padding:14px 16px">
@@ -36,6 +39,16 @@
       <p class="kx-muted" style="color:var(--text2);font-size:14px;margin:8px 0 ${open === k.n ? 12 : 8}px;${open === k.n ? '' : 'display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden'}">${esc(k.d)}</p>
       <div class="kx-row"><button class="kx-btn ghost sm" data-o="${esc(k.n)}">${open === k.n ? 'Less' : 'Read more'}</button>
       ${['y', 'm', 'n'].map(v => `<button class="kx-btn sm ${st[k.n] === v ? '' : 'ghost'}" data-m="${v}" data-k="${esc(k.n)}">${L[v]}</button>`).join('')}</div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
+    const hs = n => { let h = 2166136261; for (const c of n) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; } return h.toString(36); };
+    document.getElementById('cc').onclick = async () => { const code = 'KA1:' + kinks.filter(k => st[k.n] === 'y' || st[k.n] === 'm').map(k => st[k.n] + hs('ka|' + k.n)).join('.'); try { await navigator.clipboard.writeText(code); KX.toast('Code copied. Send it to your partner.'); } catch (e) { prompt('Copy this code', code); } };
+    document.getElementById('cm').onclick = () => {
+      const v = document.getElementById('pc').value.trim(), box = document.getElementById('cr');
+      if (!/^KA1:/.test(v)) { box.innerHTML = '<p class="kx-muted">That does not look like a code.</p>'; return; }
+      const theirs = {}; v.slice(4).split('.').filter(Boolean).forEach(x => { theirs[x.slice(1)] = x[0]; });
+      const both = kinks.filter(k => (st[k.n] === 'y' || st[k.n] === 'm') && theirs[hs('ka|' + k.n)]);
+      const yy = both.filter(k => st[k.n] === 'y' && theirs[hs('ka|' + k.n)] === 'y'), rest = both.filter(k => !yy.includes(k));
+      box.innerHTML = '<div class="kx-sec" style="margin-top:0">You are both curious (' + yy.length + ')</div>' + (yy.map(k => '<div class="kx-item"><span class="kx-it">' + esc(k.n) + '</span></div>').join('') || '<p class="kx-muted">None yet.</p>') + '<div class="kx-sec">One curious, one maybe (' + rest.length + ')</div>' + (rest.map(k => '<div class="kx-item"><span class="kx-it">' + esc(k.n) + '</span></div>').join('') || '<p class="kx-muted">None yet.</p>');
+    };
     document.getElementById('q').oninput = e => { q = e.target.value; const pos = e.target.selectionStart; draw(); const i = document.getElementById('q'); i.focus(); i.setSelectionRange(pos, pos); };
     app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { f = b.dataset.f; draw(); });
     app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { open = open === b.dataset.o ? null : b.dataset.o; draw(); });

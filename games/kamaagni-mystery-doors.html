@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Mystery Doors</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_doors_v2';
+const P0 = {1: ['A 10-minute shoulder massage','A long slow kiss','Breakfast in bed','You choose the film and I give you a foot rub','A love note read aloud','A 5-minute cuddle with no phones','Dance with me to one song','A compliment for every minute of 3 minutes','A hand massage with lotion','A back scratch for 5 minutes'],
+2: ['A blindfolded tease for 5 minutes','A full-body massage','Kisses wherever you choose for 5 minutes','A strip-tease of your choice','I wear whatever you pick tonight','A bubble bath together','Whisper my fantasy in your ear','I undress you slowly','Ice and feather for 5 minutes','10 minutes of dirty talk'],
+3: ['You are in charge for 20 minutes','A role-play of your choice','Oral for as long as you like (to give or to receive)','A new position from the selector, your choice','I wear something daring and follow your orders','A toy used on me or you, your choice','Tied up and teased for 10 minutes','An hour of pure worship','A fantasy from the box made real','The whole night is yours']};
+const GUIDE = `<h3>The idea</h3><p>Deal or No Deal for couples. Nine doors hide prizes from sweet to wild. The contestant keeps one door, opens the others in rounds, and the banker makes offers.</p>
+<h3>Each round</h3><ol><li>The contestant picks a door to keep, then opens two others. Opened prizes are gone.</li><li>The banker makes an offer: a <b>safe prize</b> or a <b>door swap</b>.</li><li>The contestant says Deal or No deal. At the end, the kept door opens.</li></ol>
+<h3>Two phones</h3><p>One of you is the contestant, the other is the banker. The banker sees what is behind every closed door and chooses which offer to make. A good banker bluffs kindly.</p>
+<h3>Ground rules</h3><ul><li>Heat level controls how wild the prizes can be.</li><li>A prize is a suggestion. You can always agree a different one.</li></ul>`;
+let S = null;
+const D = KA_DUO.init({g: 'doors', key: KEY, get: () => S, onState: st => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
+S = D.load();
+const two = () => !!(S && S.mode === 'two'), N = () => D.names(S);
+const isC = () => !two() || D.me === S.who, isB = () => two() && D.me !== S.who;
+function build(h) {
+  const T = k => shuffle(KF(P0[k]));
+  const a = T(1).slice(0, 3), b = (h >= 2 ? T(2) : T(1).filter(x => !a.includes(x))).slice(0, 3), c = (h >= 3 ? T(3) : T(2)).slice(0, 3);
+  return shuffle([...a.map(t => ({t, v: 1})), ...b.map(t => ({t, v: h >= 2 ? 2 : 1})), ...c.map(t => ({t, v: h >= 3 ? 3 : 2}))]);
+}
+function start(o) {
+  const cp = LS.get('ka_couple', {}) || {};
+  S = {mode: o.mode, gid: Date.now(), seq: 0, phase: 'pick', doors: build(o.heat), heat: o.heat, mine: null, open: [], pending: [], who: 0, round: 0, offers: null, offer: null, prize: null, names: [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2']};
+  D.setMe(0); D.save(S); render();
+}
+const closed = () => S.doors.map((d, i) => i).filter(i => i !== S.mine && !S.open.includes(i));
+function makeOffers() {
+  const rest = [...closed().map(i => S.doors[i]), S.doors[S.mine]], avg = rest.reduce((a, d) => a + d.v, 0) / rest.length;
+  const lv = k => Math.max(1, Math.min(S.heat, k)), mk = k => ({k: 'safe', t: pick(KF(P0[lv(k)])), v: lv(k)});
+  const offers = [mk(Math.floor(avg)), mk(Math.round(avg)), mk(Math.ceil(avg + .4))];
+  if (closed().length >= 2) offers.push({k: 'swap', t: 'Swap your door with another closed door'});
+  return offers.filter((o, i, a) => a.findIndex(x => x.k === o.k && x.t === o.t) === i);
+}
+function render() {
+  if (!S) return U.setup(app, {id: 'doors', title: 'Mystery Doors', sub: 'Open the doors, hear the banker and decide: deal or no deal.', modes: ['one', 'two'], duo: D, catsLabel: 'Prizes', cats: [{id: 'all', l: 'All prizes', i: '🎁', n: 'Sweet to wild, up to your heat level', h: 1}], extras: [], startLabel: 'Open the doors', guideTitle: 'How Mystery Doors works', guide: GUIDE, start, note: 'Prizes are suggestions. A "no" is always okay.'});
+  const n = N(), cn = n[S.who], bn = n[1 - S.who], left = closed();
+  let body = '';
+  if (S.phase === 'pick') body = `<div class="kx-turn">${esc(cn)}, pick your door</div><p class="kx-muted">${isC() ? 'This is the door you keep. Do not open it yet.' : esc(cn) + ' is choosing a door to keep.'}</p>`;
+  else if (S.phase === 'open') body = `<div class="kx-turn">${isC() ? 'Open ' + (Math.min(2, left.length) - S.pending.length) + ' more' : esc(cn) + ' is opening doors'}</div><p class="kx-muted">Each opened prize is gone for good.</p>`;
+  else if (S.phase === 'offer') {
+    if (isB()) body = `<div class="kx-turn">You are the banker</div><p class="kx-muted">Closed prizes. Only you can see them:</p><div class="kx-list">${left.concat([S.mine]).sort((a, b) => a - b).map(i => `<div class="kx-item"><span class="kx-it">Door ${i + 1}${i === S.mine ? ' (kept)' : ''}: ${esc(S.doors[i].t)}</span><span class="kx-chip h${S.doors[i].v}">${'🔥'.repeat(S.doors[i].v)}</span></div>`).join('')}</div><div class="kx-sec">Make an offer</div>${S.offers.map((o, k) => `<button class="kx-btn gold" data-of="${k}" style="display:block;width:100%;margin:6px 0">${o.k === 'swap' ? '🔁 ' + esc(o.t) : '🎁 ' + esc(o.t)}</button>`).join('')}`;
+    else body = `<div class="kx-turn">The banker is thinking…</div><div class="kx-big" style="margin:12px auto">📞</div>`;
+  } else if (S.phase === 'respond') {
+    const o = S.offer;
+    body = `<div class="kx-turn">The banker calls…</div><div class="kx-big" style="margin:12px auto">${o.k === 'swap' ? '🔁 Swap doors?' : '"' + esc(o.t) + '"'}</div>` + (isC() ? `<div class="kd-pass"><button class="kx-btn gold" id="dl">✅ ${o.k === 'swap' ? 'Swap' : 'Deal'}</button><button class="kx-btn ghost" id="nd">❌ No deal</button></div>` : `<p class="kx-muted">${esc(cn)} is deciding…</p>`);
+  } else if (S.phase === 'final') body = `<div class="kx-turn">Your door</div>` + (isC() ? `<button class="kx-btn gold" id="fo">Open door ${S.mine + 1}</button>` : `<p class="kx-muted">${esc(cn)} opens door ${S.mine + 1}…</p>`);
+  else body = `<div class="kx-turn">${esc(cn)}'s prize</div><div class="kx-big" style="margin:12px auto">🎉 ${esc(S.prize)}</div><p class="kx-muted">${esc(bn)} delivers it.</p><div class="kd-pass">${!two() || D.me === 0 ? '<button class="kx-btn gold" id="ag">Play again</button>' : ''}</div>`;
+  app.innerHTML = '<h1 class="kx-title"><span>Mystery Doors</span></h1>' + U.bar([['Round ' + (S.round + 1), ''], two() ? ['📱📱 ' + (isB() ? 'Banker' : 'Contestant'), 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true}) + '<div class="kx-card" data-nofx="1" style="text-align:center">' + body + '<div class="kd-doors">' + S.doors.map((d, i) => `<button class="kd-door ${i === S.mine ? 'mine' : ''} ${S.open.includes(i) ? 'open' : ''}" data-d="${i}" ${(S.phase !== 'pick' && S.phase !== 'open') || !isC() ? 'disabled' : ''}><b>${i + 1}</b>${S.open.includes(i) ? '<em>' + esc(d.t) + '</em>' : ''}</button>`).join('') + '</div></div>';
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How Mystery Doors works', two: two(), quit: () => { D.quit(S); S = null; render(); }});
+  const sv = () => { D.save(S); render(); };
+  app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => {
+    const i = +b.dataset.d; if (!isC()) return;
+    if (S.phase === 'pick') { S.mine = i; S.phase = 'open'; S.pending = []; sv(); }
+    else if (S.phase === 'open' && i !== S.mine && !S.open.includes(i)) {
+      S.open.push(i); S.pending.push(i); window.KA_MOTION && KA_MOTION.burst({kind: 'embers', n: 10, y: innerHeight * .5});
+      const goal = Math.min(2, S.doors.length - 1 - (S.open.length - S.pending.length));
+      if (S.pending.length >= goal || closed().length === 0) { S.pending = []; S.round++; if (closed().length === 0) S.phase = 'final'; else { S.offers = makeOffers(); if (two()) S.phase = 'offer'; else { S.offer = pick(S.offers); S.phase = 'respond'; } } }
+      sv();
+    }
+  });
+  app.querySelectorAll('[data-of]').forEach(b => b.onclick = () => { S.offer = S.offers[+b.dataset.of]; S.phase = 'respond'; sv(); });
+  const done = () => { try { KA_TRACK.log('play', 'Mystery Doors', S.prize.slice(0, 60)); } catch (e) {} window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 50}); S.phase = 'end'; sv(); };
+  const dl = document.getElementById('dl'); if (dl) dl.onclick = () => { if (S.offer.k === 'swap') { const c = closed(), j = c[Math.floor(Math.random() * c.length)]; S.mine = j; S.phase = 'open'; S.pending = []; S.offer = null; KX.toast('Door swapped'); sv(); } else { S.prize = S.offer.t; done(); } };
+  const nd = document.getElementById('nd'); if (nd) nd.onclick = () => { S.phase = 'open'; S.pending = []; S.offer = null; sv(); };
+  const fo = document.getElementById('fo'); if (fo) fo.onclick = () => { S.prize = S.doors[S.mine].t; done(); };
+  const ag = document.getElementById('ag'); if (ag) ag.onclick = () => { D.clear(); S = null; render(); };
+}
+render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Intimate Bingo</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+const {esc, shuffle, LS} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_bingo_v1';
+const _CU = (window.KA_CUSTOM ? KA_CUSTOM.get('bingo') : []);
+const IT = {1: ['Kiss for a full minute','Slow dance','Give a 5-minute massage','Cuddle for 10 minutes','Say 3 compliments','Hold eye contact for 1 minute','Feed each other a snack','Share a long hug','Whisper a secret','Kiss the neck','Hold hands for a whole film','Trace a heart on their back','Take a selfie together','Say "I love you" in a funny voice','Kiss their hand','Sing a line of a love song','Give a foot rub','Play with their hair','Write a love note','Make them laugh','Share a favourite memory','Kiss the forehead','Do a spontaneous dance','Say what you love about their smile','Warm them up with a blanket cuddle','Share a sweet treat','Do a 20-second hug','Tell them how you felt on your first date','Put a note in their pocket','Give a shoulder rub'],
+2: ['Kiss them somewhere unexpected','Give a sensual massage','Undress one item of their clothing slowly','Do a strip-tease','Whisper something naughty','Blindfold them for 3 minutes','Use a feather or ice on their skin','Make out like teenagers','Kiss from the neck to the waist','Say what you want tonight','Try a new kind of kiss','Wear something daring','Shower together','Take a sexy photo (delete after)','Give a 10-minute massage with oil','Tease with no touching for 2 minutes','Send a teasing message','Sit on their lap and kiss','Play with their ears and neck','Describe your favourite night together','Dance close and slow','Lick or kiss a fingertip slowly','Give an almost-kiss five times','Kiss their inner wrist and thigh','Take a bath together'],
+3: ['Take charge for 5 minutes','Follow orders for 5 minutes','Use a toy','Try a new position','Role-play for 10 minutes','Give oral or receive oral','Tie their wrists with a soft scarf','Edging round: stop before the finish','Dirty talk for 3 minutes','Wear a blindfold the whole time','Tell them your fantasy in detail','Take control of the pace','Use ice and heat','Make love somewhere new','Whisper a command','Say "beg me" and enjoy it','Spank gently with a yes','Watch them touch themselves','Finish together','Try something from the Desire Match list','Do a lap dance','Spend 10 minutes only on them','Let them choose your outfit','Be teased with no relief for 5 minutes','Record a voice note for later']};
+const REW = {1: ['A foot rub','Pick the film','Breakfast in bed','A massage tomorrow','A love note','A special dessert'], 2: ['A full-body massage','A strip-tease','10 minutes of kisses anywhere you want','You choose the night\'s outfit','A bath together','A teasing session'], 3: ['You are in charge for 20 minutes','A role-play of your choice','Winner chooses everything for an hour','A fantasy made real','Oral of your choice','A night with no limits (within agreed ones)']};
+const LINES = []; for (let r = 0; r < 5; r++) LINES.push([0, 1, 2, 3, 4].map(c => r * 5 + c)); for (let c = 0; c < 5; c++) LINES.push([0, 1, 2, 3, 4].map(r => r * 5 + c)); LINES.push([0, 6, 12, 18, 24], [4, 8, 12, 16, 20]);
+let S = null;
+const D = KA_DUO.init({g: 'bingo', key: KEY, get: () => S, onState: st => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); },
+  merge: (cur, st) => { let ch = false; const m = JSON.parse(JSON.stringify(cur)); st.marks.forEach((v, i) => { if (v && !m.marks[i]) { m.marks[i] = v; ch = true; } }); (st.claimed || []).forEach(c => { if (!m.claimed.includes(c)) { m.claimed.push(c); m.rew = (m.rew || []).concat((st.rew || []).slice(m.rew ? m.rew.length : 0)); ch = true; } }); return ch ? m : null; }});
+S = D.load();
+const two = () => !!(S && S.mode === 'two');
+const TH = {rom: /kiss|hug|love|cuddl|compliment|note|hold|dance|memory|hand|smile|whisper|date/i, fun: /laugh|selfie|sing|funny|game|silly|voice|spontaneous|make them|tell|play/i, sen: /massage|undress|blindfold|feather|ice|whisper|shower|oil|strip|neck|touch|slow|tease|lingerie/i};
+function build(h, themes) { const pool = []; for (let l = 1; l <= h; l++) pool.push(...KF(IT[l]).map(t => ({t, h: l}))); _CU.forEach(t => pool.push({t, h: 1})); const th = (themes || []).filter(x => TH[x]); let pl2 = pool; if (th.length) { const f = pool.filter(x => th.some(k => TH[k].test(x.t))); if (f.length >= 24) pl2 = f; else if (f.length) pl2 = f.concat(shuffle(pool.filter(x => !f.includes(x))).slice(0, 24 - f.length)); } const sel = shuffle(pl2).slice(0, 24); sel.splice(12, 0, {t: 'FREE', h: 0}); return sel; }
+function start(o) { S = {mode: o.mode, gid: Date.now(), seq: 0, phase: 'play', heat: o.heat, grid: build(o.heat, o.cats), cats: o.cats, marks: Array.from({length: 25}, (_, i) => i === 12 ? 1 : 0), claimed: [], rew: []}; D.setMe(0); D.save(S); render(); }
+const GUIDE = `<h3>The idea</h3><p>A 5×5 bingo card of things to do together. Do an activity, tap its square. Complete a line (across, down or diagonal) to win a reward. Cover the whole card for a blackout.</p>
+<h3>Rewards</h3><p>Each completed line gives the next reward from a list. The reward goes to whoever you decide.</p>
+<h3>Two phones</h3><p>Link in Together first. You share one card. Marks sync live.</p>
+<h3>Heat</h3><p>Only activities up to your heat level appear on the card.</p>`;
+function setup() { U.setup(app, {id: 'bingo', title: 'Intimate Bingo', sub: 'Mark off activities together. Complete a line to win a reward.', modes: ['one', 'two'], duo: D, catsLabel: 'Card', cats: [{id: 'all', l: 'Mixed card', i: '🎰', n: 'Random activities up to your heat level', h: 1}, {id: 'rom', l: 'Romantic theme', i: '💞', n: 'Kisses, words, hugs and memories', h: 1}, {id: 'fun', l: 'Playful theme', i: '😜', n: 'Laughs, silly challenges and games', h: 1}, {id: 'sen', l: 'Sensual theme', i: '🕯️', n: 'Massage, teasing and slow touch', h: 2}], extras: [], startLabel: 'Deal a card', guideTitle: 'How Intimate Bingo works', guide: GUIDE, start, note: 'Both partners agree on every square.'}); }
+function lines(m) { return LINES.map((l, i) => l.every(c => m[c]) ? i : -1).filter(i => i >= 0); }
+function render() {
+  if (!S) return setup();
+  const done = lines(S.marks), full = S.marks.every(Boolean), newOnes = done.filter(i => !S.claimed.includes(i));
+  if (newOnes.length) { newOnes.forEach(i => { S.claimed.push(i); const lvl = Math.min(S.heat, 3), r = REW[lvl][Math.floor(Math.random() * REW[lvl].length)]; S.rew.push(r); }); D.save(S); window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 60}); KX.toast('BINGO! ' + S.rew[S.rew.length - 1]); }
+  app.innerHTML = '<h1 class="kx-title"><span>Intimate Bingo</span></h1>' + U.bar([[done.length + ' line' + (done.length === 1 ? '' : 's'), 'h2'], [S.marks.filter(Boolean).length - 1 + '/24', ''], two() ? ['📱📱 Two phones', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true}) +
+    `<div class="kd-bingo">${S.grid.map((c, i) => `<button class="kd-bc ${S.marks[i] ? 'on' : ''} ${c.t === 'FREE' ? 'free' : ''} h${c.h}" data-c="${i}">${c.t === 'FREE' ? '💖' : esc(c.t)}</button>`).join('')}</div>` +
+    (S.rew.length ? '<div class="kx-sec">Rewards won</div><div class="kx-list">' + S.rew.map(r => `<div class="kx-item"><span class="kx-it">🏆 ${esc(r)}</span></div>`).join('') + '</div>' : '') + (full ? '<div class="kx-card" style="text-align:center"><div class="kx-big">🎉 Blackout!</div><button class="kx-btn gold" id="ag">New card</button></div>' : '');
+  U.bindBar(app, {guide: GUIDE, guideTitle: 'How Intimate Bingo works', two: two(), quit: () => { D.quit(S); S = null; render(); }});
+  app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { const i = +b.dataset.c; if (i === 12) return; if (two() && S.marks[i]) return; S.marks[i] = S.marks[i] ? 0 : 1; if (S.marks[i]) try { KA_TRACK.log('play', 'Bingo', S.grid[i].t.slice(0, 60)); navigator.vibrate && navigator.vibrate(15); } catch (e) {} D.save(S); render(); });
+  const ag = document.getElementById('ag'); if (ag) ag.onclick = () => { D.clear(); S = null; render(); };
+}
+render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

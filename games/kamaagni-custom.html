@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Our Own Cards</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-duo.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, toast} = KX, app = document.getElementById('app');
+const G = [
+ ['truth','Truth or Dare: truths','💬','Type one question per line.'],
+ ['dare','Truth or Dare: dares','🎯','Type one dare per line.'],
+ ['wyp','Would You Prefer','⚖️','Format: option A | option B'],
+ ['nhie','Never Have I Ever','🙊','Start with "Never have I ever..."'],
+ ['who','Who\'s Most Likely','👆','Start with "Who is most likely..."'],
+ ['know','How Well Do You Know Me','🧠','Format: question | answer A | answer B'],
+ ['conn','Connection Cards','🃏','Format: title | what to do (title optional)'],
+ ['coupons','Love Coupons','🎟️','One coupon per line, e.g. "One foot rub, no questions asked".'],
+ ['scratch','Scratch-Off tickets','🪙','One prize per line.'],
+ ['dice','Kinky Dice faces','🎲','Short phrase per line, becomes a die face.'],
+ ['menu','Bedroom Menu items','🍽️','One item per line.'],
+ ['bingo','Bingo squares','🔢','One activity per line.'],
+ ['quick','Quick-Fire "Name 3"','⚡','Start with "Name 3 ..."'],
+ ['quicklr','Quick-Fire Letter Rush categories','🔤','e.g. A kind of flower'],
+ ['quickch','Quick-Fire Charades cards','🎭','e.g. A kiss in the rain'],
+ ['tasks','Task Deck tasks','🃏','One task per line. Use {A} and {B} for your names.']
+];
+let cur = 'truth';
+function render() {
+  const g = G.find(x => x[0] === cur), list = KA_CUSTOM.get(cur);
+  app.innerHTML = KX.top('Our own cards', 'Write your own cards. They stay on this device and are mixed into the games.') +
+   '<div class="kd-chips">' + G.map(x => `<button class="kx-chip-btn${x[0] === cur ? ' on' : ''}" data-g="${x[0]}">${x[2]} ${esc(x[1])}</button>`).join('') + '</div>' +
+   `<div class="kx-card"><div class="kx-sec">${g[2]} ${esc(g[1])}</div><p class="kx-muted">${esc(g[3])}</p><textarea id="ta" rows="4" class="kx-input" style="width:100%" placeholder="Add one per line"></textarea><div style="height:8px"></div><button class="kx-btn" id="add">Add</button></div>` +
+   `<div class="kx-sec">${list.length} saved</div><div class="kx-list">` + (list.length ? list.map((t, i) => `<div class="kx-item"><span class="kx-it">${esc(t)}</span><button class="kx-btn kx-ghost" data-d="${i}" aria-label="Delete">✕</button></div>`).join('') : '<p class="kx-muted">Nothing yet.</p>') + '</div>' +
+   '<p class="kx-muted" style="margin-top:14px">Your cards appear under "Our own" in the category list of each game. Topic filters from Settings also apply to your cards only in games that filter text.</p>';
+  app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { cur = b.dataset.g; render(); });
+  app.querySelector('#add').onclick = () => {
+    const ls = app.querySelector('#ta').value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 100);
+    if (!ls.length) return; const bad = (cur === 'wyp' && ls.some(l => !l.includes('|'))) || (cur === 'know' && ls.some(l => l.split('|').length < 3));
+    if (bad) { toast('Check the format shown above'); return; }
+    KA_CUSTOM.set(cur, [...list, ...ls].slice(0, 300)); toast('Added ' + ls.length); render();
+  };
+  app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const a = KA_CUSTOM.get(cur); a.splice(+b.dataset.d, 1); KA_CUSTOM.set(cur, a); render(); });
+}
+render();
+})();
+
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

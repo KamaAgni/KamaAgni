@@ -1,10 +1,10 @@
 <!doctype html>
 <html lang="en"><head>
-<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-fx.js"></script>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
 <meta name="theme-color" content="#05060f"/>
-<title>KamaAgni — Task Deck</title>
+<title>KamaAgni Task Deck</title>
 <link rel="stylesheet" href="../css/fonts.css"/>
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
@@ -23,6 +23,7 @@
     const idx = await (await fetch('../data/packs/index.json')).json();
     idx.forEach(x => packs.push({id: x.id, label: x.l, desc: x.d, heat: x.h, group: x.g, count: x.n, lazy: true, items: []}));
   } catch { app.innerHTML = top('Task Deck', '') + '<div class="kx-card kx-center">Could not load tasks. Open this page from your hosted site.</div>'; return; }
+  { const cu = window.KA_CUSTOM ? KA_CUSTOM.get('tasks') : []; if (cu.length) packs.unshift({id: 'mine', label: 'Our own tasks', desc: 'Tasks you wrote yourselves', heat: 1, group: 'Yours', items: cu}); }
   let st = LS.get('ka_tasks', {sel: ['lightfd', 'switch'], done: {}});
   const save = () => LS.set('ka_tasks', st);
   const [NA, NB] = KX.names();
@@ -43,7 +44,7 @@
     app.innerHTML = top('Task Deck', 'Pick the packs you both want, then draw. Pass or stop any time.') + `<div id="hb"></div>
       <input class="kx-input" id="q" type="search" placeholder="Search packs (e.g. bondage, public, roleplay)">
       <div class="kx-list" id="pk"></div>
-      <div class="kx-row" style="margin-top:16px"><button class="kx-btn" id="go">🃏 Draw a task</button><button class="kx-btn ghost" id="all">🎲 Surprise me (all packs)</button></div>
+      <div class="kx-row" style="margin-top:16px"><button class="kx-btn" id="go">🃏 Draw a task</button><button class="kx-btn ghost" id="all">🎲 Surprise me (all packs)</button><button class="kx-btn ghost" id="dly">📆 Task of the day</button></div><div id="dtask"></div>
       <p class="kx-note">Agree on a safe word before starting. Anything you don't both want, pass.</p>`;
     heatBar(document.getElementById('hb'), setup);
     const vis = packs.map(p => ({p, n: p.lazy ? (p.heat <= h || h === 3 ? p.count : 0) : p.items.filter(x => ih(p, x) <= h).length}))
@@ -57,6 +58,12 @@
     const q = document.getElementById('q'); q.value = query; q.oninput = e => { query = e.target.value.trim().toLowerCase(); const pos = e.target.selectionStart; setup(); const q2 = document.getElementById('q'); q2.focus(); q2.setSelectionRange(pos, pos); };
     document.getElementById('pk').onchange = e => { const id = e.target.dataset.p; st.sel = st.sel.filter(x => x !== id); if (e.target.checked) st.sel.push(id); save(); };
     document.getElementById('all').onclick = async () => { const b = document.getElementById('all'); b.textContent = 'Shuffling…'; st.sel = packs.filter(p => (p.lazy ? p.heat <= heat() : true)).map(p => p.id); save(); await ensure(st.sel); draw(); };
+    document.getElementById('dly').onclick = async () => {
+      await ensure(st.sel); const pl = pool(), box = document.getElementById('dtask');
+      if (!pl.length) { box.innerHTML = '<p class="kx-muted">Pick a pack first.</p>'; return; }
+      const d = new Date(), seed = d.getFullYear() * 400 + d.getMonth() * 32 + d.getDate(), x = pl[(seed * 2654435761 >>> 0) % pl.length];
+      box.innerHTML = '<div class="kx-card kx-center" style="margin-top:14px"><div class="kx-sec" style="margin-top:0">Today\'s task</div><div class="kx-big">' + esc(fill(x.t)) + '</div><p class="kx-muted">' + esc(x.p.label) + '. The same task shows all day. Pass any time.</p></div>';
+    };
     document.getElementById('go').onclick = async () => { const b = document.getElementById('go'); b.textContent = 'Shuffling…'; await ensure(st.sel); draw(); };
   }
   function pool() {
