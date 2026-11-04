@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Sensory Night</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style></style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_sn_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const SN = {"sight": ["Sight", "👀", [["Candlelight Gaze", "Dim the lights and light a candle. Gaze at each other by candlelight and say what you see. Take 2 minutes."], ["Slow Reveal", "The giver undresses one item slowly while the other watches without touching. Take 2 minutes."], ["Mirror Moment", "Stand together in front of a mirror and say one thing you love about the reflection. Take 2 minutes."]]], "sound": ["Sound", "🎧", [["Whisper Tour", "The receiver closes their eyes. The giver whispers something warm into each ear, one after the other. Take 2 minutes."], ["Playlist Pick", "Choose a song that says what you feel. Play it and slow dance. Take 3 minutes."], ["Breath Listening", "Rest your head on your partner's chest and listen to their breathing and heartbeat. Take 2 minutes."]]], "scent": ["Scent", "🌸", [["Scent Guess", "The receiver closes their eyes. The giver holds up three scents, such as a spice, a flower or a perfume, one at a time. The receiver guesses and says how each makes them feel. Take 3 minutes."], ["Neck Scent", "Breathe in the scent of your partner's neck and say what it reminds you of. Take 2 minutes."], ["Warm Oil", "Warm a little scented oil in your hands and let your partner breathe it in before you touch. Take 2 minutes."]]], "taste": ["Taste", "🍓", [["Blind Taste", "The receiver closes their eyes. The giver feeds them three small bites, one at a time, and the receiver guesses each. Take 3 minutes."], ["Chocolate Kiss", "Share a piece of chocolate by passing it between your mouths. Take 2 minutes."], ["Sip and Kiss", "Take a sip of a drink, then share a kiss, and repeat. Take 3 minutes."]]], "touch": ["Touch", "✋", [["Fingertip Map", "The receiver closes their eyes. The giver traces a different pattern on the arm and the receiver guesses it. Take 3 minutes."], ["Textures", "Use a feather, a silk scarf and an ice cube in turn on the receiver's arms and shoulders. Take 3 minutes."], ["Hands Only", "The giver explores the receiver's hands, wrists and forearms with slow, careful touch. Take 3 minutes."]]]}, SNACKS = ["Strawberries or other berries", "Dark chocolate", "Figs or dates", "Honey and soft cheese", "Watermelon or grapes", "Almonds or pistachios", "Chilli chocolate or spiced nuts", "Sparkling water or a favourite drink"];
+const GUIDE = `<h3>The idea</h3><p>An evening that wakes up all five senses: sight, sound, scent, taste and touch. One of you gives, the other receives, and you swap roles with every sense.</p><h3>Before you start</h3><p>Prepare a small board of snacks, a blindfold or scarf, a few scents, a feather or scarf, and a candle.</p>`;
+function setup() { U.setup(app, {id: 'sn', title: 'Sensory Night', sub: 'Five senses, five stations, one slow evening.', modes: ['one'], catsLabel: 'Senses', cats: Object.keys(SN).map(k => ({id: k, l: SN[k][0], i: SN[k][1], n: 3, h: 1})), guide: GUIDE, guideTitle: 'How to play', startLabel: 'Prepare the snacks',
+  extras: [{id: 'who', label: 'Roles', opts: [['alt', 'Swap roles each sense'], ['both', 'Each does every step']], def: 'alt'}],
+  start: o => { const plan = []; let r = 0; Object.keys(SN).filter(k => o.cats.includes(k)).forEach(k => { const e = pick(SN[k][2]); if (o.extras.who === 'both') { plan.push([k, e, 0]); plan.push([k, e, 1]); } else { plan.push([k, e, r]); r = 1 - r; } }); S = {plan, i: 0, phase: 'prep', ok: []}; save(); render(); }}); }
+function render() {
+  if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Sensory Night</span></h1>' + bar([['Station ' + Math.min(S.i + 1, S.plan.length) + '/' + S.plan.length, '']]);
+  if (S.phase === 'prep') { app.innerHTML = head + '<p class="kx-sub">Prepare the snack board</p>' + SNACKS.map((p, i) => '<button class="kx-btn ghost" style="display:block;width:100%;text-align:left;margin:4px 0" data-p="' + i + '">' + (S.ok.includes(i) ? '✓ ' : '○ ') + esc(p) + '</button>').join('') + '<div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn gold" id="go">Begin</button></div>';
+    bindBar(); app.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { const i = +b.dataset.p, k = S.ok.indexOf(i); if (k >= 0) S.ok.splice(k, 1); else S.ok.push(i); save(); render(); }); document.getElementById('go').onclick = () => { S.phase = 'go'; save(); render(); }; return; }
+  if (S.i >= S.plan.length) { app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Every sense awake</div><p class="kx-big" style="margin:12px 0">Tell each other which sense was your favourite.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="fin">Finish</button></div></div>'; bindBar(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Sensory Night', ''); } catch (e) {} clear(); setup(); }; return; }
+  const p = S.plan[S.i]; app.innerHTML = head + '<div id="pf"></div>'; bindBar();
+  KA_PERF.show(document.getElementById('pf'), {badge: SN[p[0]][0] + ' · ' + p[1][0], sub: NM[p[2]] + ' gives, ' + NM[1 - p[2]] + ' receives', text: p[1][1], onDone: () => { S.i++; save(); render(); }});
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Ask and Tell</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.at-lv{display:flex;gap:8px;justify-content:center;margin:10px 0}.at-lv button{padding:8px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit;font:inherit;cursor:pointer}.at-lv button.on{border-color:var(--gold);color:var(--gold)}
+.at-th{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0}.at-th button{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;cursor:pointer}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_at_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const D = {"L": [["What is the first thing you noticed about me?", "Describe the best kiss we have shared.", "Which of my habits makes you smile?", "Which lyric do you wish you could dedicate to me?", "Where is your favourite place to be touched when we are relaxing?", "What outfit of mine do you secretly love most?", "Which tiny thing I do would you hate to lose?", "When did you first feel attracted to me?", "What would a perfect lazy morning with me look like?", "Which of our dates would you replay?", "Which part of getting ready do you most enjoy watching me do?", "What is your favourite way for me to say hello?", "What is one compliment you wish you heard more?", "Where would you take me for a weekend if money did not matter?", "What makes you feel most relaxed around me?", "Which part of your day do you wish we shared more?", "What was your first impression of my voice?", "What is your favourite way to be woken up?", "How do you like to be held when you are tired?", "What is one thing I do that always works on you?", "What is a tiny habit of mine you find sexy?", "When do you feel closest to me during an ordinary day?", "Which of my gifts do you still think about?", "Which of my outfits makes you look twice?", "What is a smell, song or place that instantly brings me to mind?", "What is your favourite thing to do together when we have no plans?", "What was the moment you knew you wanted a future with me?", "What is the most romantic thing a stranger could say about us?", "How do you like to end a long day together?", "What is a compliment I gave you that you still remember?"], ["Describe a time you felt very turned on by me.", "What is a place at home we have not yet used and you have thought about?", "What kind of kiss makes you melt?", "Where on your body do you wish I would linger longer?", "What do you like me to wear to bed, or not wear?", "When we start in the mood, how do you like to be asked?", "Which part of foreplay is your favourite?", "What is something I do that you wish I would do for longer?", "How do you like to be touched when you are stressed?", "What sort of talk turns you on: sweet, dirty, or both?", "What time of day do you feel most in the mood?", "What is something new you would try if I said yes straight away?", "Describe the perfect first five minutes of an evening together.", "What is one thing you find hard to ask for?", "What helps you move from busy to ready when we have a chance to be close?", "If we had a free hour right now, how would you spend it?", "What is your favourite memory of us together in bed?", "Which of my moves makes you lose track of time?", "What do you like to hear me whisper?", "How do you feel about being surprised with a seduction?", "Which part of an evening together do you wish lasted longer?", "When I take charge, what do you enjoy most?", "When you take charge, what do you hope I do?", "What is a kind of touch you can never get enough of?", "What do you like me to do when you are nervous or shy?", "What is a place on your body you wish I paid more attention to?", "What makes you feel most confident in bed?", "Which of our nights would you most like to repeat, and why?", "What is the sweetest thing I have whispered to you?", "How do you like to be teased when we are out in public?"], ["Describe a fantasy you have never told me.", "What is something you think about when you are alone that you would like to share with me?", "If I gave you total control for ten minutes, what would you do?", "What would you like me to try that I probably have not?", "Which of your turn-ons surprises people the most?", "What is a role you would like us to play one night?", "If we planned a night around your wildest idea, what would it include?", "What is one boundary you want me to know about, and one you are curious to move?", "What do you like to watch or read that gets you going?", "Which words or phrases make you feel desired?", "What is the most daring thing you would do with me in private?", "What do you want to feel more of during sex?", "If you could rewind and redo one moment of ours, which and how?", "What would make you feel truly wanted tonight?", "What is one thing you would like me to ask about but I never do?", "Pick a place on my body and tell me what you would like to do there.", "What would you like me to say to you at the peak of a night?", "What is something you have always wanted me to beg for?", "Tell me how you want to be teased.", "What is your boldest unspoken wish for us this year?", "What is something you have always wanted to hear me say in bed?", "If we had a whole day with no interruptions, how would you plan it?", "What is a fantasy that involves just the two of us, in a place we know?", "What would you like me to wear, or not wear, for a night you design?", "Which of your desires do you worry I might find too much, and which would you like me to ask about?", "What would you like me to do to you when you are completely relaxed?", "What is a word or phrase that really turns you on?", "What is the boldest way you would like me to seduce you?", "If you could ask me for anything tonight with no explanation needed, what would it be?", "What do you imagine when you think about our hottest night together?"]], "B": ["Bonus: ask your partner any question from the other levels.", "Bonus: swap places on the couch and stay that way for one more round.", "Bonus: both write one word that describes tonight, then reveal at once.", "Bonus: give your partner a 60-second shoulder rub before answering.", "Bonus: say one thing you have never said out loud.", "Bonus: pick a card level for your partner and ask the first question there.", "Bonus: you can skip one question this round, no questions asked.", "Bonus: whisper your answer into your partner's ear instead.", "Bonus: look into each other's eyes for 30 seconds and say nothing.", "Bonus: answer with only gestures and your partner guesses.", "Bonus: ask any question you have always wanted answered.", "Bonus: swap seats with your partner and give them a kiss on the neck.", "Bonus: tell your partner one thing you are grateful for tonight.", "Bonus: take turns saying the first word that comes to mind about each other for one minute."], "A": ["Action: kiss slowly for one full minute.", "Action: sit facing each other and give a two-minute massage, partner's choice of area.", "Action: say three things you appreciate, each followed by a kiss.", "Action: take one item of clothing off your partner, slowly.", "Action: dance close to one song, no talking.", "Action: trace your partner's face with your fingertips for one minute.", "Action: give a full minute of kisses on the neck.", "Action: hold your partner's hand and tell them how your day felt.", "Action: whisper something flirty in your partner's ear and let them respond with a kiss.", "Action: hold your partner's face and give them a long, slow kiss on the forehead and cheeks.", "Action: give a one-minute hand massage and say one thing you love about their hands.", "Action: sit in each other's lap and share a long hug without speaking."], "T": ["Chilly", "Cool", "Warm", "Hot", "Scorching"]};
+const GUIDE = `<h3>The idea</h3><p>A conversation game in three levels: Warm-up, Closer and Deep. Take turns drawing a question. The partner who answers rates how comfortable it felt on the thermometer, so you both learn where the edges are.</p><h3>Play</h3><ol><li>Pick a level on your turn, or let the game climb with you.</li><li>Answer honestly. You can always pass once per level.</li><li>Rate the heat. Every fifth card brings a bonus or an action.</li></ol><p class="kx-note">No judgement. Everything said here is a gift.</p>`;
+const LV = ['Warm-up', 'Closer', 'Deep'];
+function setup() { U.setup(app, {id: 'at', title: 'Ask and Tell', sub: 'A conversation game that gets closer with every card.', modes: ['one'], catsLabel: 'Levels', cats: LV.map((l, i) => ({id: 'l' + i, l: l, i: ['💬', '🔥', '🌋'][i], n: D.L[i].length, h: i === 0 ? 1 : i + 1})), guide: GUIDE, guideTitle: 'How to play', startLabel: 'Start talking',
+  extras: [{id: 'n', label: 'Number of cards', opts: [[10, '10'], [20, '20'], [30, '30']], def: 10}],
+  start: o => { const lv = o.cats.map(c => +c.slice(1)); S = {lv, total: +o.extras.n, n: 0, turn: 0, who: 0, phase: 'draw', used: [[], [], []], hist: [], card: '', cur: lv[0]}; save(); render(); }}); }
+function draw(l) { const used = S.used[l]; let pool = D.L[l].map((q, i) => i).filter(i => !used.includes(i)); if (!pool.length) { S.used[l] = []; pool = D.L[l].map((q, i) => i); } const i = pick(pool); S.used[l].push(i); return D.L[l][i]; }
+function render() {
+  if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Ask and Tell</span></h1>' + bar([['Card ' + Math.min(S.n + 1, S.total) + '/' + S.total, ''], ['🎤 ' + esc(NM[S.who]), '']]);
+  if (S.phase === 'draw') {
+    const lvBtn = S.lv.map(l => '<button data-l="' + l + '" class="' + (S.cur === l ? 'on' : '') + '">' + LV[l] + '</button>').join('');
+    app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + esc(NM[S.who]) + ', your turn</div><p class="kx-muted">Pick a level</p><div class="at-lv">' + lvBtn + '</div><div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="dr">Draw a card</button></div></div>';
+    bindBar(); app.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { S.cur = +b.dataset.l; render(); });
+    document.getElementById('dr').onclick = () => { S.n++; const special = S.n % 5 === 0; if (special) { S.sp = Math.random() < .5 ? 'B' : 'A'; S.card = pick(D[S.sp]); S.phase = 'special'; } else { S.card = draw(S.cur); S.phase = 'ask'; } save(); render(); }; return; }
+  if (S.phase === 'special') {
+    app.innerHTML = head + '<div id="pf"></div>'; bindBar();
+    KA_PERF.show(document.getElementById('pf'), {badge: S.sp === 'B' ? 'Bonus card' : 'Action card', sub: 'Both of you', text: S.card.replace(/^(Bonus|Action): /, ''), onDone: () => { S.who = 1 - S.who; S.phase = S.n >= S.total ? 'end' : 'draw'; save(); render(); }}); return; }
+  if (S.phase === 'ask') {
+    app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + LV[S.cur] + '</div><div class="kx-big" style="margin:14px 0">' + esc(S.card) + '</div><p class="kx-muted">' + esc(NM[1 - S.who]) + ' asks. ' + esc(NM[S.who]) + ' answers.</p><div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn gold" id="ans">Answered</button><button class="kx-btn ghost" id="ps">Pass</button></div></div>';
+    bindBar(); document.getElementById('ans').onclick = () => { S.phase = 'rate'; save(); render(); }; document.getElementById('ps').onclick = () => { S.phase = 'draw'; S.who = 1 - S.who; if (S.n >= S.total) S.phase = 'end'; save(); render(); }; return; }
+  if (S.phase === 'rate') {
+    app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Comfort thermometer</div><p class="kx-big" style="margin:10px 0">How warm did that feel, ' + esc(NM[S.who]) + '?</p><div class="at-th">' + D.T.map((t, i) => '<button data-r="' + i + '">' + t + '</button>').join('') + '</div></div>';
+    bindBar(); app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { S.hist.push({l: S.cur, r: +b.dataset.r}); if (+b.dataset.r >= 3 && S.cur < Math.max.apply(null, S.lv)) S.cur = S.lv[Math.min(S.lv.length - 1, S.lv.indexOf(S.cur) + 1)] || S.cur; S.who = 1 - S.who; S.phase = S.n >= S.total ? 'end' : 'draw'; save(); render(); }); return; }
+  const avg = S.hist.length ? (S.hist.reduce((a, h) => a + h.r, 0) / S.hist.length) : 0;
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">That was honest and brave</div><p class="kx-big" style="margin:12px 0">Average heat: ' + D.T[Math.round(avg)] + '</p><p class="kx-muted">Finish with a long hug and one thing you learned.</p><div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn gold" id="fin">Finish</button></div></div>';
+  bindBar(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Ask and Tell', ''); } catch (e) {} clear(); setup(); };
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

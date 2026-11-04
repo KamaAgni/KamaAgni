@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-dedup.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="theme-color" content="#05060f"/>
@@ -39,7 +39,7 @@
       <div class="kx-list" id="list"></div>
       <div class="kx-card" style="margin-top:18px"><b>Your own ideas</b><p class="kx-muted" style="margin:4px 0 10px">Add anything that isn't on the list.</p>
         <input class="kx-input" id="own" maxlength="80" placeholder="e.g. Dance together in the rain"><button class="kx-btn sm" id="addown">Add to list</button></div>`;
-    document.getElementById('addown').onclick = () => { const v = document.getElementById('own').value.trim(); if (v && !items.includes(v)) { st.own.push(v); items = [...base, ...st.own]; save(); shell(); } };
+    document.getElementById('addown').onclick = () => { const v = document.getElementById('own').value.trim(); if (v && !items.includes(v)) KA_DEDUP.guard([v], items, a => { if (a.length) { st.own.push(v); items = [...base, ...st.own]; save(); shell(); } }); };
     document.getElementById('start').onchange = e => { st.start = e.target.value; save(); stats(); };
     document.getElementById('q').oninput = e => { q = e.target.value.toLowerCase(); list(); };
     app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; app.querySelectorAll('[data-f]').forEach(x => x.classList.toggle('on', x === b)); list(); });

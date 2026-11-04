@@ -4,7 +4,7 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   function LSget(k, d) { try { var v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } }
   function LSset(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function heat() { var h = LSget('ka_heat', 2); return h >= 1 && h <= 3 ? h : 2; }
+  function heat() { var h = LSget('ka_heat', 3); return h >= 1 && h <= 3 ? h : 3; }
   function tick(n) { window.KA_MOTION && KA_MOTION.tick(n); }
 
   /* ---------- guide overlay ---------- */
@@ -37,7 +37,7 @@
         '<div class="kx-sec">' + esc(cfg.catsLabel || 'Categories') + ' <span class="kd-all"><button type="button" id="kd-on">All</button><button type="button" id="kd-off">None</button></span></div>' +
         '<div class="kd-cats">' + cfg.cats.map(function (c, ci) { var dis = c.h > h; var gh = c.g && (ci === 0 || cfg.cats[ci - 1].g !== c.g) ? '<div class="kd-grp">' + esc(c.g) + '</div>' : ''; return gh + '<button type="button" class="kd-cat ' + (sel.has(c.id) && !dis ? 'on' : '') + '" data-c="' + c.id + '" ' + (dis ? 'disabled title="Needs a higher heat level"' : '') + '><span class="i">' + (c.i || '•') + '</span><b>' + esc(c.l) + '</b>' + (c.n ? '<em>' + c.n + '</em>' : '') + '</button>'; }).join('') + '</div>' +
         (cfg.extras || []).map(function (e) { return '<div class="kx-sec">' + esc(e.label) + '</div><div class="kd-opts" data-x="' + e.id + '">' + e.opts.map(function (o) { return '<button type="button" data-v="' + esc(o[0]) + '" class="' + (String(ex[e.id]) === String(o[0]) ? 'on' : '') + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>'; }).join('') +
-        '<div class="kx-row" style="margin-top:20px"><button class="kx-btn gold" id="kd-go">' + esc(cfg.startLabel || 'Start') + '</button>' + (cfg.guide ? '<button class="kx-btn ghost" id="kd-gd">📖 How to play</button>' : '') + '</div>' +
+        '<div class="kx-row kd-start" style="margin-top:20px"><button class="kx-btn gold" id="kd-go">' + esc(cfg.startLabel || 'Start') + '</button>' + (cfg.guide ? '<button class="kx-btn ghost" id="kd-gd">📖 How to play</button>' : '') + '</div>' +
         (cfg.note ? '<p class="kx-note">' + esc(cfg.note) + '</p>' : '') + '</div>';
       window.KX && KX.heatBar(document.getElementById('kd-heat'), function () { draw(); });
       app.querySelectorAll('[data-m]').forEach(function (b) { b.onclick = function () { if (b.disabled) return; mode = b.dataset.m; draw(); }; });
@@ -71,7 +71,7 @@
   function flip(host, delay) { var fc = host.querySelector('.kd-fc'); if (!fc) return; var r = window.KA_MOTION && KA_MOTION.reduced; setTimeout(function () { fc.classList.add('back'); if (window.KA_FX && KA_FX.clack) try { KA_FX.clack(); } catch (e) {} tick(10); }, r ? 0 : (delay == null ? 250 : delay)); }
 
   /* countdown ring: timer(el, seconds, onDone) */
-  function timer(el, secs, done) {
+  function timer(el, secs, done, opts) {
     var R = 38, L = 2 * Math.PI * R, t = secs, id = 0, run = false;
     el.innerHTML = '<div class="kd-ring"><svg viewBox="0 0 90 90"><circle cx="45" cy="45" r="' + R + '" class="bg"/><circle cx="45" cy="45" r="' + R + '" class="fg" stroke-dasharray="' + L + '" stroke-dashoffset="0"/></svg><b>' + t + '</b></div><button class="kx-btn ghost sm" type="button">▶ Start timer</button>';
     var fg = el.querySelector('.fg'), num = el.querySelector('b'), btn = el.querySelector('button');
@@ -81,7 +81,10 @@
       run = true; btn.textContent = '⏸ Pause'; tick();
       id = setInterval(function () { t--; draw(); if (t <= 0) { clearInterval(id); run = false; btn.textContent = '↺ Again'; t = secs; tick(40); window.KA_MOTION && KA_MOTION.burst({ kind: 'embers', n: 20 }); done && done(); setTimeout(draw, 600); } }, 1000);
     };
-    return function () { clearInterval(id); };
+    var stopLead = window.KA_AUTO ? KA_AUTO.lead(btn, (opts && opts.text) || '') : function () {};
+    var re = document.createElement('button'); re.type = 'button'; re.className = 'kx-btn ghost sm'; re.textContent = '↺ Start over'; re.style.marginLeft = '6px'; btn.parentNode.appendChild(re);
+    re.onclick = function () { clearInterval(id); run = false; t = secs; draw(); btn.textContent = '▶ Start timer'; stopLead(); stopLead = window.KA_AUTO ? KA_AUTO.lead(btn, (opts && opts.text) || '') : function () {}; };
+    return function () { clearInterval(id); stopLead(); };
   }
   function parseSecs(text) { var m = /\((\d+)\s*(sec|s|seconds|min|minutes|m)\b/i.exec(text) || /\bfor\s+(\d+)\s*(seconds?|secs?|minutes?|mins?)\b/i.exec(text) || /\b(\d+)\s*(seconds?|minutes?|mins?)\b/i.exec(text); if (!m) return 0; var n = +m[1], u = m[2].toLowerCase(); n = /^m/.test(u) ? n * 60 : n; return n >= 10 && n <= 600 ? n : 0; }
 

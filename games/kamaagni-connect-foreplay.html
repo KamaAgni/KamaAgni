@@ -465,7 +465,7 @@ function setupScreen(){
       <button class="link-btn" id="rulesBtn">How to Play →</button>
     </div>
   `;
-  let mode='one', heat = [1,2,3].includes(+LSget('ka_heat',2)) ? +LSget('ka_heat',2) : 2; const off = new Set();
+  let mode='one', heat = [1,2,3].includes(+LSget('ka_heat',3)) ? +LSget('ka_heat',3) : 3; const off = new Set();
   const syncHeat=()=>wrap.querySelectorAll('[data-h]').forEach(b=>b.classList.toggle('on', +b.dataset.h===heat)); syncHeat();
   wrap.querySelectorAll('[data-h]').forEach(b=> b.onclick=()=>{ heat=+b.dataset.h; LSset('ka_heat',heat); syncHeat(); });
   wrap.querySelectorAll('[data-t]').forEach(b=> b.onclick=()=>{ const k=b.dataset.t; if(off.has(k)){ off.delete(k); b.classList.add('on'); } else { off.add(k); b.classList.remove('on'); } });

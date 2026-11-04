@@ -271,16 +271,6 @@ async function checkPinOnLoad() {
   await runUnlockFlow(ls);
 }
 
-/* ─── Quick lock ─────────────────────────────────────── */
-async function quickLock() {
-  const saved = LS.get('ka_pin', null);
-  if (!saved) { toast('Set a PIN in Settings first to use Quick Lock.'); return; }
-  try { sessionStorage.removeItem(SESSION_KEY); } catch {}
-  const ls = buildLockScreen();
-  document.body.appendChild(ls);
-  await runUnlockFlow(ls);
-}
-
 /* ─── Couple profile ─────────────────────────────────── */
 function openCoupleProfile() {
   const p = LS.get('ka_couple', {});
@@ -419,7 +409,6 @@ const ALL_GAMES = [
   GAME('kamaagni-poker-quick.html'),
   GAME('kamaagni-would-you-prefer.html'),
   GAME('kamaagni-truth-or-dare.html'),
-  GAME('kamaagni-mission-week.html'),
   GAME('kamaagni-love-coupons.html'),
   GAME('kamaagni-task-deck.html'),
 ];
@@ -586,11 +575,12 @@ const fmt = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 
 function clearTimer() { if (tmr) { clearInterval(tmr.iv); tmr = null; } const p = document.getElementById('ka-timer-pill'); if (p) p.remove(); }
 function startTimer(sec, label) {
   clearTimer();
-  tmr = { end: Date.now() + sec * 1000, label: label || '' };
+  tmr = { end: Date.now() + sec * 1000, label: label || '', sec: sec };
   const pill = document.createElement('div'); pill.id = 'ka-timer-pill'; pill.setAttribute('role', 'timer');
-  pill.innerHTML = '<span id="ka-tp-t"></span><button type="button" id="ka-tp-add">+1 min</button><button type="button" id="ka-tp-x">✕</button>';
+  pill.innerHTML = '<span id="ka-tp-t"></span><button type="button" id="ka-tp-re" title="Start over">↺</button><button type="button" id="ka-tp-add">+1 min</button><button type="button" id="ka-tp-x">✕</button>';
   document.body.appendChild(pill);
   document.getElementById('ka-tp-x').onclick = clearTimer;
+  document.getElementById('ka-tp-re').onclick = () => { const s = tmr ? tmr.sec : sec, l = tmr ? tmr.label : label; startTimer(s, l); };
   document.getElementById('ka-tp-add').onclick = () => { if (tmr) tmr.end += 60000; };
   const tick = () => {
     if (!tmr) return;
@@ -620,22 +610,21 @@ function panic() {
   const el = document.createElement('div'); el.id = 'ka-panic';
   const clock = () => { const d = new Date(); el.textContent = d.getHours() + ':' + String(d.getMinutes()).padStart(2, '0'); };
   clock(); const iv = setInterval(clock, 10000);
-  el.addEventListener('dblclick', () => { clearInterval(iv); el.remove(); });
-  let last = 0; el.addEventListener('touchend', () => { const n = Date.now(); if (n - last < 350) { clearInterval(iv); el.remove(); } last = n; });
+  const gated = window.KA_GATE && KA_GATE.askPin && KA_GATE.hasPin && KA_GATE.hasPin();
+  if (gated) KA_GATE.seal();   /* a reload cannot get past the hide screen without the PIN */
+  const open = () => { clearInterval(iv); el.remove(); };
+  let busy = false;
+  const ask = () => { if (busy) return; busy = true; KA_GATE.askPin(() => { busy = false; open(); }, () => { busy = false; }); };
+  if (gated) { el.addEventListener('dblclick', ask); }
+  else el.addEventListener('dblclick', open);
+  let last = 0; el.addEventListener('touchend', () => { const n = Date.now(); if (n - last < 350) { gated ? ask() : open(); } last = n; });
   document.body.appendChild(el);
 }
 let lastEsc = 0;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') { const n = Date.now(); if (n - lastEsc < 600) panic(); lastEsc = n; } });
 
-/* ─── Auto-lock when the app is hidden ───────────────── */
-document.addEventListener('visibilitychange', () => {
-  if (!LS.get('ka_autolock', false) || !LS.get('ka_pin', null)) return;
-  if (document.visibilityState === 'hidden') { try { sessionStorage.removeItem(SESSION_KEY); } catch {} }
-  else if (!isSessionUnlocked() && !document.getElementById('ka-lock-screen')) { checkPinOnLoad(); }
-});
-
 /* ─── Backup / restore ───────────────────────────────── */
-const SKIP_KEYS = ['ka_pin', 'ka_pin_salt', 'ka_pin_lock'];
+const SKIP_KEYS = ['ka_pin', 'ka_pin_salt', 'ka_pin_lock', 'ka_gpin', 'ka_last'];
 function backup() {
   const data = {};
   try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (!SKIP_KEYS.includes(k)) data[k] = localStorage.getItem(k); } } catch {}
@@ -674,9 +663,7 @@ function buildSettings() {
     <button class="ka-btn ka-btn-ghost" id="ks-mood">🎭 Pick a Mood</button>
     <button class="ka-btn ka-btn-ghost" id="ks-favs">❤️ Saved Moments</button>
     <div class="ka-divider"></div>
-    <button class="ka-btn ka-btn-ghost" id="ks-pin-set">🔐 Set / Change PIN</button>
-    <div class="ka-set-row"><span>Auto-lock when app is hidden</span><div class="ka-switch ${LS.get('ka_autolock', false) ? 'on' : ''}" id="ks-auto" role="switch" tabindex="0" aria-checked="${LS.get('ka_autolock', false)}"></div></div>
-    <button class="ka-btn ka-btn-danger" id="ks-pin-clr">Remove PIN</button>
+    <button class="ka-btn ka-btn-ghost" id="ks-pin-set">🔐 Change my PIN</button>
     <div class="ka-divider"></div>
     <button class="ka-btn ka-btn-ghost" id="ks-backup">⬇ Backup my data</button>
     <button class="ka-btn ka-btn-ghost" id="ks-restore">⬆ Restore backup</button>
@@ -688,23 +675,10 @@ function buildSettings() {
   document.getElementById('ks-couple').onclick = () => { close(); openCoupleProfile(); };
   document.getElementById('ks-mood').onclick   = () => { close(); openMoodPicker(); };
   document.getElementById('ks-favs').onclick   = () => { close(); openFavHub(); };
-  document.getElementById('ks-pin-set').onclick = () => {
-    close();
-    pinKeypad('set').then(p1 => {
-      if (!p1) return;
-      pinKeypad('confirm').then(p2 => {
-        if (p1 === p2) { LS.del('ka_pin_salt'); hashPin(p1).then(h => { LS.set('ka_pin', h); LS.del('ka_pin_lock'); markSessionUnlocked(); toast('PIN saved.'); }); }
-        else toast('PINs did not match. Please try again.');
-      });
-    });
-  };
-  const sw = document.getElementById('ks-auto');
-  const flip = () => { const v = !LS.get('ka_autolock', false); if (v && !LS.get('ka_pin', null)) { toast('Set a PIN first to use auto-lock.'); return; } LS.set('ka_autolock', v); sw.classList.toggle('on', v); sw.setAttribute('aria-checked', v); };
-  sw.onclick = flip; sw.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } };
+  document.getElementById('ks-pin-set').onclick = () => { close(); if (window.KA_GATE && KA_GATE.changePin) KA_GATE.changePin(); else toast('Sign in first to set a PIN.'); };
   document.getElementById('ks-backup').onclick = () => { close(); backup(); };
   document.getElementById('ks-restore').onclick = () => { close(); restore(); };
   document.getElementById('ks-install').onclick = async () => { if (!deferredInstall) return; deferredInstall.prompt(); await deferredInstall.userChoice; deferredInstall = null; close(); };
-  document.getElementById('ks-pin-clr').onclick = () => { LS.del('ka_pin'); LS.del('ka_pin_salt'); LS.del('ka_pin_lock'); close(); toast('PIN removed.'); };
 }
 
 /* ─── Floating toolbar ───────────────────────────────── */
@@ -716,7 +690,6 @@ function buildToolbar() {
     <button class="ka-fab" id="ka-music-fab"    title="Mood Music" aria-label="Mood music">🎵</button>
     <button class="ka-fab" id="ka-timer-fab"    title="Timer" aria-label="Timer">⏱</button>
     <button class="ka-fab" id="ka-favs-fab"     title="Saved Moments" aria-label="Saved moments">❤️</button>
-    <button class="ka-fab" id="ka-lock-fab"     title="Quick Lock" aria-label="Quick lock">🔒</button>
     <button class="ka-fab" id="ka-hide-fab"     title="Hide screen (or press Esc twice)" aria-label="Hide screen">🕶</button>`;
   document.body.appendChild(tb);
 
@@ -728,7 +701,6 @@ function buildToolbar() {
   document.getElementById('ka-timer-fab').addEventListener('click', openTimer);
   document.getElementById('ka-hide-fab').addEventListener('click', panic);
   document.getElementById('ka-favs-fab').addEventListener('click', openFavHub);
-  document.getElementById('ka-lock-fab').addEventListener('click', quickLock);
 
   document.addEventListener('click', e => {
     const s = document.getElementById('ka-settings');
@@ -763,7 +735,6 @@ function injectBanners() {
 /* ─── Init ───────────────────────────────────────────── */
 async function init() {
   injectCSS();
-  await checkPinOnLoad();
   buildSettings();
   buildToolbar();
   injectBanners();

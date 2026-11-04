@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Fit for Fun</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.fp-c{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin:10px 0}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_fit_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const EX = {"stamina": ["Stamina", "🔥", [["Hip Bridge", "Lie on your back, feet flat, and lift your hips high. Hold for 30 seconds, then rest. Your partner counts and cheers. Repeat 3 times. Take 2 minutes in total."], ["Slow Squats", "Stand facing each other, hold hands and squat together in slow time. Do 12 squats, then a kiss. Take 2 minutes."], ["Plank and Tease", "One partner holds a plank for 30 seconds while the other traces a fingertip along their back. Swap. Take 2 minutes."], ["Dance Burst", "Play an upbeat song and dance as hard as you can for the whole track. Take 3 minutes."], ["Stair Race", "Race up and down a flight of stairs three times. Loser gives a kiss. Take 3 minutes."]]], "flex": ["Flexibility", "🧘", [["Hip Opener", "Sit on the floor with the soles of your feet together and press your knees down gently. Hold for 45 seconds, then breathe. Take 2 minutes."], ["Partner Stretch", "Sit back to back, legs crossed, and lean slowly side to side. Hold each side for 30 seconds. Take 2 minutes."], ["Cat and Cow", "Get on hands and knees and arch and round your back slowly with your partner. Do 10 rounds. Take 2 minutes."], ["Child's Pose Hug", "One partner folds into child's pose while the other kneels behind and presses their hands softly along the back. Take 2 minutes."], ["Hamstring Reach", "Sit facing each other, feet touching, and pass a long stretch back and forth, holding hands. Hold for 45 seconds each way. Take 2 minutes."]]], "strength": ["Strength", "💪", [["Wall Sit", "Back flat against a wall, thighs parallel to the floor. Hold for 40 seconds, then kiss your partner. Repeat. Take 2 minutes."], ["Partner Squats", "Stand back to back, link arms and squat together, 10 times. Take 2 minutes."], ["Lunge Walk", "Walk across the room with slow lunges, side by side, 10 each. Take 2 minutes."], ["Push-Up Kiss", "Both of you hold a push-up position facing each other and lean in to kiss at the top, 8 times. Take 2 minutes."], ["Sit-Up Catch", "Sit facing each other, feet together, and pass a pillow back and forth while leaning back, 12 times. Take 2 minutes."]]], "breath": ["Breath and Core", "🌬️", [["Pelvic Floor Lift", "Sit comfortably. Tighten the muscles you would use to stop the flow of urine, hold for 5 seconds, and release. Do 10 rounds together. Take 2 minutes."], ["Belly Breathing", "Lie back to back, or head to feet, and breathe slowly into your belly together for 3 minutes."], ["Alternate Breath", "Sit facing each other. Breathe in through your nose for 4 counts and out for 6 counts together. Keep this up for 3 minutes."], ["Standing Embrace Sway", "Hold each other close and sway slowly while you breathe in time. Take 3 minutes."]]]};
+const GUIDE = `<h3>The idea</h3><p>A fun partner workout to build stamina, flexibility, strength and breath. Each exercise has its own timer and a flirty twist. Stop if anything hurts.</p><p class="kx-note">Not medical advice. Check with a doctor if you have any health concerns.</p>`;
+function setup() { U.setup(app, {id: 'fit', title: 'Fit for Fun', sub: 'Partner exercises that build stamina, flexibility and strength.', modes: ['one'], catsLabel: 'Focus areas', cats: Object.keys(EX).map(k => ({id: k, l: EX[k][0], i: EX[k][1], n: EX[k][2].length, h: 1})), guide: GUIDE, guideTitle: 'How to play', startLabel: 'Warm up',
+  extras: [{id: 'n', label: 'Exercises', opts: [[4, '4 (quick)'], [6, '6'], [8, '8 (full)']], def: 4}],
+  start: o => { let all = []; o.cats.forEach(k => EX[k][2].forEach(e => all.push([EX[k][0], e[0], e[1]]))); S = {plan: shuffle(all).slice(0, +o.extras.n), i: 0}; save(); render(); }}); }
+function render() {
+  if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Fit for Fun</span></h1>' + bar([['Exercise ' + Math.min(S.i + 1, S.plan.length) + '/' + S.plan.length, '']]);
+  if (S.i >= S.plan.length) { app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Sweaty and smiling</div><p class="kx-big" style="margin:12px 0">Finish with a long hug and a drink of water.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="fin">Finish</button></div></div>'; bindBar(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Fit for Fun', ''); } catch (e) {} clear(); setup(); }; return; }
+  const s = S.plan[S.i]; app.innerHTML = head + '<div id="pf"></div>'; bindBar();
+  KA_PERF.show(document.getElementById('pf'), {badge: s[1], sub: s[0], text: s[2], onDone: () => { S.i++; save(); render(); }});
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

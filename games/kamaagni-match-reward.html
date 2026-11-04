@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Match and Reward</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.mm-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:420px;margin:14px auto}.mm{aspect-ratio:3/4;perspective:700px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.mm-in{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .5s cubic-bezier(.3,.7,.2,1)}.mm.up .mm-in,.mm.ok .mm-in{transform:rotateY(180deg)}
+.mm-f,.mm-b{position:absolute;inset:0;border-radius:14px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center}
+.mm-b{background:repeating-linear-gradient(45deg,#2a1240 0 6px,#3a1a58 6px 12px);border:1.5px solid rgba(244,160,174,.5);font-size:22px;box-shadow:0 6px 14px rgba(0,0,0,.4)}
+.mm-f{transform:rotateY(180deg);background:linear-gradient(160deg,#fff6ea,#f0dfc8);font-size:34px;box-shadow:0 6px 14px rgba(0,0,0,.4)}.mm.ok .mm-f{box-shadow:0 0 18px rgba(255,170,90,.8)}
+@keyframes mmin{from{opacity:0;transform:translateY(20px) scale(.9)}to{opacity:1;transform:none}}.mm{animation:mmin .45s both;animation-delay:calc(var(--i)*40ms)}@media(prefers-reduced-motion:reduce){.mm{animation:none}.mm-in{transition:none}}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let DK, S = null;
+const KEY = 'ka_mm_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+function pool(h) { const sel = new Set(S ? S.cats : []), out = []; DK.cats.forEach(c => { if (sel.has(c.id) && c.h <= (S ? S.heat : 2)) DK.items[c.id].forEach(t => out.push({t, h: c.h})); }); return out.length ? out : [{t: 'A slow kiss, however long you like.', h: 1}]; }
+const prize = (minH) => { const p = pool(), q = minH ? p.filter(x => x.h >= minH) : p; return pick(q.length ? q : p).t; };
+const bar = (chips) => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }});
+const catCfg = () => DK.cats.map(c => ({id: c.id, l: c.l, i: c.i, n: DK.items[c.id].length, h: c.h}));
+(async () => { try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; } setup(); })();
+const GUIDE = `<h3>The idea</h3><p>A memory game. Turn over two cards at a time. Find a matching pair and you win a reward card: your partner does it for you.</p><h3>Play</h3><ol><li>Take turns turning over two cards.</li><li>A match scores a point and a reward. You also go again.</li><li>No match: the cards turn back and it is your partner's go.</li><li>When every pair is found, the player with the most matches picks a final wish.</li></ol><p>Rewards with a time start their timer by themselves after a moment to read. Tap Start over if you missed it.</p>`;
+function setup() { U.setup(app, {id: 'mm', title: 'Match and Reward', sub: 'Find the pairs. Every match wins a reward from your partner.', modes: ['one'], catsLabel: 'Reward categories', cats: catCfg(), guide: GUIDE, guideTitle: 'How to play', extras: [{id: 'pairs', label: 'How many pairs', opts: [[6, '6 (quick)'], [8, '8 (classic)'], [10, '10 (long)']], def: 8}], startLabel: 'Deal the cards',
+  start: o => { const n = +o.extras.pairs, ic = shuffle(['💋','🔥','🌹','🍓','🪶','🕯️','🍷','🎀','💫','🧊','🌙','🍒']).slice(0, n); S = {cats: o.cats, heat: o.heat, cards: shuffle(ic.concat(ic)).map(i => ({i, s: 0})), turn: 0, first: null, lock: false, score: [0, 0], phase: 'play', pr: null}; save(); render(); }}); }
+function render() {
+  if (!S) return setup(); const t = S.turn, left = S.cards.filter(c => c.s !== 2).length;
+  const head = '<h1 class="kx-title"><span>Match and Reward</span></h1>' + bar([['💗 ' + esc(NM[0]) + ' ' + S.score[0], t === 0 && S.phase === 'play' ? 'h2' : ''], ['💗 ' + esc(NM[1]) + ' ' + S.score[1], t === 1 && S.phase === 'play' ? 'h2' : ''], ['🃏 ' + left / 2 + ' pairs left', '']]);
+  if (S.phase === 'prize') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: NM[S.who] + ' made a match', sub: NM[1 - S.who] + ' does this for ' + NM[S.who], text: S.pr, onDone: () => { S.phase = 'play'; S.pr = null; if (!S.cards.some(c => c.s !== 2)) { S.phase = 'final'; S.fin = prize(2); } save(); render(); }}); return; }
+  if (S.phase === 'final') { const w = S.score[0] === S.score[1] ? -1 : (S.score[0] > S.score[1] ? 0 : 1); app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: w < 0 ? 'A tie. You both win' : NM[w] + ' wins the game', sub: w < 0 ? 'You both pick one for the other' : NM[1 - w] + ' gives the winner this wish', text: S.fin, doneLabel: 'Finish', onDone: () => { try { KA_TRACK.log('play', 'Match and Reward', ''); } catch (e) {} S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); return; }
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p' + t + '"><i></i>' + esc(NM[t]) + ', turn over two cards</div><div class="mm-grid">' + S.cards.map((c, i) => '<div class="mm ' + (c.s === 1 ? 'up' : c.s === 2 ? 'ok' : '') + '" data-i="' + i + '" style="--i:' + i + '"><div class="mm-in"><div class="mm-b">🔥</div><div class="mm-f">' + c.i + '</div></div></div>').join('') + '</div></div>';
+  bindBar();
+  app.querySelectorAll('.mm').forEach(el => el.onclick = () => {
+    const i = +el.dataset.i, c = S.cards[i]; if (S.lock || c.s) return; c.s = 1; el.classList.add('up'); try { KA_FX.clack(1); navigator.vibrate && navigator.vibrate(8); } catch (e) {}
+    if (S.first == null) { S.first = i; save(); return; }
+    const a = S.first; S.first = null; S.lock = true;
+    if (S.cards[a].i === c.i) setTimeout(() => { S.cards[a].s = c.s = 2; S.score[S.turn]++; S.who = S.turn; S.pr = prize(); S.phase = 'prize'; S.lock = false; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 20}); save(); render(); }, 750);
+    else setTimeout(() => { S.cards[a].s = c.s = 0; S.turn = 1 - S.turn; S.lock = false; save(); render(); }, 1000);
+  });
+}
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

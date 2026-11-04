@@ -43,6 +43,7 @@
       user: function () { return c.auth.getSession().then(function (r) { var s = r.data && r.data.session; return s ? { id: s.user.id, email: s.user.email } : null; }); },
       signUp: function (e, p) { return c.auth.signUp({ email: e, password: p }).then(function (r) { if (r.error) throw r.error; return { user: r.data.user ? { id: r.data.user.id, email: e } : null, needsConfirm: !r.data.session }; }); },
       signIn: function (e, p) { return c.auth.signInWithPassword({ email: e, password: p }).then(function (r) { if (r.error) throw r.error; return { user: { id: r.data.user.id, email: r.data.user.email } }; }); },
+      claimInvite: function (code) { return c.rpc('claim_invite', { p_code: String(code || '').trim() }).then(chk); },
       signOut: function () { return c.auth.signOut(); },
       resetPassword: function (e) { return c.auth.resetPasswordForEmail(e, { redirectTo: location.origin + location.pathname }).then(chk0); },
       vaultList: function () { return c.from('vault').select('k,v,updated_at').then(chk); },
@@ -78,6 +79,7 @@
       user: function () { return tok ? call('user').then(function (d) { return d.user; }, function () { return null; }) : Promise.resolve(null); },
       signUp: function (e, p) { return auth('signUp', e, p).then(function (d) { return { user: d.user, needsConfirm: false }; }); },
       signIn: function (e, p) { return auth('signIn', e, p).then(function (d) { return { user: d.user }; }); },
+      claimInvite: function (code) { return code ? Promise.resolve(true) : Promise.reject(new Error('Enter your invite code.')); },
       signOut: function () { tok = ''; SY.raw.remove('ka_cloud_mock'); return Promise.resolve(); },
       resetPassword: function () { return Promise.resolve(true); },
       vaultList: function () { return call('vaultList'); },
@@ -253,8 +255,16 @@
   function stopLive() { liveStop.forEach(function (f) { try { f(); } catch (e) {} }); liveStop = []; seen = {}; lastId = 0; }
 
   /* ---------------- account ---------------- */
-  function signUp(email, pass) {
-    return A.signUp(email, pass).then(function (r) { if (r.needsConfirm) return { needsConfirm: true }; st.user = r.user; return afterLogin().then(function () { emit(); return { ok: true }; }); });
+  function signUp(email, pass, invite) {
+    var need = !!CFG.REQUIRE_INVITE;
+    if (need && !String(invite || '').trim()) return Promise.reject(new Error('Enter your invite code.'));
+    var first = A.signUp(email, pass).catch(function (e) { if (need && /already|registered/i.test(e && e.message || '')) return A.signIn(email, pass); throw e; });
+    return first.then(function (r) {
+      if (r.needsConfirm) return { needsConfirm: true };
+      st.user = r.user;
+      var claim = need ? A.claimInvite(invite).catch(function (e) { return A.signOut().then(function () { st.user = null; throw new Error(/not valid|already used|invite/i.test(e.message || '') ? 'That invite code is not valid or was already used.' : e.message); }); }) : Promise.resolve();
+      return claim.then(function () { return afterLogin(); }).then(function () { emit(); return { ok: true }; });
+    });
   }
   function signIn(email, pass) { return A.signIn(email, pass).then(function (r) { st.user = r.user; return afterLogin().then(function () { return refreshCouple(); }).then(function () { emit(); if (st.vault === 'ready') return syncNow(); }); }); }
   function signOut() {

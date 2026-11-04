@@ -29,7 +29,7 @@
     var p = a.pages[m[1]] || { n: 0 }; p.n++; p.last = Date.now(); a.pages[m[1]] = p;
     a.last = m[1]; a.lastAt = Date.now();
     a.seen = a.seen || {}; var key = t + ':' + m[1];
-    if (!a.seen[key]) { a.seen[key] = 1; var ks = Object.keys(a.seen); if (ks.length > 80) ks.slice(0, ks.length - 80).forEach(function (x) { delete a.seen[x]; }); setTimeout(function () { log('play', 'Played ' + (document.title || m[1]).replace(/^KamaAgni\s*[—-]\s*/, '')); }, 0); }
+    if (!a.seen[key]) { a.seen[key] = 1; var ks = Object.keys(a.seen); if (ks.length > 80) ks.slice(0, ks.length - 80).forEach(function (x) { delete a.seen[x]; }); if (!/^kamaagni-(history|settings|journal|library|custom|progress|learn|experts|prompts|tonight|about)$/.test(m[1])) setTimeout(function () { log('play', 'Played ' + (document.title || m[1]).replace(/^KamaAgni\s*[—-]?\s*/, '')); }, 0); }
     a.xp += first ? 15 : (p.n % 3 === 1 ? 4 : 1);             // daily bonus, small per-game credit
     put(a);
   }

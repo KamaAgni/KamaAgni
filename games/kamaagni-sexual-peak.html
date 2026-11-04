@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Sexual Peak</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.py-board{position:relative;margin:12px auto 0;width:100%;max-width:380px;height:272px}.py-c{position:absolute;width:44px;height:62px;padding:0;border:0;background:none;cursor:pointer;transition:transform .2s,opacity .3s}.py-c .kc{width:44px;height:62px;font-size:15px}.py-c .kc span{font-size:16px}
+.py-c.lock{filter:brightness(.55);cursor:default}.py-c.sel .kc{border-color:#ffb84d;box-shadow:0 0 16px rgba(255,170,70,.9);transform:translateY(-5px)}.py-c.gone{opacity:0;transform:scale(.4) rotate(20deg);pointer-events:none}
+.py-low{display:flex;gap:18px;justify-content:center;align-items:center;margin:12px 0}.py-low .kc{width:54px;height:76px}.py-low .tap{cursor:pointer}.py-low .sel{border-color:#ffb84d;box-shadow:0 0 16px rgba(255,170,70,.9)}.py-peak{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-size:20px;pointer-events:none}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_peak_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+const GUIDE = `<h3>The idea</h3><p>Pyramid Solitaire for two, played in turns. Clear as many cards as you can. The last two cards you clear decide the bonus your partner performs.</p><h3>Play</h3><ol><li>Tap two free cards that add up to 13 (Ace is 1, Jack 11, Queen 12). A King is 13 on its own, so tap it alone.</li><li>A card is free when nothing is sitting on it. You can also use the top card of the waste pile.</li><li>Tap the stock to turn over a card. You can recycle the waste once.</li><li>When you run out of moves, your game ends. Your partner performs the activity of the last card you cleared.</li><li>Clear the whole pyramid and you reach the Sexual Peak: you win the match on the spot.</li><li>After everyone has played their games, most cards cleared wins a final wish.</li></ol>`;
+const vr = c => c.r + 1;
+function setup() { U.setup(app, {id: 'peak', title: 'Sexual Peak', sub: 'Pyramid solitaire for two. Reach the peak first.', modes: ['one'], catsLabel: 'Intensity tiers', cats: C.cats(), guide: GUIDE, guideTitle: 'How to play', extras: tierExtras.concat([{id: 'games', label: 'Games each', opts: [[2, '2 (quick)'], [3, '3 (classic)'], [5, '5 (long)']], def: 3}]), startLabel: 'Build the pyramid',
+  start: o => { let t = tierList(o.cats); if (o.extras.x === 'one') t = [t[0]]; S = {tiers: t, heat: o.heat, games: +o.extras.games, played: [0, 0], scores: [[], []], player: 0, phase: 'play'}; newGame(); save(); render(); }}); }
+function newGame() { const d = C.shuffle(C.deck()); S.pyr = []; for (let i = 0; i < 7; i++) { S.pyr.push([]); for (let j = 0; j <= i; j++) S.pyr[i].push(d.shift()); } S.stock = d; S.waste = []; S.rec = 1; S.sel = null; S.last = []; S.cleared = 0; S.phase = 'play'; }
+const free = (i, j) => S.pyr[i][j] && (i === 6 || (!S.pyr[i + 1][j] && !S.pyr[i + 1][j + 1]));
+const prog = () => Math.min(.99, ((S.played[0] + S.played[1]) / (S.games * 2)));
+const freeCards = () => { const out = []; S.pyr.forEach((row, i) => row.forEach((c, j) => { if (c && free(i, j)) out.push({c, i, j}); })); if (S.waste.length) out.push({c: S.waste[S.waste.length - 1], w: 1}); return out; };
+const hasMove = () => { if (S.stock.length || (S.waste.length && S.rec > 0)) return true; const f = freeCards(); for (let a = 0; a < f.length; a++) { if (vr(f[a].c) === 13) return true; for (let b = a + 1; b < f.length; b++) if (vr(f[a].c) + vr(f[b].c) === 13) return true; } return false; };
+function take(x) { if (x.w) S.waste.pop(); else S.pyr[x.i][x.j] = null; S.cleared++; S.last.push(x.c); if (S.last.length > 2) S.last.shift(); }
+function endGame(peak) { const p = S.player, last = S.last.length ? S.last[S.last.length - 1] : null; S.scores[p].push(S.cleared); S.played[p]++;
+  S.phase = 'bonus'; S.peak = !!peak; S.bonus = last ? actFor(last, prog()) + (S.last.length > 1 ? ' Then: ' + actFor(S.last[0], prog()) : '') : 'A slow kiss for trying.';
+  if (peak) { S.final = 1; S.winner = p; } save(); render(); }
+function render() {
+  if (!S) return setup(); const p = S.player, o = 1 - p, tot = i => S.scores[i].reduce((a, b) => a + b, 0);
+  const head = '<h1 class="kx-title"><span>Sexual Peak</span></h1>' + bar([['🔺 ' + esc(NM[0]) + ' ' + tot(0), p === 0 ? 'h2' : ''], ['🔺 ' + esc(NM[1]) + ' ' + tot(1), p === 1 ? 'h2' : ''], ['game ' + (S.played[p] + 1) + '/' + S.games, '']]);
+  if (S.phase === 'bonus') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: S.peak ? NM[p] + ' reached the Sexual Peak!' : NM[p] + ' cleared ' + S.cleared + ' cards', sub: NM[o] + ' performs this for ' + NM[p], text: S.bonus, doneLabel: S.final ? 'Collect the wish' : 'Next', onDone: () => { if (S.peak) return wish(S.winner); if (S.played[0] >= S.games && S.played[1] >= S.games) { const a = tot(0), b = tot(1); return wish(a === b ? -1 : a > b ? 0 : 1); } S.player = S.played[1 - p] <= S.played[p] ? 1 - p : p; newGame(); save(); render(); }}); if (S.peak) window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 50}); return; }
+  if (S.phase === 'wish') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); const w = S.winner; KA_PERF.show(document.getElementById('pf'), {badge: w < 0 ? 'A tie. You both win' : NM[w] + ' wins the match', sub: w < 0 ? 'Each of you picks a wish for the other' : NM[1 - w] + ' gives the winner this wish', text: wishText(), doneLabel: 'Finish', onDone: () => { try { KA_TRACK.log('play', 'Sexual Peak', ''); } catch (e) {} clear(); setup(); }}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); return; }
+  const W = 44, G = 4, step = W + G, cx = 190;
+  let cells = ''; S.pyr.forEach((row, i) => row.forEach((c, j) => { if (!c) return; const f = free(i, j), x = cx - (i + 1) * step / 2 + j * step + G / 2, y = i * 34 + 14; cells += '<button class="py-c ' + (f ? '' : 'lock') + (S.sel && S.sel.i === i && S.sel.j === j ? ' sel' : '') + '" style="left:' + x + 'px;top:' + y + 'px;z-index:' + i + '" data-i="' + i + '" data-j="' + j + '" aria-label="' + C.lab(c) + '">' + C.face(c) + '</button>'; }));
+  const top = S.waste[S.waste.length - 1];
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p' + p + '"><i></i>' + esc(NM[p]) + ', reach for the peak</div><div class="py-board"><span class="py-peak">🔥</span>' + cells + '</div>' +
+    '<div class="py-low"><div data-stock>' + (S.stock.length ? '<div class="kc back tap"></div>' : '<div class="kc dim">' + (S.rec > 0 && S.waste.length ? '↺' : '·') + '</div>') + '<div class="kx-muted" style="font-size:12px">' + S.stock.length + ' left</div></div><div data-waste>' + (top ? C.face(top, 'tap' + (S.sel && S.sel.w ? ' sel' : '')) : '<div class="kc dim">·</div>') + '</div></div>' +
+    '<p class="kx-muted" id="nt">' + S.cleared + ' cleared. Pairs add to 13, Kings go alone.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn ghost sm" id="stuck">I am out of moves</button></div></div>'; bindBar();
+  const pickX = x => { const f = x.w ? (S.waste.length ? {c: top, w: 1} : null) : (free(x.i, x.j) ? {c: S.pyr[x.i][x.j], i: x.i, j: x.j} : null); if (!f) return;
+    if (vr(f.c) === 13) { take(f); S.sel = null; return after(); }
+    if (S.sel) { if ((S.sel.w && f.w) || (S.sel.i === f.i && S.sel.j === f.j && !f.w && !S.sel.w)) { S.sel = null; return render(); }
+      if (vr(S.sel.c) + vr(f.c) === 13) { const a = S.sel; S.sel = null; take(a); take(f); try { KA_FX.clack(2); navigator.vibrate && navigator.vibrate(12); } catch (e) {} return after(); } }
+    S.sel = f; try { KA_FX.clack(1); } catch (e) {} save(); render(); };
+  const after = () => { if (S.pyr.every(r => r.every(c => !c))) return endGame(true); if (!hasMove()) { KX.toast('No more moves'); return endGame(false); } save(); render(); };
+  app.querySelectorAll('.py-c').forEach(b => b.onclick = () => pickX({i: +b.dataset.i, j: +b.dataset.j}));
+  const wst = app.querySelector('[data-waste] .kc.tap'); if (wst) wst.onclick = () => pickX({w: 1});
+  app.querySelector('[data-stock]').onclick = () => { S.sel = null; if (S.stock.length) { S.waste.push(S.stock.shift()); try { KA_FX.clack(1); } catch (e) {} } else if (S.rec > 0 && S.waste.length) { S.rec--; S.stock = S.waste.splice(0); KX.toast('Recycled the waste pile'); } if (!hasMove()) return endGame(false); save(); render(); };
+  document.getElementById('stuck').onclick = () => endGame(false);
+}
+function wish(w) { S.phase = 'wish'; S.winner = w; save(); render(); }
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

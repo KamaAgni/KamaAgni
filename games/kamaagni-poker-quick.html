@@ -64,6 +64,7 @@
     -webkit-background-clip:text; background-clip:text; color:transparent;
     text-shadow:0 0 40px rgba(255,106,43,.25);
   }
+  .logo.compact{margin-bottom:12px}.logo.compact h1{font-size:24px}.logo.compact .tag,.logo.compact .eyebrow{display:none}
   .logo .tag{color:var(--ash); font-size:13px; letter-spacing:.08em;}
 
   .panel{
@@ -167,7 +168,62 @@
   .final-screen h2{font-size:30px; color:var(--flame);}
 
   .checkbox-hint{text-align:center; font-size:12px; color:var(--ash); margin-top:-6px; margin-bottom:14px;}
-  @media(max-width:480px){</style>
+  /* real cards: 3D flip, dealt from the pile, tossed when swapped */
+  .card-hand{display:flex; gap:8px; justify-content:center; flex-wrap:nowrap; margin:18px 0; perspective:900px}
+  .pc{width:58px; height:84px; position:relative; cursor:pointer; user-select:none; -webkit-tap-highlight-color:transparent; transition:transform .18s ease, margin-top .18s ease; flex:none}
+  .pc.static{cursor:default}
+  .pc-in{position:absolute; inset:0; transform-style:preserve-3d; transition:transform .55s cubic-bezier(.3,.7,.2,1)}
+  .pc.down .pc-in{transform:rotateY(180deg)}
+  .pc-f,.pc-b{position:absolute; inset:0; border-radius:9px; backface-visibility:hidden; -webkit-backface-visibility:hidden}
+  .pc-f{background:linear-gradient(160deg,#fffaf0,var(--card-bg)); color:var(--card-ink); box-shadow:0 5px 12px rgba(0,0,0,.45); border:2px solid transparent; display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:700; font-size:19px}
+  .pc.red .pc-f{color:#a3172c}
+  .pc-f .suit{font-size:22px; margin-top:1px}
+  .pc-f .rk2{position:absolute; left:4px; bottom:2px; font-size:9px; opacity:.55; transform:rotate(180deg)}
+  .pc-b{transform:rotateY(180deg); background:repeating-linear-gradient(45deg,#4b0f1a 0 5px,#6b1626 5px 10px); border:2px solid var(--gold); box-shadow:0 5px 12px rgba(0,0,0,.5)}
+  .pc-b::after{content:"🔥"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:20px; opacity:.8}
+  .pc.selected{margin-top:-14px}
+  .pc.selected .pc-f{border-color:var(--ember); box-shadow:0 12px 20px rgba(255,106,43,.45)}
+  .pc:not(.static):hover{transform:translateY(-3px)}
+  @keyframes dealin{0%{transform:translate(-140px,-220px) rotate(-28deg) scale(.6); opacity:0}18%{opacity:1}70%{transform:translate(4px,6px) rotate(2deg) scale(1.03)}100%{transform:none; opacity:1}}
+  .pc.dealin{animation:dealin .62s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i) * 130ms)}
+  @keyframes toss{to{transform:translate(160px,-190px) rotate(48deg) scale(.7); opacity:0}}
+  .pc.toss{animation:toss .45s ease-in forwards; pointer-events:none}
+  .dealrow{display:flex; justify-content:flex-start; margin:-4px 0 -6px 6px}
+  .deckpile{position:relative; width:40px; height:56px}
+  .deckpile i{position:absolute; inset:0; border-radius:6px; background:repeating-linear-gradient(45deg,#4b0f1a 0 4px,#6b1626 4px 8px); border:1.5px solid var(--gold-dim); box-shadow:0 2px 4px rgba(0,0,0,.5)}
+  .deckpile i:nth-child(2){transform:translate(2px,-2px)} .deckpile i:nth-child(3){transform:translate(4px,-4px)} .deckpile i:nth-child(4){transform:translate(6px,-6px)}
+  .hand-verdict{opacity:0; transform:translateY(8px); transition:all .4s ease; min-height:22px}
+  .hand-verdict.show{opacity:1; transform:none}
+  .hb{transition:box-shadow .5s, border-color .5s, filter .5s}
+  .hb.win{border-color:var(--flame); box-shadow:0 0 0 1px var(--flame), 0 0 40px rgba(255,140,60,.45)}
+  .hb.win .pc-f{box-shadow:0 0 14px rgba(255,180,90,.6)}
+  .hb.lose{filter:saturate(.55) brightness(.85)}
+  /* chips and the table */
+  .table{display:flex; align-items:flex-end; justify-content:space-around; gap:8px; margin:6px 0 4px; padding:12px 8px 8px; border-radius:16px; background:radial-gradient(ellipse at 50% 120%,rgba(20,90,50,.55),rgba(10,40,25,.35) 70%); border:1px solid rgba(230,181,104,.18)}
+  .seat{position:relative; display:flex; flex-direction:column; align-items:center; min-width:70px}
+  .seat b{font-family:'Cinzel',serif; font-size:18px; color:var(--gold); margin-top:4px}
+  .seat small{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--ash); max-width:90px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .seat.pot b{color:var(--flame)}
+  .stack{position:relative; width:36px; height:64px}
+  .chip{position:absolute; left:0; bottom:calc(var(--n) * 3.5px); width:36px; height:15px; border-radius:50%; box-shadow:0 2px 0 rgba(0,0,0,.45), inset 0 0 0 2px rgba(255,255,255,.55), inset 0 0 0 4px var(--cc,#c22a12)}
+  .chip.r{--cc:#c22a12; background:#e0402a} .chip.b{--cc:#1b4fa8; background:#2e6fd6} .chip.g{--cc:#1a7a48; background:#27a566} .chip.k{--cc:#111; background:#2a2a2a}
+  @keyframes bump{0%{transform:scale(1)}35%{transform:scale(1.18) translateY(-4px)}100%{transform:scale(1)}}
+  .seat.bump{animation:bump .6s ease}
+  .gain{position:absolute; top:-6px; right:-2px; font-weight:800; color:#8ff0a8; animation:floatup 1.8s ease-out forwards}
+  @keyframes floatup{0%{transform:translateY(8px); opacity:0}20%{opacity:1}100%{transform:translateY(-34px); opacity:0}}
+  .marker-card{margin:10px 0 14px; padding:14px; border-radius:12px; border:1px dashed var(--gold); background:rgba(230,181,104,.08); font-size:16px; line-height:1.45}
+  .marker-card small{display:block; margin-top:8px; color:var(--ash); font-size:12px}
+  .flames{font-size:13px; letter-spacing:2px}
+  .task-big{font-family:'Cinzel',serif; font-size:21px; line-height:1.45; margin:14px 4px 6px; color:var(--cream)}
+  .perform .badge{margin-bottom:8px}
+  .breathe{animation:breathe 4.5s ease-in-out infinite}
+  @keyframes breathe{50%{opacity:.45}}
+  @keyframes optin{from{opacity:0; transform:translateY(14px) scale(.97)}to{opacity:1; transform:none}}
+  .optin{animation:optin .5s cubic-bezier(.2,.8,.2,1) both}
+  .option.wish{border-style:dashed}
+  @media (prefers-reduced-motion:reduce){.pc.dealin,.pc.toss,.optin,.seat.bump,.gain{animation:none}.pc-in{transition:none}}
+  @media(max-width:380px){.pc{width:50px; height:74px}.card-hand{gap:5px}}
+</style>
 </head>
 <body>
 <div id="embers"></div>
@@ -248,6 +304,8 @@ function compareHands(a,b){
 }
 
 /* ---------------- Reward content ---------------- */
+const PK = {bet: true, strip: true, heat: (window.KX && KX.heat) ? KX.heat() : 2};
+const pkEsc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const REWARD_ORDER = ['strip','strip','cuddle','nude','hot','hot','lust','climax'];
 const REWARD_META = {
   strip:{label:'Strip', desc:'One item comes off.'},
@@ -260,215 +318,204 @@ const REWARD_META = {
 const REWARD_CONTENT = {
   cuddle:[
     "Hold each other close, forehead to forehead, for one full minute.",
-    "Spoon up and just breathe together for a minute — no talking.",
+    "Spoon up and just breathe together for a minute, no talking.",
     "Give your partner three slow hugs from behind.",
-    "Trace lazy circles on your partner's back while you tell them one thing you love about tonight."
+    "Trace lazy circles on your partner's back while you tell them one thing you love about tonight.",
+    "Look into each other's eyes in silence for 60 seconds. Whoever looks away first owes the other a kiss.",
+    "Tell your partner three things you adore about them. Take 30 seconds.",
+    "Slow dance for 90 seconds, as close as you can get."
   ],
   hot:[
     "Give your partner a slow 90-second massage, anywhere they ask.",
     "Kiss your partner's neck and collarbone, taking your time.",
     "Whisper one thing you want to do to them later tonight.",
-    "Trail your fingertips slowly from their jaw down to their hips."
+    "Trail your fingertips slowly from their jaw down to their hips.",
+    "Kiss slowly for one full minute. Hands stay above the waist.",
+    "Answer honestly: the moment tonight you most wanted to kiss them. Take 30 seconds.",
+    "Give a 2-minute neck and shoulder massage with lotion or oil."
   ],
   strip:[
-    "Remove one item of your choice — nice and slow.",
+    "Remove one item of your choice, nice and slow.",
     "Your partner picks which item comes off.",
     "Remove one item, but no using your hands.",
-    "Swap one item of clothing with your partner if you can, otherwise remove one of yours."
+    "Swap one item of clothing with your partner if you can, otherwise remove one of yours.",
+    "Take one item off while your partner counts down from ten."
   ],
   nude:[
-    "Finish undressing completely — no more clothes for the rest of the game.",
+    "Finish undressing completely. No more clothes for the rest of the game.",
     "Let your partner finish undressing you, piece by piece.",
     "Strip down to just one item of your choice.",
     "Undress each other at the same time, matching each other's pace."
   ],
   lust:[
     "Tell your partner exactly what you want to do to them next.",
-    "Give your partner step-by-step instructions on how you want to be touched.",
+    "Give your partner step-by-step instructions on how you want to be touched. Take 60 seconds.",
     "Kiss your partner like it's the last thing you'll do tonight.",
-    "Straddle your partner and don't stop kissing them for 30 seconds."
+    "Straddle your partner and don't stop kissing them for 30 seconds.",
+    "Blindfold your partner and tease them with your lips for 60 seconds. They guess where you'll kiss next."
   ],
   climax:[
-    "Take things all the way — lead however you want.",
+    "Take things all the way. Lead however you want.",
     "Let your partner take full control until you finish.",
     "Move wherever's comfortable and finish what this game started.",
     "Switch off and take turns finishing each other."
   ]
 };
-function randomOptions(type){
-  return shuffle(REWARD_CONTENT[type]).slice(0, type==='climax'?4:3);
+/* Foreplay markers: one per hand can be put on the table instead of chips. The loser performs it for the winner. */
+const MARKERS = [
+  {h:1, f:1, t:"A slow 60-second shoulder massage"}, {h:1, f:1, t:"Kiss them wherever they choose for 30 seconds"}, {h:1, f:1, t:"Whisper three compliments into their ear"},
+  {h:1, f:1, t:"A slow 90-second foot rub"}, {h:1, f:1, t:"Dance one slow song together for 90 seconds"}, {h:1, f:1, t:"Feed them three bites of something sweet while holding eye contact"},
+  {h:2, f:2, t:"A 2-minute back massage with lotion or oil"}, {h:2, f:2, t:"Kiss and nibble their neck for 60 seconds"}, {h:2, f:2, t:"A 30-second striptease"},
+  {h:2, f:2, t:"Take off one of their items using only your mouth"}, {h:2, f:2, t:"A 60-second lap dance"}, {h:2, f:2, t:"Blindfolded: they guess where you will kiss next, for 60 seconds"},
+  {h:3, f:3, t:"Whisper your boldest fantasy, then act out the first step for 60 seconds"}, {h:3, f:3, t:"Oral attention to a spot of their choice for 90 seconds"},
+  {h:3, f:3, t:"Be their toy: follow every instruction for 2 minutes"}, {h:3, f:3, t:"Tease them with your hands for 2 minutes, then stop right before the edge"},
+  {h:3, f:3, t:"Describe in detail what you will do to them later, for 60 seconds, while touching them"}, {h:3, f:3, t:"A spanking, with the number of swats they choose up to ten"}
+];
+function markerPool(){
+  let pool = MARKERS.filter(m => m.h <= PK.heat);
+  if (window.KA_FILTER && KA_FILTER.keep) { try { const keep = KA_FILTER.keep(pool.map(m => m.t)); if (keep && keep.length) pool = pool.filter(m => keep.includes(m.t)); } catch (e) {} }
+  return pool.length ? pool : MARKERS.filter(m => m.h === 1);
+}
+function randomOptions(type){ return shuffle(REWARD_CONTENT[type]).slice(0, type==='climax'?4:3); }
+
+/* ---------------- helpers: timers that clean up, sound, motion ---------------- */
+const RM = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+let RENDERED_PHASE = null, TMS = [], STOP = [], LAST = {chips: [50, 50], pot: 0};
+const later = (fn, ms) => { if (RM) ms = Math.min(ms, 60); const id = setTimeout(fn, ms); TMS.push(id); return id; };
+function clearAll(){ TMS.forEach(clearTimeout); TMS = []; STOP.forEach(f => { try { f(); } catch (e) {} }); STOP = []; }
+const sfx = n => { try { if (!window.KA_FX) return; if (n === 'shuffle') KA_FX.shuffle(); else KA_FX.clack(n || 2); } catch (e) {} };
+const buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
+const drive = idx => { const m = (typeof PK_ME === 'function') ? PK_ME() : null; return m == null || m === idx; };
+/* progress bar that continues by itself unless the person taps the button */
+function autoNext(host, secs, label, fn, allowed){
+  const wrap = el('div', 'center'); wrap.style.marginTop = '14px';
+  wrap.innerHTML = '<div class="kauto-next" style="margin:0 auto 10px"><i></i></div>';
+  const btn = el('button', 'btn-ghost', label); btn.style.width = '100%'; wrap.appendChild(btn); host.appendChild(wrap);
+  const bar = wrap.querySelector('i'); let done = false; const go = () => { if (done) return; done = true; fn(); };
+  btn.onclick = go;
+  if (allowed === false) { btn.textContent = 'Waiting for your partner…'; btn.disabled = true; }
+  const t0 = Date.now(), iv = setInterval(() => { const f = Math.min(1, (Date.now() - t0) / (secs * 1000)); bar.style.width = f * 100 + '%'; if (f >= 1) { clearInterval(iv); if (allowed !== false) go(); } }, 100);
+  STOP.push(() => { done = true; clearInterval(iv); });
 }
 
 /* ---------------- Game State ---------------- */
 let S = null;
+function newPlayer(name){ return { name, hand:[], deckIndex:0, bails:2, clothes:5, chips:50, freshN:0 }; }
 
-function newPlayer(name){
-  return { name, hand:[], deckIndex:0, bails:2, clothes:5 };
-}
-
-function initGame(nameA, nameB){
+function initGame(nameA, nameB, finale){
   S = {
-    phase:'deal-p1', // pipeline of phases
-    round:1,
-    dealer:0, // index into players, 0 or 1
+    phase:'deal-p1', round:1, dealer:0,
     players:[newPlayer(nameA), newPlayer(nameB)],
-    pack:[],
-    selected:[],
-    revealed:false,
-    rewardQueue:[], // list of {who, type} to resolve this round, in order
-    currentReward:null, // {who, type, options, chosenIdx}
-    lastRoundResult:null,
-    winner:null,
-    log:[]
+    pack:[], selected:[], revealed:false, rewardQueue:[], currentReward:null, lastRoundResult:null, winner:null, log:[],
+    pot:0, bet:null, markerDue:null, markerOpts:null, finale: finale || '', bustMsg:'', foldMsg:'', potWon:null, cfgBet: PK.bet, cfgStrip: PK.strip
   };
   startRound();
 }
-
 function startRound(){
   const deck = shuffle(freshDeck());
   S.players[0].hand = deck.splice(0,5);
   S.players[1].hand = deck.splice(0,5);
-  S.pack = deck;
-  S.selected = [[], []];
-  S.revealed = false;
+  S.players.forEach(p => p.freshN = 5);
+  S.pack = deck; S.selected = [[], []]; S.revealed = false;
+  S.pot = 0; S.bet = null; S.markerDue = null; S.markerOpts = null; S.potWon = null;
+  if (S.cfgBet) S.players.forEach(p => { const a = Math.min(5, p.chips); p.chips -= a; S.pot += a; });
   S.phase = 'exchange1-nondealer-gate';
 }
-
 function nonDealer(){ return 1 - S.dealer; }
+function actorOf(ph){ if (!S) return null; if (ph === 'stakeA') return nonDealer(); if (ph === 'stakeB') return S.dealer; if (ph === 'stakeR' && S.bet) return 1 - S.bet.by; return null; }
 
 function drawReplacements(playerIdx){
-  const p = S.players[playerIdx];
-  const sel = S.selected[playerIdx];
-  if(sel.length){
+  const p = S.players[playerIdx], sel = S.selected[playerIdx];
+  if (sel.length){
     const kept = p.hand.filter((_,i)=> !sel.includes(i));
     const drawn = S.pack.splice(0, sel.length);
-    p.hand = kept.concat(drawn);
-  }
+    p.hand = kept.concat(drawn); p.freshN = drawn.length;
+  } else p.freshN = 0;
   S.selected[playerIdx] = [];
 }
+function afterExchange(){ S.phase = S.cfgBet ? 'stakeA' : 'showdown-gate'; }
 
 function resolveShowdown(){
-  const evalA = evaluateHand(S.players[0].hand);
-  const evalB = evaluateHand(S.players[1].hand);
+  const evalA = evaluateHand(S.players[0].hand), evalB = evaluateHand(S.players[1].hand);
   const cmp = compareHands(evalA, evalB);
-  let winnerIdx = null;
-  if(cmp>0) winnerIdx = 0;
-  else if(cmp<0) winnerIdx = 1;
+  let winnerIdx = null; if (cmp > 0) winnerIdx = 0; else if (cmp < 0) winnerIdx = 1;
   S.lastRoundResult = {evalA, evalB, winnerIdx};
-
-  if(winnerIdx===null){
-    S.phase = 'tie';
-    return;
+  if (winnerIdx === null){
+    if (S.cfgBet && S.pot){ const h = Math.floor(S.pot / 2); S.players[0].chips += h; S.players[1].chips += S.pot - h; S.pot = 0; }
+    S.phase = 'tie'; return;
   }
-  // build reward queue for the winner (just one draw)
+  if (S.cfgBet && S.pot){ S.players[winnerIdx].chips += S.pot; S.potWon = {to: winnerIdx, n: S.pot}; S.pot = 0; }
   const wp = S.players[winnerIdx];
-  const type = REWARD_ORDER[wp.deckIndex];
+  const type = REWARD_ORDER[Math.min(wp.deckIndex, REWARD_ORDER.length - 1)];
   wp.deckIndex++;
-  S.currentReward = {who:winnerIdx, type, options: randomOptions(type), chosenIdx:0, bailedOnce:false};
+  S.currentReward = {who:winnerIdx, type, options: randomOptions(type), chosenIdx:0, picked:null};
+  S.markerDue = (S.bet && S.bet.kind === 'marker' && S.bet.called) ? {loser: 1 - winnerIdx, m: S.bet.m} : null;
   S.phase = 'showdown';
 }
-
 function applyClothing(playerIdx, type){
   const p = S.players[playerIdx];
-  if(type==='strip') p.clothes = Math.max(0, p.clothes-1);
-  if(type==='nude') p.clothes = 0;
+  if (type === 'strip') p.clothes = Math.max(0, p.clothes-1);
+  if (type === 'nude') p.clothes = 0;
 }
-
+function nextRound(){ S.dealer = 1 - S.dealer; S.round++; S.currentReward = null; startRound(); }
+function endHand(){
+  S.currentReward = null; S.bet = null; S.markerDue = null;
+  if (S.cfgBet){
+    const b = S.players.findIndex(p => p.chips <= 0);
+    if (b >= 0){
+      const p = S.players[b]; S.players.forEach(x => x.chips = 50);
+      if (S.cfgStrip){
+        if (p.clothes > 0){ p.clothes--; S.bustMsg = p.name + ' is out of chips and removes one item. Chips reset to 50 each.'; S.phase = 'bust'; return; }
+        S.winner = 1 - b; S.phase = 'final'; return;
+      }
+      const m = shuffle(markerPool())[0];
+      S.bustMsg = p.name + ' is out of chips and owes a forfeit: ' + m.t + '. Chips reset to 50 each.'; S.phase = 'bust'; return;
+    }
+  }
+  nextRound();
+}
 function finishReward(){
   const r = S.currentReward;
   applyClothing(r.who, r.type);
-  if(r.type==='climax'){
-    S.winner = r.who;
-    S.phase = 'final';
-    return;
-  }
-  // advance dealer & round
-  S.dealer = 1 - S.dealer;
-  S.round++;
-  S.currentReward = null;
-  startRound();
+  if (r.type === 'climax'){ S.winner = r.who; S.phase = 'final'; return; }
+  endHand();
 }
 
 /* ---------------- Rendering ---------------- */
 const app = document.getElementById('app');
+function el(tag, cls, html){ const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+const go = ph => { S.phase = ph; render(); };
 
 function render(){
-  app.innerHTML = '';
+  clearAll(); app.innerHTML = '';
+  if (S && S.phase !== RENDERED_PHASE) { try { scrollTo(0, 0); } catch (e) {} } RENDERED_PHASE = S ? S.phase : null;
   app.appendChild(logo());
-  if(!S){ app.appendChild(setupScreen()); return; }
+  if (!S){ app.appendChild(setupScreen()); return; }
   app.appendChild(agniTrack());
-
-  switch(true){
-    case S.phase==='exchange1-nondealer-gate':
-      app.appendChild(privacyGate(nonDealer(), ()=>{ S.phase='exchange1-nondealer'; render(); }, 'First Exchange'));
-      break;
-    case S.phase==='exchange1-nondealer':
-      app.appendChild(exchangeScreen(nonDealer(), ()=>{
-        drawReplacements(nonDealer());
-        S.phase='exchange1-dealer-gate';
-        render();
-      }));
-      break;
-    case S.phase==='exchange1-dealer-gate':
-      app.appendChild(privacyGate(S.dealer, ()=>{ S.phase='exchange1-dealer'; render(); }, 'First Exchange'));
-      break;
-    case S.phase==='exchange1-dealer':
-      app.appendChild(exchangeScreen(S.dealer, ()=>{
-        drawReplacements(S.dealer);
-        S.phase='exchange2-nondealer-gate';
-        render();
-      }));
-      break;
-    case S.phase==='exchange2-nondealer-gate':
-      app.appendChild(privacyGate(nonDealer(), ()=>{ S.phase='exchange2-nondealer'; render(); }, 'Second Exchange'));
-      break;
-    case S.phase==='exchange2-nondealer':
-      app.appendChild(exchangeScreen(nonDealer(), ()=>{
-        drawReplacements(nonDealer());
-        S.phase='exchange2-dealer-gate';
-        render();
-      }));
-      break;
-    case S.phase==='exchange2-dealer-gate':
-      app.appendChild(privacyGate(S.dealer, ()=>{ S.phase='exchange2-dealer'; render(); }, 'Second Exchange'));
-      break;
-    case S.phase==='exchange2-dealer':
-      app.appendChild(exchangeScreen(S.dealer, ()=>{
-        drawReplacements(S.dealer);
-        S.phase='showdown-gate';
-        render();
-      }));
-      break;
-    case S.phase==='showdown-gate':
-      app.appendChild(showdownGate());
-      break;
-    case S.phase==='showdown':
-      app.appendChild(showdownScreen());
-      break;
-    case S.phase==='tie':
-      app.appendChild(tieScreen());
-      break;
-    case S.phase==='reward':
-      app.appendChild(rewardScreen());
-      break;
-    case S.phase==='final':
-      app.appendChild(finalScreen());
-      break;
-  }
-}
-
-function el(tag, cls, html){
-  const e = document.createElement(tag);
-  if(cls) e.className = cls;
-  if(html!==undefined) e.innerHTML = html;
-  return e;
+  const ph = S.phase;
+  if (ph === 'exchange1-nondealer-gate') app.appendChild(privacyGate(nonDealer(), () => go('exchange1-nondealer'), 'First Exchange'));
+  else if (ph === 'exchange1-nondealer') app.appendChild(exchangeScreen(nonDealer(), () => { drawReplacements(nonDealer()); go('exchange1-dealer-gate'); }, 'First exchange'));
+  else if (ph === 'exchange1-dealer-gate') app.appendChild(privacyGate(S.dealer, () => go('exchange1-dealer'), 'First Exchange'));
+  else if (ph === 'exchange1-dealer') app.appendChild(exchangeScreen(S.dealer, () => { drawReplacements(S.dealer); go('exchange2-nondealer-gate'); }, 'First exchange'));
+  else if (ph === 'exchange2-nondealer-gate') app.appendChild(privacyGate(nonDealer(), () => go('exchange2-nondealer'), 'Second Exchange'));
+  else if (ph === 'exchange2-nondealer') app.appendChild(exchangeScreen(nonDealer(), () => { drawReplacements(nonDealer()); go('exchange2-dealer-gate'); }, 'Second exchange'));
+  else if (ph === 'exchange2-dealer-gate') app.appendChild(privacyGate(S.dealer, () => go('exchange2-dealer'), 'Second Exchange'));
+  else if (ph === 'exchange2-dealer') app.appendChild(exchangeScreen(S.dealer, () => { drawReplacements(S.dealer); afterExchange(); render(); }, 'Second exchange'));
+  else if (ph === 'stakeA' || ph === 'stakeB' || ph === 'stakeR') app.appendChild(stakeScreen());
+  else if (ph === 'fold') app.appendChild(foldScreen());
+  else if (ph === 'showdown-gate') app.appendChild(showdownGate());
+  else if (ph === 'showdown') app.appendChild(showdownScreen());
+  else if (ph === 'tie') app.appendChild(tieScreen());
+  else if (ph === 'marker') app.appendChild(markerScreen());
+  else if (ph === 'reward') app.appendChild(rewardScreen());
+  else if (ph === 'bust') app.appendChild(bustScreen());
+  else if (ph === 'final') app.appendChild(finalScreen());
+  LAST = {chips: S.players.map(p => p.chips), pot: S.pot};
 }
 
 function logo(){
-  const d = el('div','logo');
-  d.innerHTML = `<div class="eyebrow" style="text-align:center">KamaAgni Presents</div>
-    <h1>Poker for Couples</h1>
-    <div class="tag">the quick version · let the fire decide</div>`;
+  const d = el('div','logo' + (S ? ' compact' : ''));
+  d.innerHTML = `<div class="eyebrow" style="text-align:center">KamaAgni Presents</div><h1>Poker for Couples</h1><div class="tag">the quick version · let the fire decide</div>`;
   return d;
 }
 
@@ -476,36 +523,45 @@ function setupScreen(){
   const wrap = el('div','panel');
   wrap.innerHTML = `
     <div class="eyebrow">Before you begin</div>
-    <p class="muted" style="margin-bottom:18px;">Two players, five clothing items each (a pair of socks or shoes counts as one). Play in a room where you won't be interrupted for about 90 minutes.</p>
-    <label>Player One</label>
-    <input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
-    <label>Player Two</label>
-    <input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
-    <button class="btn-primary" id="startBtn">Deal the First Hand</button>
-  `;
-  wrap.querySelector('#startBtn').onclick = ()=>{
+    <p class="muted" style="margin-bottom:18px;">Two players, five clothing items each (a pair of socks or shoes counts as one). Play in a room where you won't be interrupted for about 90 minutes. Everything is optional, and either of you can stop at any time.</p>
+    <label>Player One</label><input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
+    <label>Player Two</label><input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
+    <label>The finale you both agreed on (optional)</label><input type="text" id="finale" placeholder="e.g. A long bath together, then bed" maxlength="90">
+    <button class="btn-primary" id="startBtn">Deal the First Hand</button>`;
+  wrap.querySelector('#startBtn').onclick = () => {
     const a = wrap.querySelector('#nameA').value.trim() || 'Player One';
     const b = wrap.querySelector('#nameB').value.trim() || 'Player Two';
-    initGame(a,b);
+    initGame(a, b, wrap.querySelector('#finale').value.trim());
     render();
   };
   return wrap;
 }
 
+/* chips drawn as real stacks */
+function stackHTML(n){
+  const den = [[50,'k'],[25,'g'],[10,'b'],[5,'r']]; let out = '', left = n, c = 0;
+  for (const [v,k] of den) while (left >= v && c < 16){ out += `<i class="chip ${k}" style="--n:${c}"></i>`; left -= v; c++; }
+  return `<div class="stack">${out}</div>`;
+}
 function agniTrack(){
   const wrap = el('div','panel');
   const track = el('div','agni-track');
   S.players.forEach((p,i)=>{
     const pct = Math.round((p.deckIndex/8)*100);
     const col = el('div','agni-col');
-    col.innerHTML = `
-      <div class="agni-name">${p.name}${S.dealer===i?' <span style="opacity:.5">(dealer)</span>':''}</div>
+    col.innerHTML = `<div class="agni-name">${pkEsc(p.name)}${S.dealer===i?' <span style="opacity:.5">(dealer)</span>':''}</div>
       <div class="agni-bar"><div class="agni-fill" style="width:${pct}%"></div></div>
-      <div class="agni-sub">${p.clothes} item${p.clothes===1?'':'s'} left · ${p.bails} bail${p.bails===1?'':'s'}</div>
-    `;
+      <div class="agni-sub">${p.clothes} item${p.clothes===1?'':'s'} left · ${p.bails} bail${p.bails===1?'':'s'}</div>`;
     track.appendChild(col);
   });
   wrap.appendChild(track);
+  if (S.cfgBet){
+    const t = el('div','table');
+    const seat = i => { const p = S.players[i], bump = p.chips !== LAST.chips[i] ? ' bump' : '', gain = S.potWon && S.potWon.to === i && S.phase !== 'exchange1-nondealer-gate' ? `<span class="gain">+${S.potWon.n}</span>` : '';
+      return `<div class="seat${bump}">${gain}${stackHTML(p.chips)}<b>${p.chips}</b><small>${pkEsc(p.name)}</small></div>`; };
+    t.innerHTML = seat(0) + `<div class="seat pot${S.pot !== LAST.pot ? ' bump' : ''}">${stackHTML(S.pot)}<b>${S.pot}</b><small>Pot</small></div>` + seat(1);
+    wrap.appendChild(t);
+  }
   wrap.appendChild(el('div','muted center', `Round ${S.round}`));
   return wrap;
 }
@@ -513,156 +569,230 @@ function agniTrack(){
 function privacyGate(playerIdx, onReady, phaseLabel){
   const p = S.players[playerIdx];
   const wrap = el('div','panel privacy-screen');
-  wrap.innerHTML = `
-    <div class="badge">${phaseLabel}</div>
-    <div class="icon">🔥</div>
-    <h2>Pass to ${p.name}</h2>
-    <p class="muted">Make sure ${S.players[1-playerIdx].name} can't see the screen.</p>
-  `;
-  const btn = el('button','btn-primary', `I'm ${p.name} — show my hand`);
-  btn.style.marginTop='16px';
-  btn.onclick = onReady;
+  wrap.innerHTML = `<div class="badge">${phaseLabel}</div><div class="icon">🔥</div><h2>Pass to ${pkEsc(p.name)}</h2><p class="muted">Make sure ${pkEsc(S.players[1-playerIdx].name)} can't see the screen.</p>`;
+  const btn = el('button','btn-primary', `I'm ${pkEsc(p.name)}. Show my hand`);
+  btn.style.marginTop='16px'; btn.onclick = () => { sfx('shuffle'); onReady(); };
   wrap.appendChild(btn);
   return wrap;
 }
 
-function cardEl(card, selected, onClick){
-  const red = REDS.has(card.s ? SUITS[card.s] : '');
-  const suitChar = SUITS[card.s];
-  const isRed = REDS.has(suitChar);
-  const c = el('div', 'playing-card'+(selected?' selected':'')+(onClick?'':' static'));
-  c.classList.toggle('red', isRed);
-  c.innerHTML = `<div>${rankLabel(card.r)}</div><div class="suit">${suitChar}</div>`;
-  if(onClick) c.onclick = onClick;
+/* a real 3D card: dealt from the deck, flips face up */
+function cardEl(card, o){
+  o = o || {};
+  const isRed = REDS.has(card.s);
+  const c = el('div', 'pc' + (o.down ? ' down' : '') + (o.selected ? ' selected' : '') + (isRed ? ' red' : '') + (o.onClick ? '' : ' static') + (o.deal ? ' dealin' : ''));
+  c.style.setProperty('--i', o.i || 0);
+  c.innerHTML = `<div class="pc-in"><div class="pc-f"><div class="rk">${rankLabel(card.r)}</div><div class="suit">${card.s}</div><div class="rk2">${rankLabel(card.r)}${card.s}</div></div><div class="pc-b"></div></div>`;
+  if (o.onClick) c.onclick = o.onClick;
   return c;
 }
+function deckEl(){ return el('div','deckpile', '<i></i><i></i><i></i><i></i>'); }
 
-function exchangeScreen(playerIdx, onConfirm){
-  const p = S.players[playerIdx];
-  const sel = S.selected[playerIdx];
+function exchangeScreen(playerIdx, onConfirm, label){
+  const p = S.players[playerIdx], sel = S.selected[playerIdx];
   const wrap = el('div','panel');
-  wrap.appendChild(el('div','badge', `${p.name}'s hand`));
-  wrap.appendChild(el('p','muted', 'Tap any cards you want to discard, then exchange them for new ones. You may keep your whole hand if you\'re happy with it.'));
-  const handWrap = el('div','card-hand');
-  p.hand.forEach((card, i)=>{
-    const isSel = sel.includes(i);
-    handWrap.appendChild(cardEl(card, isSel, ()=>{
-      const idx = sel.indexOf(i);
-      if(idx>-1) sel.splice(idx,1); else sel.push(i);
-      render();
-    }));
+  wrap.appendChild(el('div','badge', `${pkEsc(p.name)}'s hand · ${label}`));
+  wrap.appendChild(el('p','muted', 'Tap the cards you want to swap. You may keep your whole hand if you\'re happy with it.'));
+  const top = el('div','dealrow'); top.appendChild(deckEl()); wrap.appendChild(top);
+  const handWrap = el('div','card-hand'); wrap.appendChild(handWrap);
+  const hint = el('div','checkbox-hint'), btn = el('button','btn-primary');
+  const cards = [];
+  const fresh = p.freshN || 0, n = p.hand.length;
+  function update(){
+    cards.forEach((c, i) => c.classList.toggle('selected', sel.includes(i)));
+    hint.textContent = sel.length ? `${sel.length} card${sel.length===1?'':'s'} selected to swap` : 'No cards selected. You may keep everything';
+    btn.textContent = sel.length ? `Swap ${sel.length} Card${sel.length===1?'':'s'}` : 'Keep My Hand';
+  }
+  p.hand.forEach((card, i) => {
+    const isNew = i >= n - fresh;
+    const c = cardEl(card, {down: isNew && !RM, deal: isNew && !RM, i: isNew ? i - (n - fresh) : 0, onClick: () => { const k = sel.indexOf(i); if (k > -1) sel.splice(k, 1); else sel.push(i); sfx(1); buzz(8); update(); }});
+    cards.push(c); handWrap.appendChild(c);
+    if (isNew && !RM){ const d = 220 + (i - (n - fresh)) * 130; later(() => { c.classList.remove('down'); sfx(1); }, d + 380); }
   });
-  wrap.appendChild(handWrap);
-  wrap.appendChild(el('div','checkbox-hint', sel.length ? `${sel.length} card${sel.length===1?'':'s'} selected to discard` : 'No cards selected — you may keep everything'));
-  const btn = el('button','btn-primary', sel.length ? `Exchange ${sel.length} Card${sel.length===1?'':'s'}` : 'Keep My Hand');
-  btn.onclick = onConfirm;
-  wrap.appendChild(btn);
+  if (fresh){ sfx('shuffle'); later(() => { p.freshN = 0; }, 50); }
+  wrap.appendChild(hint); wrap.appendChild(btn); update();
+  btn.onclick = () => {
+    btn.disabled = true;
+    if (sel.length && !RM){ sel.forEach(i => cards[i] && cards[i].classList.add('toss')); sfx(3); later(onConfirm, 460); } else onConfirm();
+  };
+  return wrap;
+}
+
+/* ---- stakes: check, bet chips, or put a foreplay marker on the table ---- */
+function stakeScreen(){
+  const ph = S.phase, a = actorOf(ph), p = S.players[a], o = S.players[1-a];
+  const wrap = el('div','panel center');
+  wrap.appendChild(el('div','badge', 'Stakes'));
+  if (ph === 'stakeR'){
+    const b = S.bet, by = S.players[b.by];
+    wrap.appendChild(el('h2', '', `${pkEsc(p.name)}, ${pkEsc(by.name)} ${b.kind === 'chips' ? 'bets <span style="color:var(--flame)">' + b.amt + ' chips</span>' : 'puts a marker on the table'}`));
+    if (b.kind === 'marker') wrap.appendChild(el('div','marker-card', `<div class="flames">${'🔥'.repeat(b.m.f)}</div>${pkEsc(b.m.t)}<small>If you lose the hand, you do this for ${pkEsc(by.name)}. If you win, ${pkEsc(by.name)} does it for you.</small>`));
+    else wrap.appendChild(el('p','muted', `Match it to see the hands, or fold and ${pkEsc(by.name)} takes the pot.`));
+    const row = el('div','btn-row');
+    const call = el('button','btn-primary', b.kind === 'chips' ? `Call ${b.amt}` : 'Accept the marker');
+    const fold = el('button','btn-danger', 'Fold');
+    call.onclick = () => { if (b.kind === 'chips'){ const x = Math.min(b.amt, p.chips); p.chips -= x; S.pot += x; } else b.called = true; sfx(3); go('showdown-gate'); };
+    fold.onclick = () => { p.chips = p.chips; by.chips += S.pot; S.potWon = {to: b.by, n: S.pot}; S.pot = 0; S.foldMsg = `${p.name} folds. ${by.name} takes the pot.`; sfx(2); go('fold'); };
+    row.appendChild(call); row.appendChild(fold); wrap.appendChild(row);
+    return wrap;
+  }
+  wrap.appendChild(el('h2', '', `${pkEsc(p.name)}, your move`));
+  wrap.appendChild(el('p','muted', ph === 'stakeA' ? 'Hands stay hidden. Check, bet chips, or put a foreplay marker on the table (one marker per hand).' : `${pkEsc(o.name)} checked. Your turn to check, bet or put a marker down.`));
+  if (S.markerOpts){
+    wrap.appendChild(el('p','muted', 'Choose a marker. The loser of the hand performs it for the winner.'));
+    S.markerOpts.forEach(m => {
+      const d = el('div','option', `<span class="flames">${'🔥'.repeat(m.f)}</span> ${pkEsc(m.t)}`);
+      d.onclick = () => { S.bet = {by: a, kind: 'marker', m, called: false}; S.markerOpts = null; sfx(2); go('stakeR'); };
+      wrap.appendChild(d);
+    });
+    const back = el('button','btn-ghost','Back'); back.style.width = '100%'; back.onclick = () => { S.markerOpts = null; render(); }; wrap.appendChild(back);
+    return wrap;
+  }
+  const amt = Math.min(10, p.chips, o.chips);
+  const col = el('div'); col.style.cssText = 'display:grid;gap:10px;margin-top:8px';
+  const chk = el('button','btn-ghost','Check'); chk.onclick = () => { sfx(1); if (ph === 'stakeA') go('stakeB'); else go('showdown-gate'); };
+  const bet = el('button','btn-primary', amt > 0 ? `Bet ${amt} chips` : 'No chips to bet'); bet.disabled = amt <= 0;
+  bet.onclick = () => { p.chips -= amt; S.pot += amt; S.bet = {by: a, kind: 'chips', amt}; sfx(3); buzz(20); go('stakeR'); };
+  const mk = el('button','btn-ghost','🎟️ Put a foreplay marker down');
+  mk.onclick = () => { S.markerOpts = shuffle(markerPool()).slice(0, 4); render(); };
+  col.appendChild(chk); col.appendChild(bet); col.appendChild(mk); wrap.appendChild(col);
+  return wrap;
+}
+function foldScreen(){
+  const wrap = el('div','panel center');
+  wrap.innerHTML = `<div class="badge">Folded</div><div class="icon">🪙</div><h2>${pkEsc(S.foldMsg)}</h2><p class="muted">No reward card this hand. Next hand is dealing.</p>`;
+  autoNext(wrap, 3.5, 'Deal the next hand', () => { endHand(); render(); }, drive(S.bet ? S.bet.by : 0));
   return wrap;
 }
 
 function showdownGate(){
   const wrap = el('div','panel privacy-screen');
-  wrap.innerHTML = `
-    <div class="badge">Showdown</div>
-    <div class="icon">🃏</div>
-    <h2>Ready to Reveal</h2>
-    <p class="muted">Both of you should be able to see the screen now.</p>
-  `;
-  const btn = el('button','btn-primary','Show Both Hands');
-  btn.style.marginTop='16px';
-  btn.onclick = ()=>{ resolveShowdown(); render(); };
-  wrap.appendChild(btn);
+  wrap.innerHTML = `<div class="badge">Showdown</div><div class="icon">🃏</div><h2>Ready to Reveal</h2><p class="muted">Both of you should be able to see the screen now. Cards turn over by themselves.</p>`;
+  autoNext(wrap, 3, 'Show both hands now', () => { sfx(3); resolveShowdown(); render(); }, drive(S.dealer));
   return wrap;
 }
 
-function handBlock(playerIdx, evalResult, isWinner){
+function handBlock(playerIdx, evalResult, isWinner, base){
   const p = S.players[playerIdx];
-  const box = el('div','panel');
-  box.style.marginBottom='10px';
-  const badge = el('div','badge', p.name + (isWinner ? ' — Winner' : ''));
-  if(isWinner) badge.style.background='rgba(255,106,43,.18)';
-  box.appendChild(badge);
-  const handWrap = el('div','card-hand');
-  p.hand.forEach(card => handWrap.appendChild(cardEl(card, false, null)));
-  box.appendChild(handWrap);
-  box.appendChild(el('div','hand-verdict', evalResult.name));
+  const box = el('div','panel hb'); box.style.marginBottom='10px';
+  const badge = el('div','badge', pkEsc(p.name)); box.appendChild(badge);
+  const handWrap = el('div','card-hand'); box.appendChild(handWrap);
+  const verdict = el('div','hand-verdict', ' '); box.appendChild(verdict);
+  p.hand.forEach((card, i) => {
+    const c = cardEl(card, {down: !RM, deal: false});
+    handWrap.appendChild(c);
+    if (!RM) later(() => { c.classList.remove('down'); sfx(1); }, base + i * 260);
+  });
+  later(() => { verdict.textContent = evalResult.name; verdict.classList.add('show'); if (isWinner){ box.classList.add('win'); badge.textContent = p.name + ' · Winner'; buzz([30, 40, 60]); window.KA_MOTION && KA_MOTION.burst && KA_MOTION.burst({kind: 'hearts', n: 18, y: innerHeight * .35}); } else if (S.lastRoundResult.winnerIdx !== null) box.classList.add('lose'); }, base + 5 * 260 + 250);
   return box;
 }
-
 function showdownScreen(){
   const {evalA, evalB, winnerIdx} = S.lastRoundResult;
-  const wrap = document.createDocumentFragment();
-  const container = el('div');
-  container.appendChild(handBlock(0, evalA, winnerIdx===0));
-  container.appendChild(handBlock(1, evalB, winnerIdx===1));
-  const btn = el('button','btn-primary', `${S.players[winnerIdx].name} draws a reward card`);
-  btn.onclick = ()=>{ S.phase = 'reward'; render(); };
-  container.appendChild(btn);
-  return container;
+  const c = el('div');
+  c.appendChild(handBlock(0, evalA, winnerIdx===0, 300));
+  c.appendChild(handBlock(1, evalB, winnerIdx===1, 300 + 5*260 + 700));
+  const total = 300 + 10*260 + 1500;
+  const next = S.markerDue ? 'marker' : 'reward';
+  const w = S.players[winnerIdx];
+  const holder = el('div'); c.appendChild(holder);
+  later(() => {
+    holder.appendChild(el('p','muted center', S.markerDue ? `${pkEsc(S.players[S.markerDue.loser].name)} lost the marker bet and performs it first.` : `${pkEsc(w.name)} wins the hand and draws a reward card.`));
+    autoNext(holder, 4, S.markerDue ? 'Continue to the marker' : `${pkEsc(w.name)} draws a reward card`, () => go(next), drive(winnerIdx));
+  }, total);
+  return c;
 }
-
 function tieScreen(){
   const wrap = el('div','panel center');
-  wrap.innerHTML = `<div class="badge">Exact Tie</div>
-    <h2>Too close to call</h2>
-    <p class="muted">Your hands are exactly equal in strength. Per the rules, you'll replay this round — no reward card drawn.</p>`;
-  const btn = el('button','btn-primary','Replay This Round');
-  btn.onclick = ()=>{ startRound(); render(); };
-  wrap.appendChild(btn);
+  wrap.innerHTML = `<div class="badge">Exact Tie</div><h2>Too close to call</h2><p class="muted">Your hands are exactly equal in strength. The pot is split and you replay the round, no reward card.</p>`;
+  autoNext(wrap, 3.5, 'Replay this round', () => { startRound(); render(); }, drive(S.dealer));
   return wrap;
+}
+
+/* a task on screen: time to read it, then the timer starts by itself */
+function performScreen(o){
+  const wrap = el('div','panel center perform');
+  wrap.appendChild(el('div','badge', o.badge));
+  if (o.sub) wrap.appendChild(el('div','reward-desc', o.sub));
+  wrap.appendChild(el('div','task-big', pkEsc(o.text)));
+  const secs = window.KA_AUTO ? KA_AUTO.secsOf(o.text) : 0;
+  const host = el('div'); wrap.appendChild(host);
+  let finished = false;
+  const done = () => { if (finished) return; finished = true; o.onDone(); };
+  if (secs && window.KA_AUTO){
+    const stop = KA_AUTO.ring(host, {secs, text: o.text, label: o.timerLabel, onNext: drive(o.who) ? done : null, next: 5});
+    STOP.push(stop);
+    later(() => { try { host.scrollIntoView({behavior: 'smooth', block: 'center'}); } catch (e) {} }, 250);
+    host.appendChild(el('p','muted', 'Take a moment to read it. The timer begins by itself, so you can just be present.'));
+  } else host.appendChild(el('p','muted breathe', 'No timer for this one. Take as long as you both like.'));
+  const row = el('div','btn-row'); row.style.marginTop = '14px';
+  const d = el('button','btn-primary', secs ? 'Done early' : 'Done'); d.onclick = done; row.appendChild(d);
+  if (o.back){ const b = el('button','btn-ghost','Pick another'); b.onclick = o.back; row.appendChild(b); }
+  wrap.appendChild(row);
+  return wrap;
+}
+function markerScreen(){
+  const md = S.markerDue, loser = S.players[md.loser], winner = S.players[1 - md.loser];
+  return performScreen({badge: 'Marker due', sub: `${loser.name} performs this for ${winner.name}`, text: md.m.t, who: 1 - md.loser, timerLabel: 'Enjoy it', onDone: () => { S.markerDue = null; go('reward'); }});
 }
 
 function rewardScreen(){
   const r = S.currentReward;
-  const drawer = S.players[r.who];
-  const other = S.players[1-r.who];
-  const meta = REWARD_META[r.type];
+  const drawer = S.players[r.who], other = S.players[1-r.who], meta = REWARD_META[r.type];
+  if (r.picked != null){
+    return performScreen({badge: `${drawer.name} won the round · ${meta.label} card`, text: r.options[r.picked], who: r.who, timerLabel: 'Together',
+      back: () => { r.picked = null; render(); },
+      onDone: () => { finishReward(); render(); }});
+  }
   const wrap = el('div','panel');
-  wrap.appendChild(el('div','badge', `${drawer.name} won the round`));
+  wrap.appendChild(el('div','badge', `${pkEsc(drawer.name)} won the round`));
   wrap.appendChild(el('div','reward-type', meta.label+' Card'));
   wrap.appendChild(el('div','reward-desc', meta.desc));
-
   const optWrap = el('div');
   r.options.forEach((text, i)=>{
-    const o = el('div', 'option'+(r.chosenIdx===i?' chosen':''), text);
-    o.onclick = ()=>{ r.chosenIdx = i; render(); };
+    const o = el('div', 'option optin', pkEsc(text)); o.style.animationDelay = (i * 160) + 'ms';
+    o.onclick = () => { r.picked = i; r.chosenIdx = i; sfx(2); buzz(15); render(); };
     optWrap.appendChild(o);
   });
+  const wish = el('div','option optin wish', '✍️ Write your own wish'); wish.style.animationDelay = (r.options.length * 160) + 'ms';
+  wish.onclick = () => {
+    wish.className = 'option'; wish.onclick = null;
+    wish.innerHTML = '<input type="text" id="wishin" maxlength="140" placeholder="What do you want right now?" style="margin-bottom:10px"><button class="btn-primary" id="wishgo">Use this</button>';
+    wish.querySelector('#wishgo').onclick = () => { const v = wish.querySelector('#wishin').value.trim(); if (!v) return; r.options.push(v); r.picked = r.options.length - 1; render(); };
+    wish.querySelector('#wishin').focus();
+  };
+  optWrap.appendChild(wish);
   wrap.appendChild(optWrap);
-
-  wrap.appendChild(el('p','muted', `${drawer.name} picks one option above and you both follow it. You may temporarily remove clothing to complete it, but only strip/nude/climax cards permanently remove clothes.`));
-
-  const doBtn = el('button','btn-primary', 'Do It');
-  doBtn.onclick = ()=>{ finishReward(); render(); };
-  wrap.appendChild(doBtn);
-
-  if(other.bails>0){
-    const bailBtn = el('button','btn-ghost', `${other.name}, Bail on This (${other.bails} left)`);
-    bailBtn.style.marginTop='10px';
-    bailBtn.style.width='100%';
+  wrap.appendChild(el('p','muted', `${pkEsc(drawer.name)} taps one option and you both follow it. Strip, nude and climax cards permanently remove clothes.`));
+  if (other.bails > 0){
+    const bailBtn = el('button','btn-ghost', `${pkEsc(other.name)}, bail on these (${other.bails} left)`);
+    bailBtn.style.cssText = 'margin-top:10px;width:100%';
     bailBtn.onclick = ()=>{
       other.bails--;
-      // remove chosen option, pick fresh set excluding chosen
-      const remaining = REWARD_CONTENT[r.type].filter(t=> t!==r.options[r.chosenIdx]);
-      r.options = shuffle(remaining).slice(0, r.type==='climax'?4:3);
-      r.chosenIdx = 0;
-      render();
+      const remaining = REWARD_CONTENT[r.type].filter(t=> !r.options.includes(t));
+      r.options = shuffle(remaining.length >= 3 ? remaining : REWARD_CONTENT[r.type]).slice(0, r.type==='climax'?4:3);
+      r.chosenIdx = 0; render();
     };
     wrap.appendChild(bailBtn);
   }
   return wrap;
 }
-
+function bustScreen(){
+  const wrap = el('div','panel center');
+  wrap.innerHTML = `<div class="badge">Out of chips</div><div class="icon">🪙</div><h2>${pkEsc(S.bustMsg)}</h2>`;
+  autoNext(wrap, 5, 'Deal the next hand', () => { nextRound(); render(); }, drive(0));
+  return wrap;
+}
 function finalScreen(){
   const w = S.players[S.winner];
   const wrap = el('div','panel final-screen');
-  wrap.innerHTML = `<div class="badge">Game Over</div>
-    <h2>${w.name} wins the game! 🔥</h2>
-    <p class="muted">The Climax card is drawn — you're both free to finish however you like.</p>`;
+  wrap.innerHTML = `<div class="badge">Game Over</div><h2>${pkEsc(w.name)} wins the game! 🔥</h2>
+    <p class="muted">${S.finale ? 'Time for the finale you agreed on:' : 'The Climax card is drawn. You are both free to finish however you like.'}</p>
+    ${S.finale ? '<div class="task-big">' + pkEsc(S.finale) + '</div>' : ''}`;
   const restart = el('button','btn-primary','Play Again');
   restart.style.marginTop='16px';
-  restart.onclick = ()=>{ initGame(S.players[0].name, S.players[1].name); render(); };
+  restart.onclick = ()=>{ initGame(S.players[0].name, S.players[1].name, S.finale); render(); };
   wrap.appendChild(restart);
+  window.KA_MOTION && KA_MOTION.burst && later(() => KA_MOTION.burst({kind: 'hearts', n: 40, y: innerHeight * .4}), 300);
   return wrap;
 }
 

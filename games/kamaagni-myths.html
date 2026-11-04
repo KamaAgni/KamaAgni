@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Myths vs Facts</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.mf-b{display:flex;gap:10px;justify-content:center;margin:12px 0}.mf-b button{padding:12px 22px;border-radius:14px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.05);color:inherit;font:inherit;font-size:16px;cursor:pointer}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_myths_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const M = [["Men always want sex more than women.", false, "Desire varies by person, not by gender. Stress, sleep, health and the relationship all affect it."], ["Most women need clitoral stimulation to reach orgasm.", true, "Research finds that most women need direct or indirect clitoral stimulation. Intercourse alone is often not enough."], ["Bigger is always better.", false, "Satisfaction depends far more on skill, attention and communication than on size."], ["Foreplay is optional.", false, "Build-up improves arousal, comfort and pleasure for most people, and many need more time than they expect."], ["If you are in love, sex will always be easy.", false, "Even loving couples need to talk, learn and adapt. Good sex is a skill, not magic."], ["Couples who are happy have sex every day.", false, "Frequency varies widely. Satisfaction matters more than the number."], ["Stress can lower desire.", true, "Stress hormones and tiredness often reduce desire, and relaxing together can help."], ["Orgasm is the only goal of sex.", false, "Closeness and pleasure matter as much as the finish. Focusing only on the end can add pressure."], ["Talking about sex ruins the mood.", false, "Kind, curious conversation often improves intimacy, especially when it is about what you enjoy."], ["Women cannot have multiple orgasms.", false, "Some women and some men can have more than one, though it varies and is never required."], ["A low-desire partner is not interested in you.", false, "Desire can drop for many reasons unrelated to attraction, such as health, stress or medication."], ["Lubricant means something is wrong.", false, "Lubricant is a comfort tool that makes things more pleasurable for everyone."], ["You can always tell what your partner wants by instinct.", false, "Most people need to be told. Guessing is the surest way to miss."], ["Desire sometimes follows touch instead of leading it.", true, "Many people are not in the mood at first but become aroused once affectionate touch begins."], ["Sex gets worse with age.", false, "Many couples report better intimacy later, thanks to confidence, communication and fewer distractions."], ["Fantasies mean you want to act on them.", false, "A fantasy can be enjoyable as a thought only. Talking about it does not commit you to doing it."], ["Staying silent about discomfort is polite.", false, "Speaking up protects both of you. Pain is a signal to stop, not to push through."], ["Masturbation harms a relationship.", false, "For most people it is a normal part of sexuality and does not damage a relationship by itself."], ["Regular affection outside the bedroom helps your sex life.", true, "Hugs, kisses and kind words build trust and desire."], ["Sex always has to be spontaneous.", false, "Planned intimacy can be exciting. Anticipation is part of the pleasure."], ["Both partners should always orgasm at the same time.", false, "Simultaneous orgasm is rare and not a measure of success. Taking turns is just as good."], ["Alcohol always improves sex.", false, "A little can relax you, but more can dull sensation and judgement, and can make things worse."], ["A good lover knows what to do without being told.", false, "Good lovers ask, listen and adjust."], ["You should be able to do everything in a sex guide.", false, "Bodies differ. Choose what feels good and skip what does not."], ["Men do not like talking about feelings during sex.", false, "Many men value emotional closeness, and being asked kindly often helps them open up."], ["Waiting a little before the next round can improve it.", true, "Short breaks help bodies recover and keep sensation fresh. Rushing back can reduce pleasure."], ["If a partner says no, it means they do not love you.", false, "A no to sex is about that moment, not about love. A kind response keeps trust strong."], ["Sex toys replace your partner.", false, "Used together, toys usually add to closeness and play, not replace each other."], ["Relaxation increases pleasure.", true, "A relaxed body and mind respond more to touch and are less distracted."], ["Everyone knows what they like without exploring.", false, "Preferences are discovered through trying, noticing and talking, and they change over time."], ["You should hide your insecurities from your partner.", false, "Sharing worries with kindness often deepens trust and brings relief."], ["Eye contact makes sex more intimate.", true, "Looking into each other's eyes increases connection and awareness of your partner's reactions."], ["Good sex needs a perfect body.", false, "Confidence, attention and comfort matter far more than appearance."], ["Dirty talk has to be explicit.", false, "It can be as soft or as bold as you both like. A whispered compliment counts."], ["Cuddling after sex is a waste of time.", false, "Cuddling builds closeness and helps both of you feel valued."], ["You can tell if someone is satisfied just from how loud they are.", false, "People express pleasure in very different ways. Ask and watch for other signs."], ["Humour helps in bed.", true, "Shared laughter reduces tension and makes it easier to try new things."], ["Spontaneity is more important than planning.", false, "Planned time can build anticipation and make sure intimacy happens at all."], ["Hydration affects comfort and energy.", true, "Staying hydrated helps your body feel and respond better."], ["The first few minutes of touch decide the mood.", true, "A slow, attentive start tells your partner they are cherished and sets the pace."]];
+function setup() { S = null; app.innerHTML = '<h1 class="kx-title"><span>Myths vs Facts</span></h1><p class="kx-sub">Fact or myth? Guess, then see the answer. Play together or compete.</p><div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="go">Start 10 cards</button></div></div>';
+  document.getElementById('go').onclick = () => { S = {q: shuffle(M.map((m, i) => i)).slice(0, 10), i: 0, sc: [0, 0], who: 0, a: null}; render(); }; }
+function render() {
+  const head = '<h1 class="kx-title"><span>Myths vs Facts</span></h1>' + U.bar([['Card ' + Math.min(S.i + 1, 10) + '/10', ''], [esc(NM[0]) + ' ' + S.sc[0], ''], [esc(NM[1]) + ' ' + S.sc[1], '']], {guide: 0, quit: 1});
+  const set = () => U.bindBar(app, {quit: () => setup()});
+  if (S.i >= 10) { app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + (S.sc[0] === S.sc[1] ? 'A tie' : esc(NM[S.sc[0] > S.sc[1] ? 0 : 1]) + ' wins') + '</div><p class="kx-big" style="margin:12px 0">Winner picks a massage or a kiss from the loser.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="fin">Finish</button></div></div>'; set(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Myths vs Facts', ''); } catch (e) {} setup(); }; return; }
+  const m = M[S.q[S.i]];
+  if (S.a == null) { app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + esc(NM[S.who]) + ', fact or myth?</div><p class="kx-big" style="margin:14px 0">' + esc(m[0]) + '</p><div class="mf-b"><button data-a="1">Fact</button><button data-a="0">Myth</button></div></div>'; set();
+    app.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { S.a = b.dataset.a === '1'; if (S.a === m[1]) S.sc[S.who]++; render(); }); return; }
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">' + (S.a === m[1] ? 'Correct' : 'Not quite') + ': it is ' + (m[1] ? 'a fact' : 'a myth') + '</div><p class="kx-big" style="margin:14px 0">' + esc(m[2]) + '</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="nx">Next</button></div></div>'; set();
+  document.getElementById('nx').onclick = () => { S.i++; S.a = null; S.who = 1 - S.who; render(); };
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

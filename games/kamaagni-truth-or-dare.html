@@ -115,7 +115,7 @@ function render() {
   });
   if (S.phase === 'card') {
     const c = S.cur; U.flip(app, 120);
-    const tm = document.getElementById('tm'); if (tm) timerStop = U.timer(tm, U.parseSecs(c.t));
+    const tm = document.getElementById('tm'); if (tm) timerStop = U.timer(tm, U.parseSecs(c.t), null, {text: c.t});
     const dn = document.getElementById('dn');
     if (dn) {
       dn.onclick = () => { try { KA_TRACK.log('play', 'Truth or Dare', c.t.slice(0, 70)); } catch (e) {} next(); };

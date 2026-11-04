@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-dedup.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="theme-color" content="#07060f"/>
@@ -60,7 +60,7 @@ function duo() {
   app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1>' + U.bar([['📱📱 Two phones', 'h1'], [S.box.length + ' in the box', 'h2']], {guide: true, quit: true}) + body;
   U.bindBar(app, {guide: GUIDE, guideTitle: 'How the Fantasy Box works', two: true, quit: () => { D.quit(S); S = null; view = 'home'; home(); }});
   const q = id => document.getElementById(id);
-  if (q('wr')) q('wr').onclick = () => { U.guide('Write a slip', '<textarea id="ts" class="kx-input" rows="4" maxlength="200" placeholder="A wish, a fantasy or an idea"></textarea><button class="kx-btn gold" id="tsa" style="margin-top:10px">Drop in the box</button>'); q('tsa').onclick = () => { const v = q('ts').value.trim(); if (!v) return; S.box.push({t: v, w: me, id: Date.now() + '' + me + Math.floor(Math.random() * 99)}); dsave(); const gd = document.getElementById('kd-guide'); if (gd) gd.remove(); duo(); }; };
+  if (q('wr')) q('wr').onclick = () => { U.guide('Write a slip', '<textarea id="ts" class="kx-input" rows="4" maxlength="200" placeholder="A wish, a fantasy or an idea"></textarea><button class="kx-btn gold" id="tsa" style="margin-top:10px">Drop in the box</button>'); q('tsa').onclick = () => { const v = q('ts').value.trim(); if (!v) return; KA_DEDUP.guard([v], S.box.map(x => x.t), a => { if (a.length) { S.box.push({t: v, w: me, id: Date.now() + '' + me + Math.floor(Math.random() * 99)}); dsave(); } const gd = document.getElementById('kd-guide'); if (gd) gd.remove(); duo(); }); }; };
   if (q('rd')) q('rd').onclick = () => { S.ready[me] = 1; dsave(); duo(); };
   if (q('cn')) q('cn').onclick = () => { S.ready = [0, 0]; dsave(); duo(); };
   app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { S.res[me] = b.dataset.r; dsave(); duo(); });
@@ -94,7 +94,7 @@ function write() {
   const n = names(), h = KX.heat();
   app.innerHTML = '<h1 class="kx-title"><span>Fantasy Box</span></h1><div class="kx-card" data-nofx="1"><div class="kx-turn">Private: ' + esc(n[writer]) + '</div><p class="kx-muted">Write a wish, fantasy or idea. Keep it kind. Your partner will not see who wrote it.</p><textarea class="kx-input" id="tx" rows="4" maxlength="240" placeholder="e.g. A slow evening where you tease me for an hour"></textarea><div class="kd-pass"><button class="kx-btn gold" id="ad">➕ Drop in the box</button><button class="kx-btn ghost" id="id">💡 Give me an idea</button><button class="kx-btn ghost" id="dn">Done, hide the screen</button></div><div class="kx-note" id="mc"></div></div>';
   document.getElementById('id').onclick = () => { document.getElementById('tx').value = pick(KF(IDEAS)); };
-  document.getElementById('ad').onclick = () => { const v = document.getElementById('tx').value.trim(); if (!v) return; st.box.push({t: v, w: writer, id: Date.now() + Math.random()}); save(); document.getElementById('tx').value = ''; document.getElementById('mc').textContent = '✓ Dropped in. You can add more.'; };
+  document.getElementById('ad').onclick = () => { const v = document.getElementById('tx').value.trim(); if (!v) return; KA_DEDUP.guard([v], st.box.map(x => x.t), a => { if (a.length) { st.box.push({t: v, w: writer, id: Date.now() + Math.random()}); save(); } document.getElementById('tx').value = ''; document.getElementById('mc').textContent = a.length ? '✓ Dropped in. You can add more.' : 'Already in the box or the site, so it was not added again.'; }); };
   document.getElementById('dn').onclick = home;
 }
 function draw() {

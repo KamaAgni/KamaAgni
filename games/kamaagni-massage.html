@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Sensual Massage Studio</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.ms-pr{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.ms-pr.on{background:rgba(123,224,166,.18);border-color:#7be0a6}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_ms_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const Z = {"back": ["Back", "🌿", 1, [["Long Glide", "Warm the oil in your hands. With flat palms, glide from the base of the spine up to the shoulders and back down, slowly. Keep contact the whole time. Do this for 2 minutes."], ["Slow Circles", "Make large slow circles with your palms across the shoulder blades and lower back. Ask for more or less pressure. Continue for 2 minutes."], ["Thumb Trails", "Walk your thumbs up either side of the spine, never on the bone, and stop wherever it feels tight. Spend 2 minutes."], ["Feather Trace", "Use only your fingertips and trace long, light lines from the neck to the hips. Let the skin ripple. Do this for 90 seconds."], ["Knead and Release", "Gently knead the shoulders and sides like soft dough, then release with a long sweep. Keep this up for 2 minutes."]]], "arms": ["Arms and hands", "🤲", 1, [["Arm Sweep", "Sweep from the shoulder down to the fingertips with both hands, again and again, slowly. Do this on both arms for 2 minutes."], ["Palm Press", "Press your thumbs into the centre of their palm and circle slowly, then stretch each finger. Spend 2 minutes on each hand."], ["Finger Weave", "Slide your fingers between theirs, squeeze softly, then pull away along each finger. Do this for 90 seconds."], ["Inner Arm Tease", "Trace the soft inner arm and wrist with your fingertips and a little breath. Keep this up for 90 seconds."]]], "legs": ["Legs and feet", "🦶", 1, [["Calf Sweep", "Glide from ankle to knee with both palms and use firm pressure on the way up. Do this for 2 minutes."], ["Foot Rub", "Hold the foot in both hands, thumb into the arch, slow circles at the heel. Spend 3 minutes on each foot."], ["Toe Pull", "Pull each toe gently and give the ankle a slow rotation each way. Take 2 minutes."], ["Thigh Sweep", "Sweep from the knee up to the hip with relaxed hands, staying outside the intimate zone. Keep this up for 2 minutes."]]], "head": ["Head and neck", "💆", 1, [["Scalp Comb", "Run your fingers through their hair and make small circles across the scalp. Do this for 2 minutes."], ["Neck Release", "Support the head, then use your fingertips along the base of the skull and neck. Take 2 minutes."], ["Temple Circles", "Make tiny slow circles at the temples and along the brow with your thumbs. Take 90 seconds."], ["Ear and Jaw", "Massage the earlobes and soften the jaw with slow, light circles. Spend 90 seconds."]]], "front": ["Front body", "💞", 2, [["Heart Glide", "Rest one hand on the chest and glide the other from the collarbones to the belly in long sweeps. Do this for 2 minutes."], ["Belly Circles", "Make slow clockwise circles on the belly with warm palms. Spend 2 minutes."], ["Hip Cradle", "Press the hips and sides softly, pausing wherever they respond. Take 2 minutes."], ["Kiss Trail", "Follow your hands with light kisses along the collarbone, ribs and belly. Spend 2 minutes."]]], "close": ["Intimate touch", "🔥", 3, [["Teasing Edges", "Spend time on the inner thighs and hips without going straight to the centre. Let them tell you when. Take 3 minutes."], ["Slow Build", "Use slow, warm, attentive touch and ask for guidance: faster, slower, lighter. Follow their breathing for 4 minutes."], ["Anywhere You Like", "The receiver guides your hand with words or touch, and the giver follows. Take 4 minutes."]]]}, OPEN = [["Breathe Together", "Sit facing each other. Breathe in for four counts and out for four counts together, matching each other. Do this for 2 minutes."], ["Eyes and Heart", "Rest one hand on your partner's chest and one on your own. Look into each other's eyes without speaking for 1 minute."]], CLOSE = [["Long Final Glide", "Glide both hands slowly from the head down to the feet in one long, unbroken stroke. Repeat for 90 seconds."], ["Stillness", "Cover your partner with a blanket and hold them. Say nothing for 2 minutes."]], PREP = ["The room is warm and the lights are low.", "Oil is warm and a towel is under the receiver.", "Phones are away.", "Nails are smooth and hands are warm.", "We have agreed a signal for 'stop' or 'lighter'.", "We have chosen who gives first."];
+const GUIDE = `<h3>The idea</h3><p>A guided massage for two. You begin with a short breathing and eye-contact opening, then one of you gives while the other receives. Halfway through, you swap. Every step starts its own timer after a short reading pause.</p><h3>Before you begin</h3><ol><li>Warm oil, a towel and a warm room.</li><li>Agree a word for 'lighter' or 'stop'.</li><li>The receiver's only job is to relax and tell the giver what feels good.</li></ol><p class="kx-note">A massage is a gift. It does not have to lead anywhere.</p>`;
+function setup() { U.setup(app, {id: 'ms', title: 'Sensual Massage Studio', sub: 'A guided massage with breathing, timers and a swap halfway.', modes: ['one'], catsLabel: 'Which areas?', cats: Object.keys(Z).map(k => ({id: k, l: Z[k][0], i: Z[k][1], n: Z[k][3].length, h: Z[k][2]})), guide: GUIDE, guideTitle: 'How to play', startLabel: 'Prepare the room',
+  extras: [{id: 'len', label: 'Session length', opts: [[1, 'Short (about 20 min)'], [2, 'Full (about 40 min)']], def: 1}],
+  start: o => { build(o); }}); }
+function build(o) {
+  const per = +o.extras.len, order = Object.keys(Z).filter(k => o.cats.includes(k)), plan = [];
+  OPEN.forEach(s => plan.push({r: -1, z: 'Opening', t: s[0], x: s[1]}));
+  [0, 1].forEach(r => { order.forEach(k => { shuffle(Z[k][3]).slice(0, per).forEach(s => plan.push({r, z: Z[k][0], t: s[0], x: s[1]})); }); });
+  CLOSE.forEach(s => plan.push({r: -1, z: 'Closing', t: s[0], x: s[1]}));
+  S = {plan, i: 0, phase: 'prep', ok: []}; save(); render();
+}
+function render() {
+  if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Sensual Massage</span></h1>' + bar([['Step ' + Math.min(S.i + 1, S.plan.length) + '/' + S.plan.length, '']]);
+  if (S.phase === 'prep') {
+    app.innerHTML = head + '<p class="kx-sub">Prepare the space</p>' + PREP.map((p, i) => '<button class="ms-pr ' + (S.ok.includes(i) ? 'on' : '') + '" data-p="' + i + '">' + (S.ok.includes(i) ? '✓ ' : '○ ') + esc(p) + '</button>').join('') + '<div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn gold" id="go">Begin</button></div>';
+    bindBar(); app.querySelectorAll('[data-p]').forEach(b => b.onclick = () => { const i = +b.dataset.p, k = S.ok.indexOf(i); if (k >= 0) S.ok.splice(k, 1); else S.ok.push(i); save(); render(); });
+    document.getElementById('go').onclick = () => { S.phase = 'go'; save(); render(); }; return; }
+  if (S.phase === 'end') {
+    app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Thank each other</div><p class="kx-big" style="margin:12px 0">Tell your partner what felt best.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="fin">Finish</button></div></div>';
+    bindBar(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Sensual Massage', ''); } catch (e) {} clear(); setup(); }; return; }
+  const s = S.plan[S.i], who = s.r < 0 ? 'Both of you' : NM[s.r] + ' gives, ' + NM[1 - s.r] + ' receives';
+  app.innerHTML = head + '<div id="pf"></div>'; bindBar();
+  KA_PERF.show(document.getElementById('pf'), {badge: s.z + ' · ' + s.t, sub: who, text: s.x, doneLabel: S.i === S.plan.length - 1 ? 'Finish' : 'Next', onDone: () => { S.i++; if (S.i >= S.plan.length) S.phase = 'end'; save(); render(); }});
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

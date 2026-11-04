@@ -3,9 +3,30 @@
    2. tracks which saved settings changed so cloud sync can upload them */
 (function () {
   var d = document.documentElement, seen = false;
+  /* login gate: keep the page hidden until ka-gate.js has checked the sign-in (failsafe after 6s) */
+  try {
+    var _ok = sessionStorage.getItem('ka_ok') === '1' && Date.now() - (+localStorage.getItem('ka_last') || 0) < 3600000;
+    if (!_ok) {
+      var _st = document.createElement('style'); _st.id = 'ka-hide'; _st.textContent = 'html{visibility:hidden!important}'; (document.head || d).appendChild(_st);
+      setTimeout(function () { var x = document.getElementById('ka-hide'); if (x && !window.KA_GATE) x.remove(); }, 6000);
+    }
+  } catch (e) {}
   /* load the shared theme in <head> before first paint (no flash of the old look) */
-  try { var cs = document.currentScript, base = (cs && cs.src || '').replace(/js\/ka-boot\.js.*$/, '');
+  var cs = document.currentScript, base = (cs && cs.src || '').replace(/js\/ka-boot\.js.*$/, '');
+  try {
     if (base && !document.getElementById('ka-theme-css')) { var l = document.createElement('link'); l.id = 'ka-theme-css'; l.rel = 'stylesheet'; l.href = base + 'css/ka-theme.css'; document.head.appendChild(l); d.classList.add('ka-chrome'); } } catch (e) {}
+  /* Opened straight from a folder or pen drive (file://): there is no web server, so data files are served from js/ka-embed.js */
+  try {
+    if (location.protocol === 'file:' && cs) {
+      document.write('<script src="' + base + 'js/ka-embed.js"><\/script>');
+      var realFetch = window.fetch;
+      window.fetch = function (u) {
+        try { var m = String(u && u.url || u).match(/(?:^|\/)(data\/[^?#]+\.json)/); if (m && window.KA_EMBED && window.KA_EMBED[m[1]] !== undefined) return Promise.resolve(new Response(JSON.stringify(window.KA_EMBED[m[1]]), { status: 200, headers: { 'Content-Type': 'application/json' } })); } catch (e) {}
+        return realFetch.apply(this, arguments);
+      };
+    }
+  } catch (e) {}
+  try { if (cs && base) document.write('<script src="' + base + 'js/ka-auto.js"><\/script><script src="' + base + 'js/ka-spark.js"><\/script>'); } catch (e) {}
   try { seen = !!(localStorage.getItem('ka_intro_seen') || sessionStorage.getItem('ka_intro_seen')); } catch (e) {}
   if (seen) d.classList.add('ka-skip-intro');
 

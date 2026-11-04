@@ -881,14 +881,6 @@ body::after {
 
       <div class="game-card">
         <div class="card-bar rose"></div>
-        <div class="card-icon">🗓️</div>
-        <div>
-          <span class="card-tag rose">Challenge</span>
-          <div class="card-title">Mission Week</div>
-          <p class="card-desc">One mission for seven days, one point a day.</p>
-        </div>
-        <a href="games/kamaagni-mission-week.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
-      </div>
 
     </div>
 
@@ -1375,7 +1367,7 @@ var chips='';
 if(lv){chips+='<span class="d-chip" title="One rest day never breaks your rhythm">🔥 '+st+' day'+(st===1?'':'s')+' rhythm</span>';
 chips+='<span class="d-chip d-lvl">'+lv.icon+' Level '+lv.n+' · '+lv.name+' <span style="color:#8a99b8;font-weight:600">'+lv.xp+' XP'+(lv.to?' / '+lv.to:'')+'</span><span class="bar"><i style="width:'+lv.pct+'%"></i></span></span>';}
 $('d-stats').innerHTML=chips;
-var heat=LS('ka_heat',2);
+var heat=LS('ka_heat',3);
 var M=[['romantic','🌸','Romantic'],['playful','😈','Playful'],['wild','🔥','Wild'],['gentle','🛁','Tired & gentle'],['apart','📱','Apart tonight']].filter(function(m){return m[0]!=='wild'||heat>=3});
 $('d-moods').innerHTML=M.map(function(m){return '<a class="d-mood" href="games/kamaagni-session.html?mood='+m[0]+'"><b>'+m[1]+'</b>'+m[2]+'</a>'}).join('');
 var NAMES={intimacy_dice_game_single_page:'Intimacy Dice','kamaagni-showdown':'Seduction Showdown',intimacy_cards_game_single_page:'Connection Cards','kamaagni-rituals':'Connection Rituals','kamaagni-date-kits':'Date Night Kits','kamaagni-scratch-book':'Scratch-Off Book','kamaagni-whos-most-likely':"Who\'s Most Likely",'kamaagni-know-me':'How Well Do You Know Me','kamaagni-quick-fire':'Quick-Fire','kamaagni-fantasy-box':'Fantasy Box','kamaagni-mystery-doors':'Mystery Doors','kamaagni-bedroom-menu':'Bedroom Menu','kamaagni-bingo':'Intimate Bingo','kamaagni-tic-tac-tease':'Tic-Tac-Tease','kamaagni-body-map':'Body Map','kamaagni-never-have-i-ever':'Never Have I Ever',intimacy_ludo_dice_game_single_page:'Intimacy Ludo',intimacy_Position_Selector_page:'Position Selector',intimacy_Oral_Position_Selector_page:'Oral Selector','kamaagni-connect-foreplay':'Connect & Foreplay','kamaagni-poker-quick':'Quick Poker','kamaagni-desire-match':'Desire Match','kamaagni-would-you-prefer':'Would You Prefer','kamaagni-truth-or-dare':'Truth or Dare','kamaagni-bucket-list':'Bucket List','kamaagni-mission-week':'Mission Week','kamaagni-love-coupons':'Love Coupons','kamaagni-task-deck':'Task Deck','kamaagni-kink-explorer':'Kink Explorer','kamaagni-learn':'Learn','kamaagni-tonight':'Plan Tonight','kamaagni-journal':'Our Journal','kamaagni-roleplay':'Roleplay Studio','kamaagni-journey':'BDSM Journey','kamaagni-challenges':'Challenges','kamaagni-kinky-dice':'Dice Sets','kamaagni-hornopoly':'Hornopoly','kamaagni-prompts':'Reflection Prompts','kamaagni-secret':'Secret Envelope','kamaagni-session':'Guided Session'};

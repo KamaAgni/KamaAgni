@@ -89,7 +89,7 @@ function render() {
   const tn = document.getElementById('tn'); if (tn) tn.onclick = () => { if (S.tile === 'swap') { S.cur = null; S.phase = 'draw'; D.save(S); render(); } else next(); };
   if (S.phase === 'card') {
     const c = S.cur; U.flip(app, 120);
-    const tm = document.getElementById('tm'); if (tm) stop = U.timer(tm, secs(c.t));
+    const tm = document.getElementById('tm'); if (tm) stop = U.timer(tm, secs(c.t), null, {text: c.t});
     const dn = document.getElementById('dn');
     if (dn) {
       dn.onclick = () => { S.score[t]++; try { KA_TRACK.log('play', 'Hornopoly', c.t.slice(0, 70)); } catch (e) {} next(); };

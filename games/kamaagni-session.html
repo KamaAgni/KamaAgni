@@ -101,7 +101,7 @@
     if (g('nx')) g('nx').onclick = () => { i++; run(); };
     if (g('bk')) g('bk').onclick = () => { i--; run(); };
     if (g('sw')) g('sw').onclick = async () => { steps[i] = await s.re(); steps[i].re = s.re; run(); };
-    if (g('tm')) g('tm').onclick = () => window.KA && KA.timer(s.m * 60, s.k);
+    if (g('tm')) { g('tm').onclick = () => window.KA && KA.timer(s.m * 60, s.k); window.KA_AUTO && KA_AUTO.lead(g('tm'), s.t); }
     if (g('sv')) g('sv').onclick = e => { KX.fav('cards', fill(s.t)); e.target.textContent = '♥'; };
     app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { rating = +b.dataset.r; run(); });
     if (g('fin')) g('fin').onclick = finish;

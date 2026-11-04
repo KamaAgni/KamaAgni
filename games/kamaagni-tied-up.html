@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Tied Up</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.wr-row{display:flex;justify-content:center;gap:26px;margin:16px 0}.wr-col{text-align:center}.wr-col small{display:block;margin-top:6px;color:var(--kv-mute);font-size:12px}.wr-win .kc{border-color:#ffb84d;box-shadow:0 0 20px rgba(255,170,70,.8)}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_war_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+const GUIDE = `<h3>The idea</h3><p>The card game War, turned into a tease. Both of you flip a card. Higher card takes both. When they match, it's a war.</p><h3>Play</h3><ol><li>Cards flip by themselves every couple of seconds. Tap Pause any time.</li><li>A war: three cards down, one up. The winner of the war takes the pile and the loser performs the activity for the tied rank.</li><li>A second tie in a row is a double war: the loser also takes off an item of clothing (or does a kiss instead).</li><li>When the hands run out or the flips are up, whoever has more cards wins a final wish.</li></ol>`;
+let tm = 0;
+const V = c => c.r === 0 ? 13 : c.r;
+function setup() { clearTimeout(tm); U.setup(app, {id: 'war', title: 'Tied Up', sub: 'War, but the ties get interesting.', modes: ['one'], catsLabel: 'Intensity tiers', cats: C.cats(), guide: GUIDE, guideTitle: 'How to play', extras: tierExtras.concat([{id: 'len', label: 'Length', opts: [[16, 'Short (16 flips)'], [26, 'Classic (26)'], [52, 'Long (all cards)']], def: 26}]), startLabel: 'Deal',
+  start: o => { let t = tierList(o.cats); if (o.extras.x === 'one') t = [t[0]]; const d = C.shuffle(C.deck()); S = {tiers: t, heat: o.heat, len: +o.extras.len, flips: 0, h: [d.slice(0, 26), d.slice(26)], pile: [], war: 0, last: null, pause: false, phase: 'play', msg: 'Flipping in a moment'}; save(); render(); }}); }
+const ended = () => S.flips >= S.len || !S.h[0].length || !S.h[1].length;
+function render() {
+  clearTimeout(tm); if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Tied Up</span></h1>' + bar([['🃏 ' + esc(NM[0]) + ' ' + S.h[0].length, ''], ['🃏 ' + esc(NM[1]) + ' ' + S.h[1].length, ''], ['flip ' + S.flips + '/' + S.len, '']]);
+  if (S.phase === 'perform') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: S.badge, sub: S.sub, text: S.text, doneLabel: S.final ? 'Finish' : undefined, onDone: () => { if (S.final) { try { KA_TRACK.log('play', 'Tied Up', ''); } catch (e) {} clear(); setup(); return; } if (S.after) { const a = S.after; S.after = null; Object.assign(S, a); } else S.phase = 'play'; if (S.phase === 'play' && ended()) return over(); save(); render(); }}); return; }
+  const lc = S.last;
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="wr-row"><div class="wr-col ' + (lc && lc.w === 0 ? 'wr-win' : '') + '">' + (lc ? C.face(lc.a, 'big in') : '<div class="kc big back"></div>') + '<small>' + esc(NM[0]) + '</small></div><div class="wr-col ' + (lc && lc.w === 1 ? 'wr-win' : '') + '">' + (lc ? C.face(lc.b, 'big in') : '<div class="kc big back"></div>') + '<small>' + esc(NM[1]) + '</small></div></div><p class="kx-muted" id="nt">' + esc(S.msg) + '</p><div class="kx-row" style="justify-content:center"><button class="kx-btn ghost" id="ps">' + (S.pause ? '▶ Resume' : '⏸ Pause') + '</button><button class="kx-btn gold" id="nx">Flip now</button></div></div>';
+  bindBar();
+  document.getElementById('ps').onclick = () => { S.pause = !S.pause; save(); render(); };
+  const step = () => { if (S.phase !== 'play') return; if (ended()) return over(); const a = S.h[0].shift(), b = S.h[1].shift(); S.flips++; S.pile.push(a, b); S.last = {a, b, w: V(a) > V(b) ? 0 : V(a) < V(b) ? 1 : -1}; try { KA_FX.clack(2); } catch (e) {}
+    const p = S.flips / S.len;
+    if (S.last.w >= 0) { const w = S.last.w; S.h[w].push(...shuffle(S.pile)); S.pile = []; S.msg = NM[w] + ' takes both cards.' + (S.war ? '' : ''); if (S.war) { const dbl = S.war >= 2; S.badge = 'War won by ' + NM[w] + (dbl ? ' (double war)' : ''); S.sub = NM[1 - w] + ' performs this for ' + NM[w]; S.text = actFor(S.warCard, p) + (dbl ? ' Then take off one item of clothing, or give a long kiss instead.' : ''); S.war = 0; S.phase = 'perform'; } }
+    else { S.war++; S.warCard = a; for (let i = 0; i < 3; i++) { if (S.h[0].length > 1) S.pile.push(S.h[0].shift()); if (S.h[1].length > 1) S.pile.push(S.h[1].shift()); } S.msg = S.war >= 2 ? 'DOUBLE WAR! Three cards down, one up.' : 'WAR! Three cards down, one up.'; }
+    save(); render(); };
+  document.getElementById('nx').onclick = () => { clearTimeout(tm); step(); };
+  if (!S.pause && S.phase === 'play') tm = setTimeout(step, S.flips === 0 ? 1500 : 2200);
+}
+function over() { const w = S.h[0].length === S.h[1].length ? -1 : S.h[0].length > S.h[1].length ? 0 : 1; Object.assign(S, {phase: 'perform', final: 1, badge: w < 0 ? 'A tie. You both win' : NM[w] + ' wins with ' + S.h[w].length + ' cards', sub: w < 0 ? 'Each of you picks a wish for the other' : NM[1 - w] + ' gives the winner this wish', text: wishText()}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); save(); render(); }
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

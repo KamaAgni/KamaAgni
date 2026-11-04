@@ -47,7 +47,7 @@
       d.querySelector('#dn').onclick = () => { st.done[t.i] = 1; window.KA_TRACK && KA_TRACK.log('journey', 'Journey step done', ''); save(); d.remove(); view(); };
       d.querySelector('#ag').onclick = () => { d.remove(); document.getElementById('draw').click(); };
       d.querySelector('#cl').onclick = () => d.remove();
-      const tm = d.querySelector('#tm'); if (tm) tm.onclick = () => window.KA && KA.timer(+mt[1] * 60, 'Journey');
+      const tm = d.querySelector('#tm'); if (tm) { tm.onclick = () => window.KA && KA.timer(+mt[1] * 60, 'Journey'); window.KA_AUTO && KA_AUTO.lead(tm, d.textContent); }
     };
   }
   view();

@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni 30-Day Spark</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.sc-g{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}.sc-g button{aspect-ratio:1;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.sc-g button.done{background:rgba(123,224,166,.2);border-color:#7be0a6}.sc-g button.today{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,200,100,.35)}
+.sc-t{display:flex;gap:8px;justify-content:center;margin:10px 0}.sc-t button{padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit;font:inherit;cursor:pointer}.sc-t button.on{border-color:var(--gold);color:var(--gold)}
+.sc-ch{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.sc-ch.on{background:rgba(123,224,166,.18);border-color:#7be0a6}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_spark30_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const DAYS = [["Say it with a note", "Hide a handwritten note where your partner will find it today.", "Kiss for a full ten seconds when you next meet."], ["Real hello and goodbye", "Greet and part today with a hug that lasts six seconds.", "Say the words 'I'm glad you're mine'."], ["Compliment storm", "Give three sincere compliments, one about looks, one about character, one about something they did.", "Text a fourth at night."], ["Phone-free supper", "Eat together with phones in another room.", "Ask: what was your favourite moment today?"], ["Memory lane", "Tell each other your favourite memory from the first month together.", "Look at an old photo together."], ["Shoulder rub", "Give a five-minute shoulder and neck massage.", "Swap and receive one too."], ["Date night one: the old favourite", "Go on a date to the place where you had your first date, or recreate it at home.", "Kiss like it is the first time."], ["Small favour", "Quietly take over one of their chores today.", "Do not mention it. Watch them notice."], ["Appreciation list", "Write down five things you love about them and read them aloud.", "Give them the list."], ["Slow kiss", "Share a kiss that lasts at least a full minute, no rush.", "Hold hands afterwards."], ["Talk about dreams", "Share one dream for the next five years and ask for theirs.", "Write both down."], ["Flirty text", "Send a flirty message in the middle of the day.", "Reply with something hotter."], ["Dance", "Dance to one song in the living room.", "Slow dance for a second song."], ["Date night two: something new", "Try something neither of you has done before.", "Take one photo as a souvenir."], ["Touch hunt", "Touch your partner in a small loving way at least five times today.", "Count them together at night."], ["Cuddle without a plan", "Spend twenty minutes cuddling with no agenda.", "Breathe together."], ["Sensual bath or shower", "Wash each other's backs.", "Wrap each other in towels."], ["Tell a secret fantasy", "Share a small, safe fantasy you have not shared before.", "Ask what they felt."], ["Eyes open", "Make eye contact for one full minute without speaking.", "Say what you saw."], ["Breakfast surprise", "Bring breakfast in bed, or make their favourite.", "Feed them the first bite."], ["Date night three: dress up", "Dress up as though you are going somewhere fancy, even at home.", "Compliment each other's outfit slowly."], ["Hands only", "Spend ten minutes exploring each other with hands only, over clothes.", "Say which spots you liked best."], ["Gratitude call", "Thank them for something you have never thanked them for.", "Be specific."], ["Teasing tonight", "Tease them all day with looks, touches and hints, no payoff until evening.", "Choose a signal that means 'tonight'."], ["Massage with oil", "Give a full body massage with warm oil.", "Let them guide the pressure."], ["Role swap", "Take over each other's usual role in the bedroom for one night.", "Tell each other what surprised you."], ["Love letter", "Write a short letter about what they mean to you.", "Read it aloud."], ["Date night four: the grand finale", "Plan an evening around their favourite things, start to finish.", "Make a toast to the thirty days."], ["Your wish list", "Each of you writes down three wishes for the coming month and swaps them.", "Pick one to do this week."], ["Looking back", "Talk about what changed in the last thirty days.", "Plan how to keep one habit going."]], CH = ["Said something kind about them", "Gave them a real hug", "Listened without interrupting", "Thanked them for something small", "Brought them a drink or snack unasked", "Kissed them hello or goodbye", "Asked about their day and meant it", "Held their hand", "Complimented how they look", "Texted them something sweet", "Remembered something they told me", "Cooked or helped with a meal", "Offered a massage", "Made time for just the two of us", "Cheered them on in something", "Apologised when I was wrong", "Planned a surprise", "Said what I admire about them", "Put my phone away while we talked", "Smiled when they walked in"];
+let tab = 'days', sel = null;
+const load = () => { S = LS.get(KEY, null) || {done: [], ch: [], start: Date.now()}; };
+const todayN = () => Math.min(30, Math.floor((Date.now() - S.start) / 864e5) + 1);
+function draw() {
+  if (!S) load();
+  const dn = S.done.length, cur = sel || (DAYS.findIndex((d, i) => !S.done.includes(i)) + 1) || 30;
+  let h = '<h1 class="kx-title"><span>30-Day Spark</span></h1><p class="kx-sub">One small act every day. Thirty days to feel closer.</p><div class="sc-t"><button data-t="days" class="' + (tab === 'days' ? 'on' : '') + '">30 Days</button><button data-t="ch" class="' + (tab === 'ch' ? 'on' : '') + '">Cherish list</button></div>';
+  if (tab === 'days') {
+    const d = DAYS[cur - 1];
+    h += '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Day ' + cur + ' · ' + dn + '/30 done</div><h2 style="margin:6px 0">' + esc(d[0]) + '</h2><p class="kx-big" style="margin:8px 0">' + esc(d[1]) + '</p><p class="kx-muted">Bonus: ' + esc(d[2]) + '</p><div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn gold" id="ok">' + (S.done.includes(cur - 1) ? 'Done ✓ (tap to undo)' : 'We did it') + '</button></div></div>';
+    h += '<div class="sc-g">' + DAYS.map((x, i) => '<button data-d="' + (i + 1) + '" class="' + (S.done.includes(i) ? 'done ' : '') + (i + 1 === cur ? 'today' : '') + '">' + (i + 1) + '</button>').join('') + '</div>';
+    if (dn >= 30) h += '<div class="kx-card"><div class="kx-turn">You finished all 30 days</div><p class="kx-muted">Pick the three habits you loved most and keep them going.</p></div>';
+  } else {
+    h += '<p class="kx-muted" style="text-align:center">Tick what you did for your partner this week. Then tell them. Appreciation grows when it is said out loud.</p>' + CH.map((c, i) => '<button class="sc-ch ' + (S.ch.includes(i) ? 'on' : '') + '" data-c="' + i + '">' + (S.ch.includes(i) ? '✓ ' : '○ ') + esc(c) + '</button>').join('') + '<div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn ghost" id="rc">New week (clear)</button></div>';
+  }
+  app.innerHTML = h;
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; draw(); });
+  app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { sel = +b.dataset.d; draw(); });
+  const ok = document.getElementById('ok'); if (ok) ok.onclick = () => { const i = cur - 1, k = S.done.indexOf(i); if (k >= 0) S.done.splice(k, 1); else { S.done.push(i); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 24}); try { KA_TRACK.log('play', '30-Day Spark', 'Day ' + cur); } catch (e) {} } sel = null; save(); draw(); };
+  app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { const i = +b.dataset.c, k = S.ch.indexOf(i); if (k >= 0) S.ch.splice(k, 1); else S.ch.push(i); save(); draw(); });
+  const rc = document.getElementById('rc'); if (rc) rc.onclick = () => { S.ch = []; save(); draw(); };
+}
+function setup() { draw(); }
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

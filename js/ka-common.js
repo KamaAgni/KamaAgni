@@ -11,7 +11,7 @@
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const names = () => { const c = LS.get('ka_couple', {}) || {}; return [c.p1 || 'Partner 1', c.p2 || 'Partner 2']; };
   const HEAT = [null, 'Sweet', 'Spicy', 'Wild'];
-  const heat = () => { const h = LS.get('ka_heat', 2); return h >= 1 && h <= 3 ? h : 2; };
+  const heat = () => { const h = LS.get('ka_heat', 3); return h >= 1 && h <= 3 ? h : 3; };
   const toast = m => (window.KA && KA.toast) ? KA.toast(m) : null;
   const fav = (type, text) => { if (window.KA && KA.saveFav) { KA.saveFav(type, text); toast('Saved to Saved Moments'); } };
 

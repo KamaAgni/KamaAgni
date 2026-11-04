@@ -12,7 +12,7 @@
     ['Play', [['🎮', 'All Games (pick for me)', 'play.html'], ['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Connection Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['⚔️', 'Seduction Showdown', G + 'kamaagni-showdown.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html'], ['🙋', 'Never Have I Ever', G + 'kamaagni-never-have-i-ever.html'], ['👉', "Who's Most Likely", G + 'kamaagni-whos-most-likely.html'], ['🔎', 'How Well Do You Know Me', G + 'kamaagni-know-me.html'], ['⏱️', 'Quick-Fire', G + 'kamaagni-quick-fire.html'], ['🎰', 'Intimate Bingo', G + 'kamaagni-bingo.html'], ['❌', 'Tic-Tac-Tease', G + 'kamaagni-tic-tac-tease.html'], ['🚪', 'Mystery Doors', G + 'kamaagni-mystery-doors.html'], ['🎟️', 'Scratch-Off Book', G + 'kamaagni-scratch-book.html']]],
     ['Rituals & plans', [['🧘', 'Connection Rituals', G + 'kamaagni-rituals.html'], ['🕯️', 'Date Night Kits', G + 'kamaagni-date-kits.html'], ['✍️', 'Our Own Cards', G + 'kamaagni-custom.html'], ['🍽️', 'Bedroom Menu', G + 'kamaagni-bedroom-menu.html'], ['🎁', 'Fantasy Box', G + 'kamaagni-fantasy-box.html'], ['🗺️', 'Body Map', G + 'kamaagni-body-map.html']]],
     ['Explore', [['🃏', 'Task Deck', G + 'kamaagni-task-deck.html'], ['⛓️', 'BDSM Journey', G + 'kamaagni-journey.html'], ['🏆', 'Challenges', G + 'kamaagni-challenges.html'], ['🎭', 'Roleplay Studio', G + 'kamaagni-roleplay.html'], ['🧭', 'Kink Explorer', G + 'kamaagni-kink-explorer.html'], ['🧘', 'Position Selector', G + 'intimacy_Position_Selector_page.html'], ['👄', 'Oral Selector', G + 'intimacy_Oral_Position_Selector_page.html']]],
-    ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['📅', 'Mission Week', G + 'kamaagni-mission-week.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
+    ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['🌱', '30-Day Spark', G + 'kamaagni-spark-challenge.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
     ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
   ];
   var NAV = [['🎮', 'Games', 'play.html'], ['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎉', 'Fun', G + 'kamaagni-fun.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html']];
@@ -47,10 +47,50 @@
     '#ka-ftr a{color:#a8bcd8;text-decoration:none;margin:0 8px;white-space:nowrap;font-weight:600}#ka-ftr a:hover{color:#f4a0ae}',
     '#ka-ftr .fs{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:11.5px}',
     '.kx-top{display:none!important}',
+    /* v43 comfort pass: finger-sized targets and readable small text on every page */
+    '.kh-logo{display:inline-flex;align-items:center;min-height:44px}',
+    '#kh-back{font-size:32px!important;font-weight:300;line-height:1;padding:0 10px;min-width:40px;margin-right:-4px}',
+    '#ka-ftr a{display:inline-flex;align-items:center;min-height:40px;padding:0 6px}',
+    '.kd-start{position:sticky;bottom:84px;z-index:30;padding:12px 0 6px;margin-left:-4px;background:linear-gradient(to top,rgba(10,8,20,.96) 70%,transparent)}',
+    '.kd-act{position:sticky;bottom:84px;z-index:40;padding:14px 0 8px;background:linear-gradient(to top,#07060f 65%,transparent)}',
+    '.kx-check{position:relative;width:28px;height:28px;min-width:0;min-height:0;align-self:center}.kx-check::after{content:"";position:absolute;inset:-9px}',
+    '.kx-chip,.card-tag,.gc .new,.gc .cont,.hub-chips .lbl,.gc .meta span,.gc .meta,.kx-sec,.kx-heat-lbl,.kd-all button,.kd-grp,.kd-cat em{font-size:12px!important}',
+    '.kd-all button,#kd-on,#kd-off,.cf-chip{min-height:36px;padding-left:12px;padding-right:12px}',
+    '.kx-note a{display:inline-block;padding:8px 0}',
+    'input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}',
+    'label:has(>input[type=checkbox]),label:has(>input[type=radio]){min-height:40px;display:inline-flex;align-items:center;gap:8px}',
+    ':focus-visible{outline:2px solid #ffb27a;outline-offset:2px}',
+    '@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}',
     '@media(max-width:480px){.kh-logo{font-size:14px}}'
   ].join('\n');
   doc.head.appendChild(css);
   root.classList.add('ka-chrome');
+  /* back button: go back if we came from this site, otherwise to the games hub */
+  (function () { var bk = doc.getElementById('kh-back'); if (!bk) return; bk.addEventListener('click', function (e) { try { if (document.referrer && new URL(document.referrer).origin === location.origin && history.length > 1) { e.preventDefault(); history.back(); } } catch (x) {} }); })();
+  /* keep the screen awake while playing (phones dim and lock mid-game otherwise) */
+  (function () {
+    if (!/\/games\//.test(location.pathname) || !navigator.wakeLock) return;
+    var lock = null;
+    function get() { if (document.visibilityState !== 'visible') return; navigator.wakeLock.request('screen').then(function (l) { lock = l; l.addEventListener('release', function () { lock = null; }); }, function () {}); }
+    document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible' && !lock) get(); });
+    window.addEventListener('pointerdown', function once() { window.removeEventListener('pointerdown', once, true); if (!lock) get(); }, true);
+    get();
+  })();
+  /* tick boxes without a name: make them real checkboxes for screen readers and keep aria-checked in sync */
+  (function () {
+    function fix(b) {
+      if (b.getAttribute('role') !== 'checkbox') b.setAttribute('role', 'checkbox');
+      b.setAttribute('aria-checked', b.classList.contains('on') ? 'true' : 'false');
+      if (!b.getAttribute('aria-label') || b.getAttribute('aria-label') === 'Toggle' || b.getAttribute('aria-label') === 'Tick') {
+        var it = b.parentNode && b.parentNode.querySelector('.kx-it'); var t = it ? it.textContent.trim().slice(0, 80) : '';
+        if (t) b.setAttribute('aria-label', t); else if (!b.getAttribute('aria-label')) b.setAttribute('aria-label', 'Mark done');
+      }
+    }
+    var pend = false;
+    function scan() { pend = false; var l = doc.querySelectorAll('.kx-check'); for (var i = 0; i < l.length; i++) fix(l[i]); }
+    new MutationObserver(function () { if (!pend) { pend = true; setTimeout(scan, 120); } }).observe(doc.documentElement, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    scan();
+  })();
   /* Velvet Night theme + motion kit, loaded last so every page shares one look */
   (function () { if (!doc.getElementById('ka-theme-css')) { var l = doc.createElement('link'); l.id = 'ka-theme-css'; l.rel = 'stylesheet'; l.href = BASE + 'css/ka-theme.css'; doc.head.appendChild(l); }
     var m = doc.createElement('script'); m.src = BASE + 'js/ka-motion.js'; m.defer = true; doc.head.appendChild(m);
@@ -59,7 +99,7 @@
   /* ---- header ---- */
   var hdr = doc.createElement('header'); hdr.id = 'ka-hdr'; hdr.setAttribute('role', 'banner');
   hdr.innerHTML = '<button class="kh-b" id="kh-menu" type="button" aria-label="Open menu">☰</button>' +
-    '<a class="kh-logo" href="' + u('index.html') + '">🔥 KAMAAGNI</a><span class="kh-sp"></span>' +
+    (/\/games\//.test(location.pathname) ? '<a class="kh-b" id="kh-back" href="' + u('play.html') + '" aria-label="Back to games" title="Back to games">‹</a>' : '') + '<a class="kh-logo" href="' + u('index.html') + '">🔥 KAMAAGNI</a><span class="kh-sp"></span>' +
     '<nav class="kh-nav" aria-label="Main">' + NAV.map(function (n) { return '<a class="kh-b' + (file === n[2].split('/').pop() ? ' on' : '') + '" href="' + u(n[2]) + '">' + n[0] + ' ' + n[1] + '</a>'; }).join('') + '</nav>' +
     '<a class="kh-b" id="kh-pt" href="' + u(G + 'kamaagni-together.html') + '" aria-label="Partner" style="display:none">💞<span class="kh-dot" id="kh-pd"></span></a>' +
     '<button class="kh-b" id="kh-acct" type="button" aria-label="Account"><span id="kh-ai">👤</span><span class="kh-dot" id="kh-ad"></span></button>';
@@ -95,7 +135,7 @@
       h += '<h2>Your KamaAgni account</h2><p>Sign in to keep your data on every device and link with your partner. Everything personal is encrypted on your device before it is uploaded.</p>' +
         '<div class="ka-tabs"><button data-t="in" class="' + (tab === 'in' ? 'on' : '') + '">Sign in</button><button data-t="up" class="' + (tab === 'up' ? 'on' : '') + '">Create account</button></div>' +
         '<input class="ka-in" id="ka-em" type="email" autocomplete="email" placeholder="Email"><input class="ka-in" id="ka-pw" type="password" autocomplete="' + (tab === 'in' ? 'current-password' : 'new-password') + '" placeholder="Password (8+ characters)">' +
-        '<div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-go">' + (tab === 'in' ? 'Sign in' : 'Create account') + '</button>' + (tab === 'in' ? '<button class="ka-bt g" id="ka-fp" style="margin-top:8px">Forgot password</button>' : '');
+        ((tab === 'up' && window.KA_CONFIG && KA_CONFIG.REQUIRE_INVITE) ? '<input class="ka-in" id="ka-iv" type="text" autocapitalize="characters" autocomplete="off" placeholder="Your invite code">' : '') + '<div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-go">' + (tab === 'in' ? 'Sign in' : 'Create account') + '</button>' + (tab === 'in' ? '<button class="ka-bt g" id="ka-fp" style="margin-top:8px">Forgot password</button>' : '');
     } else if (s.vault === 'new') {
       h += '<h2>Create your vault passphrase</h2><p>This passphrase encrypts your data before it leaves your device. <b style="color:#ffb089">We cannot reset it.</b> If you forget it, your cloud data cannot be recovered. Write it down somewhere safe.</p><input class="ka-in" id="ka-p1" type="password" autocomplete="new-password" placeholder="Passphrase (8+ characters)"><input class="ka-in" id="ka-p2" type="password" autocomplete="new-password" placeholder="Repeat passphrase"><div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-vk">Create vault</button><button class="ka-bt g" id="ka-so" style="margin-top:8px">Sign out</button>';
     } else if (s.vault === 'locked') {
@@ -115,7 +155,7 @@
     if (g('ka-go')) g('ka-go').onclick = function () {
       var em = g('ka-em').value.trim(), pw = g('ka-pw').value;
       if (!/^\S+@\S+\.\S+$/.test(em)) return msg('Enter a valid email.'); if (pw.length < 8) return msg('Password needs 8+ characters.');
-      busy(this, tab === 'in' ? C.signIn(em, pw) : C.signUp(em, pw)).then(function (r) { if (r && r.needsConfirm) { msg('Check your email to confirm, then sign in.', true); tab = 'in'; } else renderAcct(); }, function () {});
+      busy(this, tab === 'in' ? C.signIn(em, pw) : C.signUp(em, pw, g('ka-iv') ? g('ka-iv').value : '')).then(function (r) { if (r && r.needsConfirm) { msg('Check your email to confirm, then sign in.', true); tab = 'in'; } else renderAcct(); }, function () {});
     };
     if (g('ka-fp')) g('ka-fp').onclick = function () { var em = g('ka-em').value.trim(); if (!em) return msg('Enter your email first.'); C.resetPassword(em).then(function () { msg('Reset email sent (if the account exists).', true); }, function (e) { msg(e.message); }); };
     if (g('ka-vk')) g('ka-vk').onclick = function () {
@@ -129,7 +169,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v25</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v45</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */
@@ -221,3 +261,4 @@
 
   window.KA_CHROME = { openAccount: openAcct, MENU: MENU, notify: notify, describe: describe };
 })();
+

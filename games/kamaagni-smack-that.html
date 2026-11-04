@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Smack That</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.sm-wrap{display:flex;flex-direction:column;gap:10px;max-width:460px;margin:10px auto}.sm-pad{border-radius:22px;padding:26px 10px;font:700 20px Cinzel,serif;color:#fff;border:0;width:100%;-webkit-tap-highlight-color:transparent;touch-action:manipulation;user-select:none}
+.sm-pad.a{background:linear-gradient(135deg,#ff5d8f,#ff7a3d)}.sm-pad.b{background:linear-gradient(135deg,#8b6cff,#46d7c6);transform:rotate(180deg)}.sm-pad:active{filter:brightness(1.25);transform:scale(.98)}.sm-pad.b:active{transform:rotate(180deg) scale(.98)}
+.sm-mid{height:170px;display:flex;align-items:center;justify-content:center;font-size:84px;border-radius:24px;border:1px solid var(--kv-line2);background:var(--kv-glass);transition:box-shadow .15s}.sm-mid.hot{box-shadow:0 0 0 3px #ffb84d,0 0 40px rgba(255,140,60,.7);background:linear-gradient(135deg,rgba(255,93,143,.25),rgba(255,160,60,.25))}
+@keyframes smpop{0%{transform:scale(.4) rotate(-10deg);opacity:0}60%{transform:scale(1.15)}100%{transform:none;opacity:1}}.sm-mid span{animation:smpop .28s both}@media(prefers-reduced-motion:reduce){.sm-mid span{animation:none}}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let DK, S = null;
+const KEY = 'ka_sm_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+function pool(h) { const sel = new Set(S ? S.cats : []), out = []; DK.cats.forEach(c => { if (sel.has(c.id) && c.h <= (S ? S.heat : 2)) DK.items[c.id].forEach(t => out.push({t, h: c.h})); }); return out.length ? out : [{t: 'A slow kiss, however long you like.', h: 1}]; }
+const prize = (minH) => { const p = pool(), q = minH ? p.filter(x => x.h >= minH) : p; return pick(q.length ? q : p).t; };
+const bar = (chips) => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }});
+const catCfg = () => DK.cats.map(c => ({id: c.id, l: c.l, i: c.i, n: DK.items[c.id].length, h: c.h}));
+(async () => { try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; } setup(); })();
+const GUIDE = `<h3>The idea</h3><p>A reaction game for two on one phone. Lay it flat between you. Cards flip one after another. When the 🔥 card appears, be the first to smack your pad.</p><h3>Play</h3><ol><li>Normal cards: do nothing. Smack too early and you lose a point and owe your partner a kiss.</li><li>🔥 card: first to smack wins it and a reward card. Your partner does the reward for you.</li><li>The first to win the target number of 🔥 cards wins a final wish.</li></ol><p>Your pad is the one facing you: pink at the bottom, purple at the top.</p>`;
+let tm = 0, live = false, hot = false;
+const NORM = ['🍎','🌙','⭐','🍀','🦋','🎲','🫧','🪐'];
+function setup() { clearTimeout(tm); U.setup(app, {id: 'sm', title: 'Smack That', sub: 'Lay the phone flat. First to smack the 🔥 card wins a reward.', modes: ['one'], catsLabel: 'Reward categories', cats: catCfg(), guide: GUIDE, guideTitle: 'How to play', extras: [{id: 'goal', label: 'First to', opts: [[3, '3 cards'], [5, '5 cards'], [7, '7 cards']], def: 3}], startLabel: 'Get ready',
+  start: o => { S = {cats: o.cats, heat: o.heat, goal: +o.extras.goal, score: [0, 0], phase: 'ready', msg: ''}; save(); render(); }}); }
+function render() {
+  clearTimeout(tm); live = false; hot = false; if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Smack That</span></h1>' + bar([['👋 ' + esc(NM[0]) + ' ' + S.score[0], ''], ['👋 ' + esc(NM[1]) + ' ' + S.score[1], ''], ['first to ' + S.goal, '']]);
+  if (S.phase === 'prize') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: NM[S.who] + ' smacked it first', sub: NM[1 - S.who] + ' does this for ' + NM[S.who], text: S.pr, onDone: () => { if (S.score[S.who] >= S.goal) { S.phase = 'final'; S.fin = prize(2); } else S.phase = 'ready'; save(); render(); }}); return; }
+  if (S.phase === 'final') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: NM[S.who] + ' wins the game', sub: NM[1 - S.who] + ' gives the winner this wish', text: S.fin, doneLabel: 'Finish', onDone: () => { try { KA_TRACK.log('play', 'Smack That', ''); } catch (e) {} S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); return; }
+  app.innerHTML = head + '<div class="sm-wrap"><button class="sm-pad b" id="pb">' + esc(NM[1]) + ': SMACK</button><div class="sm-mid" id="mid"><span>' + (S.phase === 'ready' ? '👋' : '') + '</span></div><button class="sm-pad a" id="pa">' + esc(NM[0]) + ': SMACK</button></div><p class="kx-note" style="text-align:center" id="nt">' + esc(S.msg || 'Cards start in a moment. Wait for the 🔥.') + '</p>';
+  bindBar(); const mid = document.getElementById('mid'), nt = document.getElementById('nt');
+  const win = who => { if (!hot) return; hot = false; live = false; clearTimeout(tm); S.score[who]++; S.who = who; S.pr = prize(); S.phase = 'prize'; S.msg = ''; try { navigator.vibrate && navigator.vibrate([30, 40, 60]); KA_FX.clack(3); } catch (e) {} save(); render(); };
+  const early = who => { if (!live || hot) return; S.score[who] = Math.max(0, S.score[who] - 1); nt.textContent = NM[who] + ' smacked too early: -1 and a kiss for ' + NM[1 - who] + '.'; try { navigator.vibrate && navigator.vibrate(120); } catch (e) {} };
+  const tap = who => () => { if (hot) win(who); else early(who); };
+  document.getElementById('pa').onpointerdown = tap(0); document.getElementById('pb').onpointerdown = tap(1);
+  let n = 0, since = 0;
+  const flip = () => { if (!live) return; n++; since++; hot = false; mid.classList.remove('hot');
+    const isHot = n > 2 && (since >= 3 && Math.random() < .35 || since >= 7);
+    if (isHot) { since = 0; hot = true; mid.classList.add('hot'); mid.innerHTML = '<span>🔥</span>'; try { KA_FX.clack(2); } catch (e) {} tm = setTimeout(() => { hot = false; mid.classList.remove('hot'); nt.textContent = 'Too slow, both of you. Next card.'; flip(); }, 1700); }
+    else { mid.innerHTML = '<span>' + pick(NORM) + '</span>'; tm = setTimeout(flip, 1000 + Math.random() * 500); } };
+  if (S.phase === 'ready') { live = true; let c = 3; mid.innerHTML = '<span>' + c + '</span>'; const cd = () => { c--; if (c > 0) { mid.innerHTML = '<span>' + c + '</span>'; tm = setTimeout(cd, 800); } else { S.phase = 'run'; flip(); } }; tm = setTimeout(cd, 800); }
+}
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

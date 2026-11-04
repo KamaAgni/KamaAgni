@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Eight Dates</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.ed-i{display:block;width:100%;text-align:left;margin:8px 0;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04);color:inherit;font:inherit;cursor:pointer}.ed-i b{display:block;font-size:16px}.ed-i small{opacity:.75}.ed-i.ok{border-color:#7be0a6;background:rgba(123,224,166,.12)}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_8d_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const D = [["Trust", "Somewhere quiet where you can talk, like a favourite cafe or a park bench.", ["Tell each other one moment you felt completely safe with each other. Take 3 minutes.", "Share one thing that makes it hard for you to trust. Take 3 minutes each.", "Say one promise you want to keep this year. Take 2 minutes.", "Describe what you need from your partner when you feel insecure. Take 3 minutes each.", "Say thank you for one time they kept their word. Take 2 minutes."], "Do one small trustworthy thing for your partner this week and tell them about it."], ["Fun and Play", "A place that makes you laugh: a game cafe, a mini golf, a living room with board games.", ["Share the silliest memory you have of the two of you. Take 3 minutes.", "Each name one game you would like to play more. Take 2 minutes.", "Describe how you like to be teased, and where your limit is. Take 3 minutes.", "Plan one playful surprise for the other this month. Take 3 minutes.", "Do a 2-minute dance, no matter how ridiculous."], "Schedule one playful hour this week."], ["Money and Life", "A calm dinner or a long walk.", ["Share what money meant in the home you grew up in. Take 3 minutes each.", "Say what you want to save or spend on in the next year. Take 3 minutes.", "Describe a financial worry and what would help. Take 3 minutes each.", "Agree on one money habit you will both try. Take 3 minutes.", "Say what 'enough' looks like for you. Take 2 minutes."], "Set a 20-minute money check-in for later this month."], ["Closeness and Intimacy", "A private space, candlelight and soft music.", ["Say what makes you feel most desired. Take 3 minutes each.", "Share one thing you wish we did more often. Take 3 minutes each.", "Describe a moment of intimacy you remember fondly. Take 3 minutes.", "Say one thing you would like to try, and one you would rather skip. Take 3 minutes each.", "Share a kiss that lasts for a full minute."], "Choose one thing from tonight to try in the next two weeks."], ["Family and Roots", "A walk, or a family photo album at home.", ["Tell a story about your family that shaped who you are. Take 3 minutes each.", "Say what you want to keep from how you grew up and what you want to change. Take 3 minutes each.", "Describe what you want your home to feel like. Take 3 minutes.", "Talk about how you handle visits and holidays. Take 3 minutes.", "Say one thing you admire in your partner's family. Take 2 minutes."], "Call or message someone in each of your families this week and say thank you."], ["Conflict and Repair", "A comfortable place with no distractions.", ["Name one thing we argue about and how it starts. Take 3 minutes.", "Describe how you feel when we argue and what you need. Take 3 minutes each.", "Agree on a signal that means 'let us pause'. Take 2 minutes.", "Say one thing you could do to repair after a fight. Take 3 minutes.", "Apologise for one thing from the past, and accept one apology. Take 3 minutes."], "Try the pause signal the next time things get tense."], ["Adventure", "Somewhere new: a different suburb, a hike, a market.", ["Share one adventure you would love to have together. Take 3 minutes.", "Say what scares you about trying something new and what would help. Take 3 minutes each.", "Pick a small adventure to do within the next month. Take 3 minutes.", "Describe the best trip you have shared. Take 3 minutes.", "Take a photo of the two of you, wherever you are."], "Book the adventure before you go to sleep."], ["Dreams and Future", "A rooftop, a beach or a quiet evening walk.", ["Describe the life you would like in five years. Take 3 minutes each.", "Say one dream you have never told anyone. Take 3 minutes.", "Describe what you want from our relationship in the next year. Take 3 minutes each.", "Share what you are proud of in us. Take 3 minutes.", "Write one shared goal on paper and sign it together. Take 2 minutes."], "Put the goal somewhere you will both see it."]];
+const load = () => (LS.get(KEY, null) || {done: []});
+function setup() {
+  const st = load(); S = null;
+  app.innerHTML = '<h1 class="kx-title"><span>Eight Dates</span></h1><p class="kx-sub">Eight conversations for a lifetime of love. Take one date at a time. ' + st.done.length + '/8 done.</p>' + D.map((d, i) => '<button class="ed-i ' + (st.done.includes(i) ? 'ok' : '') + '" data-i="' + i + '"><b>' + (st.done.includes(i) ? '✓ ' : '') + (i + 1) + '. ' + esc(d[0]) + '</b><small>' + esc(d[1]) + '</small></button>').join('');
+  app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { S = {d: +b.dataset.i, i: 0}; render(); });
+}
+function render() {
+  const d = D[S.d], head = '<h1 class="kx-title"><span>Date ' + (S.d + 1) + ': ' + esc(d[0]) + '</span></h1>' + U.bar([[S.i < d[2].length ? 'Question ' + (S.i + 1) + '/' + d[2].length : 'Wrap up', '']], {guide: 0, quit: 1});
+  app.innerHTML = head + '<div id="pf"></div>'; U.bindBar(app, {quit: () => { KA_PERF.stop(); setup(); }});
+  if (S.i < d[2].length) KA_PERF.show(document.getElementById('pf'), {badge: 'Talk', sub: d[1], text: d[2][S.i], doneLabel: 'Next', onDone: () => { S.i++; render(); }});
+  else KA_PERF.show(document.getElementById('pf'), {badge: 'This week', sub: 'Your homework', text: d[3], doneLabel: 'Mark date done', onDone: () => { const st = load(); if (!st.done.includes(S.d)) st.done.push(S.d); try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} try { KA_TRACK.log('play', 'Eight Dates', d[0]); } catch (e) {} window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); setup(); }});
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

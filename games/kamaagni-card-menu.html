@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Card Menu</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.cm-tabs{display:flex;gap:8px;overflow-x:auto;margin:10px 0}.cm-tabs button{flex:none}.cm-row{display:flex;gap:10px;align-items:flex-start;margin:8px 0}.cm-row .kc{flex:none;width:44px;height:62px;font-size:16px}.cm-row textarea{flex:1;min-height:62px;border-radius:12px;border:1px solid var(--kv-line2);background:rgba(255,255,255,.05);color:var(--kv-ink);font:inherit;font-size:14px;padding:8px 10px;resize:vertical}
+@media print{body{background:#fff!important;color:#000!important}.kx-row,.kd-bar,header,footer,nav,.cm-tabs,#kf-v,.no-print{display:none!important}.cm-row textarea{border:1px solid #999;color:#000;background:#fff}}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_cardmenu_page';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+const GUIDE = '';
+let tier = 'romantic';
+function setup() { render(); }
+function render() {
+  const cu = C.custom(), T = C.TIERS.find(t => t.id === tier);
+  app.innerHTML = '<h1 class="kx-title"><span>Card Menu</span></h1><p class="kx-sub">Every card in a 52-card deck gets an activity, in four tiers. Card games like Go Bleep Yourself, Crazy Sex, Snap Heat and Tied Up use these. Change any line to make it yours, or print it and write on real cards.</p>' +
+    '<div class="cm-tabs">' + C.TIERS.map(t => '<button class="kx-btn ' + (t.id === tier ? 'gold' : 'ghost') + '" data-t="' + t.id + '">' + t.i + ' ' + t.l + '</button>').join('') + '</div>' +
+    '<div class="kx-card" data-nofx="1">' + C.RK.map((r, i) => '<div class="cm-row"><div class="kc ' + (i % 2 ? 'red' : '') + '"><b>' + r + '</b><span>' + (i % 2 ? '♥' : '♠') + '</span></div><textarea data-r="' + i + '" aria-label="Activity for ' + r + '">' + esc((cu[tier] && cu[tier][i]) || C.MENU[tier][i]) + '</textarea></div>').join('') +
+    '<p class="kx-note">The same activity applies to all four suits of a rank. Changes save on this device and sync if you are signed in.</p><div class="kx-row"><button class="kx-btn ghost" id="rs">Reset this tier</button><button class="kx-btn ghost" id="pr">🖨️ Print</button></div></div>';
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tier = b.dataset.t; render(); });
+  app.querySelectorAll('textarea').forEach(a => a.oninput = () => { const c = C.custom(); c[tier] = c[tier] || {}; c[tier][a.dataset.r] = a.value; try { localStorage.setItem('ka_cardmenu', JSON.stringify(c)); } catch (e) {} });
+  document.getElementById('rs').onclick = () => { const c = C.custom(); delete c[tier]; try { localStorage.setItem('ka_cardmenu', JSON.stringify(c)); } catch (e) {} render(); };
+  document.getElementById('pr').onclick = () => window.print();
+}
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

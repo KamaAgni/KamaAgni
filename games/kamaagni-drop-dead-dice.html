@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Drop Dead Dice</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.dd-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:16px 0}.dd{width:62px;height:62px;border-radius:14px;background:linear-gradient(145deg,#fff,#e8e2ef);color:#2a1233;display:flex;align-items:center;justify-content:center;font-size:44px;box-shadow:0 8px 18px rgba(0,0,0,.45);transition:transform .2s}
+.dd.drop{background:linear-gradient(145deg,#ff9ab0,#e8446a);color:#fff;transform:translateY(8px) scale(.9)}.dd.roll{animation:ddshake .12s infinite}@keyframes ddshake{0%{transform:rotate(-12deg) translateY(-6px)}50%{transform:rotate(10deg) translateY(2px)}100%{transform:rotate(-8deg) translateY(-4px)}}
+.dd-sc{display:flex;justify-content:center;gap:22px;font:700 15px Cinzel,serif;margin:6px 0}@media(prefers-reduced-motion:reduce){.dd.roll{animation:none}}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let DK, S = null;
+const KEY = 'ka_dd_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+function pool(h) { const sel = new Set(S ? S.cats : []), out = []; DK.cats.forEach(c => { if (sel.has(c.id) && c.h <= (S ? S.heat : 2)) DK.items[c.id].forEach(t => out.push({t, h: c.h})); }); return out.length ? out : [{t: 'A slow kiss, however long you like.', h: 1}]; }
+const prize = (minH) => { const p = pool(), q = minH ? p.filter(x => x.h >= minH) : p; return pick(q.length ? q : p).t; };
+const bar = (chips) => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }});
+const catCfg = () => DK.cats.map(c => ({id: c.id, l: c.l, i: c.i, n: DK.items[c.id].length, h: c.h}));
+(async () => { try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; } setup(); })();
+const GUIDE = `<h3>The idea</h3><p>Based on the dice game Drop Dead. Roll five dice. Every 2 or 5 is a "drop": you pay a forfeit. The other dice add to your score. Forfeits get more intense as the rounds go on.</p><h3>Play</h3><ol><li>Take turns rolling all five dice.</li><li>Each 2 or 5 is a drop. Your partner gets a forfeit from you (the first is a clothing item if that is switched on).</li><li>Add up the dice that did not drop. That is your score for the turn.</li><li>After the last round the higher score wins a final wish from the other player.</li></ol><p>Timed forfeits start their timer by themselves after a moment to read.</p>`;
+const SYM = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+function setup() { U.setup(app, {id: 'dd', title: 'Drop Dead Dice', sub: 'Roll five dice. Every 2 or 5 is a drop that costs a forfeit.', modes: ['one'], catsLabel: 'Forfeit categories', cats: catCfg(), guide: GUIDE, guideTitle: 'How to play', extras: [{id: 'rounds', label: 'Rounds each', opts: [[3, '3 (quick)'], [5, '5 (classic)'], [7, '7 (long)']], def: 5}, {id: 'strip', label: 'First drop each turn', opts: [['on', 'Take off an item'], ['off', 'Always a forfeit card']], def: 'on'}], startLabel: 'Roll the dice',
+  start: o => { S = {cats: o.cats, heat: o.heat, rounds: +o.extras.rounds, strip: o.extras.strip === 'on', round: 1, turn: 0, score: [0, 0], phase: 'roll', dice: [], drops: [], todo: [], msg: ''}; save(); render(); }}); }
+const tier = () => Math.min(3, 1 + Math.floor((S.round - 1) / Math.max(1, S.rounds / 3)));
+function forfeit(i) { if (i === 0 && S.strip) return 'Take off one item of clothing, slowly. If you are down to your last, pick a kiss instead.'; const p = pool().filter(x => x.h <= tier()); const hi = p.filter(x => x.h === tier()); return pick(hi.length ? hi : p).t; }
+function render() {
+  if (!S) return setup(); const t = S.turn;
+  const head = '<h1 class="kx-title"><span>Drop Dead Dice</span></h1>' + bar([['🎲 ' + esc(NM[0]) + ' ' + S.score[0], t === 0 ? 'h2' : ''], ['🎲 ' + esc(NM[1]) + ' ' + S.score[1], t === 1 ? 'h2' : ''], ['round ' + Math.min(S.round, S.rounds) + '/' + S.rounds, '']]);
+  const diceHTML = (cls) => '<div class="dd-row">' + (S.dice.length ? S.dice : [0, 0, 0, 0, 0]).map(d => '<div class="dd ' + (cls || (d === 2 || d === 5 ? 'drop' : '')) + '">' + (SYM[d] || '·') + '</div>').join('') + '</div>';
+  if (S.phase === 'forfeit') { const f = S.todo[0]; app.innerHTML = head + diceHTML() + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: 'Forfeit for ' + NM[t] + ' (' + (S.drops.length - S.todo.length + 1) + ' of ' + S.drops.length + ')', sub: NM[t] + ' performs it for ' + NM[1 - t], text: f, onDone: () => { S.todo.shift(); if (!S.todo.length) next(); save(); render(); }}); return; }
+  if (S.phase === 'final') { const w = S.score[0] === S.score[1] ? -1 : (S.score[0] > S.score[1] ? 0 : 1); app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: w < 0 ? 'A tie. You both win' : NM[w] + ' wins with ' + S.score[w], sub: w < 0 ? 'Each of you picks a wish for the other' : NM[1 - w] + ' gives the winner this wish', text: S.fin, doneLabel: 'Finish', onDone: () => { try { KA_TRACK.log('play', 'Drop Dead Dice', ''); } catch (e) {} S = null; try { localStorage.removeItem(KEY); } catch (e) {} setup(); }}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); return; }
+  app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kd-turn p' + t + '"><i></i>' + esc(NM[t]) + ', your roll</div>' + diceHTML() + '<p class="kx-muted" id="nt">' + esc(S.msg || 'Every 2 and 5 is a drop.') + '</p><button class="kx-btn gold" id="rl">🎲 Roll</button></div>'; bindBar();
+  document.getElementById('rl').onclick = e => { e.target.disabled = true; const row = app.querySelector('.dd-row'); row.querySelectorAll('.dd').forEach(d => d.classList.add('roll')); let k = 0; try { KA_FX.shuffle(); } catch (x) {}
+    const iv = setInterval(() => { row.querySelectorAll('.dd').forEach(d => d.textContent = SYM[1 + Math.floor(Math.random() * 6)]); if (++k >= 10) { clearInterval(iv); settle(); } }, 80); };
+}
+function next() { if (S.turn === 0) S.turn = 1; else { S.turn = 0; S.round++; if (S.round > S.rounds) { S.phase = 'final'; S.fin = prize(2); return; } } S.phase = 'roll'; }
+function settle() { S.dice = Array.from({length: 5}, () => 1 + Math.floor(Math.random() * 6)); const drops = S.dice.filter(d => d === 2 || d === 5).length, sum = S.dice.filter(d => d !== 2 && d !== 5).reduce((a, b) => a + b, 0);
+  S.score[S.turn] += sum; S.drops = Array.from({length: Math.min(drops, 3)}, (_, i) => i); S.todo = S.drops.map(i => forfeit(i)); S.msg = NM[S.turn] + ' scored ' + sum + (drops ? ' and dropped ' + drops : ' with no drops');
+  try { KA_FX.clack(3); navigator.vibrate && navigator.vibrate(20); } catch (e) {}
+  if (drops) { S.phase = 'forfeit'; save(); const head = app.querySelector('.dd-row'); head.outerHTML = '<div class="dd-row">' + S.dice.map(d => '<div class="dd ' + (d === 2 || d === 5 ? 'drop' : '') + '">' + SYM[d] + '</div>').join('') + '</div>'; setTimeout(render, 1400); }
+  else { next(); save(); app.querySelector('.dd-row').outerHTML = '<div class="dd-row">' + S.dice.map(d => '<div class="dd">' + SYM[d] + '</div>').join('') + '</div>'; document.getElementById('nt').textContent = S.msg + '. Clean roll!'; setTimeout(render, 1600); } }
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

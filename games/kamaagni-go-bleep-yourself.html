@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Go Bleep Yourself</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.gb-ask{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}.gb-ask button{min-width:54px}.gb-sets{font-size:13px;color:var(--kv-mute);text-align:center;margin-top:8px}
+@keyframes gbshake{0%,100%{transform:none}20%{transform:translateX(-10px) rotate(-3deg)}40%{transform:translateX(10px) rotate(3deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}.gb-bleep{font:800 30px Cinzel,serif;color:#ff6a8f;animation:gbshake .6s both;margin:14px 0}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_gby_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+const GUIDE = `<h3>The idea</h3><p>Go Fish with a twist. Ask your partner for a card to make pairs. If they have it, they hand it over. If not, they tell you to Go Bleep Yourself.</p><h3>Play</h3><ol><li>The phone gets passed. Only the player whose turn it is sees their hand.</li><li>Ask for a rank you hold. If your partner has it, they tap the card to hand it over, and you ask again.</li><li>If the two cards are opposite colours (red and black), your partner performs that rank's activity right away. Same colour: you simply keep the pair.</li><li>No luck: your partner says Go Bleep Yourself and you draw a card. Then it's their turn.</li><li>Most pairs wins a final wish.</li></ol>`;
+const RKH = r => C.RK[r];
+function pairUp(i) { let again = true; while (again) { again = false; const h = S.hands[i]; for (let a = 0; a < h.length && !again; a++) for (let b = a + 1; b < h.length; b++) if (h[a].r === h[b].r) { S.sets[i].push([h[a], h[b]]); S.hands[i] = h.filter((_, k) => k !== a && k !== b); again = true; break; } } }
+function setup() { U.setup(app, {id: 'gby', title: 'Go Bleep Yourself', sub: 'Go Fish for couples. Ask, pair up, and perform.', modes: ['one'], catsLabel: 'Intensity tiers', cats: C.cats(), guide: GUIDE, guideTitle: 'How to play', extras: tierExtras, startLabel: 'Deal the cards',
+  start: o => { let t = tierList(o.cats); if (o.extras.x === 'one') t = [t[0]]; const d = C.shuffle(C.deck()); S = {tiers: t, heat: o.heat, hands: [d.splice(0, 7), d.splice(0, 7)], pile: d, sets: [[], []], turn: 0, phase: 'gateA', ask: null, msg: ''}; pairUp(0); pairUp(1); save(); render(); }}); }
+const prog = () => Math.min(.99, (S.sets[0].length + S.sets[1].length) / 26);
+function finish() { const a = S.sets[0].length, b = S.sets[1].length, w = a === b ? -1 : a > b ? 0 : 1; Object.assign(S, {phase: 'perform', final: 1, badge: w < 0 ? 'A tie. You both win' : NM[w] + ' wins with ' + Math.max(a, b) + ' pairs', sub: w < 0 ? 'Each of you picks a wish for the other' : NM[1 - w] + ' gives the winner this wish', text: wishText()}); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 40}); save(); render(); }
+function render() {
+  if (!S) return setup(); const t = S.turn, o = 1 - t;
+  const head = '<h1 class="kx-title"><span>Go Bleep Yourself</span></h1>' + bar([['🃏 ' + esc(NM[0]) + ' ' + S.sets[0].length + ' pairs', t === 0 ? 'h2' : ''], ['🃏 ' + esc(NM[1]) + ' ' + S.sets[1].length + ' pairs', t === 1 ? 'h2' : ''], ['🂠 ' + S.pile.length + ' in pile', '']]);
+  const card = h => '<div class="kx-card" data-nofx="1" style="text-align:center">' + h + '</div>';
+  const gate = (who, msg, label, next) => { app.innerHTML = head + card('<div class="kx-turn">Pass the phone</div><div class="kx-big" style="margin:10px auto">' + esc(NM[who]) + '</div><p class="kx-muted">' + msg + '</p><button class="kx-btn gold" id="g">' + label + '</button>'); bindBar(); document.getElementById('g').onclick = () => { S.phase = next; save(); render(); }; };
+  const hand = (i, ok) => '<div class="kc-hand">' + S.hands[i].slice().sort((a, b) => a.r - b.r).map(c => C.face(c, (ok === undefined ? '' : ok(c) ? 'ok' : 'dim') + (ok ? ' tap' : ''))).join('') + '</div>';
+  if (S.phase === 'perform') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: S.badge, sub: S.sub, text: S.text, doneLabel: S.final ? 'Finish' : undefined, onDone: () => { if (S.final) { try { KA_TRACK.log('play', 'Go Bleep Yourself', ''); } catch (e) {} clear(); setup(); return; } S.phase = 'gateA'; save(); render(); }}); return; }
+  if (S.phase === 'gateA') {
+    if (!S.hands[t].length && S.pile.length) { S.hands[t] = S.pile.splice(0, Math.min(3, S.pile.length)); pairUp(t); }
+    if (!S.hands[t].length || (!S.hands[0].length && !S.hands[1].length)) return finish();
+    return gate(t, esc(NM[o]) + ', look away.', 'I am ' + esc(NM[t]) + '. Show my hand', 'ask'); }
+  if (S.phase === 'ask') { const ranks = [...new Set(S.hands[t].map(c => c.r))].sort((a, b) => a - b);
+    app.innerHTML = head + card('<div class="kx-turn">' + esc(NM[t]) + ', your turn</div>' + hand(t) + '<p class="kx-muted">' + esc(S.msg || 'Ask your partner for a rank you hold.') + '</p><div class="gb-ask">' + ranks.map(r => '<button class="kx-btn gold" data-r="' + r + '">' + RKH(r) + '</button>').join('') + '</div><div class="gb-sets">Pairs so far: ' + (S.sets[t].map(p => RKH(p[0].r)).join(' ') || 'none') + '</div>'); bindBar(); S.msg = '';
+    app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { S.ask = +b.dataset.r; S.phase = 'gateB'; save(); render(); }); return; }
+  if (S.phase === 'gateB') return gate(o, esc(NM[t]) + ' is asking for a <b>' + RKH(S.ask) + '</b>. ' + esc(NM[t]) + ', look away.', 'I am ' + esc(NM[o]) + '. Show my hand', 'reply');
+  if (S.phase === 'reply') { const has = S.hands[o].some(c => c.r === S.ask);
+    app.innerHTML = head + card('<div class="kx-turn">' + esc(NM[o]) + ', do you have a ' + RKH(S.ask) + '?</div>' + hand(o, c => c.r === S.ask) + (has ? '<p class="kx-muted">Tap the card to hand it over.</p>' : '<p class="kx-muted">No ' + RKH(S.ask) + '. Tell them.</p><button class="kx-btn gold" id="bl">Go Bleep Yourself!</button>')); bindBar();
+    app.querySelectorAll('.kc.tap.ok').forEach((el, k) => el.onclick = () => { const give = S.hands[o].find(c => c.r === S.ask), mine = S.hands[t].find(c => c.r === S.ask); S.hands[o] = S.hands[o].filter(c => c !== give); S.hands[t] = S.hands[t].filter(c => c !== mine); S.sets[t].push([mine, give]); try { KA_FX.clack(2); } catch (e) {}
+      const opp = C.red(mine) !== C.red(give); pairUp(t);
+      if (opp) Object.assign(S, {phase: 'perform', badge: NM[o] + ' hands over a ' + C.lab(give) + ' (opposite colours)', sub: NM[o] + ' performs this for ' + NM[t] + ', then ' + NM[t] + ' asks again', text: actFor(give, prog())}); else { S.phase = 'gateA'; S.msg = 'Same colours: you keep the pair. Ask again.'; } save(); render(); });
+    const bl = document.getElementById('bl'); if (bl) bl.onclick = () => { S.phase = 'bleep'; save(); render(); }; return; }
+  if (S.phase === 'bleep') { const dr = S.pile.shift(); if (dr) { S.hands[t].push(dr); pairUp(t); } app.innerHTML = head + card('<div class="gb-bleep">Go Bleep Yourself!</div><p class="kx-muted">' + esc(NM[t]) + ' draws a card from the pile' + (dr ? '.' : ', but the pile is empty.') + '</p><p class="kx-muted">Now it is ' + esc(NM[o]) + "'s turn.</p>"); bindBar(); try { navigator.vibrate && navigator.vibrate([60, 40, 60]); KA_FX.clack(3); } catch (e) {} S.turn = o; S.phase = 'gateA'; save();
+    const nx = document.createElement('div'); app.appendChild(nx); setTimeout(() => { if (S && S.phase === 'gateA') render(); }, 2600); return; }
+}
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

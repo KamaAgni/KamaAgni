@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Position Families</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.pf-i{margin:8px 0;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04)}.pf-i b{display:block;font-size:16px}.pf-i small{display:block;opacity:.8;margin:4px 0}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_pf_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const F = [["Twining", "💞", 1, "Bodies wrapped close, face to face, with arms and legs intertwined. It is slow, intimate and made for kissing.", "Wrap legs around each other and keep your foreheads touching. Move in small, slow rocks rather than big thrusts.", "Use a pillow under the hips for comfort."], ["Open", "🌸", 2, "One partner lies back with the legs open or raised, giving the other easy access and a clear view of each other.", "Keep eye contact and stay in charge of the angle with your hands. Raise or lower the legs to change the feel.", "Put a pillow beneath the lower back."], ["Rising", "⬆️", 2, "The receiving partner lifts the hips or legs, changing the angle and depth.", "Lift slowly and hold, then release. Use a pillow or the other's hands as support.", "Stop if the lower back or hips feel strained."], ["Pressed", "🤍", 2, "Close and compact: the legs are drawn up or folded, so bodies press together and everything feels tighter.", "Go very slowly. The compact shape makes tiny movements feel big.", "Stretch the hips beforehand."], ["Animal-inspired", "🐆", 3, "Rear-facing or all-fours positions named after animals in the old texts. They give freedom of movement and a different feel.", "Use pillows under the knees and chest. Let the receiving partner set the depth with their hips.", "Check in often, since the face-away angle hides expressions."], ["On Top", "👑", 2, "The receiving partner is above, in charge of rhythm, depth and angle, and the other can watch and touch.", "Lean forward for kisses or sit up to change the angle. The partner below keeps hands free to caress.", "Rest the hands on the other's chest for balance."], ["Equal", "⚖️", 2, "Neither partner is above or below. Side by side, seated or kneeling, with both free to move and touch.", "Face each other and share the rhythm. Slow your breathing together.", "Choose a soft surface for the knees."]], CF = ["Use a pillow or folded towel to lift the hips.", "Keep lubricant within reach.", "Check in with a quick 'is this good?'.", "Move slowly into any position and stop if something pinches.", "Try a position for a few minutes, then switch.", "Hold hands or keep eye contact to stay connected."];
+const GUIDE = `<h3>The idea</h3><p>The old Kama Sutra sorts positions into families. This page explains each family in plain words, then deals you a family for the night with a comfort tip and a timer.</p><p class="kx-note">Go at your own pace. If anything hurts, change position or stop.</p>`;
+let run = null;
+function setup() {
+  if (run) { app.innerHTML = '<h1 class="kx-title"><span>Position Families</span></h1><div id="pf"></div>'; KA_PERF.show(document.getElementById('pf'), {badge: run.t, sub: 'Position of the night', text: run.x, doneLabel: 'Done', onDone: () => { run = null; setup(); }}); return; }
+  const h = (window.KX && KX.heat) ? KX.heat() : 3;
+  app.innerHTML = '<h1 class="kx-title"><span>Position Families</span></h1><p class="kx-sub">Seven families from the old texts, explained simply.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="dr">Deal me a family</button></div>' + F.filter(f => f[2] <= h).map(f => '<div class="pf-i"><b>' + f[1] + ' ' + esc(f[0]) + '</b><small>' + esc(f[3]) + '</small><small><em>Try:</em> ' + esc(f[4]) + '</small><small><em>Comfort:</em> ' + esc(f[5]) + '</small></div>').join('') + '<div class="kx-sec">General comfort tips</div>' + CF.map(c => '<p class="kx-muted">• ' + esc(c) + '</p>').join('');
+  document.getElementById('dr').onclick = () => { const f = pick(F.filter(f => f[2] <= h)); run = {t: f[0], x: f[4] + ' Take 4 minutes. ' + f[5]}; try { KA_TRACK.log('play', 'Position Families', f[0]); } catch (e) {} setup(); };
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

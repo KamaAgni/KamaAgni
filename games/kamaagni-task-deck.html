@@ -44,7 +44,7 @@
     app.innerHTML = top('Task Deck', 'Pick the packs you both want, then draw. Pass or stop any time.') + `<div id="hb"></div>
       <input class="kx-input" id="q" type="search" placeholder="Search packs (e.g. bondage, public, roleplay)">
       <div class="kx-list" id="pk"></div>
-      <div class="kx-row" style="margin-top:16px"><button class="kx-btn" id="go">🃏 Draw a task</button><button class="kx-btn ghost" id="all">🎲 Surprise me (all packs)</button><button class="kx-btn ghost" id="dly">📆 Task of the day</button></div><div id="dtask"></div>
+      <div class="kd-act"><button class="kx-btn" id="go">🃏 Draw a task</button></div><div class="kx-row"><button class="kx-btn ghost" id="all">🎲 Surprise me (all packs)</button><button class="kx-btn ghost" id="dly">📆 Task of the day</button></div><div id="dtask"></div>
       <p class="kx-note">Agree on a safe word before starting. Anything you don't both want, pass.</p>`;
     heatBar(document.getElementById('hb'), setup);
     const vis = packs.map(p => ({p, n: p.lazy ? (p.heat <= h || h === 3 ? p.count : 0) : p.items.filter(x => ih(p, x) <= h).length}))
@@ -56,7 +56,9 @@
       return head + `<label class="kx-item" style="cursor:pointer"><input type="checkbox" data-p="${p.id}" ${st.sel.includes(p.id) ? 'checked' : ''} style="width:20px;height:20px;accent-color:#e8637a">
         <span class="kx-it"><b>${esc(p.label)}</b> <span class="kx-chip h${p.heat}">${HEAT[p.heat]}</span><br><span class="kx-muted">${esc(p.desc)} · ${n} tasks · ${d} done</span></span></label>`; }).join('') || '<p class="kx-muted kx-center">No packs match.</p>';
     const q = document.getElementById('q'); q.value = query; q.oninput = e => { query = e.target.value.trim().toLowerCase(); const pos = e.target.selectionStart; setup(); const q2 = document.getElementById('q'); q2.focus(); q2.setSelectionRange(pos, pos); };
-    document.getElementById('pk').onchange = e => { const id = e.target.dataset.p; st.sel = st.sel.filter(x => x !== id); if (e.target.checked) st.sel.push(id); save(); };
+    const cnt = () => { const g = document.getElementById('go'); if (g) g.textContent = '🃏 Draw a task' + (st.sel.length ? ' · ' + st.sel.length + (st.sel.length === 1 ? ' pack' : ' packs') : ''); };
+    cnt();
+    document.getElementById('pk').onchange = e => { const id = e.target.dataset.p; st.sel = st.sel.filter(x => x !== id); if (e.target.checked) st.sel.push(id); save(); cnt(); };
     document.getElementById('all').onclick = async () => { const b = document.getElementById('all'); b.textContent = 'Shuffling…'; st.sel = packs.filter(p => (p.lazy ? p.heat <= heat() : true)).map(p => p.id); save(); await ensure(st.sel); draw(); };
     document.getElementById('dly').onclick = async () => {
       await ensure(st.sel); const pl = pool(), box = document.getElementById('dtask');
@@ -90,7 +92,7 @@
     document.getElementById('skip').onclick = draw;
     document.getElementById('sv').onclick = e => { KX.fav('cards', fill(c.t)); e.target.textContent = '♥'; };
     document.getElementById('packs').onclick = setup;
-    const tm = document.getElementById('tm'); if (tm) tm.onclick = () => window.KA && KA.timer(m ? +m[1] * 60 : +ms[1], c.p.label);
+    const tm = document.getElementById('tm'); if (tm) { tm.onclick = () => window.KA && KA.timer(m ? +m[1] * 60 : +ms[1], c.p.label); window.KA_AUTO && KA_AUTO.lead(tm, c.t); }
   }
   setup();
 })();

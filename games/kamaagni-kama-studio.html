@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Kama Sutra Studio</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>.ks-t{display:flex;gap:8px;justify-content:center;margin:10px 0}.ks-t button{padding:8px 14px;border-radius:99px;border:1px solid rgba(255,255,255,.2);background:transparent;color:inherit;font:inherit;cursor:pointer}.ks-t button.on{border-color:var(--gold);color:var(--gold)}.ks-i{margin:8px 0;padding:12px;border-radius:14px;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.04)}.ks-i b{display:block;font-size:16px}.ks-i small{display:block;opacity:.75;margin-top:2px}.ks-i button{margin-top:8px}</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_ks_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const EMB = [["Touching", "A first-meeting embrace. Stand side by side and let your arms or bodies brush lightly, as if by accident.", "Stand close, brush arms and hands, and hold the contact for a minute."], ["Piercing", "One partner leans in and the other lowers their head to meet them, a gentle, longing embrace.", "Take a minute to lean into each other, foreheads touching."], ["Rubbing", "Two bodies pass slowly, rubbing against each other with warmth and clothes or skin.", "Spend a minute walking past each other slowly and brushing each time."], ["Pressing", "One partner presses the other softly against a wall or pillow, with a firm hold.", "Hold each other close against a wall or pillow for a minute."], ["The Creeper", "One wraps around the other like a vine, arms and a leg, and pulls in for a kiss.", "One partner wraps around the other and kisses them for a full minute."], ["Climbing the Tree", "One partner places a foot on the other's foot and reaches up to kiss them.", "Stand on your partner's feet and share a long kiss."], ["Sesame and Rice", "Lying side by side, intertwine arms and legs so tightly it is hard to tell where each begins.", "Lie together and entwine arms and legs for two minutes."], ["Milk and Water", "The final embrace: two bodies melt together, as though nothing could separate them.", "Hold each other without moving for two minutes and breathe together."]], KIS = [["The Nominal", "A soft, light touch of the lips, almost a question.", "Give each other four soft kisses, lips only."], ["The Throbbing", "One partner kisses softly while the other answers with a gentle pulse of the lips.", "Take turns being the one who leads, for one minute each."], ["The Touching", "Lips lightly touch, and the tongue is invited to flirt.", "Share a kiss that begins with the tip of the tongue, soft and slow."], ["The Straight", "Two mouths meet directly, face to face.", "Kiss face to face, hands on each other's cheeks, for one minute."], ["The Bent", "Heads tilt towards each other, lips pressed, a classic deep kiss.", "Kiss with your heads tilted, hands on the back of the neck, for a minute."], ["The Turned", "One partner turns the other's face gently and kisses from the side.", "Turn your partner's face and kiss from the side for one minute."], ["The Pressed", "Lips are pressed more firmly, a kiss with more weight.", "Take turns pressing lips more firmly. Keep this up for a minute."], ["The Greatly Pressed", "A long, deep kiss, the lower lip held between yours.", "Share a long kiss that lasts two minutes without stopping."]], ARTS = [["Music", "Pick a song that says how you feel about your partner and sing, hum or play it for them. Take 3 minutes."], ["Dance", "Dance together to one song, as close as you can get. Take 3 minutes."], ["Poetry", "Write a short poem about your partner and read it aloud. Take 4 minutes."], ["Perfume", "Choose a scent for your partner. Apply a little to their neck and wrist, and tell them why. Take 2 minutes."], ["Cooking", "Prepare a small sweet or sensual snack together. Feed each other. Take 5 minutes."], ["Dress", "Choose an outfit for each other from what you own. Take 5 minutes to dress up."], ["Massage", "Give your partner a 3-minute hand and shoulder massage."], ["Games", "Play a quick game with a small bet: loser gives the winner a kiss. Take 4 minutes."], ["Conversation", "Share a story from your life that your partner has never heard. Take 3 minutes."], ["Drawing", "Draw a quick portrait of your partner, however bad it is. Take 4 minutes."], ["Flowers", "Arrange a small flower display, or pick one flower and give it with a compliment. Take 3 minutes."], ["Riddles", "Take turns telling riddles or jokes, and kiss every time someone laughs. Take 3 minutes."], ["Mimicry", "Act out a scene from a film and let your partner guess it. Take 3 minutes."], ["Bathing", "Share a warm bath or shower, taking turns to wash each other. Take 5 minutes."], ["Hair", "Brush, braid or comb your partner's hair slowly. Take 3 minutes."], ["Costume", "Pick an imaginary character and play it for one whole minute. Take 3 minutes."]];
+let tab = 'emb', run = null;
+function setup() {
+  if (run) { app.innerHTML = '<h1 class="kx-title"><span>Kama Sutra Studio</span></h1><div id="pf"></div>'; KA_PERF.show(document.getElementById('pf'), {badge: run.badge, sub: run.sub, text: run.text, doneLabel: 'Done', onDone: () => { run = null; setup(); }}); return; }
+  const list = tab === 'emb' ? EMB : tab === 'kis' ? KIS : null;
+  let h = '<h1 class="kx-title"><span>Kama Sutra Studio</span></h1><p class="kx-sub">Eight embraces, eight kisses and an evening of arts. Inspired by the old tradition, written fresh.</p><div class="ks-t"><button data-t="emb" class="' + (tab === 'emb' ? 'on' : '') + '">Embraces</button><button data-t="kis" class="' + (tab === 'kis' ? 'on' : '') + '">Kisses</button><button data-t="art" class="' + (tab === 'art' ? 'on' : '') + '">Evening arts</button></div>';
+  if (list) h += list.map((x, i) => '<div class="ks-i"><b>' + (i + 1) + '. ' + esc(x[0]) + '</b><small>' + esc(x[1]) + '</small><button class="kx-btn ghost" data-r="' + i + '">Try it</button></div>').join('');
+  else h += '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Evening of arts</div><p class="kx-muted">The old texts list 64 arts a cultured couple should enjoy together. Draw one for tonight.</p><div class="kx-row" style="justify-content:center;margin-top:10px"><button class="kx-btn gold" id="dr">Draw an art</button></div></div>';
+  app.innerHTML = h;
+  app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; setup(); });
+  app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { const x = list[+b.dataset.r]; run = {badge: x[0], sub: tab === 'emb' ? 'Embrace' : 'Kiss', text: x[2]}; setup(); });
+  const dr = document.getElementById('dr'); if (dr) dr.onclick = () => { const x = pick(ARTS); run = {badge: x[0], sub: 'Art of the evening', text: x[1]}; try { KA_TRACK.log('play', 'Kama Sutra Studio', x[0]); } catch (e) {} setup(); };
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

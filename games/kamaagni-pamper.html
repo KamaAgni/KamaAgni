@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#07060f"/>
+<meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Pamper Prelude</title>
+<link rel="stylesheet" href="../css/fonts.css"/>
+<link rel="stylesheet" href="../css/premium.css"/>
+<link rel="stylesheet" href="../css/ka-shared.css"/>
+<style></style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-data.js"></script>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-ui.js"></script>
+<script src="../js/ka-perform.js"></script>
+<script src="../js/ka-cards.js"></script>
+<script>
+(() => {
+'use strict';
+const {esc, shuffle, LS, pick} = KX, U = KA_UI, C = KA_CARDS, app = document.getElementById('app');
+const cp = LS.get('ka_couple', {}) || {}, NM = [cp.p1 || 'Partner 1', cp.p2 || 'Partner 2'];
+let S = null;
+const KEY = 'ka_pp_v1';
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
+const clear = () => { S = null; try { localStorage.removeItem(KEY); } catch (e) {} };
+const bar = chips => U.bar(chips, {guide: 1, quit: 1});
+const bindBar = () => U.bindBar(app, {guide: GUIDE, guideTitle: 'How to play', quit: () => { KA_PERF.stop(); clear(); setup(); }});
+const tiersOf = () => (S && S.tiers) || ['romantic'];
+const actFor = (card, p) => C.act(C.tierAt(tiersOf(), p == null ? 0 : p), card.r);
+const wishText = () => C.act(tiersOf()[tiersOf().length - 1], 12);
+const tierExtras = [{id: 'x', label: 'Intensity', opts: [['one', 'Stay on the first tier'], ['up', 'Climb tier by tier']], def: 'up'}];
+const tierList = sel => { const order = C.TIERS.map(t => t.id).filter(id => sel.includes(id)); return order.length ? order : ['romantic']; };
+
+const PP = [["Warm Bath", "Run a warm bath or shower for two. Take turns washing each other's back and hair. Take 5 minutes."], ["Hair Time", "Brush or comb your partner's hair slowly, or dry it with a towel. Take 3 minutes."], ["Face Care", "Apply a face mask or moisturiser to your partner, gently and slowly. Take 3 minutes."], ["Hand Cream", "Warm some hand cream and massage your partner's hands for 3 minutes."], ["Foot Soak", "Soak your partner's feet in warm water and dry them with a towel. Take 4 minutes."], ["Scent Choice", "Pick a scent for your partner and apply a little to their neck and wrists. Take 2 minutes."], ["Choose the Outfit", "Pick something for your partner to wear tonight and help them put it on. Take 3 minutes."], ["Shave or Trim", "Offer to help with shaving or trimming, with care and a steady hand. Take 5 minutes."], ["Towel Wrap", "Wrap your partner in a warm towel and hold them for a minute."], ["Lotion Down", "Rub body lotion across your partner's shoulders, arms and back. Take 4 minutes."], ["Mood Setting", "Set the room together: candles, music, clean sheets. Take 3 minutes."], ["Toast", "Pour a drink, toast to each other, and say one thing you are looking forward to. Take 2 minutes."]];
+const GUIDE = `<h3>The idea</h3><p>Before the night begins, spend time pampering each other. Baths, scents, outfits and hand cream turn getting ready into foreplay. Each step starts its own timer after a short reading pause.</p>`;
+function setup() { U.setup(app, {id: 'pp', title: 'Pamper Prelude', sub: 'Get ready together. Bath, scent, hair and a slow build-up.', modes: ['one'], catsLabel: 'Pampering', cats: [{id: 'a', l: 'Everything', i: '🛁', n: PP.length, h: 1}], guide: GUIDE, guideTitle: 'How to play', startLabel: 'Begin',
+  extras: [{id: 'n', label: 'Steps', opts: [[4, '4 (quick)'], [6, '6'], [8, '8 (full)']], def: 4}],
+  start: o => { S = {plan: shuffle(PP).slice(0, +o.extras.n), i: 0}; save(); render(); }}); }
+function render() {
+  if (!S) return setup();
+  const head = '<h1 class="kx-title"><span>Pamper Prelude</span></h1>' + bar([['Step ' + Math.min(S.i + 1, S.plan.length) + '/' + S.plan.length, '']]);
+  if (S.i >= S.plan.length) { app.innerHTML = head + '<div class="kx-card" data-nofx="1" style="text-align:center"><div class="kx-turn">Fresh and ready</div><p class="kx-big" style="margin:12px 0">Take your partner by the hand. The night is yours.</p><div class="kx-row" style="justify-content:center"><button class="kx-btn gold" id="fin">Finish</button></div></div>'; bindBar(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); document.getElementById('fin').onclick = () => { try { KA_TRACK.log('play', 'Pamper Prelude', ''); } catch (e) {} clear(); setup(); }; return; }
+  const s = S.plan[S.i]; app.innerHTML = head + '<div id="pf"></div>'; bindBar();
+  KA_PERF.show(document.getElementById('pf'), {badge: s[0], sub: NM[S.i % 2] + ' pampers ' + NM[1 - S.i % 2], text: s[1], onDone: () => { S.i++; save(); render(); }});
+}
+
+setup();
+})();
+</script>
+<script src="../js/ka-features.js"></script>
+<script src="../js/app-shell.js"></script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

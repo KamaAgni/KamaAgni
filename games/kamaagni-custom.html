@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head>
-  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+  <script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-dedup.js"></script><script src="../js/ka-fx.js"></script>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <meta name="theme-color" content="#07060f"/>
@@ -50,7 +50,7 @@ function render() {
     const ls = app.querySelector('#ta').value.split('\n').map(x => x.trim()).filter(Boolean).slice(0, 100);
     if (!ls.length) return; const bad = (cur === 'wyp' && ls.some(l => !l.includes('|'))) || (cur === 'know' && ls.some(l => l.split('|').length < 3));
     if (bad) { toast('Check the format shown above'); return; }
-    KA_CUSTOM.set(cur, [...list, ...ls].slice(0, 300)); toast('Added ' + ls.length); render();
+    KA_DEDUP.guard(ls, list, add => { if (!add.length) { toast('Nothing new to add, the site already has these'); return; } KA_CUSTOM.set(cur, [...list, ...add].slice(0, 300)); toast('Added ' + add.length); render(); });
   };
   app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const a = KA_CUSTOM.get(cur); a.splice(+b.dataset.d, 1); KA_CUSTOM.set(cur, a); render(); });
 }
