@@ -229,3 +229,12 @@ Page titles no longer have a dash after KamaAgni.
 
 ## v47
 Oral Position Selector: the Alt image set now has a name per position ("NN - Name.jpg"); names show on the result, grid and modal when the Alt images are on. Mapping ships in KamaAgni-OralPositions-Alt.zip (positions.json).
+
+## v48
+Position Selector: the Sex Position Alt image set now has a name per position ("NNN - Name.jpg"); names show on the result, grid and modal when Alt images are on. Mapping/duplicates report ship in KamaAgni-Positions-Alt.zip.
+
+## v49
+Fixes: Position Selector toggles drew as big circles (global checkbox sizing hit the hidden switch inputs); image popup now sizes to the screen and clears the header and dock; the PIN is only asked for when none is set on the device for this account, not on every sign-in (change it any time from Settings).
+
+## v50
+Position Selector: the base "Sex Position" folder can now use the same "NNN - Name.jpg" names as Alt (falls back to the old numbered names until renamed).

@@ -57,8 +57,8 @@
     '.kx-chip,.card-tag,.gc .new,.gc .cont,.hub-chips .lbl,.gc .meta span,.gc .meta,.kx-sec,.kx-heat-lbl,.kd-all button,.kd-grp,.kd-cat em{font-size:12px!important}',
     '.kd-all button,#kd-on,#kd-off,.cf-chip{min-height:36px;padding-left:12px;padding-right:12px}',
     '.kx-note a{display:inline-block;padding:8px 0}',
-    'input[type=checkbox],input[type=radio]{min-width:22px;min-height:22px}',
-    'label:has(>input[type=checkbox]),label:has(>input[type=radio]){min-height:40px;display:inline-flex;align-items:center;gap:8px}',
+    'input[type=checkbox]:not(.filter-toggle):not(.folder-toggle),input[type=radio]{min-width:22px;min-height:22px}',
+    'label:has(>input[type=checkbox]):not(.toggle-switch),label:has(>input[type=radio]){min-height:40px;display:inline-flex;align-items:center;gap:8px}',
     ':focus-visible{outline:2px solid #ffb27a;outline-offset:2px}',
     '@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}',
     '@media(max-width:480px){.kh-logo img{height:17px}}'
@@ -169,7 +169,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v47</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v50</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */

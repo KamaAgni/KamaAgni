@@ -613,7 +613,7 @@
       justify-content: center;
       align-items: center;
       z-index: 1000;
-      padding: 20px;
+      padding: 64px 12px 84px;   /* clear of the site header and bottom dock */
       backdrop-filter: blur(4px);
     }
     .modal-overlay.open { display: flex; }
@@ -633,8 +633,10 @@
       position: relative;
       touch-action: pan-y;
       animation: modalIn 0.3s cubic-bezier(0.22,1,0.36,1);
-      max-height: 92vh;
+      max-height: calc(100vh - 148px);
+      max-height: calc(100dvh - 148px);
       overflow-y: auto;
+      overscroll-behavior: contain;
     }
 
     .modal-close-btn {
@@ -675,7 +677,8 @@
 
     .modal-image-wrap {
       width: 100%;
-      height: 440px;
+      height: clamp(200px, 50vh, 560px);
+      height: clamp(200px, 50dvh, 560px);
       background: var(--bg);
       border-radius: 12px;
       overflow: hidden;
@@ -747,13 +750,22 @@
     @media (max-width: 640px) {
       :root { --dice-size: 70px; }
       .result-image-wrap { height: 300px; }
-      .modal-image-wrap  { height: 250px; }
-      .modal-nav-btn.prev { left: -8px; }
-      .modal-nav-btn.next { right: -8px; }
+      .modal-card { padding: 16px; border-radius: 16px; }
+      .modal-image-wrap  { height: clamp(200px, 50dvh, 520px); }
+      .modal-details h3 { font-size: 22px; }
+      .modal-nav-btn.prev { left: -4px; }
+      .modal-nav-btn.next { right: -4px; }
       .data-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
       .result-actions { flex-direction: column; align-items: stretch; }
       .result-actions .btn { max-width: 100%; }
       .modal-actions { flex-direction: column; }
+    }
+
+    @media (max-height: 520px) {
+      .modal-overlay { padding: 58px 64px 10px; }
+      .modal-card { max-height: calc(100dvh - 68px); }
+      .modal-image-wrap { height: 44dvh; margin-bottom: 10px; }
+      .modal-actions { flex-direction: row; }
     }
 
     @media (max-width: 480px) {

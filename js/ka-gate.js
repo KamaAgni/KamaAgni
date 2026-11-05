@@ -48,6 +48,8 @@
       var p = mode === 'in' ? KA_CLOUD.signIn(em, pw) : KA_CLOUD.signUp(em, pw, q('kgi') ? q('kgi').value : '');
       p.then(function (r) {
         if (r && r.needsConfirm) { b.disabled = false; q('kgn').textContent = 'Check your email to confirm, then sign in.'; mode = 'up'; q('kgm').click(); return; }
+        var rec = get('ka_gpin'), u = uid();   /* PIN is set once per device, not on every sign-in */
+        if (rec && u && rec.u === u) { openSession(); next(); return; }
         pinSetup(function () { openSession(); next(); });
       }, function (e) { b.disabled = false; err((e && e.message) || 'That did not work.'); });
     };
