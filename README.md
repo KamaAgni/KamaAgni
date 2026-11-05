@@ -238,3 +238,6 @@ Fixes: Position Selector toggles drew as big circles (global checkbox sizing hit
 
 ## v50
 Position Selector: the base "Sex Position" folder can now use the same "NNN - Name.jpg" names as Alt (falls back to the old numbered names until renamed).
+
+## v51
+Position and Oral selectors: names show whether or not the Alt/filter set is on; position numbers shown from #001 (match the file numbers). Oral page now includes the owner-edited version with the base-folder name fallback.
