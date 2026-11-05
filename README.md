@@ -223,3 +223,9 @@ Page titles no longer have a dash after KamaAgni.
 
 ### v45: PDF reader
 - The first page now renders straight away instead of sitting blank, unrendered pages show a "loading" shimmer, a page that fails to load can be tapped to retry, and the reader reopens a book at the page you reached.
+
+### v46: new logo
+- The KamaAgni wordmark is now a vector logo in `assets/logo/` (`kamaagni-logo.svg`, plus transparent PNGs at 1024, 2048 and 4096 px wide, and a 1024 px square "K" icon). It is used in the header, the home screen, the sign-in and PIN screens, and the app icons.
+
+## v47
+Oral Position Selector: the Alt image set now has a name per position ("NN - Name.jpg"); names show on the result, grid and modal when the Alt images are on. Mapping ships in KamaAgni-OralPositions-Alt.zip (positions.json).

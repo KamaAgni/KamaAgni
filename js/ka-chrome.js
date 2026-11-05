@@ -48,7 +48,7 @@
     '#ka-ftr .fs{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:999px;border:1px solid rgba(255,255,255,.12);font-size:11.5px}',
     '.kx-top{display:none!important}',
     /* v43 comfort pass: finger-sized targets and readable small text on every page */
-    '.kh-logo{display:inline-flex;align-items:center;min-height:44px}',
+    '.kh-logo{display:inline-flex;align-items:center;min-height:44px}.kh-logo img{height:19px;width:auto;display:block;background:none}',
     '#kh-back{font-size:32px!important;font-weight:300;line-height:1;padding:0 10px;min-width:40px;margin-right:-4px}',
     '#ka-ftr a{display:inline-flex;align-items:center;min-height:40px;padding:0 6px}',
     '.kd-start{position:sticky;bottom:84px;z-index:30;padding:12px 0 6px;margin-left:-4px;background:linear-gradient(to top,rgba(10,8,20,.96) 70%,transparent)}',
@@ -61,7 +61,7 @@
     'label:has(>input[type=checkbox]),label:has(>input[type=radio]){min-height:40px;display:inline-flex;align-items:center;gap:8px}',
     ':focus-visible{outline:2px solid #ffb27a;outline-offset:2px}',
     '@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}',
-    '@media(max-width:480px){.kh-logo{font-size:14px}}'
+    '@media(max-width:480px){.kh-logo img{height:17px}}'
   ].join('\n');
   doc.head.appendChild(css);
   root.classList.add('ka-chrome');
@@ -99,7 +99,7 @@
   /* ---- header ---- */
   var hdr = doc.createElement('header'); hdr.id = 'ka-hdr'; hdr.setAttribute('role', 'banner');
   hdr.innerHTML = '<button class="kh-b" id="kh-menu" type="button" aria-label="Open menu">☰</button>' +
-    (/\/games\//.test(location.pathname) ? '<a class="kh-b" id="kh-back" href="' + u('play.html') + '" aria-label="Back to games" title="Back to games">‹</a>' : '') + '<a class="kh-logo" href="' + u('index.html') + '">🔥 KAMAAGNI</a><span class="kh-sp"></span>' +
+    (/\/games\//.test(location.pathname) ? '<a class="kh-b" id="kh-back" href="' + u('play.html') + '" aria-label="Back to games" title="Back to games">‹</a>' : '') + '<a class="kh-logo" href="' + u('index.html') + '" aria-label="KamaAgni home"><img src="' + u('assets/logo/kamaagni-logo.svg') + '" alt="KamaAgni" width="120" height="18"></a><span class="kh-sp"></span>' +
     '<nav class="kh-nav" aria-label="Main">' + NAV.map(function (n) { return '<a class="kh-b' + (file === n[2].split('/').pop() ? ' on' : '') + '" href="' + u(n[2]) + '">' + n[0] + ' ' + n[1] + '</a>'; }).join('') + '</nav>' +
     '<a class="kh-b" id="kh-pt" href="' + u(G + 'kamaagni-together.html') + '" aria-label="Partner" style="display:none">💞<span class="kh-dot" id="kh-pd"></span></a>' +
     '<button class="kh-b" id="kh-acct" type="button" aria-label="Account"><span id="kh-ai">👤</span><span class="kh-dot" id="kh-ad"></span></button>';
@@ -169,7 +169,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v45</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v47</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */

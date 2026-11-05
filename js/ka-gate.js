@@ -10,6 +10,8 @@
   var css = document.createElement('style');
   css.textContent = '.kg{position:fixed;inset:0;z-index:2147483600;background:#05060f;display:flex;align-items:center;justify-content:center;padding:20px}.kg-c{max-width:420px;width:100%;background:#0c0e1c;border:1px solid rgba(255,255,255,.15);border-radius:22px;padding:26px 22px;text-align:center;color:#dce9ff;font-family:"DM Sans",system-ui,sans-serif}.kg-c h2{font-family:Cinzel,serif;font-size:24px;margin:0 0 10px;color:#f4a0ae}.kg-c p{font-size:14px;line-height:1.6;color:#a8bcd8;margin:0 0 14px}.kg-c input{width:100%;box-sizing:border-box;background:#12152a;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px;color:#dce9ff;font:inherit;margin-bottom:10px}.kg-c input.pin{text-align:center;letter-spacing:.5em;font-size:24px}.kg-b{display:block;width:100%;padding:13px;border-radius:999px;border:0;background:linear-gradient(135deg,#e8637a,#f07090);color:#fff;font:inherit;font-weight:700;cursor:pointer;margin-top:6px;min-height:46px}.kg-b.g{background:transparent;border:1px solid rgba(255,255,255,.15);color:#a8bcd8}.kg-e{color:#ff9aa8;font-size:13px;min-height:18px;margin:0 0 6px}.kg-l{background:none;border:0;color:#a8bcd8;text-decoration:underline;cursor:pointer;font:inherit;font-size:13px;margin-top:10px}';
   document.head.appendChild(css);
+  var BASE = (function () { var s = document.querySelector('script[src*="ka-gate.js"]'); return ((s && s.getAttribute('src')) || 'js/ka-gate.js').replace(/js\/ka-gate\.js.*$/, ''); })();
+  var LOGO = '<img src="' + BASE + 'assets/logo/kamaagni-logo.svg" alt="KamaAgni" style="height:30px;width:auto;margin:0 auto 14px;display:block">';
   function unhide() { var x = document.getElementById('ka-hide'); if (x) x.remove(); }
   function box(html) { var o = document.querySelector('.kg'); if (o) o.remove(); var d = document.createElement('div'); d.className = 'kg'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-modal', 'true'); d.innerHTML = '<div class="kg-c">' + html + '</div>'; document.body.appendChild(d); unhide(); var i = d.querySelector('input'); if (i) try { i.focus(); } catch (e) {} return d; }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
@@ -36,7 +38,7 @@
   /* ---- screens ---- */
   function loginScreen(note) {
     var inv = !!CFG.REQUIRE_INVITE, mode = 'in';
-    var d = box('<h2>Welcome back 🔥</h2><p id="kgn">' + esc(note || 'Sign in to open KamaAgni.') + '</p><input id="kge" type="email" autocomplete="username" placeholder="Email"><input id="kgp" type="password" autocomplete="current-password" placeholder="Password">' + (inv ? '<input id="kgi" type="text" autocapitalize="characters" placeholder="Invite code (new accounts only)" style="display:none">' : '') + '<div class="kg-e" id="kgx"></div><button class="kg-b" id="kgs">Sign in</button><button class="kg-l" id="kgm">New here? Create an account</button> <button class="kg-l" id="kgf">Forgot password</button>');
+    var d = box(LOGO + '<h2>Welcome back</h2><p id="kgn">' + esc(note || 'Sign in to open KamaAgni.') + '</p><input id="kge" type="email" autocomplete="username" placeholder="Email"><input id="kgp" type="password" autocomplete="current-password" placeholder="Password">' + (inv ? '<input id="kgi" type="text" autocapitalize="characters" placeholder="Invite code (new accounts only)" style="display:none">' : '') + '<div class="kg-e" id="kgx"></div><button class="kg-b" id="kgs">Sign in</button><button class="kg-l" id="kgm">New here? Create an account</button> <button class="kg-l" id="kgf">Forgot password</button>');
     var q = function (id) { return d.querySelector('#' + id); }, err = function (m) { q('kgx').textContent = m || ''; };
     q('kgm').onclick = function () { mode = mode === 'in' ? 'up' : 'in'; q('kgs').textContent = mode === 'in' ? 'Sign in' : 'Create account'; q('kgm').textContent = mode === 'in' ? 'New here? Create an account' : 'Have an account? Sign in'; if (q('kgi')) q('kgi').style.display = mode === 'up' ? '' : 'none'; q('kgp').autocomplete = mode === 'in' ? 'current-password' : 'new-password'; err(''); };
     q('kgf').onclick = function () { var em = q('kge').value.trim(); if (!em) return err('Type your email first.'); KA_CLOUD.resetPassword(em).then(function () { err(''); q('kgn').textContent = 'Check your email for a reset link.'; }, function (e) { err(e.message || 'Could not send the email.'); }); };
@@ -53,7 +55,7 @@
   }
   function pinSetup(done, optional) {
     if (!subtle) return done();
-    var d = box('<h2>Set a PIN</h2><p>Choose 4 to 8 digits. If you were using KamaAgni in the last hour, the PIN is all you need to carry on.</p><input class="pin" id="kg1" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="PIN"><input class="pin" id="kg2" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="Again"><div class="kg-e" id="kgx"></div><button class="kg-b" id="kgok">Save PIN</button>' + (optional ? '<button class="kg-b g" id="kgcx">Cancel</button>' : ''));
+    var d = box(LOGO + '<h2>Set a PIN</h2><p>Choose 4 to 8 digits. If you were using KamaAgni in the last hour, the PIN is all you need to carry on.</p><input class="pin" id="kg1" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="PIN"><input class="pin" id="kg2" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="Again"><div class="kg-e" id="kgx"></div><button class="kg-b" id="kgok">Save PIN</button>' + (optional ? '<button class="kg-b g" id="kgcx">Cancel</button>' : ''));
     if (optional) d.querySelector('#kgcx').onclick = function () { d.remove(); };
     var go = function () {
       var a = d.querySelector('#kg1').value, b = d.querySelector('#kg2').value, e = d.querySelector('#kgx');
@@ -79,7 +81,7 @@
     d.querySelector('#kgok').onclick = go; d.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(); });
   }
   function pinScreen() {
-    var d = box('<h2>Enter your PIN</h2><p>Welcome back. Enter your PIN to pick up where you left off.</p><input class="pin" id="kg1" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="••••"><div class="kg-e" id="kgx"></div><button class="kg-b" id="kgok">Unlock</button><button class="kg-l" id="kgpw">Use email and password instead</button>');
+    var d = box(LOGO + '<h2>Enter your PIN</h2><p>Welcome back. Enter your PIN to pick up where you left off.</p><input class="pin" id="kg1" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" placeholder="••••"><div class="kg-e" id="kgx"></div><button class="kg-b" id="kgok">Unlock</button><button class="kg-l" id="kgpw">Use email and password instead</button>');
     var tries = 0, e = d.querySelector('#kgx'), inp = d.querySelector('#kg1');
     var full = function (why) { closeSession(); KA_CLOUD.signOut().catch(function () {}).then(function () { loginScreen(why); }); };
     d.querySelector('#kgpw').onclick = function () { full('Sign in with your email and password.'); };

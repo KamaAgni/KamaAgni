@@ -1037,7 +1037,16 @@ function getImageFolder() {
   return document.body.classList.contains('alt-images') ? ALT_FOLDER : BASE_FOLDER;
 }
 
+/* Names for the Alt folder: files are "NN - Name.jpg" */
+const ALT_NAMES = [{"n": "All You Can Eat", "f": "01 - All You Can Eat.jpg"}, {"n": "The Wash 'N' Blow", "f": "02 - The Wash N Blow.jpg"}, {"n": "The Cannoli", "f": "03 - The Cannoli.jpg"}, {"n": "Blind Man's Muff", "f": "04 - Blind Mans Muff.jpg"}, {"n": "Put You on a Pedestal", "f": "05 - Put You on a Pedestal.jpg"}, {"n": "Pumping Petrol", "f": "06 - Pumping Petrol.jpg"}, {"n": "Sweet Spot", "f": "07 - Sweet Spot.jpg"}, {"n": "Australian for Sex", "f": "08 - Australian for Sex.jpg"}, {"n": "The Bird Feeder", "f": "09 - The Bird Feeder.jpg"}, {"n": "Chasing the Cat", "f": "10 - Chasing the Cat.jpg"}, {"n": "Seat of Honor", "f": "11 - Seat of Honor.jpg"}, {"n": "Downtown Girl", "f": "12 - Downtown Girl.jpg"}, {"n": "A Bridge to Pleasure", "f": "13 - A Bridge to Pleasure.jpg"}, {"n": "Speaking in Tongues", "f": "14 - Speaking in Tongues.jpg"}, {"n": "Appealing to Your Target Market", "f": "15 - Appealing to Your Target Market.jpg"}, {"n": "Getting the Memo", "f": "16 - Getting the Memo.jpg"}, {"n": "Love Slave", "f": "17 - Love Slave.jpg"}, {"n": "Nose to the Grindstone", "f": "18 - Nose to the Grindstone.jpg"}, {"n": "Take It Sitting Down", "f": "19 - Take It Sitting Down.jpg"}, {"n": "The Ben Dover", "f": "20 - The Ben Dover.jpg"}, {"n": "The Circle of Pleasure", "f": "21 - The Circle of Pleasure.jpg"}, {"n": "Kiss My...", "f": "22 - Kiss My.jpg"}, {"n": "O Marks the Spot", "f": "23 - O Marks the Spot.jpg"}, {"n": "Mistress May I?", "f": "24 - Mistress May I.jpg"}, {"n": "The Shrieking Monkey", "f": "25 - The Shrieking Monkey.jpg"}, {"n": "Dinner for Two", "f": "26 - Dinner for Two.jpg"}, {"n": "Dinner for One", "f": "27 - Dinner for One.jpg"}, {"n": "Last Licks", "f": "28 - Last Licks.jpg"}, {"n": "Oral Obedience", "f": "29 - Oral Obedience.jpg"}, {"n": "Sitting Pretty", "f": "30 - Sitting Pretty.jpg"}, {"n": "Bottoms Up", "f": "31 - Bottoms Up.jpg"}, {"n": "The Deep \"C\" Dive", "f": "32 - The Deep C Dive.jpg"}, {"n": "BJ and the Bare", "f": "33 - BJ and the Bare.jpg"}, {"n": "Bridge Diving", "f": "34 - Bridge Diving.jpg"}, {"n": "Blind Faith", "f": "35 - Blind Faith.jpg"}, {"n": "The Lick and Lift", "f": "36 - The Lick and Lift.jpg"}, {"n": "The Hot Pretzel", "f": "37 - The Hot Pretzel.jpg"}, {"n": "Southern Exposure", "f": "38 - Southern Exposure.jpg"}, {"n": "The Busy Bee", "f": "39 - The Busy Bee.jpg"}, {"n": "Lady and the Clamp", "f": "40 - Lady and the Clamp.jpg"}, {"n": "Sensational Sunrise", "f": "41 - Sensational Sunrise.jpg"}, {"n": "Play Ball!", "f": "42 - Play Ball.jpg"}, {"n": "The Whipped-y Nine", "f": "43 - The Whipped-y Nine.jpg"}, {"n": "The Circus", "f": "44 - The Circus.jpg"}, {"n": "The Handstand", "f": "45 - The Handstand.jpg"}, {"n": "The Watcher", "f": "46 - The Watcher.jpg"}, {"n": "Crouching Tiger", "f": "47 - Crouching Tiger.jpg"}, {"n": "The Dirty Turtle", "f": "48 - The Dirty Turtle.jpg"}, {"n": "Ball Game", "f": "49 - Ball Game.jpg"}, {"n": "Cup", "f": "50 - Cup.jpg"}, {"n": "The Flat Back", "f": "51 - The Flat Back.jpg"}, {"n": "Two-Timing", "f": "52 - Two-Timing.jpg"}, {"n": "Heels Over Head", "f": "53 - Heels Over Head.jpg"}, {"n": "Holdover", "f": "54 - Holdover.jpg"}, {"n": "Gold Standard", "f": "55 - Gold Standard.jpg"}, {"n": "Vice Grips", "f": "56 - Vice Grips.jpg"}, {"n": "Out of Sight", "f": "57 - Out of Sight.jpg"}, {"n": "Head Rush", "f": "58 - Head Rush.jpg"}, {"n": "Double Dare", "f": "59 - Double Dare.jpg"}, {"n": "The Chin Rest", "f": "60 - The Chin Rest.jpg"}, {"n": "Two-4-One", "f": "61 - Two-4-One.jpg"}, {"n": "Mutual of O", "f": "62 - Mutual of O.jpg"}, {"n": "Sword Swallower", "f": "63 - Sword Swallower.jpg"}, {"n": "Sidewinder", "f": "64 - Sidewinder.jpg"}, {"n": "Lazy 69", "f": "65 - Lazy 69.jpg"}, {"n": "The Tipster", "f": "66 - The Tipster.jpg"}, {"n": "The Cheerleader", "f": "67 - The Cheerleader.jpg"}, {"n": "Chair Tryst", "f": "68 - Chair Tryst.jpg"}, {"n": "Driver's Seat", "f": "69 - Drivers Seat.jpg"}, {"n": "Straddle Up", "f": "70 - Straddle Up.jpg"}, {"n": "69 Massage", "f": "71 - 69 Massage.jpg"}, {"n": "Hula Girl", "f": "72 - Hula Girl.jpg"}, {"n": "Spider", "f": "73 - Spider.jpg"}, {"n": "Sweet Seat", "f": "74 - Sweet Seat.jpg"}, {"n": "Launch Pad", "f": "75 - Launch Pad.jpg"}, {"n": "The Pin-Up", "f": "76 - The Pin-Up.jpg"}, {"n": "The Ball Bob", "f": "77 - The Ball Bob.jpg"}, {"n": "World's Strongest", "f": "78 - Worlds Strongest.jpg"}, {"n": "Up Against the Wall", "f": "79 - Up Against the Wall.jpg"}, {"n": "69 Back", "f": "80 - 69 Back.jpg"}, {"n": "Kissing the Pink", "f": "81 - Kissing the Pink.jpg"}, {"n": "Dirty Doggy", "f": "82 - Dirty Doggy.jpg"}, {"n": "Dining at the Y", "f": "83 - Dining at the Y.jpg"}, {"n": "Back Bend", "f": "84 - Back Bend.jpg"}];
+function posName(posId) {
+  const a = ALT_NAMES[posId];
+  return a ? a.n : '';
+}
 function imagePathFor(posId) {
+  if (document.body.classList.contains('alt-images') && ALT_NAMES[posId]) {
+    return `${ALT_FOLDER}/${ALT_NAMES[posId].f}`;
+  }
   return `${getImageFolder()}/Oral Sex Position (${posId + 1}).jpg`;
 }
 
@@ -1219,7 +1228,7 @@ function realisticRoll() {
           <div class="img-fallback" style="display:none;">No image for #${pos.number}</div>
         </div>
         <div class="result-meta">
-          <div class="result-number">Position #${pos.number}</div>
+          <div class="result-number">Position #${pos.number}${posName(pos.id) && document.body.classList.contains('alt-images') ? ' · ' + posName(pos.id) : ''}</div>
           <div class="result-twist">Twist: <strong>${twistText}</strong></div>
         </div>
         <div class="result-actions">
@@ -1285,7 +1294,7 @@ function createGridItem(item, isGallery) {
     </div>
     <div class="item-badges">${getItemBadges(item)}</div>
     <div class="grid-item-body">
-      <div class="grid-item-num">#${item.number}</div>
+      <div class="grid-item-num">#${item.number}${document.body.classList.contains('alt-images') && posName(item.id) ? ' ' + posName(item.id) : ''}</div>
       <div class="grid-item-sub" title="${twist}">${subLabel}</div>
     </div>`;
 
@@ -1469,7 +1478,7 @@ function displayModalContent(index) {
   modalImage.setAttribute('data-pos-id', item.id);
   modalImage.onerror = () => { modalImage.style.display = 'none'; };
   modalImage.onload  = () => { modalImage.style.display = 'block'; };
-  modalTitle.textContent = `Position #${item.number}`;
+  modalTitle.textContent = `Position #${item.number}` + (document.body.classList.contains('alt-images') && posName(item.id) ? ' · ' + posName(item.id) : '');
   modalTwist.textContent = item.twist === defaultTwist ? 'Base Position' : `Twist: ${item.twist}`;
   modalCount.textContent = item.performedCount > 0 ? `Performed ${item.performedCount} time(s)` : 'Not performed yet.';
   modalLikeBtn.textContent = item.isLiked ? 'Liked ❤️' : 'Like / Save ❤️';
