@@ -1056,11 +1056,21 @@ function posName(posId) {
   return a ? a.n : '';
 }
 function imagePathFor(posId) {
-  if (document.body.classList.contains('alt-images') && ALT_NAMES[posId]) {
-    return `${ALT_FOLDER}/${ALT_NAMES[posId].f}`;
-  }
+  /* both folders use the same "NN - Name.jpg" names (same approach as the Position page) */
+  if (ALT_NAMES[posId]) return `${getImageFolder()}/${ALT_NAMES[posId].f}`;
   return `${getImageFolder()}/Oral Sex Position (${posId + 1}).jpg`;
 }
+/* If a folder still has the old numbered names, fall back to "Oral Sex Position (N).jpg" */
+document.addEventListener('error', function (e) {
+  const t = e.target;
+  if (!t || t.tagName !== 'IMG' || t.dataset.oldName) return;
+  const src = decodeURIComponent(t.getAttribute('src') || '');
+  const hit = ALT_NAMES.findIndex(a => a && src.endsWith('/' + a.f));
+  if (hit < 0) return;
+  t.dataset.oldName = '1';
+  e.stopPropagation();   /* keep the page's own onerror from firing on the first miss */
+  t.src = src.replace(/[^\/]+$/, '').replace(/ /g, '%20') + 'Oral Sex Position (' + (hit + 1) + ').jpg';
+}, true);
 
 /* ══════════════════════════════════════════════════════
    AUTH
@@ -1486,6 +1496,7 @@ function displayModalContent(index) {
   const item = currentModalItems[index];
   const imgPath = imagePathFor(item.id);
 
+  delete modalImage.dataset.oldName;
   modalImage.src = imgPath;
   modalImage.setAttribute('data-pos-id', item.id);
   modalImage.onerror = () => { modalImage.style.display = 'none'; };
@@ -1577,6 +1588,7 @@ function refreshImageSources() {
     const id = parseInt(resultImg.getAttribute('data-pos-id'), 10);
     if (!isNaN(id)) {
       resultImg.style.display = '';
+      delete resultImg.dataset.oldName;
       resultImg.src = imagePathFor(id);
       const fallback = resultImg.nextElementSibling;
       if (fallback) fallback.style.display = 'none';
