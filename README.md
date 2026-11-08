@@ -241,3 +241,20 @@ Position Selector: the base "Sex Position" folder can now use the same "NNN - Na
 
 ## v51
 Position and Oral selectors: names show whether or not the Alt/filter set is on; position numbers shown from #001 (match the file numbers). Oral page now includes the owner-edited version with the base-folder name fallback.
+
+## v52
+Home: removed a leftover empty card (from the merged Mission Week) that left a div open and pushed the Explore, Keep & plan and Learn sections into the wrong columns on wide screens.
+
+## v53
+- Mined the uploaded books: 6 new adult role-play scenarios (restaurant strangers, call girl, roadside, costume party, rope lesson, switch night), 12 new massage techniques (hacking, knuckle glide, feather and fur, blindfold touch, bath massage and more) and a "Cherishing Each Other" journal set.
+- Skipped anything with minors, teacher/student and non-consent themes.
+
+## v54
+- New page: Love Languages. A 15-question either-or quiz for each partner, a personal result, a side-by-side comparison and a "speak their language this week" idea. Added after comparing the top couples apps (Paired, Kindu, Spicer, Fck, Between/Lovewick).
+
+## v55
+- Touch screens: no sticky hover lift or press-scale jump, so taps no longer make the screen shake.
+- Smack That and Snap Heat fit a phone screen and can be played from a keyboard (A and L).
+
+## v56
+- UX pass from a 74-page audit: bigger tap areas on checkmarks, filters and footer links, 12px minimum small text, a visible keyboard focus ring, reduced-motion support, names for unlabeled buttons, one heading on every page.

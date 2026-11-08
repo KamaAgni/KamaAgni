@@ -62,3 +62,23 @@
   }
   window.KA_MOTION = { burst: burst, tick: tick, reveal: reveal, reduced: reduce };
 })();
+
+/* v56: accessibility fill-ins. Every button/link gets a name, every page gets one h1. */
+(function () {
+  function fix() {
+    try {
+      document.querySelectorAll('button:not([aria-label]),a:not([aria-label])').forEach(function (e) {
+        if ((e.innerText || '').trim() || e.title || e.querySelector('img[alt]')) return;
+        var t = (e.textContent || '').trim() || e.getAttribute('data-t') || e.getAttribute('data-v') || e.getAttribute('data-mood');
+        if (t) e.setAttribute('aria-label', t);
+      });
+      if (!document.querySelector('h1')) {
+        var h = document.createElement('h1'); h.className = 'ka-sr'; h.textContent = (document.title || 'KamaAgni').replace(/\s*[|:·-].*$/, '') || 'KamaAgni';
+        document.body.insertBefore(h, document.body.firstChild);
+      }
+    } catch (e) {}
+  }
+  var tm; function later() { clearTimeout(tm); tm = setTimeout(fix, 300); }
+  if (document.readyState !== 'loading') later(); else document.addEventListener('DOMContentLoaded', later);
+  try { new MutationObserver(later).observe(document.body || document.documentElement, { childList: true, subtree: true }); } catch (e) {}
+})();

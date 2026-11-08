@@ -1,0 +1,15 @@
+/* Calm look: same colours, fonts and layout, with the glow, aurora and particle effects removed */
+#fire-canvas,#star-canvas,.ka-fx-canvas-bg{display:none!important}
+body::before,html.ka-chrome body::before{display:none!important;animation:none!important}
+body,html.ka-chrome body{background-image:none!important}
+*{text-shadow:none!important}
+.flame-icon,.hero-brand,.hero-logo,.kh-logo img{filter:none!important}
+.flame-glow{display:none!important}
+.enter-dot{box-shadow:none!important}
+.dash{background:rgba(12,14,28,.9)!important;box-shadow:none!important}
+.d-go,.card-cta,.card-cta:hover,.kx-btn,.kx-btn:hover,.btn-primary,.btn-primary:hover,.kx-btn.gold,.kx-btn.indigo{box-shadow:none!important;animation:none!important}
+.game-card::before{display:none!important}
+.game-card:hover{box-shadow:none!important}
+.kx-opt:hover,.kx-scale button:hover,.kd-modes button.on,.kd-rv.same{box-shadow:none!important}
+.kd-turn i{box-shadow:none!important}
+.kx-big{text-shadow:none!important}

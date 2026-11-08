@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Love Languages</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(function(){
+  const {LS,esc,top}=KX, app=document.getElementById('app'), KEY='ka_ll_v1';
+  const L={
+    words:{n:'Words',i:'💬',d:'You feel closest when you hear it: praise, flirty messages, being told what they like about you.',t:['Send one specific compliment about their body or the way they move.','Leave a flirty note where they will find it tomorrow.','Tell them out loud, tonight, what turned you on this week.']},
+    time:{n:'Time',i:'🕰️',d:'You feel closest with undivided attention: phones away, no rush, eyes on each other.',t:['Book a phone-free hour this week, and say what it is for.','Take a long, slow evening with no plan beyond each other.','Take 10 minutes to look at each other before anything else starts.']},
+    touch:{n:'Touch',i:'🤲',d:'You feel closest through skin: cuddles, hand-holding, massage, being held while you talk.',t:['Offer a 10-minute massage with no strings attached.','Hold hands or touch their back whenever you pass each other today.','Make cuddling a daily habit, even when sex is not planned.']},
+    surprise:{n:'Surprise',i:'🎁',d:'You feel closest through novelty and thoughtfulness: little gifts, new experiences, a planned surprise.',t:['Give one small, sexy gift this week, such as lingerie, oil or a card.','Plan a mystery date and only tell them what to wear.','Try one thing neither of you has done before.']},
+    service:{n:'Helping',i:'🛠️',d:'You feel closest when your partner takes weight off you: doing chores, planning, making space for rest.',t:['Take one task off their list so they have energy for you.','Run their bath or make them tea before bed.','Handle the plans for a date night from start to finish.']}
+  };
+  const Q=[
+   ['I would rather hear "I love how you touch me"','words','I would rather be held for a long time','touch'],
+   ['I would rather have a whole evening just us','time','I would rather get a thoughtful surprise','surprise'],
+   ['I feel loved when they take care of things for me','service','I feel loved when they tell me what they appreciate','words'],
+   ['I like a long cuddle after sex','touch','I like a talk and a laugh after sex','time'],
+   ['A little gift that shows they were thinking of me','surprise','Them doing something I dislike doing','service'],
+   ['A flirty text in the middle of the day','words','An hour with no phones at all','time'],
+   ['A back or foot massage','touch','Being brought breakfast in bed','service'],
+   ['Planning a new experience together','surprise','Spending a slow, quiet weekend together','time'],
+   ['Hearing them say they desire me','words','A surprise gift to wear in bed','surprise'],
+   ['Kissing for a long time before anything else','touch','Them doing the planning so I can relax','service'],
+   ['Doing something new and exciting','surprise','Being held and caressed with no goal','touch'],
+   ['A handwritten note','words','A day when they do all the chores','service'],
+   ['Deep eye contact and conversation','time','A long, slow touch all over the body','touch'],
+   ['Being praised for something I did well','words','Being surprised with a night out','surprise'],
+   ['Being given their complete attention','time','Them carrying a load off my shoulders','service']
+  ];
+  let st=LS.get(KEY,{r:{}}); if(!st||!st.r) st={r:{}};
+  const names=KX.names();
+  let who=0, idx=0, sc;
+  const save=()=>LS.set(KEY,st);
+  function home(){
+    const done=[0,1].filter(p=>st.r[p]);
+    app.innerHTML=top('Love Languages','Learn how each of you feels most loved, and how to use it tonight')+
+    '<div class="kx-card"><p>Fifteen quick either-or questions each. Take them one after the other on one phone, or each on your own. There are no wrong answers. Then compare.</p></div>'+
+    [0,1].map(p=>'<button class="kx-btn" data-p="'+p+'" style="display:block;width:100%;margin:8px 0">'+(st.r[p]?'✅ Retake: ':'▶ Start: ')+esc(names[p])+'</button>').join('')+
+    (done.length===2?'<button class="kx-btn gold" id="cmp" style="display:block;width:100%;margin:8px 0">💞 Compare our results</button>':'')+
+    (done.length?'<button class="kx-btn" id="clr" style="display:block;width:100%;margin:8px 0;opacity:.7">Clear results</button>':'');
+    app.querySelectorAll('[data-p]').forEach(b=>b.onclick=()=>start(+b.dataset.p));
+    const c=document.getElementById('cmp'); if(c) c.onclick=compare;
+    const x=document.getElementById('clr'); if(x) x.onclick=()=>{if(confirm('Clear both results?')){st={r:{}};save();home();}};
+  }
+  function start(p){who=p;idx=0;sc={words:0,time:0,touch:0,surprise:0,service:0};ask();}
+  function ask(){
+    const q=Q[idx];
+    app.innerHTML=top('Love Languages',names[who]+' · question '+(idx+1)+' of '+Q.length)+
+    '<div class="kx-prog"><i style="width:'+(idx/Q.length*100)+'%"></i></div>'+
+    '<div class="kx-card kx-center"><p class="kx-muted">Pick the one that is more you</p></div>'+
+    [[q[0],q[1]],[q[2],q[3]]].map(o=>'<button class="kx-opt" data-k="'+o[1]+'" style="display:block;width:100%;margin:8px 0;text-align:left">'+esc(o[0])+'</button>').join('');
+    app.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{sc[b.dataset.k]++;idx++;if(idx<Q.length)ask();else{st.r[who]=sc;save();show(who);}});
+  }
+  function rank(s){return Object.keys(s).sort((a,b)=>s[b]-s[a]);}
+  function bars(s){const mx=Math.max(1,...Object.values(s));return rank(s).map(k=>'<div class="kx-item"><span style="font-size:22px">'+L[k].i+'</span><span class="kx-it">'+L[k].n+'</span><div class="kx-prog" style="flex:1;margin:0 10px"><i style="width:'+(s[k]/mx*100)+'%"></i></div><b>'+s[k]+'</b></div>').join('');}
+  function show(p){
+    const s=st.r[p], r=rank(s), a=L[r[0]], b=L[r[1]];
+    app.innerHTML=top('Love Languages',names[p]+' — your result')+
+    '<div class="kx-card kx-center"><div style="font-size:44px">'+a.i+'</div><div class="kx-big">'+a.n+'</div><p>'+a.d+'</p><p class="kx-muted">Second: '+b.i+' '+b.n+'</p></div>'+
+    '<div class="kx-sec">Your scores</div><div class="kx-list">'+bars(s)+'</div>'+
+    '<div class="kx-sec">Ideas for your partner to try</div><div class="kx-card"><ul>'+a.t.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul></div>'+
+    '<button class="kx-btn" id="bk" style="display:block;width:100%;margin:8px 0">'+(p===0&&!st.r[1]?'Hand over to '+esc(names[1])+' ▶':'Back')+'</button>';
+    document.getElementById('bk').onclick=()=>{if(p===0&&!st.r[1])start(1);else home();};
+  }
+  function compare(){
+    const r0=rank(st.r[0]), r1=rank(st.r[1]), same=r0[0]===r1[0];
+    const A=L[r0[0]], B=L[r1[0]];
+    let shared=r0.slice(0,2).filter(k=>r1.slice(0,2).includes(k));
+    app.innerHTML=top('Love Languages',names.join(' & ')+' — side by side')+
+    '<div class="kx-card kx-center"><div class="kx-big">'+(same?'Same top language':'Different top languages')+'</div><p>'+(same?'You both light up with <b>'+A.n+'</b>. Lean into it together.':esc(names[0])+' feels loved through <b>'+A.n+'</b>, '+esc(names[1])+' through <b>'+B.n+'</b>. Neither is wrong: you just speak differently, so say it in their language.')+'</p>'+(shared.length&&!same?'<p class="kx-muted">You overlap on '+shared.map(k=>L[k].i+' '+L[k].n).join(' and ')+'.</p>':'')+'</div>'+
+    [0,1].map(p=>'<div class="kx-sec">'+esc(names[p])+'</div><div class="kx-list">'+bars(st.r[p])+'</div>').join('')+
+    '<div class="kx-sec">This week</div><div class="kx-card"><p><b>'+esc(names[1])+'</b>, speak '+esc(names[0])+'’s language: '+esc(A.t[0])+'</p><p><b>'+esc(names[0])+'</b>, speak '+esc(names[1])+'’s language: '+esc(B.t[0])+'</p></div>'+
+    '<button class="kx-btn" id="bk" style="display:block;width:100%;margin:8px 0">Back</button>';
+    document.getElementById('bk').onclick=home;
+  }
+  home();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

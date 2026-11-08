@@ -200,3 +200,32 @@ html.ka-chrome body{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
 .kd-zn{fill:rgba(255,255,255,.1);stroke:rgba(255,255,255,.3);stroke-width:1.5;cursor:pointer;transition:all .2s}.kd-zn:hover{fill:rgba(255,255,255,.3)}
 .kd-zn.z-love,.kd-zn.z-both{fill:rgba(255,93,143,.85);stroke:#fff;filter:drop-shadow(0 0 6px rgba(255,93,143,.9))}.kd-zn.z-maybe{fill:rgba(255,184,77,.8);stroke:#fff}.kd-zn.z-no{fill:rgba(120,130,160,.7)}
 .kd-ttt[style*="repeat(4"] .kd-tc{font-size:30px;border-radius:14px}.kd-ttt[style*="repeat(5"] .kd-tc{font-size:22px;border-radius:10px}.kd-ttt[style*="repeat(5"],.kd-ttt[style*="repeat(4"]{gap:5px}
+
+/* v55: calm taps on touch screens. No sticky hover lift, no press-scale jump, no page shift. */
+@media (hover:none),(pointer:coarse){
+  button:hover,.btn:hover,.card-cta:hover,.home-btn:hover,.kx-opt:hover,.kx-scale button:hover,.kd-hc:hover:not(:disabled),.kd-door:hover:not(:disabled),
+  html.ka-chrome .kx-opt:hover,html.ka-chrome .kx-scale button:hover,.game-card:hover{transform:none!important;box-shadow:none!important}
+  button:active,.btn:active,.card-cta:active,.home-btn:active,.kx-btn:active{transform:none!important;filter:brightness(1.15)}
+}
+html,body{overflow-anchor:none}
+body{overflow-x:hidden}
+/* two-pad games: always fit the phone screen */
+.sm-wrap,.sn-wrap{max-height:calc(100dvh - 190px)}
+.sm-pad,.sn-pad{flex:1 1 0;min-height:64px;max-height:22dvh;padding-top:12px!important;padding-bottom:12px!important}
+.sm-mid,.sn-mid{flex:0 1 auto;height:auto!important;min-height:80px!important}
+@media (max-height:700px){.sm-mid,.sn-mid{font-size:56px!important}}
+.kd-key{display:block;text-align:center;font-size:12px;opacity:.75;margin-top:2px}
+
+/* v56: easier tapping, readable small text */
+.kx-check{position:relative}
+.kx-check::after{content:'';position:absolute;inset:-8px}
+#kd-on,#kd-off,.kd-modes button,.link-btn{min-height:36px!important;min-width:44px!important;font-size:max(12px,1em)!important}
+.link-btn{display:inline-flex;align-items:center}
+#ka-ftr a,.footer-links a,footer a{display:inline-block;padding:8px 6px;min-height:32px}
+.eyebrow,.section-label,#ka-ftr .fs,.kx-note,.muted{font-size:max(12px,1em)}
+.eyebrow,.section-label{font-size:12px!important}
+#ka-ftr .fs{font-size:12px!important}
+.cf-chip{min-height:36px}
+:focus-visible{outline:2px solid #ffc861;outline-offset:2px;border-radius:6px}
+.ka-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

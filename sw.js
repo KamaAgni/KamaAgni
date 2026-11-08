@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v53';
+const CACHE = 'kamaagni-v58';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -95,6 +95,7 @@ const ASSETS = [
   p('data/deck/know.json'),
   p('games/kamaagni-whos-most-likely.html'),
   p('games/kamaagni-know-me.html'),
+  p('games/kamaagni-love-languages.html'),
   p('data/deck/truth.json'),
   p('data/deck/dare.json'),
   p('data/deck/wyp.json'),

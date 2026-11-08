@@ -44,7 +44,7 @@ function render() {
   clearTimeout(tm); live = false; hot = null; if (!S) return setup();
   const head = '<h1 class="kx-title"><span>Snap Heat</span></h1>' + bar([['👋 ' + esc(NM[0]) + ' ' + S.score[0], ''], ['👋 ' + esc(NM[1]) + ' ' + S.score[1], ''], ['first to ' + S.goal, '']]);
   if (S.phase === 'perform') { app.innerHTML = head + '<div id="pf"></div>'; bindBar(); KA_PERF.show(document.getElementById('pf'), {badge: S.badge, sub: S.sub, text: S.text, onDone: () => { if (S.final) { try { KA_TRACK.log('play', 'Snap Heat', ''); } catch (e) {} clear(); setup(); return; } if (S.score[0] >= S.goal || S.score[1] >= S.goal) { const w = S.score[0] >= S.goal ? 0 : 1; Object.assign(S, {phase: 'perform', final: 1, badge: NM[w] + ' wins the game', sub: NM[1 - w] + ' gives the winner this wish', text: wishText()}); } else S.phase = 'ready'; save(); render(); }}); return; }
-  app.innerHTML = head + '<div class="sn-wrap"><button class="sn-pad b" id="pb">' + esc(NM[1]) + ': SNAP</button><div class="sn-mid" id="mid"><span class="big">👋</span></div><button class="sn-pad a" id="pa">' + esc(NM[0]) + ': SNAP</button></div><p class="kx-note" style="text-align:center" id="nt">' + esc(S.msg || 'Cards start in a moment. Smack only on a match.') + '</p>';
+  app.innerHTML = head + '<div class="sn-wrap"><button class="sn-pad b" id="pb">' + esc(NM[1]) + ': SNAP</button><div class="sn-mid" id="mid"><span class="big">👋</span></div><button class="sn-pad a" id="pa">' + esc(NM[0]) + ': SNAP</button></div><p class="kx-note" style="text-align:center" id="nt">' + esc(S.msg || 'Cards start in a moment. Smack only on a match. Keyboard: A (bottom) and L (top).') + '</p>';
   bindBar(); const mid = document.getElementById('mid'), nt = document.getElementById('nt'); let cur = null;
   const finish = (who, win) => { hot = null; live = false; clearTimeout(tm); try { navigator.vibrate && navigator.vibrate([30, 40, 60]); KA_FX.clack(3); } catch (e) {}
     if (win) { S.score[who]++; Object.assign(S, {phase: 'perform', badge: NM[who] + ' snapped it first', sub: NM[1 - who] + ' does this for ' + NM[who], text: actFor(hot0, prog())}); }
@@ -53,6 +53,7 @@ function render() {
   let hot0 = null;
   const tap = who => () => { if (!live || !cur) return; if (hot) { hot0 = hot; finish(who, true); } else finish(who, false); };
   document.getElementById('pa').onpointerdown = tap(0); document.getElementById('pb').onpointerdown = tap(1);
+  window.__kaKeys = { a: tap(0), b: tap(1) }; if (!window.__kaKeyBound) { window.__kaKeyBound = 1; document.addEventListener('keydown', e => { if (e.repeat || /INPUT|TEXTAREA|SELECT/.test((e.target || {}).tagName || '')) return; const k = (e.key || '').toLowerCase(); if (k === 'a' || k === 'z') window.__kaKeys && window.__kaKeys.a(); else if (k === 'l' || k === 'm') window.__kaKeys && window.__kaKeys.b(); }); }
   let since = 0;
   const flip = () => { if (!live) return; hot = null; mid.classList.remove('hot'); since++;
     const m = since >= 2 && (Math.random() < .35 || since >= 6), a = C.deck()[Math.floor(Math.random() * 52)], r = m ? a.r : (a.r + 1 + Math.floor(Math.random() * 12)) % 13;
