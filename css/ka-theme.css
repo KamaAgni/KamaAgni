@@ -229,3 +229,15 @@ body{overflow-x:hidden}
 :focus-visible{outline:2px solid #ffc861;outline-offset:2px;border-radius:6px}
 .ka-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* v57: phone held sideways. Toolbar becomes a slim bottom row, less chrome above the game. */
+@media (max-height:480px) and (orientation:landscape){
+  #ka-toolbar{top:auto!important;bottom:6px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;flex-direction:row!important;width:auto!important;height:auto!important;gap:8px!important;padding:0!important}
+  #ka-toolbar>*{width:38px!important;height:38px!important;min-width:38px!important;font-size:16px!important}
+  body{padding-bottom:56px}
+  #ka-hdr{height:44px!important}
+  body.ka-pad,html.ka-chrome body{padding-top:48px!important}
+  h1,.kx-title,.kx-hero h1,.hero h1{font-size:clamp(22px,6vh,34px)!important;line-height:1.15!important;margin:4px 0!important}
+  .kx-card,.card{padding-top:10px;padding-bottom:10px}
+  #ka-ftr{padding-top:12px}
+}

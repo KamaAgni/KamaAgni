@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Roadmap</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a,.g-note a{color:#ffc861;display:inline-block;padding:8px 4px}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+const R=[["Year 1", "Discover", "Learn each other, set habits, build trust.", ["Complete Know Me and Love Languages", "Make your yes / no / maybe lists", "Try the 8 Dates", "Agree on protection and testing"], [["Know Me", "kamaagni-know-me.html"], ["Love Languages", "kamaagni-love-languages.html"], ["8 Dates", "kamaagni-eight-dates.html"]]], ["Year 2", "Deepen", "Turn excitement into a steady, warm routine.", ["Start a weekly ritual", "Build your bucket list", "Explore the Position Selector together", "Take a trip together"], [["Rituals", "kamaagni-rituals.html"], ["Bucket List", "kamaagni-bucket-list.html"], ["Positions", "intimacy_Position_Selector_page.html"]]], ["Year 3", "Play", "Bring in playfulness and fresh ideas.", ["Try a new game every month", "Explore role-play", "Plan a surprise for each other", "Do a sensory night"], [["Roleplay", "kamaagni-roleplay.html"], ["Sensory Night", "kamaagni-sensory-night.html"], ["Secret Envelope", "kamaagni-secret.html"]]], ["Year 4", "Grow", "Talk about bigger goals and what you want to explore.", ["Share fantasies safely", "Learn massage techniques", "Try a Mission Week", "Review your first three years"], [["Fantasy Box", "kamaagni-fantasy-box.html"], ["Massage", "kamaagni-massage.html"], ["Mission Week", "kamaagni-mission-week.html"]]], ["Year 5", "Renew", "The five-year mark. Protect your bond with a proper reset.", ["Do a full yearly review", "Plan a meaningful trip or retreat", "Refresh your health checks", "Write each other a letter"], [["Yearly Review", "kamaagni-roadmap.html"], ["Journal", "kamaagni-journal.html"], ["Health", "kamaagni-health.html"]]], ["Years 6 to 7", "Protect", "Careers and families can crowd out closeness. Guard your time.", ["Fix a standing date night", "Use short rituals when busy", "Check in on desire gaps", "Look after fitness together"], [["Quickies", "kamaagni-quickies.html"], ["Fitness", "kamaagni-fit.html"], ["Life Stages", "kamaagni-life-stages.html"]]], ["Years 8 to 10", "Rekindle", "Long-term love needs novelty and appreciation to stay bright.", ["Plan a second honeymoon", "Try something neither of you has done", "Revisit your old favourites", "Share what you still admire"], [["Date Kits", "kamaagni-date-kits.html"], ["Kama Studio", "kamaagni-kama-studio.html"], ["Movie Night", "kamaagni-movies.html"]]], ["Year 10 and beyond", "Celebrate", "A decade is a gift. Keep choosing each other.", ["Reflect on ten years", "Keep learning about each other", "Look after your health as a team", "Pass on what you have learned"], [["Journal", "kamaagni-journal.html"], ["History", "kamaagni-history.html"], ["Progress", "kamaagni-progress.html"]]]], AREAS=["Connection", "Communication", "Desire", "Adventure", "Trust", "Fun"], KEY='ka_review_v1';
+let st=LS.get(KEY,null); if(!st||typeof st!=='object') st={};
+const yr=new Date().getFullYear(); let tab='review', y=yr;
+const save=()=>LS.set(KEY,st);
+function rev(Y){if(!st[Y])st[Y]={r:{},w:'',x:'',g:['','','']};return st[Y];}
+function avg(Y,p){const r=(st[Y]||{}).r||{};const v=AREAS.map(a=>(r[a]||[0,0])[p]).filter(Boolean);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):0;}
+function view(){
+ let h=top('Our Roadmap','Where you are headed, and a private review each year')+
+ '<div class="g-chips"><button class="g-chip'+(tab==='review'?' on':'')+'" data-t="review">Yearly review</button><button class="g-chip'+(tab==='road'?' on':'')+'" data-t="road">10-year roadmap</button></div>';
+ if(tab==='road'){
+  h+=R.map(x=>'<details class="g-card"><summary><span>'+esc(x[0])+'</span> · '+esc(x[1])+'</summary><div class="g-body"><p>'+esc(x[2])+'</p><h4>Goals</h4><ul>'+x[3].map(g=>'<li>'+esc(g)+'</li>').join('')+'</ul><h4>Try these pages</h4><div class="g-chips">'+x[4].map(l=>'<a class="g-chip" style="text-decoration:none" href="'+l[1]+'">'+esc(l[0])+' →</a>').join('')+'</div></div></details>').join('');
+ }else{
+  const d=rev(y), prev=st[y-1];
+  h+='<div class="g-chips"><button class="g-chip" data-y="-1" aria-label="Previous year">‹</button><span class="g-chip on">'+y+'</span><button class="g-chip" data-y="1" aria-label="Next year">›</button></div>'+
+  '<div class="g-note">Each of you rate the year honestly, 1 (poor) to 5 (great). Saved only on this device.</div>'+
+  AREAS.map(a=>'<div class="g-rate"><span class="l">'+a+'</span>'+[0,1].map(p=>'<span class="kx-muted" style="font-size:12px">'+esc(names[p])+'</span>'+[1,2,3,4,5].map(n=>'<button data-r="'+a+'|'+p+'|'+n+'" class="'+(((d.r[a]||[0,0])[p])>=n?'on':'')+'" aria-label="'+esc(names[p])+' '+a+' '+n+'">♥</button>').join('')).join('')+'</div>').join('')+
+  '<h4 style="margin:14px 0 4px">Best moments this year</h4><textarea class="g-in" id="w">'+esc(d.w)+'</textarea>'+
+  '<h4 style="margin:14px 0 4px">What we would love more of</h4><textarea class="g-in" id="x">'+esc(d.x)+'</textarea>'+
+  '<h4 style="margin:14px 0 4px">Three goals for next year</h4>'+[0,1,2].map(i=>'<input class="g-in" data-g="'+i+'" style="margin:4px 0" value="'+esc(d.g[i]||'')+'" aria-label="Goal '+(i+1)+'"/>').join('');
+  if(prev){h+='<div class="g-card"><div class="g-body" style="padding-top:14px"><h4>Compared with '+(y-1)+'</h4>'+[0,1].map(p=>{const a=avg(y,p),b=avg(y-1,p);return a&&b?'<p>'+esc(names[p])+': '+b.toFixed(1)+' → '+a.toFixed(1)+' '+(a>b?'⬆️':a<b?'⬇️':'➡️')+'</p>':'';}).join('')+'</div></div>';}
+ }
+ app.innerHTML=h;
+ app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;view();});
+ app.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{y+=+b.dataset.y;view();});
+ app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{const [a,p,n]=b.dataset.r.split('|');const d=rev(y);d.r[a]=d.r[a]||[0,0];d.r[a][+p]=d.r[a][+p]===+n?0:+n;save();view();});
+ const w=document.getElementById('w'),x=document.getElementById('x'); if(w)w.oninput=()=>{rev(y).w=w.value;save();}; if(x)x.oninput=()=>{rev(y).x=x.value;save();};
+ app.querySelectorAll('[data-g]').forEach(i=>i.oninput=()=>{rev(y).g[+i.dataset.g]=i.value;save();});
+}
+view();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -258,3 +258,46 @@ Home: removed a leftover empty card (from the merged Mission Week) that left a d
 
 ## v56
 - UX pass from a 74-page audit: bigger tap areas on checkmarks, filters and footer links, 12px minimum small text, a visible keyboard focus ring, reduced-motion support, names for unlabeled buttons, one heading on every page.
+
+## v57
+- Checked every game on small phone, phone sideways, tablet and laptop (no overflow, no errors).
+- Phone sideways: tool buttons move to a slim bottom row and the header and titles shrink, so the game starts higher on screen.
+
+## v58
+- New page: Movie Night (106 films by mood, heat and length; pick-one-for-us; shared watchlist; both partners rate; talk prompts and a movie-night add-on idea).
+
+## Roadmap (agreed with owner)
+1. Movie Night (done v58)
+2. Health & Wellbeing hub: contraception, testing, common problems, pelvic floor, when to see a doctor
+3. Life-stage guides: new couples, long-term, after a baby, 40s and beyond, long distance
+4. "Today" home screen and site-wide search
+5. Year-by-year relationship roadmap and private yearly review
+
+## v59 (roadmap stages 2 to 5)
+- Health & Wellbeing: 21 plain-language topics with "what helps" and "when to get help".
+- Life Stages: nine guides from new love to later life, long distance and rebuilding, each with page links and talk prompts.
+- Search: finds any game, guide or tool by word (also a search box on the home page).
+- Roadmap & Yearly Review: a 10-year roadmap and a private yearly review with both partners' ratings and year-on-year comparison.
+- Five new cards on the home page and four new menu entries.
+
+## v60
+- Tips: 57 new hack-of-the-day tips (167 in total) from Sex Hacks, Tips.pdf, Every Man's Guide and the Kama Sutra books, written in our own words.
+- Favourites: a star in the header of every game page. The home page shows "Continue" and your favourites.
+
+## v61
+- New page: Bedroom Skills (16 how-to guides with a "we tried this" tick).
+- Sync: every new page and the older position, ludo and filter settings now sync to the account. Device-only items (PIN, last page, session time) stay local.
+- Sign-in reminder: if you are signed in but have not created or unlocked the vault passphrase, a bar says nothing is syncing yet and opens the account panel.
+
+## v62
+- New pages: Date Planner, Memory Book, Our Playlist (82 songs). Movie Night: 16 more films and a "Together" shortlist of films you both starred. Health: 8 more topics. Home: a daily question and mini-mission card.
+
+## v63
+- **Partner sharing**: Date Planner, Memory Book, Movie Night, yearly review and playlist favourites now merge between couple-linked accounts (js/ka-motion.js, KA_SHARE). Item lists merge by id with update times and deletion markers; Movies/Review use last-write-wins; favourites are unioned. Needs both partners signed in, vault unlocked and linked on the Together page.
+- **Start here**: 3-question guide on first home visit (mood, time, spice), suggests 3 pages with "Save to favourites". Reopen from the home buttons.
+- **Our week**: games/kamaagni-week.html weekly recap (history, memories, next-week idea).
+- **Surprise me** button on home. **Comfort**: text size and high contrast in Settings (synced). iPhone "Add to Home Screen" hint.
+- tools/compress-images.py: WebP converter for position images (run it yourself on the repo images).
+
+## v64
+- Home quick-action buttons fit one row on phones.

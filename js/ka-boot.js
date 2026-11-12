@@ -33,8 +33,9 @@
   /* ---- sync hook: records changed ka_* keys (values are only read later, by ka-cloud.js) ---- */
   try {
     var S = Storage.prototype, rawSet = S.setItem, rawRem = S.removeItem, rawGet = S.getItem;
-    var LOCAL_ONLY = /^(ka_pin|ka_vkey|ka_adult|ka_sync|ka_cloud|ka_mock|ka_lib_recent|ka_act_dev)/;
-    var ok = function (k) { return typeof k === 'string' && (k.indexOf('ka_') === 0 || k === 'dice_favorites') && !LOCAL_ONLY.test(k); };
+    var LOCAL_ONLY = /^(ka_pin|ka_vkey|ka_adult|ka_sync|ka_cloud|ka_mock|ka_lib_recent|ka_act_dev|ka_lastpage|ka_recent_search|ka_gpin|ka_last$|ka_visits|ka_share)/;
+    var EXTRA = /^(dice_favorites|filterPreference|intimacy_general_(history_v1|filterPref|folderPref)|ludo_intimacy_game_v1|oralFolderPreference|position_roll_history_v3)$/;
+    var ok = function (k) { return typeof k === 'string' && (k.indexOf('ka_') === 0 || EXTRA.test(k)) && !LOCAL_ONLY.test(k); };
     var meta = function () { try { return JSON.parse(rawGet.call(localStorage, 'ka_sync_meta')) || {}; } catch (e) { return {}; } };
     var mark = function (k, del) {
       if (window.KA_SYNC && KA_SYNC.applying) return;

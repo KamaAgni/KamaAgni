@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Playlist</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a{color:#ffc861}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+const SONGS=[{"t": "At Last", "a": "Etta James", "m": "slow"}, {"t": "Can't Help Falling in Love", "a": "Elvis Presley", "m": "slow"}, {"t": "Perfect", "a": "Ed Sheeran", "m": "slow"}, {"t": "All of Me", "a": "John Legend", "m": "slow"}, {"t": "Thinking Out Loud", "a": "Ed Sheeran", "m": "slow"}, {"t": "Make You Feel My Love", "a": "Adele", "m": "slow"}, {"t": "Your Song", "a": "Elton John", "m": "slow"}, {"t": "Unchained Melody", "a": "The Righteous Brothers", "m": "slow"}, {"t": "Wonderful Tonight", "a": "Eric Clapton", "m": "slow"}, {"t": "La Vie en Rose", "a": "Édith Piaf", "m": "slow"}, {"t": "Moon River", "a": "Audrey Hepburn", "m": "slow"}, {"t": "Let's Stay Together", "a": "Al Green", "m": "slow"}, {"t": "Fly Me to the Moon", "a": "Frank Sinatra", "m": "slow"}, {"t": "L-O-V-E", "a": "Nat King Cole", "m": "slow"}, {"t": "Better Together", "a": "Jack Johnson", "m": "slow"}, {"t": "Smooth Operator", "a": "Sade", "m": "sensual"}, {"t": "By Your Side", "a": "Sade", "m": "sensual"}, {"t": "Let's Get It On", "a": "Marvin Gaye", "m": "sensual"}, {"t": "Sexual Healing", "a": "Marvin Gaye", "m": "sensual"}, {"t": "Can't Get Enough of Your Love, Babe", "a": "Barry White", "m": "sensual"}, {"t": "Untitled (How Does It Feel)", "a": "D'Angelo", "m": "sensual"}, {"t": "Earned It", "a": "The Weeknd", "m": "sensual"}, {"t": "Drunk in Love", "a": "Beyoncé", "m": "sensual"}, {"t": "Climax", "a": "Usher", "m": "sensual"}, {"t": "Pretty Wings", "a": "Maxwell", "m": "sensual"}, {"t": "Teardrop", "a": "Massive Attack", "m": "sensual"}, {"t": "Glory Box", "a": "Portishead", "m": "sensual"}, {"t": "Fallin'", "a": "Alicia Keys", "m": "sensual"}, {"t": "Get You", "a": "Daniel Caesar", "m": "sensual"}, {"t": "Pink + White", "a": "Frank Ocean", "m": "sensual"}, {"t": "Marry You", "a": "Bruno Mars", "m": "playful"}, {"t": "Isn't She Lovely", "a": "Stevie Wonder", "m": "playful"}, {"t": "Here Comes the Sun", "a": "The Beatles", "m": "playful"}, {"t": "September", "a": "Earth, Wind & Fire", "m": "playful"}, {"t": "Happy", "a": "Pharrell Williams", "m": "playful"}, {"t": "I'm Yours", "a": "Jason Mraz", "m": "playful"}, {"t": "Levitating", "a": "Dua Lipa", "m": "playful"}, {"t": "Can't Stop the Feeling!", "a": "Justin Timberlake", "m": "playful"}, {"t": "Watermelon Sugar", "a": "Harry Styles", "m": "playful"}, {"t": "Hips Don't Lie", "a": "Shakira", "m": "playful"}, {"t": "Crazy in Love", "a": "Beyoncé", "m": "playful"}, {"t": "Good as Hell", "a": "Lizzo", "m": "playful"}, {"t": "Hey Ya!", "a": "Outkast", "m": "playful"}, {"t": "The Way You Look Tonight", "a": "Frank Sinatra", "m": "dance"}, {"t": "I Wanna Dance with Somebody", "a": "Whitney Houston", "m": "dance"}, {"t": "Haven't Met You Yet", "a": "Michael Bublé", "m": "dance"}, {"t": "Livin' la Vida Loca", "a": "Ricky Martin", "m": "dance"}, {"t": "Get Lucky", "a": "Daft Punk", "m": "dance"}, {"t": "Stayin' Alive", "a": "Bee Gees", "m": "dance"}, {"t": "Dancing Queen", "a": "ABBA", "m": "dance"}, {"t": "Love to Love You Baby", "a": "Donna Summer", "m": "dance"}, {"t": "Dancing in the Moonlight", "a": "Toploader", "m": "dance"}, {"t": "Shut Up and Dance", "a": "Walk the Moon", "m": "dance"}, {"t": "Tum Hi Ho", "a": "Arijit Singh (Aashiqui 2)", "m": "bolly"}, {"t": "Tujhe Dekha Toh", "a": "Kumar Sanu and Lata Mangeshkar (DDLJ)", "m": "bolly"}, {"t": "Pehla Nasha", "a": "Udit Narayan and Sadhana Sargam", "m": "bolly"}, {"t": "Kabira", "a": "Tochi Raina and Rekha Bhardwaj (YJHD)", "m": "bolly"}, {"t": "Channa Mereya", "a": "Arijit Singh (ADHM)", "m": "bolly"}, {"t": "Agar Tum Saath Ho", "a": "Alka Yagnik and Arijit Singh (Tamasha)", "m": "bolly"}, {"t": "Tum Se Hi", "a": "Mohit Chauhan (Jab We Met)", "m": "bolly"}, {"t": "Kal Ho Naa Ho", "a": "Sonu Nigam", "m": "bolly"}, {"t": "Pee Loon", "a": "Mohit Chauhan", "m": "bolly"}, {"t": "Tera Ban Jaunga", "a": "Akhil Sachdeva and Tulsi Kumar", "m": "bolly"}, {"t": "Raataan Lambiyan", "a": "Jubin Nautiyal and Asees Kaur (Shershaah)", "m": "bolly"}, {"t": "Dil Diyan Gallan", "a": "Atif Aslam", "m": "bolly"}, {"t": "Tere Bina", "a": "A. R. Rahman (Guru)", "m": "bolly"}, {"t": "Chaiyya Chaiyya", "a": "Sukhwinder Singh and Sapna Awasthi (Dil Se)", "m": "bolly"}, {"t": "Tujh Mein Rab Dikhta Hai", "a": "Roop Kumar Rathod", "m": "bolly"}, {"t": "Gerua", "a": "Arijit Singh and Antara Mitra (Dilwale)", "m": "bolly"}, {"t": "Lag Ja Gale", "a": "Lata Mangeshkar", "m": "bolly"}, {"t": "Come Away with Me", "a": "Norah Jones", "m": "chill"}, {"t": "Banana Pancakes", "a": "Jack Johnson", "m": "chill"}, {"t": "Skinny Love", "a": "Bon Iver", "m": "chill"}, {"t": "Only Love", "a": "Ben Howard", "m": "chill"}, {"t": "Such Great Heights", "a": "Iron & Wine", "m": "chill"}, {"t": "Yellow", "a": "Coldplay", "m": "chill"}, {"t": "Another Love", "a": "Tom Odell", "m": "chill"}, {"t": "Cold Little Heart", "a": "Michael Kiwanuka", "m": "chill"}, {"t": "Slow Dancing in a Burning Room", "a": "John Mayer", "m": "chill"}, {"t": "White Gloves", "a": "Khruangbin", "m": "chill"}, {"t": "Work Song", "a": "Hozier", "m": "chill"}, {"t": "Lovely Day", "a": "Bill Withers", "m": "chill"}], MOODS={"slow": "💗 Slow & romantic", "sensual": "🔥 Sensual", "playful": "😄 Playful", "dance": "💃 Dance together", "bolly": "🇮🇳 Bollywood", "chill": "🛋️ Chill & cuddle"}; const KEY='ka_songs_v1';
+let fav=LS.get(KEY,[]); if(!Array.isArray(fav))fav=[]; let m='all', q='', set=null, tab='all';
+const id=s=>s.t+' | '+s.a;
+function row(s){const sq=encodeURIComponent(s.t+' '+s.a.replace(/\(.*\)/,''));const f=fav.includes(id(s));
+ return '<div class="g-card"><div class="g-body" style="padding:12px 14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>'+esc(s.t)+'</b><div class="kx-muted" style="font-size:13px">'+esc(s.a)+'</div></div><a class="g-chip" style="text-decoration:none" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query='+sq+'">▶ Play</a><button class="g-chip" data-f="'+esc(id(s))+'" aria-label="'+(f?'Remove from favourites':'Add to favourites')+'">'+(f?'♥':'♡')+'</button></div></div>';}
+function view(){
+ let L=SONGS.filter(s=>(m==='all'||s.m===m)&&(!q||(s.t+' '+s.a).toLowerCase().includes(q.toLowerCase())));
+ if(tab==='fav')L=SONGS.filter(s=>fav.includes(id(s)));
+ let h=top('Our Playlist','Songs for every mood. Tap play to open it, heart the ones you love.')+
+ '<div class="g-chips"><button class="g-chip'+(tab==='all'?' on':'')+'" data-tab="all">All songs</button><button class="g-chip'+(tab==='fav'?' on':'')+'" data-tab="fav">♥ Ours ('+fav.length+')</button></div>';
+ if(tab==='all')h+='<input class="g-in" id="q" placeholder="Search a song or artist" aria-label="Search songs" value="'+esc(q)+'"/><div class="g-chips"><button class="g-chip'+(m==='all'?' on':'')+'" data-m="all">All</button>'+Object.keys(MOODS).map(k=>'<button class="g-chip'+(m===k?' on':'')+'" data-m="'+k+'">'+MOODS[k]+'</button>').join('')+'</div>'+
+ '<button class="kx-btn gold" id="mk" style="display:block;width:100%;margin:8px 0">🎲 Make tonight\u2019s set of 5</button>';
+ if(set){h+='<div class="g-note"><b>Tonight\u2019s set</b></div>'+set.map(row).join('');}
+ h+=L.length?L.map(row).join(''):'<div class="g-note">'+(tab==='fav'?'No favourites yet.':'No songs match.')+'</div>';
+ app.innerHTML=h;
+ app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;set=null;view();});
+ app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{m=b.dataset.m;view();});
+ app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{const k=b.dataset.f;fav=fav.includes(k)?fav.filter(x=>x!==k):fav.concat(k);LS.set(KEY,fav);view();});
+ const mk=document.getElementById('mk'); if(mk)mk.onclick=()=>{const P=SONGS.filter(s=>m==='all'||s.m===m).slice();for(let i=P.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[P[i],P[j]]=[P[j],P[i]];}set=P.slice(0,5);view();};
+ const i=document.getElementById('q'); if(i)i.oninput=()=>{q=i.value;const p=i.selectionStart;view();const n=document.getElementById('q');n.focus();n.setSelectionRange(p,p);};
+}
+view();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

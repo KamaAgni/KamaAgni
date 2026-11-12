@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Our Week</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a{color:#ffc861}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-catalog.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+
+const day=t=>{const x=new Date(t);x.setHours(0,0,0,0);return x.getTime()};
+const ws=(()=>{const x=new Date();x.setHours(0,0,0,0);x.setDate(x.getDate()-((x.getDay()+6)%7));return x.getTime()})();
+const W=864e5*7;
+const hist=LS.get('ka_hist',[])||[]; const mem=((LS.get('ka_mem_v1',{})||{}).e)||[]; const plan=((LS.get('ka_plan_v1',{})||{}).e)||[];
+const ICON={play:'🎮',session:'🕯️',task:'🃏',journey:'⛓️',challenge:'🏆',journal:'📓',envelope:'💌',together:'💞',program:'🎓',pulse:'📊',roleplay:'🎭'};
+const NAME={play:'Games played',session:'Guided sessions',task:'Tasks',journey:'Journey steps',challenge:'Challenges',journal:'Journal entries',envelope:'Envelopes',together:'Together',program:'Programme steps',pulse:'Pulse check-ins',roleplay:'Role-plays'};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+let off=0;
+function view(){
+ const a=ws-off*W,b=a+W;
+ const hh=hist.filter(e=>e.t>=a&&e.t<b), pv=hist.filter(e=>e.t>=a-W&&e.t<a);
+ const ia=iso(new Date(a)), ib=iso(new Date(b-1));
+ const mm=mem.filter(e=>e.d>=ia&&e.d<=ib);
+ const by={}; hh.forEach(e=>by[e.y]=(by[e.y]||0)+1);
+ const types=Object.keys(by).sort((x,y)=>by[y]-by[x]);
+ const days=new Set(hh.map(e=>day(e.t))).size;
+ const rated=mem.filter(e=>(e.r[0]+e.r[1])>0).sort((x,y)=>(y.r[0]+y.r[1])-(x.r[0]+x.r[1])||(x.d<y.d?1:-1));
+ const best=mm.slice().sort((x,y)=>(y.r[0]+y.r[1])-(x.r[0]+x.r[1]))[0]||null;
+ const lbl=new Date(a).toLocaleDateString(undefined,{day:'numeric',month:'short'})+' – '+new Date(b-1).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+ const diff=hh.length-pv.length;
+ let h=top('Our week','A gentle look back at what you did, and one idea for next week')+
+ '<div class="g-chips"><button class="g-chip" data-o="1" aria-label="Earlier week">← Earlier</button><span class="g-chip on" style="cursor:default">'+(off?lbl:'This week · '+lbl)+'</span>'+(off?'<button class="g-chip" data-o="-1" aria-label="Later week">Later →</button>':'')+'</div>';
+ if(!hh.length&&!mm.length) h+='<div class="g-card"><h3>Nothing recorded yet</h3><p class="g-m">Play something together or write a memory, and it will appear here. Everything stays on your device (and your own synced account).</p><p><a class="g-btn" href="kamaagni-tonight.html">Start tonight</a> <a class="g-btn g-alt" href="kamaagni-memories.html">Write a memory</a></p></div>';
+ else{
+  h+='<div class="g-card"><h3>What you did</h3><p class="g-m">'+hh.length+' activit'+(hh.length===1?'y':'ies')+' on '+days+' day'+(days===1?'':'s')+(pv.length||diff?(diff>0?' · up '+diff+' on the week before':diff<0?' · '+(-diff)+' fewer than the week before (that is fine)':' · same as the week before'):'')+'</p>'+
+   types.map(t=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.07)"><span>'+(ICON[t]||'✨')+' '+esc(NAME[t]||t)+'</span><b>'+by[t]+'</b></div>').join('')+'</div>';
+  const tried=hh.filter(e=>e.y!=='play').slice(0,6);
+  if(tried.length) h+='<div class="g-card"><h3>Things you tried</h3>'+tried.map(e=>'<div class="g-m" style="padding:4px 0">'+(ICON[e.y]||'✨')+' '+esc(e.a)+(e.b?' <span style="opacity:.7">· '+esc(e.b)+'</span>':'')+'</div>').join('')+'</div>';
+  if(mm.length) h+='<div class="g-card"><h3>Memories this week ('+mm.length+')</h3>'+(best?'<p class="g-m">Highest rated: <b>'+esc(best.t)+'</b>'+((best.r[0]+best.r[1])?' · '+'★'.repeat(Math.round((best.r[0]+best.r[1])/2)):'')+'</p>':'')+'<p><a class="g-btn g-alt" href="kamaagni-memories.html">Open Memory Book</a></p></div>';
+ }
+ if(!off){
+  const up=plan.filter(e=>e.d>=iso(new Date())).sort((x,y)=>x.d<y.d?-1:1);
+  let idea='';
+  const C=window.KA_CATALOG||[]; const seen=new Set(hist.map(e=>e.a));
+  const fresh=C.filter(c=>c.u&&c.modes&&!seen.has(c.t)&&/sweet|playful|learn/.test(c.v));
+  const pick=fresh.length?fresh[(Math.floor(Date.now()/W))%fresh.length]:null;
+  h+='<div class="g-card"><h3>Idea for next week</h3>'+
+   (up.length?'<p class="g-m">Coming up: <b>'+esc(up[0].t)+'</b> on '+esc(up[0].d)+'.</p>':'<p class="g-m">Nothing is planned yet. A small plan beats waiting for the right moment.</p><p><a class="g-btn" href="kamaagni-planner.html">Plan a date</a></p>')+
+   (pick?'<p class="g-m">Something new to try: <b>'+pick.i+' '+esc(pick.t)+'</b> — '+esc(pick.d)+'</p><p><a class="g-btn g-alt" href="../'+pick.u+'">Open it</a></p>':'')+
+   (rated[0]?'<p class="g-m">Or repeat a favourite: <b>'+esc(rated[0].t)+'</b> ('+esc(rated[0].d)+').</p>':'')+'</div>';
+ }
+ h+='<p class="g-m" style="text-align:center;opacity:.7">Private to you and your linked partner. You can clear history any time on the History page.</p>';
+ app.innerHTML=h;
+ app.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{off=Math.max(0,off+ +b.dataset.o);view();});
+}
+view();
+
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

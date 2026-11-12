@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Memory Book</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a{color:#ffc861}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+const TAGS=["Romantic", "Playful", "Adventurous", "Gentle", "Wild", "First time", "Trip", "At home", "Anniversary", "Funny"], KEY='ka_mem_v1';
+let st=LS.get(KEY,null); if(!st||!Array.isArray(st.e)) st={e:[]};
+const save=()=>LS.set(KEY,st);
+let tab='list', ed=null, q='', ft='';
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function blank(){return {id:'',d:iso(new Date()),t:'',n:'',g:[],r:[0,0],again:0};}
+function view(){
+ let h=top('Memory Book','A private place to keep the nights, trips and moments you want to remember')+
+ '<div class="g-chips"><button class="g-chip'+(tab==='list'?' on':'')+'" data-t="list">Memories ('+st.e.length+')</button><button class="g-chip'+(tab==='new'?' on':'')+'" data-t="new">+ New</button><button class="g-chip'+(tab==='top'?' on':'')+'" data-t="top">Favourites</button></div>';
+ if(tab==='new'){
+  const e=ed||(ed=blank());
+  h+='<div class="g-card"><div class="g-body" style="padding-top:14px"><label class="kx-muted">Title</label><input class="g-in" id="mt" value="'+esc(e.t)+'" placeholder="Rainy Sunday and a long bath"/>'+
+  '<label class="kx-muted" style="display:block;margin-top:8px">Date</label><input class="g-in" id="md" type="date" value="'+e.d+'"/>'+
+  '<div class="g-chips">'+TAGS.map(x=>'<button class="g-chip'+(e.g.includes(x)?' on':'')+'" data-g="'+x+'">'+x+'</button>').join('')+'</div>'+
+  '<label class="kx-muted">What happened, what you loved</label><textarea class="g-in" id="mn" style="min-height:120px">'+esc(e.n)+'</textarea>'+
+  [0,1].map(p=>'<div class="g-rate"><span class="l">'+esc(names[p])+'</span>'+[1,2,3,4,5].map(n=>'<button data-r="'+p+'|'+n+'" class="'+(e.r[p]>=n?'on':'')+'" aria-label="'+esc(names[p])+' '+n+' of 5">♥</button>').join('')+'</div>').join('')+
+  '<label style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="ma"'+(e.again?' checked':'')+'/> We want to do this again</label>'+
+  '<div class="g-chips"><button class="g-btn" id="ms">Save memory</button>'+(e.id?'<button class="g-btn" id="mx">Delete</button>':'')+'</div></div></div>';
+ }else{
+  let L=st.e.slice().sort((a,b)=>b.d.localeCompare(a.d));
+  if(tab==='top')L=L.filter(e=>e.again||((e.r[0]+e.r[1])/2)>=4);
+  if(q)L=L.filter(e=>(e.t+e.n).toLowerCase().includes(q.toLowerCase()));
+  if(ft)L=L.filter(e=>e.g.includes(ft));
+  h+='<input class="g-in" id="mq" placeholder="Search memories" aria-label="Search memories" value="'+esc(q)+'"/><div class="g-chips">'+TAGS.map(x=>'<button class="g-chip'+(ft===x?' on':'')+'" data-f="'+x+'">'+x+'</button>').join('')+'</div>';
+  const years={};st.e.forEach(e=>{const y=e.d.slice(0,4);years[y]=(years[y]||0)+1;});
+  if(tab==='list'&&st.e.length)h+='<div class="kx-muted" style="margin:6px 0">'+Object.keys(years).sort().reverse().map(y=>y+': '+years[y]).join(' · ')+'</div>';
+  const otd=st.e.filter(e=>e.d.slice(5)===iso(new Date()).slice(5)&&e.d.slice(0,4)!==iso(new Date()).slice(0,4));
+  if(otd.length&&tab==='list')h+='<div class="g-note">📅 On this day: '+otd.map(e=>esc(e.t)+' ('+e.d.slice(0,4)+')').join(', ')+'</div>';
+  h+=L.length?L.map(e=>'<div class="g-card"><div class="g-body" style="padding-top:14px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>'+esc(e.t)+'</b><span class="kx-muted">'+e.d+'</span></div>'+(e.g.length?'<div class="kx-muted" style="font-size:13px">'+e.g.map(esc).join(' · ')+'</div>':'')+(e.n?'<p style="white-space:pre-wrap">'+esc(e.n)+'</p>':'')+'<div class="kx-muted" style="font-size:13px">'+[0,1].map(p=>esc(names[p])+' '+'♥'.repeat(e.r[p])||'').join(' · ')+(e.again?' · 🔁 again':'')+'</div><div class="g-chips"><button class="g-chip" data-e="'+e.id+'">Edit</button></div></div></div>').join(''):'<div class="g-note">'+(st.e.length?'Nothing matches.':'No memories yet. Tap + New after your next special night.')+'</div>';
+ }
+ app.innerHTML=h;
+ app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;ed=null;view();});
+ app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{snap();const g=b.dataset.g;ed.g=ed.g.includes(g)?ed.g.filter(x=>x!==g):ed.g.concat(g);view();});
+ app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{ft=ft===b.dataset.f?'':b.dataset.f;view();});
+ app.querySelectorAll('[data-r]').forEach(b=>b.onclick=()=>{snap();const [p,n]=b.dataset.r.split('|');ed.r[+p]=ed.r[+p]===+n?0:+n;view();});
+ app.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{ed=JSON.parse(JSON.stringify(st.e.find(x=>x.id===b.dataset.e)));tab='new';view();});
+ const s=document.getElementById('ms'); if(s)s.onclick=()=>{snap();if(!ed.t.trim()){document.getElementById('mt').focus();return;}if(!ed.id){ed.id='m'+Date.now().toString(36);st.e.push(ed);}else{st.e=st.e.map(x=>x.id===ed.id?ed:x);}save();ed=null;tab='list';view();};
+ const x=document.getElementById('mx'); if(x)x.onclick=()=>{if(confirm('Delete this memory?')){st.e=st.e.filter(z=>z.id!==ed.id);save();ed=null;tab='list';view();}};
+ const mq=document.getElementById('mq'); if(mq)mq.oninput=()=>{q=mq.value;const p=mq.selectionStart;view();const n=document.getElementById('mq');n.focus();n.setSelectionRange(p,p);};
+}
+function snap(){ if(!ed)ed=blank(); const t=document.getElementById('mt'); if(t){ed.t=t.value;ed.d=document.getElementById('md').value||ed.d;ed.n=document.getElementById('mn').value;ed.again=document.getElementById('ma').checked?1:0;} }
+view();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

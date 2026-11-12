@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Search</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a,.g-note a{color:#ffc861;display:inline-block;padding:8px 4px}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script><script src="../js/ka-catalog.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+const C=window.KA_CATALOG||[]; const KEY='ka_recent_search';
+let q=(new URLSearchParams(location.search).get('q')||'').trim(); let rec=LS.get(KEY,[]); if(!Array.isArray(rec))rec=[];
+const EXTRA=[
+ {t:'Positions',u:'intimacy_Position_Selector_page.html',d:'Browse 500+ positions with names and pictures. Filter by difficulty and mood.',tag:'Learn',i:'🧘'},
+ {t:'Oral Positions',u:'intimacy_Oral_Position_Selector_page.html',d:'Oral-sex positions with names and pictures.',tag:'Learn',i:'👄'},
+ {t:'Ask the Experts',u:'kamaagni-experts.html',d:'Questions and answers from sex and relationship experts.',tag:'Learn',i:'🎓'},
+ {t:'Health & Wellbeing',u:'kamaagni-health.html',d:'Contraception, testing, pain, desire, pelvic floor, safety and more.',tag:'Health',i:'🩺'},
+ {t:'Life Stages',u:'kamaagni-life-stages.html',d:'Guidance for new love, busy seasons, parenthood, midlife and long distance.',tag:'Guide',i:'🌳'},
+ {t:'Roadmap & Yearly Review',u:'kamaagni-roadmap.html',d:'A 10-year roadmap and a private yearly review.',tag:'Plan',i:'🗺️'},
+ {t:'Tips',u:'kamaagni-tips.html',d:'Quick tips for better intimacy.',tag:'Learn',i:'💡'},
+ {t:'Myths',u:'kamaagni-myths.html',d:'Common sex myths, busted.',tag:'Learn',i:'🧠'},
+ {t:'Settings',u:'kamaagni-settings.html',d:'Names, PIN, heat level, backup and theme.',tag:'Tool',i:'⚙️'},
+ {t:'History',u:'kamaagni-history.html',d:'Everything you have played and saved.',tag:'Track',i:'📜'},
+];
+const ALL=C.map(x=>({t:x.t,u:x.u,d:x.d,tag:x.tag||'',i:x.i||'✨'})).concat(EXTRA.filter(e=>!C.some(c=>c.u===e.u)));
+const SYN={'condom':'health','sti':'health','test':'health','pain':'health','contraception':'health','movie':'movie','film':'movie','date':'dates','talk':'conversation','quiz':'quiz','massage':'massage','kink':'kink','bondage':'bdsm','rope':'bdsm','new':'new love','baby':'parent','kids':'parent','old':'later life','distance':'long distance'};
+function score(x,t){const h=(x.t+' '+x.tag+' '+x.d).toLowerCase();let s=0;for(const w of t){if(x.t.toLowerCase().includes(w))s+=5;else if(h.includes(w))s+=2;else if(SYN[w]&&h.includes(SYN[w]))s+=1;else return 0;}return s;}
+function run(){const t=q.toLowerCase().split(/\s+/).filter(Boolean);return t.length?ALL.map(x=>[score(x,t),x]).filter(z=>z[0]>0).sort((a,b)=>b[0]-a[0]).map(z=>z[1]):[];}
+function view(){
+ const r=run();
+ let h=top('Search','Find any game, guide or tool')+'<input class="g-in" id="q" type="search" placeholder="Try: massage, movie, talk, baby, pain" aria-label="Search the site" value="'+esc(q)+'"/>';
+ if(!q){h+='<h4 style="margin:14px 0 6px">Popular</h4><div class="g-chips">'+['massage','movie','quiz','date','talk','health','new love','kink','fitness'].map(w=>'<button class="g-chip" data-w="'+w+'">'+w+'</button>').join('')+'</div>'+(rec.length?'<h4 style="margin:14px 0 6px">Recent</h4><div class="g-chips">'+rec.map(w=>'<button class="g-chip" data-w="'+esc(w)+'">'+esc(w)+'</button>').join('')+'</div>':'');}
+ else{h+='<div class="kx-muted" style="margin:8px 0">'+r.length+' result'+(r.length===1?'':'s')+'</div>'+(r.length?r.map(x=>'<a class="g-card" style="display:block;text-decoration:none;color:inherit;padding:14px" href="'+esc(x.u)+'"><div style="font-weight:700">'+x.i+' '+esc(x.t)+' <span class="kx-muted" style="font-weight:400;font-size:12px">'+esc(x.tag)+'</span></div><div style="font-size:14px;opacity:.85;margin-top:4px">'+esc(x.d)+'</div></a>').join(''):'<div class="g-note">Nothing found. Try a simpler word, or open <a href="../play.html">All Games</a>.</div>');}
+ app.innerHTML=h;
+ const i=document.getElementById('q'); i.oninput=()=>{q=i.value;const p=i.selectionStart;view();const n=document.getElementById('q');n.focus();n.setSelectionRange(p,p);};
+ i.onchange=()=>{const v=q.trim();if(v){rec=[v].concat(rec.filter(x=>x!==v)).slice(0,6);LS.set(KEY,rec);}};
+ app.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{q=b.dataset.w;view();});
+ if(!q && !location.search) setTimeout(()=>i.focus(),50);
+}
+view();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/><meta name="robots" content="noindex,nofollow"/>
+<title>KamaAgni Date Planner</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.g-chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.g-chip{padding:8px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.18);background:transparent;color:inherit;font:inherit;font-size:14px;min-height:40px;cursor:pointer}
+.g-chip.on{background:rgba(255,160,90,.22);border-color:#ffb066}
+.g-card{border:1px solid rgba(255,255,255,.12);border-radius:14px;margin:10px 0;background:rgba(255,255,255,.03);overflow:hidden}
+.g-card summary{padding:14px;cursor:pointer;font-weight:700;font-size:16px;min-height:44px;display:flex;align-items:center;gap:10px;list-style:none}
+.g-card summary::-webkit-details-marker{display:none}
+.g-card summary::after{content:'+';margin-left:auto;opacity:.6;font-size:20px}
+.g-card[open] summary::after{content:'\2212'}
+.g-body{padding:0 14px 14px;font-size:15px;line-height:1.6}
+.g-body h4{margin:12px 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#ffb066}
+.g-body ul{margin:4px 0 4px 18px;padding:0}.g-body li{margin:4px 0}
+.g-body a{color:#ffc861}
+.g-note{border-left:3px solid #ffb066;padding:8px 12px;margin:10px 0;font-size:14px;opacity:.9}
+.g-in{width:100%;min-height:44px;padding:8px 12px;border-radius:10px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:inherit;font:inherit;box-sizing:border-box}
+textarea.g-in{min-height:80px}
+.g-rate{display:flex;align-items:center;gap:6px;margin:6px 0;flex-wrap:wrap}.g-rate span.l{min-width:120px;font-size:14px}
+.g-rate button{border:0;background:none;font-size:22px;padding:4px;min-width:36px;min-height:40px;cursor:pointer;color:inherit;opacity:.3}
+.g-rate button.on{opacity:1}
+.g-btn{min-height:44px;padding:8px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:transparent;color:inherit;font:inherit;cursor:pointer}
+</style></head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(function(){
+const {LS,esc,top}=KX, app=document.getElementById('app'); const names=KX.names();
+const IDEAS=["Candlelit dinner at home", "Picnic at sunset", "Dance lesson", "Cook a new cuisine together", "Couples massage night", "Stargazing with blankets", "Movie night with a themed menu", "Bath for two", "Mystery date: only the time is given", "Breakfast in bed", "Photo walk and a coffee", "Wine or tea tasting at home", "Game night with the Games hub", "Day trip somewhere new", "Write each other letters and swap them"], TYPES=[["date", "\ud83d\udc9e", "Date"], ["anni", "\ud83c\udf82", "Anniversary"], ["trip", "\u2708\ufe0f", "Trip"], ["special", "\ud83c\udf81", "Special night"]], KEY='ka_plan_v1';
+let st=LS.get(KEY,null); if(!st||!Array.isArray(st.e)) st={e:[]};
+const save=()=>LS.set(KEY,st);
+let editing=null, tab='soon';
+const today=()=>{const d=new Date();return new Date(d.getFullYear(),d.getMonth(),d.getDate());};
+const pd=s=>{const p=String(s).split('-');return new Date(+p[0],+p[1]-1,+p[2]);};
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+function next(e){const d=pd(e.d);if(!e.r)return d;const t=today();let n=new Date(t.getFullYear(),d.getMonth(),d.getDate());if(n<t)n=new Date(t.getFullYear()+1,d.getMonth(),d.getDate());return n;}
+function days(e){return Math.round((next(e)-today())/864e5);}
+function lab(n){return n===0?'Today':n===1?'Tomorrow':n<0?(-n)+' days ago':'in '+n+' days';}
+function ics(e){const d=next(e).toISOString().slice(0,10).replace(/-/g,'');const nd=new Date(next(e).getTime()+864e5).toISOString().slice(0,10).replace(/-/g,'');
+ const t=(e.t||'').replace(/[,;\\\n]/g,' ');return 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//KamaAgni//EN\r\nBEGIN:VEVENT\r\nUID:'+e.id+'@kamaagni\r\nDTSTAMP:'+new Date().toISOString().replace(/[-:]|\.\d+/g,'')+'\r\nDTSTART;VALUE=DATE:'+d+'\r\nDTEND;VALUE=DATE:'+nd+'\r\nSUMMARY:'+t+'\r\n'+(e.r?'RRULE:FREQ=YEARLY\r\n':'')+'END:VEVENT\r\nEND:VCALENDAR';}
+function dl(e){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics(e)],{type:'text/calendar'}));a.download='kamaagni-'+e.id+'.ics';a.click();}
+function view(){
+ let h=top('Date Planner','Plan dates, anniversaries and trips. Never forget a special day.')+
+ '<div class="g-chips"><button class="g-chip'+(tab==='soon'?' on':'')+'" data-t="soon">Coming up</button><button class="g-chip'+(tab==='past'?' on':'')+'" data-t="past">Past</button><button class="g-chip'+(tab==='new'?' on':'')+'" data-t="new">+ Add</button></div>';
+ if(tab==='new'){
+  const e=editing||{id:'',t:'',d:iso(today()),y:'date',r:0,n:''};
+  h+='<div class="g-card"><div class="g-body" style="padding-top:14px"><label class="kx-muted">What</label><input class="g-in" id="pt" value="'+esc(e.t)+'" placeholder="Dinner at our favourite place"/>'+
+  '<label class="kx-muted" style="display:block;margin-top:8px">When</label><input class="g-in" id="pd" type="date" value="'+e.d+'"/>'+
+  '<div class="g-chips">'+TYPES.map(t=>'<button class="g-chip'+(e.y===t[0]?' on':'')+'" data-y="'+t[0]+'">'+t[1]+' '+t[2]+'</button>').join('')+'</div>'+
+  '<label style="display:flex;gap:8px;align-items:center;min-height:44px"><input type="checkbox" id="pr"'+(e.r?' checked':'')+'/> Repeats every year (anniversaries, birthdays)</label>'+
+  '<label class="kx-muted" style="display:block;margin-top:6px">Notes</label><textarea class="g-in" id="pn">'+esc(e.n)+'</textarea>'+
+  '<div class="g-chips" style="margin-top:10px"><button class="g-btn" id="ps">Save</button>'+(e.id?'<button class="g-btn" id="pdl">Delete</button>':'')+'</div></div></div>'+
+  '<h4 style="margin:14px 0 6px">Ideas</h4><div class="g-chips">'+IDEAS.map((x,i)=>'<button class="g-chip" data-i="'+i+'">'+esc(x)+'</button>').join('')+'</div>';
+ }else{
+  const L=st.e.map(e=>({e,n:days(e)})).filter(z=>tab==='soon'?z.n>=0:z.n<0).sort((a,b)=>tab==='soon'?a.n-b.n:b.n-a.n);
+  if(tab==='soon'&&L.length){const f=L[0];h+='<div class="g-note" style="font-size:16px"><b>Next:</b> '+(TYPES.find(t=>t[0]===f.e.y)||TYPES[0])[1]+' '+esc(f.e.t)+' · '+lab(f.n)+'</div>';}
+  h+=L.length?L.map(z=>'<div class="g-card"><div class="g-body" style="padding-top:14px"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>'+(TYPES.find(t=>t[0]===z.e.y)||TYPES[0])[1]+' '+esc(z.e.t)+'</b><span class="kx-muted">'+lab(z.n)+' · '+next(z.e).toDateString().slice(0,10)+(z.e.r?' · yearly':'')+'</span></div>'+(z.e.n?'<p class="kx-muted">'+esc(z.e.n)+'</p>':'')+'<div class="g-chips"><button class="g-chip" data-e="'+z.e.id+'">Edit</button><button class="g-chip" data-c="'+z.e.id+'">Add to my calendar</button></div></div></div>').join(''):'<div class="g-note">'+(tab==='soon'?'Nothing planned yet. Tap + Add, or pick an idea.':'No past events.')+'</div>';
+ }
+ app.innerHTML=h;
+ app.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{tab=b.dataset.t;if(tab!=='new')editing=null;view();});
+ app.querySelectorAll('[data-y]').forEach(b=>b.onclick=()=>{snap();editing.y=b.dataset.y;view();});
+ app.querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>{snap();editing.t=IDEAS[+b.dataset.i];view();});
+ app.querySelectorAll('[data-e]').forEach(b=>b.onclick=()=>{editing=st.e.find(x=>x.id===b.dataset.e);tab='new';view();});
+ app.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>dl(st.e.find(x=>x.id===b.dataset.c)));
+ const s=document.getElementById('ps');
+ if(s)s.onclick=()=>{snap();if(!editing.t.trim()){document.getElementById('pt').focus();return;}if(!editing.id){editing.id='p'+Date.now().toString(36);st.e.push(editing);}save();editing=null;tab='soon';view();};
+ const dd=document.getElementById('pdl'); if(dd)dd.onclick=()=>{if(confirm('Delete this?')){st.e=st.e.filter(x=>x.id!==editing.id);save();editing=null;tab='soon';view();}};
+}
+function snap(){const e=editing||(editing={id:'',t:'',d:iso(today()),y:'date',r:0,n:''});const t=document.getElementById('pt');if(t){e.t=t.value;e.d=document.getElementById('pd').value||e.d;e.r=document.getElementById('pr').checked?1:0;e.n=document.getElementById('pn').value;}}
+view();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>
