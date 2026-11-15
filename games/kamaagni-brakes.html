@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Brakes &amp; Accelerators</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.ba-who{display:flex;gap:8px;margin:6px 0 12px}
+.ba-who button,.ba-tabs button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-weight:700;cursor:pointer;padding:6px 10px}
+.ba-who button.on,.ba-tabs button.on{color:#fff;border-color:rgba(232,99,122,.6);background:rgba(232,99,122,.14)}
+.ba-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}.ba-tabs button{flex:none;border-radius:999px}
+.ba-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ba-item span{flex:1;line-height:1.4}
+.ba-3{display:flex;gap:4px;flex:none}
+.ba-3 button{min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:inherit;font-size:18px;cursor:pointer}
+.ba-3 button.on.g{background:rgba(80,200,120,.2);border-color:rgba(80,200,120,.6)}
+.ba-3 button.on.m{background:rgba(255,255,255,.1)}
+.ba-3 button.on.r{background:rgba(232,99,122,.2);border-color:rgba(232,99,122,.6)}
+.ba-sum{display:grid;gap:10px}@media(min-width:640px){.ba-sum{grid-template-columns:1fr 1fr}}
+.ba-sum .kx-card ul{margin:6px 0 10px 18px;padding:0;line-height:1.6}
+.ba-meter{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 2px}.ba-meter i{display:block;height:100%}
+.ba-ta,.ba-sel{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:inherit;font:inherit;padding:10px;box-sizing:border-box;margin:4px 0 10px}
+.ba-ck{display:flex;gap:10px;align-items:center;min-height:44px;cursor:pointer}.ba-ck input{width:22px;height:22px;accent-color:var(--rose)}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const P = KX.names();
+  /* Concept: the dual control model (Janssen & Bancroft), popularised by Emily Nagoski in "Come As You Are".
+     Arousal = turning on the accelerator AND turning off the brakes. Items below are KamaAgni's own. */
+  const AREAS = [
+    {k: 'me', l: 'Me, right now', i: '🧠', items: ['Feeling rested', 'Feeling good in my body', 'A busy, racing mind', 'Worrying about how I look', 'Worrying about whether I’ll finish', 'Having just showered', 'Being a bit tipsy', 'Feeling stressed about work or money']},
+    {k: 'you', l: 'You', i: '💞', items: ['Your smell up close', 'Seeing you confident at something', 'Watching you be kind to others', 'You taking charge', 'You being shy or nervous', 'You looking tired or distracted', 'Hearing how much you want me']},
+    {k: 'us', l: 'Us', i: '🔗', items: ['Having laughed together that day', 'Feeling heard after a hard day', 'An argument that isn’t settled', 'Feeling like a to-do list item', 'Flirting through the day', 'Time apart, then reuniting', 'Knowing we have no time pressure']},
+    {k: 'place', l: 'The setting', i: '🕯️', items: ['A tidy, private room', 'Dim light or candles', 'Clutter or chores in sight', 'Kids or others nearby', 'Somewhere new (hotel, holiday)', 'Music playing', 'Phones buzzing']},
+    {k: 'do', l: 'What we do', i: '🔥', items: ['A long build-up', 'Being kissed slowly', 'Dirty talk', 'Being touched without a goal', 'Going straight to sex', 'Being watched', 'Following a plan or game', 'Trying something new']}
+  ];
+  const STRESS = [['🏃', 'Move', 'Twenty minutes of anything that raises your heart rate: a walk, dancing in the kitchen, stairs.'], ['🌬️', 'Breathe', 'Slow breaths: in for 5, out for 5, for 90 seconds.'], ['🫂', 'Hold', 'A 20-second hug, chest to chest, until you both relax.'], ['😂', 'Laugh', 'Watch something genuinely funny together. Real belly laughs.'], ['😢', 'Let it out', 'A good cry is allowed. It finishes the stress, it doesn’t start more.'], ['🎨', 'Make something', 'Draw, cook, sing or write for ten minutes.']];
+  const st = LS.get('ka_brakes', {r: [{}, {}], plan: null, mem: ''});
+  st.r = st.r || [{}, {}];
+  const save = () => LS.set('ka_brakes', st);
+  let tab = ['sum', 'plan', 'unwind', 'kind'].includes(location.hash.slice(1)) ? location.hash.slice(1) : 'rate', who = 0;
+
+  function frame(inner) {
+    app.innerHTML = top('Brakes & Accelerators', 'Everyone has a sexual “accelerator” and “brakes”. Learn yours, then make room for more of the good stuff.') +
+      `<div class="ba-tabs" role="tablist">${[['rate', '🎛️ Check in'], ['sum', '📊 Our results'], ['plan', '🛠️ Turn off a brake'], ['unwind', '🌊 Unwind first'], ['kind', '🤍 Be kind to yourself']].map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" data-t="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>` + inner;
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  }
+  function rate() {
+    const R = st.r[who] = st.r[who] || {};
+    const n = Object.keys(R).length, tot = AREAS.reduce((a, x) => a + x.items.length, 0);
+    frame(`<p class="kx-muted" style="margin:0 0 6px">Do this privately, then compare. For each one: does it turn you <b>on</b> 🔥, does it make <b>no difference</b> 〰️, or does it put the <b>brakes</b> on 🛑?</p>
+      <div class="ba-who" role="group" aria-label="Whose answers">${P.map((p, i) => `<button data-w="${i}" class="${who === i ? 'on' : ''}">${esc(p)}</button>`).join('')}</div>
+      <p class="kx-muted">${n} of ${tot} answered</p>
+      ${AREAS.map(a => `<div class="kx-card" style="margin-bottom:10px"><div class="kx-turn">${a.i} ${esc(a.l)}</div>${a.items.map(t => { const k = a.k + ':' + t, v = R[k]; return `<div class="ba-item"><span>${esc(t)}</span><div class="ba-3" role="group" aria-label="${esc(t)}"><button data-k="${esc(k)}" data-v="1" class="g${v === 1 ? ' on' : ''}" aria-label="Turns me on" aria-pressed="${v === 1}">🔥</button><button data-k="${esc(k)}" data-v="0" class="m${v === 0 ? ' on' : ''}" aria-label="No difference" aria-pressed="${v === 0}">〰️</button><button data-k="${esc(k)}" data-v="-1" class="r${v === -1 ? ' on' : ''}" aria-label="Puts the brakes on" aria-pressed="${v === -1}">🛑</button></div></div>`; }).join('')}</div>`).join('')}
+      <div class="kx-row" style="justify-content:center"><button class="kx-btn" id="go">See our results →</button></div>`);
+    app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { who = +b.dataset.w; const y = scrollY; render(); scrollTo(0, 0); });
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const y = scrollY; R[b.dataset.k] = +b.dataset.v; save(); render(); scrollTo(0, y); });
+    document.getElementById('go').onclick = () => { tab = 'sum'; render(); scrollTo(0, 0); };
+  }
+  function lists(i) {
+    const R = st.r[i] || {}, on = [], off = [];
+    Object.entries(R).forEach(([k, v]) => { const t = k.split(':').slice(1).join(':'); if (v === 1) on.push(t); if (v === -1) off.push(t); });
+    return {on, off, n: Object.keys(R).length};
+  }
+  function sum() {
+    const L = [lists(0), lists(1)];
+    const shared = L[0].on.filter(x => L[1].on.includes(x)), sharedOff = L[0].off.filter(x => L[1].off.includes(x));
+    frame(`<div class="ba-sum">${P.map((p, i) => { const x = L[i], tot = x.on.length + x.off.length || 1; return `<div class="kx-card"><h2 style="margin:0 0 6px">${esc(p)}</h2>
+        ${x.n ? `<div class="kx-muted" style="font-size:13px">Accelerator ${x.on.length} · Brakes ${x.off.length}</div><div class="ba-meter"><i style="width:${Math.round(x.on.length / tot * 100)}%;background:linear-gradient(90deg,#50c878,#f3d27a)"></i></div>
+        <div class="kx-turn" style="margin-top:10px">🔥 Turns me on</div><ul>${x.on.map(t => `<li>${esc(t)}</li>`).join('') || '<li class="kx-muted">nothing yet</li>'}</ul>
+        <div class="kx-turn">🛑 Brakes</div><ul>${x.off.map(t => `<li>${esc(t)}</li>`).join('') || '<li class="kx-muted">nothing yet</li>'}</ul>` : '<p class="kx-muted">Not checked in yet.</p>'}</div>`; }).join('')}</div>
+      ${shared.length || sharedOff.length ? `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">You have in common</div>${shared.length ? `<p>🔥 ${esc(shared.join(' · '))}</p>` : ''}${sharedOff.length ? `<p>🛑 ${esc(sharedOff.join(' · '))}</p>` : ''}</div>` : ''}
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">How to read this</div>
+        <p style="line-height:1.6;margin:6px 0">More brakes than accelerators is common and normal. It usually means life is crowding in, not that something is wrong with you. Often the quickest win is <b>removing one brake</b> rather than adding more spice.</p>
+        <p style="line-height:1.6;margin:6px 0">Desire doesn’t have to arrive first. For many people it shows up <i>after</i> things begin, once the brakes are off. Being willing to start and see is enough.</p></div>
+      <div class="kx-card" style="margin-top:12px"><label class="kx-turn" for="mem" style="display:block">Remember a really good time</label><p class="kx-muted" style="margin:4px 0">What made it great: how you felt, the place, what was going on in your lives, what you did? Those are your accelerators in action.</p><textarea id="mem" class="ba-ta">${esc(st.mem || '')}</textarea></div>
+      <div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn" id="pl">🛠️ Turn off one brake →</button></div>`);
+    document.getElementById('mem').onchange = e => { st.mem = e.target.value; save(); };
+    document.getElementById('pl').onclick = () => { tab = 'plan'; render(); scrollTo(0, 0); };
+  }
+  const IDEAS = {'Feeling stressed about work or money': 'Do 20 minutes of “Unwind first” before anything else', 'A busy, racing mind': 'Write tomorrow’s to-do list before bed, then put it away', 'Worrying about how I look': 'Lights low, and say one thing you love about each other’s body', 'Clutter or chores in sight': 'Tidy one room together, just that one room, and close the door', 'Phones buzzing': 'Phones in another room after 9 pm on our nights', 'Kids or others nearby': 'A lock on the door and a fan or music for privacy', 'An argument that isn’t settled': 'Have the repair talk first; sex can wait an hour', 'Feeling like a to-do list item': 'No “Shall we?” at bedtime; flirt in the afternoon instead', 'Going straight to sex': 'A 15-minute rule: no undressing before 15 minutes of kissing and touch', 'You looking tired or distracted': 'Ask “Where’s your head tonight?” and listen before deciding'};
+  function plan() {
+    const all = [...new Set([...lists(0).off, ...lists(1).off])];
+    const p = st.plan || {brake: all[0] || '', steps: '', obstacle: '', fix: '', d: 0};
+    frame(`<div class="kx-card"><p class="kx-muted" style="margin:0 0 8px">Pick one brake. Make a small, concrete plan. Expect an obstacle and decide now how you’ll handle it. That last step is what makes plans actually work.</p>
+      <label class="kx-turn" for="br" style="display:block">1. The brake we’ll work on</label>
+      <select id="br" class="ba-sel">${(all.length ? all : ['Check in first to see your brakes']).map(b => `<option${b === p.brake ? ' selected' : ''}>${esc(b)}</option>`).join('')}</select>
+      ${IDEAS[p.brake] ? `<p class="kx-muted" style="margin:-4px 0 10px">💡 Idea: ${esc(IDEAS[p.brake])}</p>` : ''}
+      <label class="kx-turn" for="s1" style="display:block">2. What exactly we’ll do (when, where, who)</label><textarea id="s1" class="ba-ta" placeholder="e.g. Sunday evening, phones go in the kitchen drawer at 8">${esc(p.steps)}</textarea>
+      <label class="kx-turn" for="s2" style="display:block">3. What could get in the way</label><textarea id="s2" class="ba-ta" placeholder="e.g. A work email comes in">${esc(p.obstacle)}</textarea>
+      <label class="kx-turn" for="s3" style="display:block">4. If that happens, then we will…</label><textarea id="s3" class="ba-ta" placeholder="e.g. Answer it tomorrow and say “Not tonight, it’s ours”">${esc(p.fix)}</textarea>
+      <div class="kx-row"><button class="kx-btn" id="sv">💾 Save our plan</button>${window.KA_NEXT ? '<button class="kx-btn ghost" id="cal">📅 Add a night to our plans</button>' : ''}</div>
+      ${p.d ? `<p class="kx-muted" style="margin-top:8px">Saved ${new Date(p.d).toLocaleDateString()}. Check how it went in a week.</p>` : ''}</div>`);
+    const $ = id => document.getElementById(id);
+    $('br').onchange = e => { st.plan = Object.assign({}, p, {brake: e.target.value}); save(); render(); };
+    $('sv').onclick = () => { st.plan = {brake: $('br').value, steps: $('s1').value.trim(), obstacle: $('s2').value.trim(), fix: $('s3').value.trim(), d: Date.now()}; save(); KX.toast('Plan saved 🛠️'); try { window.KA_TRACK && KA_TRACK.award('brakes', 15); } catch (e) {} };
+    if ($('cal')) $('cal').onclick = () => KA_NEXT.plan();
+  }
+  function unwind() {
+    frame(`<div class="kx-card"><p style="margin:0 0 10px;line-height:1.6">Stress is the most common brake. Avoiding the stressor isn’t enough: your body needs a signal that the danger is over. Do one of these, together if you can, <b>before</b> trying to get in the mood.</p>
+      ${STRESS.map(([i, t, d], n) => `<label class="ba-ck"><input type="checkbox" data-u="${n}"><span><b>${i} ${t}.</b> ${esc(d)}</span></label>`).join('')}
+      <div class="kx-row" style="margin-top:12px"><button class="kx-btn gold" id="br">🌬️ 90-second breathing</button><button class="kx-btn ghost" id="hg">🫂 20-second hug timer</button></div></div>`);
+    document.getElementById('br').onclick = () => window.KA && KA.timer(90, 'Breathe: in 5, out 5');
+    document.getElementById('hg').onclick = () => window.KA && KA.timer(20, 'Hold each other');
+  }
+  /* Self-kindness tools. Concepts: self-compassion and "feelings about feelings" (Come As You Are); rewriting old beliefs about sex (Loving Sex). Wording is KamaAgni's own. */
+  const FEEL = [['Name it', 'Say it plainly: “Right now I feel…” (hurt, jealous, tense, flat, shy).'], ['Let it be there', 'Don’t argue with it or judge yourself for it. Breathe with it for a minute. Feelings pass faster when they’re allowed.'], ['Own it', 'Ask: what is this feeling trying to protect? What could I do about it myself?'], ['Share it', '“I feel ___, and what would help me is ___.” Your partner can help, but it’s a gift, not a duty.']];
+  function kind() {
+    const K = st.kind = st.kind || {};
+    const box = (k, lbl, ph) => `<label class="kx-turn" for="k-${k}" style="display:block;margin-top:10px">${lbl}</label><textarea id="k-${k}" data-k2="${k}" class="ba-ta" placeholder="${ph}">${esc(K[k] || '')}</textarea>`;
+    frame(`<p class="kx-muted" style="margin:0 0 10px">How you feel about yourself is one of the strongest brakes or accelerators of all. These are for each of you, privately. Shame shuts desire down; kindness opens it up.</p>
+      <div class="kx-card" style="margin-bottom:12px"><div class="kx-turn">💭 A hard feeling in four steps</div>${FEEL.map(([t, d], i) => `<div class="ba-item"><span><b>${i + 1}. ${t}.</b> ${esc(d)}</span></div>`).join('')}</div>
+      <div class="kx-card" style="margin-bottom:12px"><div class="kx-turn">🤝 Talk to yourself like a friend would</div>
+        ${box('hard', 'Something about sex or your body you’re hard on yourself about', 'e.g. I take too long to get in the mood')}
+        ${box('friend', 'Now imagine your kindest friend read that. What would they say to you?', 'e.g. Lots of people need time. You deserve that time.')}
+        <p class="kx-muted">Read the second answer out loud. It feels odd at first and gets easier.</p></div>
+      <div class="kx-card" style="margin-bottom:12px"><div class="kx-turn">📜 Old messages, new beliefs</div>
+        ${box('old', 'A message about sex you picked up growing up (from family, school, religion, friends, porn)', 'e.g. Good girls don’t ask for things / Men should always be ready')}
+        ${box('where', 'Where did it come from, and how has it shaped you?', '')}
+        ${box('new', 'What do you choose to believe now?', 'e.g. Asking for what I want is part of being a good lover')}</div>
+      <div class="kx-card"><div class="kx-turn">🪞 Three minutes of body kindness</div>
+        <p style="margin:6px 0;line-height:1.6">Alone, somewhere warm and private. Look at your body in a mirror, or simply with your hands, for three minutes. Each time a critical thought shows up, notice it, then name one thing your body does for you or one part you like. Not to fix anything, just to practise looking kindly.</p>
+        <button class="kx-btn ghost" id="bm">⏱ 3 minutes</button></div>`);
+    app.querySelectorAll('[data-k2]').forEach(t => t.onchange = () => { K[t.dataset.k2] = t.value.trim(); save(); });
+    document.getElementById('bm').onclick = () => window.KA && KA.timer(180, 'Body kindness');
+  }
+
+  function render() { ({rate, sum, plan, unwind, kind})[tab](); }
+  render();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

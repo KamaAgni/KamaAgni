@@ -26,18 +26,35 @@
     if (!sel.size) cfg.cats.forEach(function (c) { sel.add(c.id); });
     var ex = Object.assign({}, (cfg.extras || []).reduce(function (a, e) { a[e.id] = e.def; return a; }, {}), saved.extras || {});
     var canTwo = cfg.modes.indexOf('two') >= 0, linked = cfg.duo && cfg.duo.linked();
+    /* one-tap start with the categories, mode and options used last time */
+    function quick() {
+      if (!saved.cats || !saved.cats.length) return '';
+      var c = cfg.cats.filter(function (x) { return saved.cats.indexOf(x.id) >= 0 && x.h <= heat(); });
+      if (!c.length) return '';
+      var names = c.slice(0, 3).map(function (x) { return x.label || x.l || x.n || x.id; }).join(', ') + (c.length > 3 ? ' +' + (c.length - 3) : '');
+      return (saved.mode === 'two' && linked ? '📱📱 Two phones · ' : (canTwo ? '📱 One phone · ' : '')) + names;
+    }
+    /* one line describing the current choices, shown on the closed Customise section */
+    function summary() {
+      var on = cfg.cats.filter(function (c) { return sel.has(c.id) && c.h <= heat(); }).length, all = cfg.cats.filter(function (c) { return c.h <= heat(); }).length;
+      var x = (cfg.extras || []).map(function (e) { var o = e.opts.filter(function (z) { return String(z[0]) === String(ex[e.id]); })[0]; return o ? (/^\d+$/.test(o[1]) ? o[1] + ' ' + String(e.label).toLowerCase() : o[1]) : ''; }).filter(Boolean).slice(0, 2).join(' · ');
+      return (on === all ? 'All ' + all : on + ' of ' + all) + ' ' + (cfg.catsLabel && /pack/i.test(cfg.catsLabel) ? 'packs' : 'categories') + (x ? ' · ' + x : '');
+    }
     function draw() {
       var h = heat();
       app.innerHTML = '<h1 class="kx-title"><span>' + esc(cfg.title) + '</span></h1><p class="kx-sub">' + esc(cfg.sub || '') + '</p>' +
+        (quick() ? '<div class="kx-card kd-quick" data-nofx="1" style="display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:14px 16px"><div><b>⚡ Same as last time</b><div class="kx-muted" style="font-size:13px">' + esc(quick()) + '</div></div><button class="kx-btn gold sm" id="kd-q">Quick start</button></div>' : '') +
         '<div class="kx-card kd-setup" data-nofx="1">' +
         (canTwo ? '<div class="kx-sec" style="margin-top:0">How do you want to play?</div><div class="kd-modes"><button type="button" data-m="one" class="' + (mode === 'one' ? 'on' : '') + '"><b>📱 One phone</b><span>Share this phone and take turns.</span></button>' +
           '<button type="button" data-m="two" class="' + (mode === 'two' ? 'on' : '') + '" ' + (linked ? '' : 'disabled') + '><b>📱📱 Two phones</b><span>' + (linked ? 'Each on your own phone, live. Your partner joins by themselves.' : 'Needs a linked partner. Link once in Together.') + '</span></button></div>' +
           (linked ? '' : '<p class="kx-note" style="margin-top:6px"><a href="kamaagni-together.html" style="color:var(--kv-rose2)">Open Together to link</a></p>') : '') +
         '<div class="kx-sec">Heat level</div><div id="kd-heat"></div>' +
+        '<div class="kx-row kd-start" style="margin-top:16px"><button class="kx-btn gold" id="kd-go">' + esc(cfg.startLabel || 'Start') + '</button>' + (cfg.guide ? '<button class="kx-btn ghost" id="kd-gd">📖 How to play</button>' : '') + '</div>' +
+        '<details class="kd-more" id="kd-more"' + (LSget('ka_setup_open', 0) ? ' open' : '') + '><summary><b>⚙️ Customise</b><span>' + esc(summary()) + '</span></summary>' +
         '<div class="kx-sec">' + esc(cfg.catsLabel || 'Categories') + ' <span class="kd-all"><button type="button" id="kd-on">All</button><button type="button" id="kd-off">None</button></span></div>' +
         '<div class="kd-cats">' + cfg.cats.map(function (c, ci) { var dis = c.h > h; var gh = c.g && (ci === 0 || cfg.cats[ci - 1].g !== c.g) ? '<div class="kd-grp">' + esc(c.g) + '</div>' : ''; return gh + '<button type="button" class="kd-cat ' + (sel.has(c.id) && !dis ? 'on' : '') + '" data-c="' + c.id + '" ' + (dis ? 'disabled title="Needs a higher heat level"' : '') + '><span class="i">' + (c.i || '•') + '</span><b>' + esc(c.l) + '</b>' + (c.n ? '<em>' + c.n + '</em>' : '') + '</button>'; }).join('') + '</div>' +
         (cfg.extras || []).map(function (e) { return '<div class="kx-sec">' + esc(e.label) + '</div><div class="kd-opts" data-x="' + e.id + '">' + e.opts.map(function (o) { return '<button type="button" data-v="' + esc(o[0]) + '" class="' + (String(ex[e.id]) === String(o[0]) ? 'on' : '') + '">' + esc(o[1]) + '</button>'; }).join('') + '</div>'; }).join('') +
-        '<div class="kx-row kd-start" style="margin-top:20px"><button class="kx-btn gold" id="kd-go">' + esc(cfg.startLabel || 'Start') + '</button>' + (cfg.guide ? '<button class="kx-btn ghost" id="kd-gd">📖 How to play</button>' : '') + '</div>' +
+        '</details>' +
         (cfg.note ? '<p class="kx-note">' + esc(cfg.note) + '</p>' : '') + '</div>';
       window.KX && KX.heatBar(document.getElementById('kd-heat'), function () { draw(); });
       app.querySelectorAll('[data-m]').forEach(function (b) { b.onclick = function () { if (b.disabled) return; mode = b.dataset.m; draw(); }; });
@@ -45,6 +62,9 @@
       document.getElementById('kd-on').onclick = function () { cfg.cats.forEach(function (c) { if (c.h <= heat()) sel.add(c.id); }); draw(); };
       document.getElementById('kd-off').onclick = function () { sel.clear(); draw(); };
       app.querySelectorAll('[data-x] button').forEach(function (b) { b.onclick = function () { var id = b.parentElement.dataset.x; ex[id] = b.dataset.v; b.parentElement.querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); tick(); }; });
+      var qb = document.getElementById('kd-q'); if (qb) qb.onclick = function () { var c = (saved.cats || []).filter(function (id) { return cfg.cats.some(function (x) { return x.id === id && x.h <= heat(); }); }); if (!c.length) return draw(); var mo = saved.mode === 'two' && linked ? 'two' : 'one'; cfg.start({ mode: mo, heat: heat(), cats: c, extras: ex }); };
+      var km = document.getElementById('kd-more'); if (km) km.addEventListener('toggle', function () { LSset('ka_setup_open', km.open ? 1 : 0); });
+      app.querySelectorAll('[data-c],[data-x] button,#kd-on,#kd-off').forEach(function (b) { b.addEventListener('click', function () { var sm = app.querySelector('#kd-more summary span'); if (sm) sm.textContent = summary(); }); });
       if (cfg.guide) document.getElementById('kd-gd').onclick = function () { guide(cfg.guideTitle || 'How to play', cfg.guide); };
       document.getElementById('kd-go').onclick = function () {
         var cats = cfg.cats.filter(function (c) { return sel.has(c.id) && c.h <= heat(); }).map(function (c) { return c.id; });

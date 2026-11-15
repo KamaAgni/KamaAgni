@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Morning after</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.ag-h{display:flex;gap:6px;margin:6px 0 10px}.ag-h button{width:46px;height:46px;border-radius:50%;border:1px solid var(--border2);background:transparent;font-size:22px;cursor:pointer;filter:grayscale(1);opacity:.55}
+.ag-h button.on{filter:none;opacity:1;border-color:rgba(232,99,122,.7);background:rgba(232,99,122,.14)}
+.ag-in{width:100%;box-sizing:border-box;min-height:46px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:10px 12px;margin:4px 0 10px}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const P = KX.names();
+  const a = LS.get('ka_after', null) || {at: Date.now(), what: [], done: 0};
+  const ans = [{r: 0, l: '', t: ''}, {r: 0, l: '', t: ''}];
+  let talk = '';
+  const when = new Date(a.at), ago = Math.round((Date.now() - a.at) / 864e5);
+  const night = ago <= 1 ? 'last night' : 'the other night';
+  /* v84: what the remote said during the night (from js/ka-remote.js history, this phone only) */
+  const remoteH = () => window.KA_REMOTE && KA_REMOTE.history ? KA_REMOTE.history(a.at - 8 * 36e5, a.at + 4 * 36e5) : null;
+  function remoteCard() {
+    const H = remoteH(); if (!H || !H.length) return '';
+    const who = x => [x.out ? P[0] + (x.out > 1 ? ' ×' + x.out : '') : '', x['in'] ? P[1] + (x['in'] > 1 ? ' ×' + x['in'] : '') : ''].filter(Boolean).join(', ');
+    const fav = H.filter(x => !['r', 'y', 'pause', 'slower', 'lighter', 'water', 'breakc'].includes(x.v))[0];
+    return `<div class="kx-card" style="margin-bottom:12px"><div class="kx-turn">📲 During the night</div><p class="kx-muted" style="font-size:14px;margin:4px 0 8px">What the remote said, most used first.</p>
+      <ul style="margin:0 0 6px 0;padding:0;list-style:none">${H.slice(0, 8).map(x => `<li style="margin:4px 0">${x.icon} ${esc(x.text)} <span class="kx-muted" style="font-size:13px">· ${esc(who(x))}</span></li>`).join('')}</ul>
+      ${fav ? `<p style="margin:6px 0 0;font-size:14px">💡 “${esc(fav.text)}” came up most. That’s a good clue for next time.</p>` : ''}
+      ${H.some(x => x.v === 'r' || x.v === 'y') ? '<p style="margin:6px 0 0;font-size:14px">🟡🔴 A slow-down or stop came up. Worth a gentle word about what was happening then. No blame, just learning.</p>' : ''}</div>`;
+  }
+  if (!window.KA_REMOTE) setTimeout(() => { if (remoteH() && remoteH().length && document.getElementById('sv')) { keep(); draw(); } }, 900);
+  function draw() {
+    app.innerHTML = top('The morning after', `A gentle check-in about ${night}. It takes a minute, and it’s how good nights become better ones.`) +
+      `<p class="kx-muted" style="margin:-4px 0 12px">${esc(when.toLocaleDateString([], {weekday: 'long', day: 'numeric', month: 'long'}))}${a.what.length ? ' · ' + esc(a.what.join(', ')) : ''}</p>` +
+      remoteCard() + ans.map((x, i) => `<div class="kx-card" style="margin-bottom:12px"><div class="kx-turn">${esc(P[i])}</div>
+        <div class="kx-muted" style="font-size:14px">How did it feel?</div>
+        <div class="ag-h" role="group" aria-label="How it felt for ${esc(P[i])}">${[1, 2, 3, 4, 5].map(n => `<button data-p="${i}" data-r="${n}" class="${x.r >= n ? 'on' : ''}" aria-label="${n} of 5" aria-pressed="${x.r === n}">♥</button>`).join('')}</div>
+        <label class="kx-muted" style="font-size:14px" for="l${i}">One thing I loved</label><input id="l${i}" class="ag-in" maxlength="160" value="${esc(x.l)}" placeholder="The way you…">
+        <label class="kx-muted" style="font-size:14px" for="t${i}">One thing to try next time</label><input id="t${i}" class="ag-in" maxlength="160" value="${esc(x.t)}" placeholder="Next time I’d love…"></div>`).join('') +
+      `<div class="kx-card"><label class="kx-muted" style="font-size:14px" for="tk">Anything we should talk about? (optional)</label><input id="tk" class="ag-in" maxlength="200" value="${esc(talk)}" placeholder="Something that felt off, or that you want more of">
+        <p class="kx-muted" style="font-size:13px;margin:0 0 10px">If something didn’t feel good, say it kindly and early. “I loved X; next time could we go slower with Y?” works well.</p>
+        <div class="kx-row"><button class="kx-btn" id="sv">💗 Save to our Journal</button><button class="kx-btn ghost" id="sk">Not this time</button></div></div>`;
+    app.querySelectorAll('[data-r]').forEach(b => b.onclick = () => { keep(); ans[+b.dataset.p].r = +b.dataset.r; draw(); });
+    document.getElementById('sv').onclick = () => { keep(); if (!ans.some(x => x.r || x.l || x.t)) return KX.toast('Add a heart or a line first');
+      const rs = ans.map(x => x.r).filter(Boolean), r = rs.length ? Math.round(rs.reduce((p, q) => p + q, 0) / rs.length) : 4;
+      const lines = []; ans.forEach((x, i) => { if (x.l) lines.push(P[i] + ' loved: ' + x.l); if (x.t) lines.push(P[i] + ' wants to try: ' + x.t); }); if (talk) lines.push('To talk about: ' + talk); const RH = remoteH(); if (RH && RH.length) lines.push('Remote: ' + RH.slice(0, 5).map(x => x.icon + ' ' + x.text + ' ×' + (x.out + x['in'])).join(', '));
+      const log = LS.get('ka_journal', []); log.push({id: Date.now(), d: when.getFullYear() + '-' + String(when.getMonth() + 1).padStart(2, '0') + '-' + String(when.getDate()).padStart(2, '0'), r, g: ['Morning after'].concat(a.what.slice(0, 2)), n: lines.join('\n')}); LS.set('ka_journal', log);
+      window.KA_AFTER && KA_AFTER.done(); window.KA_TRACK && KA_TRACK.award && KA_TRACK.award('after', 15);
+      app.innerHTML = top('Saved 💗', 'It’s in your Journal. Bring up one of the “try next time” ideas when you plan your next night.') + '<div class="kx-row"><a class="kx-btn" href="kamaagni-journal.html">📓 Open Journal</a><a class="kx-btn ghost" href="kamaagni-tonight.html">✨ Plan the next one</a></div>'; };
+    document.getElementById('sk').onclick = () => { window.KA_AFTER && KA_AFTER.done(); location.href = '../index.html'; };
+  }
+  function keep() { ans.forEach((x, i) => { const l = document.getElementById('l' + i), t = document.getElementById('t' + i); if (l) x.l = l.value.trim(); if (t) x.t = t.value.trim(); }); const k = document.getElementById('tk'); if (k) talk = k.value.trim(); }
+  draw();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

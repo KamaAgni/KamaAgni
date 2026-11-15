@@ -26,6 +26,8 @@ body{padding-bottom:0}
   <button class="kx-btn sm ghost" id="zo" aria-label="Zoom out">−</button>
   <span class="pg" id="pg"></span>
   <button class="kx-btn sm ghost" id="zi" aria-label="Zoom in">+</button>
+  <button class="kx-btn sm ghost" id="bm" aria-label="Bookmark this page" aria-pressed="false">☆</button>
+  <select id="bml" aria-label="Jump to a bookmark" style="display:none;min-height:36px;border-radius:10px;background:#0b0d1c;color:#fff;border:1px solid rgba(255,255,255,.2);font:inherit;font-size:13px;max-width:110px"></select>
   <button class="kx-btn sm gold" id="dl">⬇ Download</button>
 </div>
 <div id="msg"><div id="mt">Opening the PDF…</div><div class="kx-prog"><i id="pb" style="width:3%"></i></div><div class="kx-muted" id="ps"></div></div>
@@ -36,11 +38,11 @@ body{padding-bottom:0}
   var REPO='KamaAgni/KamaAgniPDF',BR='main';
   var q=new URLSearchParams(location.search), p=q.get('p'), u=q.get('u'), name=q.get('n')||'';
   var url;
-  function bad(m){document.getElementById('mt').textContent=m;document.getElementById('pb').parentNode.style.display='none'}
-  if(p){ if(p.indexOf('..')>-1||!/\.pdf$/i.test(p)){return bad('Invalid file.')}
+  function bad(m){document.getElementById('mt').innerHTML=m+'<br><a class="kx-btn sm" style="margin-top:14px;display:inline-flex" href="kamaagni-library.html">Open the Library</a>';document.getElementById('pb').parentNode.style.display='none';document.getElementById('ttl').textContent='Reader';['zo','zi','dl'].forEach(function(i){document.getElementById(i).style.display='none'})}
+  if(p){ if(p.indexOf('..')>-1||!/\.pdf$/i.test(p)){return bad('That file cannot be opened here.')}
     url='https://raw.githubusercontent.com/'+REPO+'/'+BR+'/'+p.split('/').map(encodeURIComponent).join('/'); }
-  else if(u){ try{ var uu=new URL(u,location.href); if(uu.origin!==location.origin) return bad('Invalid file.'); url=uu.href; }catch(e){return bad('Invalid file.')} }
-  else return bad('No file selected.');
+  else if(u){ try{ var uu=new URL(u,location.href); if(uu.origin!==location.origin) return bad('That file cannot be opened here.'); url=uu.href; }catch(e){return bad('That file cannot be opened here.')} }
+  else return bad('Pick a book in the Library to read it here.');
   var fname=decodeURIComponent((p||u).split('/').pop());
   document.getElementById('ttl').textContent=name||fname.replace(/\.pdf$/i,'');
   document.title='KamaAgni '+(name||fname);
@@ -53,7 +55,8 @@ body{padding-bottom:0}
     }).catch(function(){ window.open(url,'_blank','noopener'); b.textContent='⬇ Download'; b.disabled=false; });
   };
   pdfjsLib.GlobalWorkerOptions.workerSrc='../js/vendor/pdf.worker.min.js';
-  var task=pdfjsLib.getDocument({url:url,withCredentials:false});
+  function openDoc(src){
+  var task=pdfjsLib.getDocument(src);
   task.onProgress=function(o){ if(o.total){ var pc=Math.min(99,Math.round(o.loaded/o.total*100)); document.getElementById('pb').style.width=pc+'%'; document.getElementById('ps').textContent=(o.loaded/1048576).toFixed(1)+' / '+(o.total/1048576).toFixed(1)+' MB'; } else document.getElementById('ps').textContent=(o.loaded/1048576).toFixed(1)+' MB'; };
   task.promise.then(function(d){
     pdf=d; document.getElementById('msg').style.display='none'; build();
@@ -61,6 +64,9 @@ body{padding-bottom:0}
     bad('Could not open this PDF in the reader (it may be very large or you may be offline).');
     var m=document.getElementById('msg'); var a=document.createElement('a'); a.className='kx-btn sm gold'; a.style.marginTop='14px'; a.href=url; a.target='_blank'; a.rel='noopener'; a.textContent='Open file directly'; m.appendChild(document.createElement('br')); m.appendChild(a);
   });
+  }
+  (window.caches ? caches.open('ka-pdf-offline').then(function(c){ return c.match(url); }).then(function(r){ return r ? r.arrayBuffer() : null; }).catch(function(){ return null; }) : Promise.resolve(null))
+    .then(function(buf){ if(buf){ document.getElementById('ps').textContent='📥 Saved on this device'; openDoc({data:new Uint8Array(buf)}); } else openDoc({url:url,withCredentials:false}); });
   var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting) render(+e.target.dataset.i); }); },{rootMargin:'600px 0px'});
   function build(){
     var host=document.getElementById('pages'); host.innerHTML=''; boxes=[]; rendered={}; token++;
@@ -81,7 +87,17 @@ body{padding-bottom:0}
       return pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise.then(function(){ if(tk!==token) return; var b=boxes[i-1]; b.style.height='auto'; b.className='pgbox'; b.textContent=''; b.appendChild(c); });
     }).catch(function(){ rendered[i]=0; var b=boxes[i-1]; if(b){ b.className='pgbox er'; b.textContent='Page '+i+' did not load. Tap to try again.'; b.onclick=function(){ b.onclick=null; b.className='pgbox ld'; b.textContent='Page '+i+' · loading…'; render(i); }; } });
   }
-  function upd(n){ document.getElementById('pg').textContent=n+' / '+(pdf?pdf.numPages:'?'); if(pdf&&n>1){ try{ localStorage.setItem('ka_pdfpos_'+fname,String(n)); }catch(e){} } }
+  var curPg=1;
+  function rdj(k,d){ try{ var v=localStorage.getItem(k); return v===null?d:JSON.parse(v); }catch(e){ return d; } }
+  function wrj(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function bms(){ var B=rdj('ka_pdf_bm',{}); return (B[fname]||[]).slice().sort(function(a,b){return a-b;}); }
+  function paintBm(){ var L=bms(), b=document.getElementById('bm'), sel=document.getElementById('bml'); var on=L.indexOf(curPg)>=0; b.textContent=on?'★':'☆'; b.setAttribute('aria-pressed',on); b.title=on?'Remove bookmark':'Bookmark this page';
+    sel.style.display=L.length?'':'none'; sel.innerHTML='<option value="">🔖 '+L.length+'</option>'+L.map(function(n){return '<option value="'+n+'">Page '+n+'</option>';}).join(''); }
+  function upd(n){ curPg=n; document.getElementById('pg').textContent=n+' / '+(pdf?pdf.numPages:'?'); if(pdf){ if(n>1){ try{ localStorage.setItem('ka_pdfpos_'+fname,String(n)); }catch(e){} }
+      var M=rdj('ka_pdf_meta',{}), o=M[fname]||{}; o.n=pdf.numPages; o.p=p||''; o.t=name||fname.replace(/\.pdf$/i,''); o.last=n; o.at=Date.now(); o.max=Math.max(o.max||0,n); M[fname]=o; wrj('ka_pdf_meta',M); }
+    paintBm(); }
+  document.getElementById('bm').onclick=function(){ var B=rdj('ka_pdf_bm',{}), L=B[fname]||[], i=L.indexOf(curPg); if(i>=0) L.splice(i,1); else L.push(curPg); B[fname]=L; wrj('ka_pdf_bm',B); paintBm(); };
+  document.getElementById('bml').onchange=function(e){ var n=+e.target.value; if(n&&boxes[n-1]) boxes[n-1].scrollIntoView(); e.target.value=''; };
   addEventListener('scroll',function(){ var mid=innerHeight/2,cur=1; for(var i=0;i<boxes.length;i++){ var r=boxes[i].getBoundingClientRect(); if(r.top<=mid) cur=i+1; else break; } upd(cur); },{passive:true});
   document.getElementById('zi').onclick=function(){ scale=Math.min(2.5,scale+.25); if(pdf) build(); };
   document.getElementById('zo').onclick=function(){ scale=Math.max(.5,scale-.25); if(pdf) build(); };

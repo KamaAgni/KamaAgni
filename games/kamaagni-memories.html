@@ -37,6 +37,8 @@ const save=()=>LS.set(KEY,st);
 let tab='list', ed=null, q='', ft='';
 const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 function blank(){return {id:'',d:iso(new Date()),t:'',n:'',g:[],r:[0,0],again:0};}
+/* opened from Our Dates (?new=1&t=…&d=…&g=Anniversary): start a new page already filled in */
+{const qp=new URLSearchParams(location.search); if(qp.get('new')){tab='new'; ed=blank(); ed.t=qp.get('t')||''; if(/^\d{4}-\d\d-\d\d$/.test(qp.get('d')||'')) ed.d=qp.get('d'); if(qp.get('g')&&TAGS.includes(qp.get('g'))) ed.g=[qp.get('g')];}}
 function view(){
  let h=top('Memory Book','A private place to keep the nights, trips and moments you want to remember')+
  '<div class="g-chips"><button class="g-chip'+(tab==='list'?' on':'')+'" data-t="list">Memories ('+st.e.length+')</button><button class="g-chip'+(tab==='new'?' on':'')+'" data-t="new">+ New</button><button class="g-chip'+(tab==='top'?' on':'')+'" data-t="top">Favourites</button></div>';

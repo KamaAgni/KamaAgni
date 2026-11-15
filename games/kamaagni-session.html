@@ -9,6 +9,7 @@
 <main class="kx app" id="app"></main>
 <script src="../js/ka-common.js"></script><script src="../js/ka-focus.js"></script><script src="../js/ka-data.js"></script>
 <script>
+const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a, i) : i;   /* position in the original pack (filters can remove items) */
 
 (async () => {
   const {LS, esc, top, pick, shuffle, heat, HEAT} = KX;
@@ -34,6 +35,8 @@
     catch { packs[id] = []; }
     return packs[id];
   }
+  /* a random task from a pack, worded for the partner it's written to (f = index of that partner, -1 = either) */
+  async function tpick(id) { const L = await pack(id), W = (await KX.whoLoad())[id] || ''; if (!L.length) return {t: ''}; const i = Math.floor(Math.random() * L.length), w = W[OI(L, i)] || 'x'; return {t: KX.forText(String(L[i]), w), f: KX.forTag(w)}; }
   async function oldPack(id) {
     if (packs['t:' + id]) return packs['t:' + id];
     try { const all = await (await fetch('../data/tasks.json')).json(); all.forEach(p => packs['t:' + p.id] = p.items); } catch {}
@@ -45,7 +48,7 @@
   const MAIN = {
     romantic: async () => pick([async () => ({k: 'Touch', t: WY(), m: 5}), async () => ({k: 'Coupon', t: (pick((D.coupons || []).filter(c => c.h <= 1)) || {t: 'Slow dance in the living room'}).t}), async () => ({k: 'Foreplay', t: pick(await pack('foreplaycards')), m: 5})])(),
     playful: async () => pick([async () => ({k: 'Task', t: pick(await oldPack('switch'))}), async () => ({k: 'Truth or dare', t: pick(D.dare || [])}), async () => ({k: 'Task', t: pick(await oldPack('lightfd'))}), async () => ({k: 'Hornopoly', t: pick(await pack('hornopoly'))})])(),
-    wild: async () => { const ids = PIDX.filter(p => p.h <= heat() && ['slut700', 'revher', 'revhim', 'public550', 'edging', 'bondage', 'kinkycards', 'femdom700', 'blowjob650', 'solo400', 'bdsmtd', 'dungeon', 'warmup'].includes(p.id)); const p = pick(ids.length ? ids : PIDX); return {k: p.l, t: pick(await pack(p.id))}; },
+    wild: async () => { const ids = PIDX.filter(p => p.h <= heat() && ['slut700', 'revher', 'revhim', 'public550', 'edging', 'bondage', 'kinkycards', 'femdom700', 'blowjob650', 'solo400', 'bdsmtd', 'dungeon', 'warmup'].includes(p.id)); const p = pick(ids.length ? ids : PIDX); return Object.assign({k: p.l}, await tpick(p.id)); },
     gentle: async () => pick([async () => ({k: 'Massage', t: pick(WYL().filter(x => /massage|feet|back|hair|scalp/i.test(x)).concat(['Massage your partner’s back for 5 minutes'])), m: 5}), async () => ({k: 'Cuddle', t: 'Lie close, match your breathing, and say one kind thing each. No goal except being near.', m: 5}), async () => ({k: 'Foreplay', t: pick(await pack('foreplaycards')), m: 5})])(),
     apart: async () => pick([async () => ({k: 'Message', t: pick(await oldPackFirst(['longdist']))}), async () => ({k: 'Voice note', t: 'Record a 1-minute voice note telling your partner exactly what you would do if you were together right now. Send it.', m: 2}), async () => ({k: 'Video call', t: 'Video call with a dress code: wear something your partner has not seen. Tell each other one fantasy.', m: 10})])()
   };
@@ -63,7 +66,7 @@
   }
   async function mk(s, m, main) {
     if (s === 'connect') return {k: 'Connect', t: pick(CONNECT), m: 3, re: () => mk('connect', m, main)};
-    if (s === 'warm') return m === 'apart' ? {k: 'Warm-up', t: 'Send each other a photo or message of what you are wearing right now.', m: 3} : {k: 'Warm-up', t: pick(m === 'romantic' || m === 'gentle' ? WYL() : await pack('warmup')), m: 3, re: () => mk('warm', m, main)};
+    if (s === 'warm') return m === 'apart' ? {k: 'Warm-up', t: 'Send each other a photo or message of what you are wearing right now.', m: 3} : Object.assign({k: 'Warm-up', m: 3, re: () => mk('warm', m, main)}, m === 'romantic' || m === 'gentle' ? {t: pick(WYL())} : await tpick('warmup'));
     if (s === 'role') { const o = pick(RP); return {k: 'Roleplay · ' + o.t, t: pick(o.p), m: 20}; }
     if (s === 'talk') return {k: 'Talk first', t: pick(TALK), m: 3, re: () => mk('talk', m, main)};
     if (s === 'touch') return {k: 'Slow touch', t: pick(TOUCH), m: 8, re: () => mk('touch', m, main)};
@@ -81,13 +84,18 @@
     app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { mins = +b.dataset.t; pickScreen(); });
     document.getElementById('go').onclick = () => { document.getElementById('go').textContent = 'Preparing…'; build(); };
     if (window.KA_FOCUS) KA_FOCUS.build('../').then(f => { const r = f.recap, it = f.items[0]; const box = document.createElement('div'); box.className = 'kx-card'; box.style.marginTop = '14px';
-      box.innerHTML = `<div class="kx-muted">This week: ${r.sessions} session${r.sessions === 1 ? '' : 's'}${r.top ? ', top mood ' + esc(r.top) : ''}.</div>` + (it ? `<div style="margin-top:6px">Next up: <a href="${it.href.replace('../', '')}" style="color:var(--rose)">${it.icon} ${esc(it.label)}: ${esc(it.title)}</a></div>` : ''); const g = document.getElementById('go'); if (g && g.parentNode.parentNode) g.parentNode.after(box); });
+      box.innerHTML = `<div class="kx-muted">This week: ${r.sessions} session${r.sessions === 1 ? '' : 's'}${r.top ? ', top mood ' + esc(r.top) : ''}.</div>` + (it ? `<div style="margin-top:6px">Next up: <a href="${it.href.replace('../', '')}" style="color:var(--rose);display:inline-block;padding:9px 0;min-height:40px">${it.icon} ${esc(it.label)}: ${esc(it.title)}</a></div>` : ''); const g = document.getElementById('go'); if (g && g.parentNode.parentNode) g.parentNode.after(box); });
   }
+  /* resume: save the session as you go (swap options can't be saved, so a resumed step just can't be swapped) */
+  const CUR = 'ka_session_cur';
+  function keep() { try { LS.set(CUR, {mood, mins, i, steps: steps.map(x => { const y = Object.assign({}, x); delete y.re; return y; }), at: Date.now()}); } catch (e) {}
+    window.KA_RESUME && KA_RESUME.set({u: 'games/kamaagni-session.html?resume=1', t: 'Guided Session', s: 'Step ' + (i + 1) + ' of ' + steps.length}); }
   function run() {
+    keep();
     const s = steps[i], last = i === steps.length - 1;
     app.innerHTML = top('Guided Session', `${MOODS[mood] ? MOODS[mood][1] : ''} · step ${i + 1} of ${steps.length}`) + `
       <div class="kx-prog"><i style="width:${(i) / (steps.length - 1) * 100}%"></i></div>
-      <div class="kx-card kx-play" style="margin-top:12px"><span class="kx-chip h2">${esc(s.k)}</span>
+      <div class="kx-card kx-play" style="margin-top:12px"><span class="kx-chip h2">${esc(s.k)}</span>${s.f >= 0 ? `<span class="kx-chip" style="margin-left:6px">For ${esc(KX.names()[s.f])}</span>` : ''}
         <div class="kx-big" style="font-size:clamp(19px,4.2vw,25px)">${esc(fill(s.t))}</div>
         ${s.close ? `<div class="kx-muted">How was tonight?</div><div class="kx-row" style="justify-content:center">${[1, 2, 3, 4, 5].map(n => `<button class="kx-btn sm ${n <= rating ? '' : 'ghost'}" data-r="${n}">${'★'.repeat(1)}${n}</button>`).join('')}</div>` : ''}
       </div>
@@ -95,10 +103,11 @@
         ${s.close ? '<button class="kx-btn" id="fin">Finish & save</button>' : `<button class="kx-btn" id="nx">Next ›</button>${s.re ? '<button class="kx-btn ghost" id="sw">⟳ Swap</button>' : ''}`}
         ${s.m ? `<button class="kx-btn gold" id="tm">⏱ ${s.m} min</button>` : ''}
         ${i > 0 && !s.close ? '<button class="kx-btn ghost sm" id="bk">‹ Back</button>' : ''}
-        ${!s.close ? '<button class="kx-btn ghost sm" id="sv" aria-label="Save">♡</button>' : ''}</div>
+        ${!s.close ? '<button class="kx-btn ghost sm" id="sv" aria-label="Save">♡</button>' : ''}${!s.close ? '<button class="kx-btn ghost sm" id="rmt">📲 Remote</button>' : ''}</div>
       <p class="kx-note">Pass or stop any time. Safe word first.</p>`;
     const g = id => document.getElementById(id);
     if (g('nx')) g('nx').onclick = () => { i++; run(); };
+    if (g('rmt')) g('rmt').onclick = () => window.KA_REMOTE && KA_REMOTE.open('session');
     if (g('bk')) g('bk').onclick = () => { i--; run(); };
     if (g('sw')) g('sw').onclick = async () => { steps[i] = await s.re(); steps[i].re = s.re; run(); };
     if (g('tm')) { g('tm').onclick = () => window.KA && KA.timer(s.m * 60, s.k); window.KA_AUTO && KA_AUTO.lead(g('tm'), s.t); }
@@ -107,6 +116,7 @@
     if (g('fin')) g('fin').onclick = finish;
   }
   function finish() {
+    LS.set(CUR, null); window.KA_RESUME && KA_RESUME.clear('games/kamaagni-session.html'); window.KA_AFTER && KA_AFTER.mark('Guided Session');
     const log = LS.get('ka_journal', []); const d = new Date();
     log.push({id: Date.now(), d: window.KA_TRACK ? KA_TRACK.today() : d.toISOString().slice(0, 10), r: rating || 4, g: ['Guided session', MOODS[mood] ? MOODS[mood][1] : ''].filter(Boolean), n: ''});
     LS.set('ka_journal', log);
@@ -116,7 +126,14 @@
       <div class="kx-muted">${st} day streak${lv ? ' · ' + lv.icon + ' ' + lv.name + ' · ' + lv.xp + ' XP' : ''}</div>
       <div class="kx-row" style="justify-content:center"><a class="kx-btn" href="kamaagni-journal.html">Add a note</a><a class="kx-btn ghost" href="../index.html">Home</a></div></div>`;
   }
-  if (mood && mins && MOODS[mood]) build(); else pickScreen();
+  const saved = LS.get(CUR, null), fresh = saved && saved.steps && saved.steps.length && Date.now() - saved.at < 12 * 36e5 && saved.i < saved.steps.length;
+  if (qs.get('resume') && fresh) { mood = saved.mood; mins = saved.mins; steps = saved.steps; i = saved.i; run(); }
+  else if (mood && mins && MOODS[mood]) build(); else { pickScreen();
+    if (fresh) { const b = document.createElement('div'); b.className = 'kx-card'; b.style.cssText = 'margin-top:12px;border-color:rgba(240,190,60,.55)';
+      b.innerHTML = `<b>▶ Pick up where you left off</b><p class="kx-muted" style="margin:4px 0 8px">${esc(MOODS[saved.mood] ? MOODS[saved.mood][1] : '')} session · step ${saved.i + 1} of ${saved.steps.length}</p><div class="kx-row"><button class="kx-btn gold" id="rs">Continue</button><button class="kx-btn ghost" id="rx">Start fresh</button></div>`;
+      const sub = app.querySelector('.kx-sub'); sub ? sub.after(b) : app.prepend(b);
+      b.querySelector('#rs').onclick = () => { mood = saved.mood; mins = saved.mins; steps = saved.steps; i = saved.i; run(); };
+      b.querySelector('#rx').onclick = () => { LS.set(CUR, null); window.KA_RESUME && KA_RESUME.clear('games/kamaagni-session.html'); b.remove(); }; } }
 })();
 
 </script>

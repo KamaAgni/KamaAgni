@@ -293,7 +293,7 @@ Home: removed a leftover empty card (from the merged Mission Week) that left a d
 - New pages: Date Planner, Memory Book, Our Playlist (82 songs). Movie Night: 16 more films and a "Together" shortlist of films you both starred. Health: 8 more topics. Home: a daily question and mini-mission card.
 
 ## v63
-- **Partner sharing**: Date Planner, Memory Book, Movie Night, yearly review and playlist favourites now merge between couple-linked accounts (js/ka-motion.js, KA_SHARE). Item lists merge by id with update times and deletion markers; Movies/Review use last-write-wins; favourites are unioned. Needs both partners signed in, vault unlocked and linked on the Together page.
+- **Partner sharing**: Date Planner, Memory Book, Movie Night, yearly review and playlist favourites now merge between couple-linked accounts (js/ka-motion.js, KA_PSHARE). Item lists merge by id with update times and deletion markers; Movies/Review use last-write-wins; favourites are unioned. Needs both partners signed in, vault unlocked and linked on the Together page.
 - **Start here**: 3-question guide on first home visit (mood, time, spice), suggests 3 pages with "Save to favourites". Reopen from the home buttons.
 - **Our week**: games/kamaagni-week.html weekly recap (history, memories, next-week idea).
 - **Surprise me** button on home. **Comfort**: text size and high contrast in Settings (synced). iPhone "Add to Home Screen" hint.
@@ -301,3 +301,234 @@ Home: removed a leftover empty card (from the merged Mission Week) that left a d
 
 ## v64
 - Home quick-action buttons fit one row on phones.
+
+## v65: full-site bug and comfort audit
+Every page (84) was loaded at phone, phone sideways, tablet and laptop size, buttons were tapped through on phone size, and screenshots were reviewed.
+- **Fixed: "Share as image" on Progress did nothing.** The partner-sharing layer from v63 reused the name `KA_SHARE` and replaced the share-card tool. Partner sharing is now `KA_PSHARE` (js/ka-motion.js).
+- **Floating timer no longer covers page titles.** While a timer runs, the page makes room for it (a 52px spacer), long labels are shortened with "…", and its buttons are larger with screen-reader names.
+- **Timer window:** cannot open twice, Enter starts it, empty or zero minutes highlights the box instead of doing nothing, capped at 180 minutes.
+- **Home page on phones:** game cards are now compact rows (icon, name, two-line description, whole card tappable). The page is about half as long. The "loop that works" tiles no longer squeeze "Afterglow".
+- **Task Deck:** at Sweet heat it explains that every pack is Spicy or Wild instead of "No packs match"; a search with no result says so; the Draw button counts only packs that can be drawn at the current heat; double-taps on "Surprise me" and "Task of the day" are ignored safely.
+- **PDF reader** opened without a book: shows "Pick a book in the Library" with a button, instead of a stuck "Loading…".
+- **Connection Cards:** double-taps on Save/Done before a card is picked no longer throw errors.
+- **PDF reader:** the flirty line no longer sits against the screen edge (it skips hidden headings). Guided Session "This week" link is easier to tap.
+- **Readability:** labels under 12px raised to 12px (dice and Ludo labels, Date Kits and Rituals meta lines, Scratch Book, Rituals stats, Progress chart labels). Pill buttons (Guide, Journal filters) are at least 36px tall.
+
+## v66: quality pass (content, accessibility)
+All 16,000+ pieces of text in `data/` were scanned for scrambled text, junk, duplicates, typos and formatting slips.
+- **Scrambled cards repaired or removed.** Some packs were copied from PDFs and had broken text ("Submissive Sub e v m i s s i…", stray "R ’ S A M CARD" letters, card headings glued to tasks). 21 cards rebuilt by hand; garbled copies of cards that already existed cleanly were removed.
+- **Source branding and leaflet text removed:** "🖤28 EXTREME SLUT TASKS🖤", "HUMILIATION & PUNISHMENT TASKS FOR MAN", "SUBMISSIVE WOMAN", section numbers, the Etsy "we're always improving our products" blurb, and the Revenge game's rulebook (scoring, "the player with the higher score wins", design notes) that had been mixed in as tasks. The Revenge packs' descriptions now say to agree a safe word and hard limits first.
+- **Cut-off cards completed** (Discover Your Kink, Roles, Public play and others that stopped mid-sentence).
+- **Rewritten for clear English:** Spicy and kinky cards (all 28) and Foreplay cards (all 18); 69 game cards, Foot fetish cards, Femdom cards and Submissive woman cards I cleaned up, with board-game rules ("go back 4 spaces", "roll again") removed.
+- **Christmas pack:** card titles now read "Candy Cane Kneel: Kneel naked…" instead of running into the task.
+- **Duplicates:** 53 near-identical cards across packs removed (the smaller, more specific pack keeps its copy, as with tools/dedupe_data.py). Cards that differ in who does what (him/her) or in numbers were kept. Two Fun questions and one date-wheel idea that repeated other decks were swapped for new ones.
+- **Typos and style:** 41 confirmed typos fixed (e.g. blindforld, messneger, cogtinue, Satna), stray "You/Your/Partner/Sex Toy" capitals lowered mid-sentence across imported packs, doubled words ("than than", "a a"), spaces before punctuation.
+- **Dice:** junk faces removed from the dice data (an empty face, "RULES", "ROLL THE DICE TO DECIDE WHO GOES FIRST").
+- One Femdom card that said a safe word can't be used now asks you to agree a stop signal before the tape goes on.
+- Task packs: 8,318 → 8,173 tasks (the difference is garbled copies, duplicates and non-task text). `js/ka-embed.js` regenerated.
+
+Accessibility (axe-core on every page): every page now has one main region and one site header/footer for screen readers; switches, sliders and dropdowns that had no name get one from their visible label; dialogs are named from their title; Ludo hint text is readable (contrast). All done once in `js/ka-chrome.js`, so new pages get it automatically.
+
+Speed was measured (home page first paint ~0.4 s, other pages ~0.25 s on a simulated phone; the 1.6 MB offline data bundle loads only when opened from a folder) and needed no changes.
+
+## v67: research-based content and "never forget what you can do"
+See **WRITING-GUIDE.md** for the research behind every rule (Muise et al. 2019 on novelty; Mallory et al. 2019 on sexual communication; Birnbaum et al. 2016 on responsiveness; Nagoski / dual control model; Gottman soft start-up; Gollwitzer & Sheeran if-then plans; Fogg B = MAP; Nielsen recognition over recall; kink-community negotiate, safe word, aftercare).
+- **Roleplay Studio rebuilt as a 4-step flow:** 1) Agree: who plays whom, "one thing I'd love / one thing off-limits", green/yellow/red safe words (or a hand signal). 2) Set the scene: a scene-specific setup line plus a "clear the brakes" checklist. 3) Play: the story, an **opening line** for the first character, and **three beats** (tease, build, peak) revealed one at a time, with a "Colour?" check-in between beats and a 7-minute beat timer. 4) Afterglow: step out of character, aftercare options, and a two-line debrief ("one thing I loved / one thing to try next time") saved per story.
+- All 70 stories now have named roles, a setup line, an opening line, three beats and a heat level (filter by Sweet / Spicy / Wild).
+- **New js/ka-next.js (loaded on every page by ka-chrome.js):** a "What next?" panel at the end of every game (untried first, related ones ranked higher); on Home, "Still to discover" with "explored X of 71" and four untried picks; **Make a plan** ("When Friday night, we'll open Roleplay Studio"), shown on Home with a "Today!" badge and a once-a-day reminder on the day. Plans are stored in `ka_ifthen` and sync like everything else.
+- Removed the "Nanny" role-play, its hook, and three cards built on childlike presentation.
+
+## v68: ideas from the reading list
+Books read (ideas only, all wording is KamaAgni's own; nothing is copied from them): Emily Nagoski, *Come As You Are*; Stella Harris, *Tongue Tied*; Kenneth Play, *Beyond Satisfied*; Laura Berman, *Loving Sex*; *Kama Sutra: A Modern Guide*; Amia Srinivasan, *The Right to Sex*.
+- **New: Talk Kit** (games/kamaagni-talk.html, key `ka_talk`). 8 guided conversations (trying something new, saying and hearing no, asking for more or less, pace, how we start sex, after-play debrief, compliments, our sexual stories), each with when to have it, turn-taking questions, words to borrow and a listening tip. "Our words": each partner marks words they love or don't want to hear, shown side by side. "How I like to be asked": invitations that work, ones to avoid, and an easy "not tonight, but…". "Touch calibration": the receiver answers with pressure and speed numbers; favourites are saved. (Tongue Tied, Loving Sex, Beyond Satisfied.)
+- **New: Brakes & Accelerators** (games/kamaagni-brakes.html, key `ka_brakes`). A private check-in for each partner across 37 of our own items (me, you, us, the setting, what we do), side-by-side results with things you have in common, a "remember a really good time" note, a 4-step "turn off one brake" plan (brake, concrete steps, obstacle, if-then fix) and "Unwind first" ways to close out stress, with breathing and hug timers. (Come As You Are: dual control model, stress, responsive desire.)
+- **Myths vs Facts:** 5 new cards: porn as performance, body vs mind arousal, mind-reading, no as information, closing the stress cycle. (The Right to Sex, Come As You Are, Tongue Tied.)
+- Both pages are in the Learn menu, the Games hub and the offline cache.
+- Already covered, so not duplicated: classical embraces and kisses (Kama Studio), want/maybe lists (Kink Explorer, Desire Match), daily rituals (Connection Rituals).
+
+## v69: the rest of the reading list
+Everything still useful from the six books, written in KamaAgni's own words. Ideas already covered elsewhere were skipped: senses and textures (Sensory Night), bathing (Pamper Prelude), fitness and pelvic floor (Fit for Fun, Health), daily appreciation (Connection Rituals), classical embraces and kisses (Kama Studio).
+- **Talk Kit, 4 more conversations:** when we want different things (with a tiebreaker), our future perfect (sex life a year from now, then one first step), planning sex without killing the mood (with a plan B), and when to get outside help. (Tongue Tied, Loving Sex.)
+- **Talk Kit, new tab "Notice & love":** each partner writes a specific compliment across 9 sides of the other (body, touch, mind, work, energy, values, care, dreams, desire), then you read them to each other. (Beyond Satisfied.)
+- **Talk Kit, "Follow my lead" kiss game** added to Touch calibration: one leads for two minutes, the other mirrors, then swap. (Beyond Satisfied.)
+- **Brakes & Accelerators, new tab "Be kind to yourself":** handling a hard feeling in four steps, talking to yourself like a friend would, old messages about sex rewritten as new beliefs, and three minutes of body kindness with a timer. (Come As You Are, Loving Sex.)
+
+## v70: 20 new role-plays, characters, scripts and costumes
+- **20 new, original, spicy role-plays (#72–91, marked NEW, plus a "✨ New" filter):** The Sommelier's Private Tasting, Last Night on Earth, The Tattoo Artist, The Escape Room, The Cabin in the Storm, The Fitting Room, The Fortune Teller, Last Hour on the Space Station, The Heist, The Night Train, The Chef's Table, The Mermaid and the Sailor, The Wedding Night, The Oil Wrestling Championship, The Empress and the Gladiator, The Secret Admirer, The Full Moon, The Strict Librarian, The Dating App Match, The Private Show. Each has two story versions, roles, a setup, props, an opening line and three beats.
+- **Character briefs** (new stories): what each character wants and how to play them (voice, attitude), shown at step 1.
+- **Conversation guide:** at step 3, under the current beat, two or more natural lines each role can say.
+- **Costume ideas for all 90 stories:** illustrated costume cards for each role at step 2 (the 70 older stories get ideas matched to their roles), with the props list.
+- **Our costume photo:** add a photo of your look to any story. It's resized and kept on this device only (`rp_photo_<n>`, deliberately not synced).
+- Data fields added to data/roleplay.json: `ch` (characters), `g` (lines per beat), `c` (costumes), `nw` (new). js/ka-embed.js regenerated.
+
+## v71: names and genders you can change, gender-aware wording
+- **Names & genders** can be changed any time: Settings → "Names & genders", or the couple profile in the ⚙️ menu. Each partner is Man, Woman or Other (defaults: Partner 1 man, Partner 2 woman). The welcome screen now asks too. Stored in `ka_couple` as `g1`/`g2`; syncs.
+- **Shared helpers** (js/ka-common.js): `KX.genders()` and `KX.gfix(text, g)`, which turns "him/her", "he/she", "his/her", "Master/Mistress", "dick/pussy" and similar into the right word for that person ('x' keeps both).
+- **Roleplay Studio:** each story version now knows which role is a man or a woman (`pg` in data/roleplay.json; 48 stories tagged, the rest work either way), and gives each partner the matching role automatically. Swap still works. "Another version" re-matches.
+- **Costumes follow the person, not the role:** 154 gendered costume ideas now have a version for the other gender (e.g. Private Dancer: lingerie and heels for a woman, fitted briefs and an open shirt for a man).
+- **Hornopoly and Truth or Dare** show the right pronoun for your partner on each card.
+
+## v72: "Printable originals" at the bottom of games
+- **New js/ka-sources.js** (loaded on every page by ka-chrome.js): on 22 games, a "📂 Printable originals" section above "What next?" links to the **whole GitHub folder** in KamaAgni/KamaAgniPDF that the game comes from ("Open folder on GitHub ↗") and lists **every PDF in that folder**, each with "📖 Read" (in-app Reader) and "↗" (GitHub). File names, page counts and sizes come from data/library.json.
+- Pages and folders: Hornopoly, Truth or Dare, Would You Prefer, Roleplay Studio, Kinky Dice and Intimacy Dice (dice games), Kink Explorer and Desire Match (Kink List 4.0), 30-Day Spark (Whole Week cards), Bucket List, Match & Reward (reward tracker), Love Coupons (all of 6 Sex Coupons), Prompts (5 Submissive Woman), BDSM Journey, Challenges (Brave cards, BDSM games), Date Planner (calendars), Task Deck (all task-book folders), Position Selector, Bedroom Skills and Learn (guides and ebooks), Crazy Sex (Naughty Games), Scratch-Off Book (advent calendars). Edit the `MAP` at the top of js/ka-sources.js to change any of these.
+- Follows the `LIBRARY` switch in js/ka-config.js: set it to false and the section disappears with the Library.
+
+## v73: plan tonight, partner nudges, check-ins, print, reader, long-distance
+- **Plan Tonight upgraded** (games/kamaagni-tonight.html): builds a whole evening: Unwind (when you're tired or have an hour or more), Connect (a question for the mood), Warm up, Main event (a role-play suited to your heat level, unplayed first, opened straight from `kamaagni-roleplay.html?n=N`, or a game), Turn it up (90+ minutes) and Afterglow. Swap re-picks the story. When you're linked, "Invite" sends the plan to your partner's phone.
+- **Invites & Secret Wishes** (games/kamaagni-invite.html, js/ka-nudge.js): invitations worded the way your partner said they like to be asked (from the Talk Kit), RSVP "Yes / Later / Let's plan", an inbox, and 24 secret wishes where you only ever see the ones you **both** picked. Uses the existing encrypted couple events. New notification types: inv, rsvp, plan, wish, ldr.
+- **Monthly Check-in** (games/kamaagni-checkin.html): seven 1–5 questions each (closeness, desire, sex, talking, feeling wanted, fun, calm) plus a note. Results side by side with change vs last month, a suggestion for your lowest area, and a Trends chart for both of you. Home shows a reminder from the 25th until you've both answered.
+- **Print Studio** (games/kamaagni-print.html): any card deck (by category), any task pack, your saved favourites or your own cards → A4 cut-out cards at 12, 8 or 4 per page, random mix, cut lines and optional card backs (mirrored for double-sided printing). Your topic filters apply.
+- **Better reader and Library:** ☆ bookmarks per page with a jump list, reading progress saved per PDF (`ka_pdf_meta`, `ka_pdf_bm`). The Library has a "📖 Continue reading" shelf with progress bars, "You read up to page N" on each book, and "Used in:" links to the games that use each PDF.
+- **Long-distance** (games/kamaagni-apart.html): both clocks with "good time to call?", your partner's time zone, a countdown to your next visit, a daily task (the same for both of you, labelled with who it's for) plus a daily ritual, one-tap nudges to their phone (or copy/share), stories to play apart, and every two-phone game.
+- All four new pages are in the menu, the catalogue (marked New) and the offline cache. Version v73, cache kamaagni-v75.
+
+## v74: Today card, saved evenings, dates, veto, quick start, dark room, read aloud, gift box, offline PDFs, who-does-it tags
+- **Today on Home** (js/ka-next.js): one card with what matters today: plans due, Plan Tonight progress ("1 of 5 steps left · next: Connect"), special dates in the next 7 days, the monthly check-in from the 25th, today's long-distance task, and (when linked) invitations from your partner you haven't answered.
+- **Saved evenings** (Plan Tonight): "★ Save this evening" with a name, then repeat it in one tap from the top of the page (up to 12, key `ka_plan_saved`).
+- **Our Dates** (games/kamaagni-dates.html, key `ka_dates`): anniversaries, wedding, birthdays, first date/kiss, moving in, engagement or anything else, yearly or one-off. Countdown and years for each; in the last week, ideas from KamaAgni (e.g. The Wedding Night, Old Flames Reunited, Secret Envelope, the gift box) and "Add a Memory Book page" (Memory Book now accepts `?new=1&t=&d=&g=`). Home shows it a week ahead, with a toast on the day.
+- **Partner veto** (Plan Tonight + Invites): a shared plan now carries its steps. Your partner can tap "✗ Not this one" on one step; your Plan Tonight marks it ("would rather skip this one") so you swap it. New event kind `veto`, with a notification.
+- **Quick start** (js/ka-ui.js): every game using the shared setup screen (22 games) shows "⚡ Same as last time" with your last mode and categories. One tap starts.
+- **Dark-room mode** (Settings → Comfort, or the ⏸ panel): dims the screen warm, text 112%, stops animations, and silences all sounds, music and vibration. Key `ka_darkroom`.
+- **Read aloud** (new js/ka-voice.js, loaded by ka-chrome.js): a 🗣 button in the header on 35 reading and game pages reads the card most on screen with the phone's own voice; tap ⏹ to stop. Nothing leaves the phone. `KA_VOICE.say(text)` for other pages.
+- **Gift box** (Print Studio → "🎁 Gift box"): a letter page in your own words (with starters), 4–8 love coupons and 0–4 role-play invitations at your heat level ("Redeem for one night of…" plus the opening line), with optional card backs.
+- **Our Week** shows the latest check-in: overall score, your win and one thing to try, with a link. Cards there now have proper padding and heading levels.
+- **Keep PDFs offline** (Library): "📥 Keep offline" on every book saves it on the device (Cache Storage `ka-pdf-offline`, kept across updates). The Reader opens the saved copy first. New tab "📥 On this device".
+- **Who each task is for:** new tools/tag-packs.py tags all 8,171 tasks in data/packs as written to her (4,477), him (2,581) or either (1,113), from the words in each task plus a default per pack. Saved in data/packs/who.json (re-run the script after editing packs). Shared helpers `KX.whoLoad()`, `KX.forTag()`, `KX.forText()`. Task Deck, Guided Session, Together's shared card, Long-distance and Print Studio show "For {name}" and word him/her for the right person. Same-gender couples see these as "either of you".
+- Fixed: Role-play "NEW" badge raised to 12px.
+- Version v74, cache kamaagni-v76. js/ka-embed.js regenerated.
+
+## v75: full-site UX sweep
+All 91 pages were opened at four screen sizes with random tapping (no script errors anywhere), scanned with axe-core, and reviewed page by page from phone screenshots, including the first-run screens.
+- **History and Our Week are honest:** a game counts as "Played" only after you actually play (three taps inside the game, or three minutes on the page). Just opening a page to look no longer logs it. Tool pages (dates, print, check-in, invites, search, planner and so on) never log as games.
+- **Home:** the Today rows (plans, tonight's progress, upcoming dates, check-in, long-distance, waiting invitations) now sit at the top inside "Today, for the two of you" instead of a screen and a half down. New section **Closer together** links Invites & Wishes, Talk Kit, Brakes & Accelerators, Monthly Check-in, Our Dates, Long-distance and Print Studio. Out-of-date descriptions corrected (Role-play 90 stories, Task Deck 8,000+ tasks in 48 packs, Truth or Dare 312/300, Bucket List 124, Challenges 92).
+- **Games hub:** "NEW" was on 52 of 78 games. Now only the 7 newest pages carry it, and only until you've opened them.
+- **Header on small phones (360px):** on games with the ❓ guide, the ☆ and account buttons were pushed off-screen. The header now tightens and the logo shrinks so everything fits.
+- **❓ guides:** Connect Foreplay's guide described a different game and Showdown's didn't match its rules. Both rewritten. New step-by-step guides for Task Deck, Secret Envelope, Challenges, BDSM Journey, Free-time Fun, Love Languages, Invites, Print Studio, Our Dates, Long-distance, Memory Book, Movie Night and Our Playlist.
+- **Welcome screen:** the two gender pickers were tiny unstyled browser boxes. Now full-width and styled like the name boxes.
+- **Settings:** the Comfort box sat above the page title. Now it's below Names & genders.
+- **Poker:** player names fill in from your couple names.
+- **Long-distance:** the daily task now follows your heat level (Sweet hides explicit tasks, Spicy hides the intense ones).
+- **Long lists:** Love Coupons shows 12 at a time and Movie Night 15, each with "Show more". These were 19,000px and 14,000px long on a phone.
+- **Readability and taps:** tick buttons are bigger (32px, with a larger hit area); dice-face text in the Position selectors, Ludo key hints and "WIN" labels, and Progress chart labels raised to at least 12px; five pages had headings that skipped a level (Home, Learn, Roadmap, Search, Settings). Fixed.
+- Version v75, cache kamaagni-v77.
+
+## v76: more steamy and explicit films
+- **Movie Night:** 51 new films, 174 in total. The Steamy heat level went from 14 to 53 films, and the Steamy mood from 24 to 75. Added: Love, 9 Songs, Shortbus, Babygirl, the Fifty Shades trilogy, Below Her Mouth, Sex and Lucía, In the Realm of the Senses, Henry & June, Bitter Moon, Belle de Jour, The Duke of Burgundy, Venus in Fur, Showgirls, Original Sin, Damage, Swimming Pool, Stranger by the Lake, Don Jon, Love & Other Drugs, Saltburn, Challengers, Passages, Queer, Love Lies Bleeding, Anora, Fair Play, Magic Mike’s Last Dance, Deep Water, Fatal Attraction, Indecent Proposal, Disobedience, Room in Rome, Newness, Crash, Hustlers, Emmanuelle (2024), Pleasure, Sliver, Lady Chatterley’s Lover (2022), The Housemaid, Kama Sutra: A Tale of Love, Sex Tape, Carol, and Bollywood: Gehraiyaan, Lust Stories 1 and 2, Aitraaz, Murder 2. Descriptions are KamaAgni’s own.
+- Left out on purpose: films with sexual content involving characters under 18, and films that present non-consent as romance.
+- Movie Night is now listed up to Wild heat in the Games hub. Version v76, cache kamaagni-v78.
+
+## v77: shorter Home, easy partner linking, instant game start
+- **Home is 40% shorter on a phone** (about 7,450px → 4,300px). The full list of games, tools and guides now sits in one **🗂️ Browse everything** section, closed by default (it remembers if you open it), with a link to the Games hub. The top of Home is Today, Plan Tonight, Start here (first visit) and the tonight dashboard. "Still to discover" shows 2 picks on phones instead of 4.
+- **Partner linking is guided** (Together): a 4-step tracker (Sign in → Unlock your vault → Invite or join → Partner joins) and a "What linking unlocks" list on every step. Creating an invite now shows a **QR code**: your partner points their phone camera at it and taps the link. Share and Copy are still there. The page checks every 5 seconds and celebrates when they join. Someone who opens an invite link gets a single "Join my partner" button. Opening a new invite link while Together is already open now works.
+  - The invite can't be a short 6-digit code: the link carries the key that end-to-end encrypts what you share, and a short code would weaken that.
+  - New `js/vendor/qrcode.min.js` (qrcode-generator 1.4.4, MIT).
+  - Tested end to end with two simulated phones on a mock backend: link, shared plan, skip a step, invitation, reply and secret wishes (only shared wishes are revealed).
+- **Games start in one tap** (the 22 games on the shared setup screen): mode, heat and a big Start button are on the first screen. Categories and options moved into **⚙️ Customise** (closed by default, remembers if you prefer it open), with a one-line summary such as "All 18 categories · Free play · 3 passes per person".
+- `dev/mock-server.py`: a small in-memory stand-in for the cloud backend (port 8787) for testing two-phone features. Set `MOCK_URL` in js/ka-config.js only while testing, never on the live site.
+- Version v77, cache kamaagni-v79.
+
+## v78: shared settings, 👍/👎 on cards, resume anything, partner alerts, older games tidied
+- **One set of settings for both phones** (new js/ka-shared.js, loaded on every page). When you're linked, heat level, topic switches, hide-words, hidden games and names & genders are the same on both phones. Names are mirrored: your "me" is their "partner".
+  - **On linking:** the two sets are merged the safe way (the lower heat, every topic either of you switched off, both hide-word lists, all hidden games). A toast says so.
+  - **After that:** a change on either phone reaches the other within seconds (an encrypted `cfg` couple event; newest change wins), with a short toast ("Riya updated your shared settings (heat: Sweet)").
+  - Settings shows "🔗 Shared with Riya…" while linked.
+  - Two-phone games therefore always use the same heat and topics.
+  - Tested on two simulated phones: merge on link, heat and topic changes both ways, renaming.
+- **👍 / 👎 under every card** (new js/ka-fb.js): the card games, Task Deck, Guided Session and Together. 👎 hides that card everywhere from now on: js/ka-filter.js skips it in every deck, task pack and game, however it was worded for you (names and him/her are ignored when matching). 👍 saves it to favourites. Settings → "Cards you've hidden" lists them, with Restore and Restore all. Stored in `ka_fb`, synced to your account.
+- **Resume anything:** a "▶️ Continue" row in Today on Home for whatever you were in the middle of in the last 12 hours.
+  - Role-play reopens at the same step and beat (deep link `?n=&pi=&sw=&s=&b=`).
+  - The Guided Session saves each step and offers "Pick up where you left off".
+  - The 13 games on the two-phone engine (Truth or Dare and others) resume their round.
+  - Store: `KA_RESUME` in js/ka-common.js.
+- **Partner alerts** (phone notifications when KamaAgni is closed): a 🔔 switch in Settings and a one-time prompt on Together once linked.
+  - What triggers them: invitations, plans, replies, a skipped step, wish updates, nudges, messages, check-ins and pause signals. The alert never shows the content, only that something arrived (everything stays end-to-end encrypted).
+  - Server side: supabase/push.sql (table) and supabase/functions/notify-partner (edge function, type-checked with Deno), called by a database webhook. Steps are in **SETUP-PUSH.md**.
+  - Hidden until `VAPID_PUBLIC_KEY` is set in js/ka-config.js. iPhone needs iOS 16.4+ and the app added to the Home Screen.
+  - sw.js shows the alert and opens the right page on tap. Tested: the switch only appears when configured, and a delivered alert shows the right title, text and page. Subscribing needs a real push service, so test that on your phone.
+- **Older games tidied** (new js/ka-tidy.js): Poker, Connect Foreplay and Showdown now show only how you play, heat and Start; everything else is in ⚙️ Customise, like the other games. Dice, Ludo and both Position selectors already started in one tap.
+- **Fixed:** with topic filters on, the "who it's for" tags in Long-distance, Print Studio, Guided Session and Together's shared card could point at the wrong task (list positions shifted after filtering). They now use the original position.
+- "What linking unlocks" on Together now lists shared settings and partner alerts.
+- dev/mock-server.py also handles alert subscriptions. Version v78, cache kamaagni-v80.
+
+## v79: "Not for me" hides everywhere, Us at a glance, morning after, weekly date night, smarter Surprise me
+- **🚫 "Not for me" hides it everywhere** (new js/ka-limits.js):
+  - Anything you mark Not for me in the Kink Explorer disappears from every game, deck and task pack, the same way a 👎 does. Each of the 53 kinks maps to topic switches and words (e.g. Choking switches off breath play; Spanking hides cards that mention spanking).
+  - When you're linked, it's hidden on your partner's phone too. Their phone gets only the hiding patterns and a count ("Also hidden for your partner's comfort: 2 things"), never the names. Stored as `ka_filter.auto.me` / `auto.you`.
+  - Settings → "Your Not for me list" shows yours and can switch it off. The Kink Explorer's note now says what Not for me does.
+  - Desire Match answers are deliberately not used: that game promises never to reveal a no.
+  - Fixed along the way: the filter's save dropped any extra fields; it now keeps them.
+- **🫶 Us at a glance** (games/kamaagni-us.html): love languages, what turns each of you on and what puts the brakes on (and what you both love), words you love and hate, how you like to be asked, this month's check-in bars, and wishes and curiosities as counts only (kept private). On top, up to five ideas made for you two, starting with your weakest area this month. Shows "x of 4 sections filled in", with links to fill the rest.
+- **💗 The morning after** (js/ka-after.js, games/kamaagni-afterglow.html):
+  - Finishing a Guided Session, reaching a role-play's afterglow step or ticking off all of tonight's plan sets a gentle reminder for the next day (Today on Home, for 3 days). When linked, it reaches both phones (event `aft`).
+  - The check-in: hearts for how it felt, one thing each of you loved, one thing to try next time, and anything to talk about. It's saved to the Journal under "Morning after", dated the night itself.
+- **🌹 Weekly date night** (Our Dates):
+  - Pick a day and time once. It's shared with your partner's phone, shown in Today on the day with a toast, and can be added to your calendar as a weekly event with a morning alarm.
+  - With partner alerts set up, both phones also get a 9 am reminder from the new supabase/functions/date-night function (hourly, via pg_cron). push.sql adds the weekday, time and time-zone columns. Steps are in SETUP-PUSH.md.
+- **🎲 Smarter Surprise me** (`KA_NEXT.smart`, used by the Games hub slot machine and both Home buttons):
+  - What it weighs: your 👍/👎 per game, games you haven't tried, variety (not what you played in the last two days), favourites, the time you have, mood, and your lowest check-in area.
+  - It picks among the best nine so it still surprises (300 test picks covered 55 games, with liked ones and the weakest area clearly favoured).
+  - The reason is shown ("Picked because you haven't tried it yet").
+- Two-phone tests on the mock backend: Not for me hides on both phones without names leaving the phone, and the date night copies across.
+- Us at a glance is in the menu, Home (Closer together) and the catalogue. Version v79, cache kamaagni-v81.
+
+## v80: Position Library, 38 critics' picks, and content from 17 books
+- **📖 Position Library (new)** (games/kamaagni-positions.html, data/positions.json): 95 positions in 9 families (face to face, she's on top, from behind, side by side, sitting, standing, furniture, from the Kama Sutra, advanced). Each one has the setup, what she does, what he does (couple names are used when set), why it works and a comfort tip. Filters for family, good-for (deep, G-spot, clitoral, eye contact, slow, beginner, she leads and more), difficulty and tried/favourites/not tried yet, plus search. Includes Position of the Day, "🎲 Pick one for us" (prefers ones you haven't tried), a 5-minute try timer, and tried/favourite marks in ka_pos. It's on Home, in the menu, in the catalogue and linked from Position Families.
+- **🎬 Movies: 174 → 212 films.** Added 38 of the best-reviewed films from Rotten Tomatoes' erotic movies ranking. A new 🍅 Tomatometer score shows on 57 films, and a new "🍅 Critics' picks (85%+)" filter lists 22 films sorted by score. Excluded: films that sexualise minors (Lolita, Y tu mamá también, Blue Is the Warmest Color, Call Me by Your Name, Somersault, Young & Beautiful, A Bigger Splash, Nymphomaniac Vol I, Angel Heart) and films built on assault or very disturbing material (Last Tango in Paris, Kissed, The Isle, We Are the Flesh, Pola X, Obsession, The Untamed, The Cook the Thief His Wife & Her Lover, Red White & Blue, Blue Velvet, Exotica, Besieged). The TMDB keyword page refuses automated reading, so nothing was used from it.
+- **📚 From the 17 books** (everything rewritten in KamaAgni's own words, nothing copied):
+  - Massage Studio: 62 techniques, with new strokes for every area plus two new areas, ☯️ Taoist touch (7) and 🪷 Tantric touch (6).
+  - 12-Minute Quickies: 45 → 65 scenarios.
+  - Bedroom Skills: 16 → 31 guides, including spanking, restraints, setting up a fantasy, toys for two, condoms that feel good, prostate and perineum play, lasting longer, when it's hard to finish, when sex hurts, sex during pregnancy, dirty talk for beginners, multiple orgasms, pelvic floor training, watching porn together and anal play.
+  - Fit for Fun: new 🤸 Position prep set (11 exercises).
+  - Eight Dates: short prep worksheets before 6 of the dates, with ticks saved per date.
+  - Kama Sutra Studio: new "Scratches & bites" tab (9 marks, with a consent note). The tab row now wraps on phones.
+  - Hack of the Day: 167 → 196 tips. Myths vs Facts: 45 → 57.
+- **Not used, on purpose:** chapters in *Hot Games for Mind-Blowing Sex* that frame non-consent as play ("The Good Rape", "The Burglar and the Victim") or act out adult/child or teacher/pupil scenes ("Babysitter and Father of the Kids", "Teacher and Student"). The modern Kama Sutra guide was byte-identical to the copy used in v68.
+- Version v80, cache kamaagni-v82.
+
+## v81: The Play Book, 60 step-by-step positions, tonight's deck, massage map, skills path, shared favourites
+- **🎲 The Play Book (new)** (games/kamaagni-playbook.html, data/playbook.json, key `ka_playbook`): 74 couples' games in 7 chapters: around the house (18), fun with food (7), outdoors & water (8), position games (11), daring nights at home (10), fantasies (14), toys & props (6). Each has what you need, the setup, a 🌸 sweet & safe and a 🌶️ hot & spicy version, and ways to turn it up. Includes Tonight's game, 🎲 Pick a game for us (prefers ones you haven't played), "played x of 74" progress, favourites, search and a `?g=` link to open a game. Follows your heat level (the spicy versions show from Spicy up) and topic filters. Ideas from *Sex Games Bible* (Randi Foxx), all written in KamaAgni's own words.
+  - Left out: the threesome and group chapter, sex on a children's playground, a rape-fantasy suggestion, a "photo shoot even if she objects" line, a "horny teenager" variation, secretly involving a friend, and a stereotyped "Japanese sex worker" variation. Everything set in public (lift, train, restroom, plane, cinema, office, shop, changing room) is rewritten as an at-home version, so nobody sees anything they didn't agree to.
+- **📖 Position Library: 95 → 155 positions.** 60 new ones from *Kama Sutra Step by Step* (Kama Sutra, Ananga Ranga, Perfumed Garden and Tao positions), such as Mandarin Duck, The Pine Tree, Cicada on a Bough, Kama's Wheel, Tiger Step, Seagulls on the Wing, Phoenix Playing in a Red Cave and The Hanging Bow. Each new one has 3 step-by-step stages and a "take it further" idea (new `st` and `x` fields). New good-for filters: Tantric and Power play.
+- **🃏 Tonight's deck** (Position Library): pick Gentle, Mixed or Adventurous and get three positions from different families, gentlest first and the hottest last, preferring untried ones and ones you both love. ▶ Start runs a 5-minute timer for each; finishing marks all three as tried.
+- **♥♥ We both love it** (new js/ka-both.js, loaded on every page): when you're linked, favourites in the Position Library and the Play Book are shared with your partner's phone (encrypted couple event `favs`). Positions and games you've both starred are marked "♥♥ you both love it", and a "♥♥ We both love" filter appears. Only favourites are shared, never tried ticks.
+- **🎬 After the film** (Movie Night): every film card suggests one thing to do afterwards, matched to the film's mood and heat and capped at your heat level. For example, Ask and Tell after a romance, Candlelit Striptease or Strangers at the Bar after a steamy one, House Arrest after a thriller, Talk Kit after a deep one.
+- **🗺️ Massage map** (Massage Studio): a body outline with back and front views. Tap an area (or Taoist / Tantric touch) to see its techniques, then run one, or all of them in a row, with the guided timer.
+- **🧗 Skills path** (Bedroom Skills): three levels (Basics 9, Building up 14, Adventurous 8). The next level opens after 3 ticks in the one before, and "next up" shows what to try next. A locked guide still shows its summary and can be opened with "Peek anyway". Two overlapping guides were renamed: "Building intensity together" and "Lasting longer: a training plan".
+- *Hot Games for Mind-Blowing Sex* was checked again: 10 of its scenarios are already role-plays (bar, restaurant, call girl, dancer, massage, boss, maid, traffic stop, roadside, rope lesson). The rest overlap existing content or were left out in v80.
+- Three phrases were reworded because they tripped the default-off topic filters ("throat", "shock", "blood") and hid content by mistake.
+- Fixed: the Connect Foreplay "Self-control finale" tick box is now finger-sized.
+- Version v81, cache kamaagni-v83. js/ka-embed.js regenerated.
+
+## v82: night menu, position walkthrough, massage remote, New for Us, plan-it, better search and Plan Tonight
+- **🍽️ Tonight's menu** (Play Book): a starter (around the house or food, kept to Sweet or Spicy), a main (positions, fantasies or daring) and a dessert (toys, water or food), favouring games you haven't played and ones you both love. ↻ swaps any course, a title opens that game, "✓ We did it" marks all three played, and "📅 Plan it" saves the menu as a plan.
+- **👣 Walk us through it** (Position Library): on the 60 positions with stages, a full-screen walkthrough shows one stage at a time with a short timer (45 s, then 60 s, then 3 minutes to enjoy). The next stage comes up on its own, with Back, Next and Close (Esc works too). Finishing marks the position tried.
+- **📲 Receiver's remote** (Massage Studio, new js/ka-remote.js): the receiver taps Lighter, Firmer, Slower, A little faster, Stay right there, Move on, More oil or That feels amazing, and the giver's phone shows it with a buzz ("🐢 Riya says Slower"). While a massage is open the giver's phone checks every 3 seconds (2 seconds end to end in the two-phone test). Encrypted couple event `mrm`; nothing is stored. Not linked? The screen shows the message so you can just turn the phone round.
+- **🌟 New for Us** (new games/kamaagni-month.html, key `ka_month`): each month, one position, one Play Book game and one Bedroom Skills guide you haven't tried yet, kept for the whole month. Open each one directly, or mark it done there. Doing all three earns that month's badge (with XP), and past badges are listed. Shows in Today on Home until done, in the menu, the catalogue and on Home.
+- **📅 Plan it**: favourite positions and Play Book games get a "Plan it" button (gold when you both love it). It opens Make a plan with that exact item, and the saved plan opens straight to it on the day (planDialog now keeps the specific item and link).
+- **Links that open one item:** `kamaagni-positions.html?p=`, `kamaagni-playbook.html?g=` (v81) and `kamaagni-skills.html?s=` (a locked guide opens as a peek).
+- **🔎 Search finds what's inside the app:** besides pages, results now include all 155 positions, the Play Book games, the role-plays (within your heat level and filters) and the 31 skills guides, grouped and opening straight to the item ("lotus", "shower", "pirate"…).
+- **Fixed: search results for pages were broken links.** Every page result linked to `games/games/…`. They open correctly now.
+- **Plan Tonight:** evenings of an hour or more (Spicy and up) get a "Try a position" step chosen from the Position Library to suit the mood (romantic: intimate and slow; playful: she leads or novel; adventurous: deeper or harder; tired: lazy and easy). Playful and adventurous evenings sometimes get a Play Book game as the main event. Both can be swapped.
+- Home: a 🌟 New for Us card. Today rows' subtitles are easier to read (contrast).
+- Connect Foreplay's finale tick box is 32px like the others.
+- Tested: two simulated phones on the mock backend (remote message arrives in about 2 s; favourites shared both ways and "We both love" filter), every changed page at four sizes with random tapping, and axe-core on all 96 pages (no issues).
+- Version v82, cache kamaagni-v84.
+
+## v83: Play Book dice and your own games, remote in more places, STOP always gets through, shared walkthrough, year in review
+- **🎲 Roll the dice** (Play Book): three dice roll a chapter, a version (🌸 sweet or 🌶️ spicy, sweet only at Sweet heat) and a twist (blindfold, whispers only, double the time, swap who leads, no hands for two minutes, a new room, slow motion, eyes locked, an ice cube…). "Play it" opens a matching game you haven't played, in that version, with the twist shown on the card. Respects reduced motion.
+- **✍️ Write our own** (Play Book): add your own games with a name, chapter, heat, what you need, the setup, a sweet version, an optional spicy version and up to six "turn it up" ideas. They're marked ✍️ Ours, have their own "Our own" filter, and can be edited or deleted (tap twice). They're part of the dice, Tonight's menu and Pick a game. Saved in `ka_playbook.mine` and synced to your account. Names must be unique.
+- **📲 Remote in the Guided Session and Role-play** (js/ka-remote.js is now shared; `KA_REMOTE.open(set)`): each page has its own set. Session: more, slower, stay there, change it up, kiss me, cuddle, water break, ready for the next step. Role-play: more, slower, stay in character, step out of character, next scene, kiss me, water break, that feels amazing. Massage keeps its own set. Every remote also has 🟢 Green / 🟡 Yellow / 🔴 Red at the top, sent as Together's signal, so a red is the same full STOP alert on the partner's phone. These pages check every 3 seconds (`KA_CHROME.check` is now exported).
+- **🔴 STOP always gets through:** a partner's STOP now shows even if partner notifications are muted in Settings (`ka_stop_seen`).
+- **👣 Shared walkthrough** (Position Library): when you're linked, starting a walkthrough opens it on your partner's phone at the same stage. Either of you can move it on or close it for both (couple event `walk`). On another page, your partner gets "Manav started a walkthrough · tap to join", which opens it at the current stage (`?p=…&walk=N`).
+- **🌟 Our year in KamaAgni** (Roadmap → Yearly review): for the chosen year, from this phone, it shows how many times you played and what you played most, positions tried, Play Book games played, New for Us badges, memories saved and what you both love. Use it to fill in your best moments.
+- Today rows on Home have brighter subtitles (contrast). The Home "Surprise us" button has a label. Headings on the yearly review are in order.
+- Tested on two simulated phones on the mock backend: role-play remote (2.1 s), STOP with notifications muted, and walkthrough open, next stage and close on both phones. Also the changed pages at four sizes with random tapping, and axe-core on all 96 pages (no issues).
+- Version v83, cache kamaagni-v85.
+
+## v84: dice on both phones, remote history in the morning after, Play Book in Print Studio, yearly review from both phones
+- **🎲 Dice on both phones** (Play Book): when you're linked, a roll is sent to your partner (couple event `dice`). Their phone shows the same roll ("Manav rolled…") with the same chapter, version, twist and game, and either of you can roll again. If the game is one of your own, its text travels with it so your partner sees it too. On another page your partner gets "Manav rolled the dice · tap to see". The Play Book checks every 3 seconds (1.8 s end to end in the test).
+- **📲 During the night** (The morning after): the remote now keeps a short history on the phone (`ka_remote_log`, last 30 days, never sent anywhere). The morning-after check-in shows what the remote said during the evening, most used first and who sent it, plus a gentle tip: what came up most is a clue for next time, and if a 🟡 or 🔴 came up, it suggests a no-blame chat. The summary is saved in the Journal entry too. 🟢🟡🔴 sent from your partner's remote are logged as well.
+- **🖨️ Play Book in Print Studio:** new sources "Play Book games (by chapter)", "Our favourite games" and "Games we wrote". Each card has the game's name, setup and the version for your heat level (spicy from Spicy up), with topic filters applied. The Play Book links to it ("Print your favourite games as cards", "print the ones you wrote"). Print Studio accepts `?src=`.
+- **🔗 Yearly review from both phones** (Roadmap): when you're linked, each phone sends its own year summary once a day, encrypted (couple event `yr`, stored as `ka_year_p`). "Our year in KamaAgni" then combines both phones: the same game logged on both within 3 hours counts once, positions, games and badges count once, and memories use the larger count. It says when it's from both phones and when it was last updated. `KA_BOTH.yearData(Y)` / `KA_BOTH.merged(Y)`.
+- Tested on two simulated phones on the mock backend: same dice roll on both (1.8 s), remote history logged as sent and received, combined yearly review on both phones (shared Truth or Dare counted once, positions merged). Also the changed pages at four sizes with random tapping, and axe-core on all 96 pages (no issues).
+- Version v84, cache kamaagni-v86.

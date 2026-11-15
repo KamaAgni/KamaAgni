@@ -24,11 +24,13 @@
   ];
   const calm = () => { const c = LS.get('ka_calm', {}) || {}; return {guard: c.guard !== false, limit: c.limit || 60, nudges: c.nudges !== false, sound: c.sound !== false, autotimer: c.autotimer !== false, spark: c.spark !== false}; };
   const setCalm = o => LS.set('ka_calm', {...calm(), ...o});
+  window.addEventListener('ka:couple', () => draw());
   function draw() {
     const f = F.get(), on = id => !f.off[id];
     const pages = (window.KA_CHROME ? KA_CHROME.MENU : []).flatMap(g => g[1]).filter(i => /games\//.test(i[2]) && !/settings|history|together|experts|learn/.test(i[2]));
     app.innerHTML = top('Settings', 'You choose what appears. Turn a topic off and it disappears from every game, pack, programme and menu.') +
-      `<div class="kx-card"><b>Quick presets</b><div class="kx-list" style="margin-top:8px">${PRESETS.map((p, i) => `<button class="kx-item" data-pr="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it"><b>${p[0]}</b><br><span class="kx-muted">${p[1]}</span></span></button>`).join('')}</div></div>
+      `<div class="kx-card"><b>Names &amp; genders</b><p class="kx-muted" style="margin:4px 0 8px">${(() => { const n = KX.names(), g = KX.genders(), L = {m: 'man', f: 'woman', x: 'other'}; return KX.esc(n[0]) + ' (' + L[g[0]] + ') and ' + KX.esc(n[1]) + ' (' + L[g[1]] + ')'; })()}. Games use these to give each of you the right roles, costumes and wording.</p><button class="kx-btn sm" id="nm-ed">✏️ Change names &amp; genders</button></div>
+      <div class="kx-card"><b>Quick presets</b><div class="kx-list" style="margin-top:8px">${PRESETS.map((p, i) => `<button class="kx-item" data-pr="${i}" style="cursor:pointer;text-align:left;font:inherit;color:inherit;width:100%"><span class="kx-it"><b>${p[0]}</b><br><span class="kx-muted">${p[1]}</span></span></button>`).join('')}</div></div>
       <div class="kx-card"><b>Topics</b><p class="kx-muted" style="margin:4px 0 8px">On = shown, Off = hidden everywhere. Each of you can set your own; if you are linked, agree together what you both enjoy.</p>
       <div class="kx-list">${F.TOPICS.map(t => `<div class="kx-item"><span class="kx-it"><b>${t.l}</b>${t.defOff ? ' <span class="kx-chip">off by default</span>' : ''}<br><span class="kx-muted">${t.d}</span></span>${sw(on(t.id), 'data-t="' + t.id + '" aria-label="' + t.l.replace(/&amp;/g, 'and') + '"')}</div>`).join('')}</div></div>
       <div class="kx-card"><b>Default intensity</b><div class="kx-row" style="margin-top:8px">${[1, 2, 3].map(h => `<button class="kx-btn sm ${KX.heat() === h ? '' : 'ghost'}" data-h="${h}">${KX.HEAT[h]}</button>`).join('')}</div></div>
@@ -59,6 +61,7 @@
     q('[data-cl]', b => b.onclick = () => { setCalm({limit: +b.dataset.cl}); draw(); });
     q('[data-wr]', b => b.onclick = () => { const x = F.get(); x.words.splice(+b.dataset.wr, 1); F.save(x); draw(); });
     const add = () => { const v = document.getElementById('wd').value.trim().toLowerCase(); if (!v) return; const x = F.get(); if (!x.words.includes(v)) x.words.push(v); F.save(x); draw(); };
+    const ne = document.getElementById('nm-ed'); if (ne) ne.onclick = () => { if (window.KA && KA.profile) KA.profile(); };
     document.getElementById('wa').onclick = add; document.getElementById('wd').onkeydown = e => { if (e.key === 'Enter') add(); };
     document.getElementById('rs').onclick = () => { if (confirm('Reset all content settings?')) { localStorage.removeItem('ka_filter'); F.save({off: Object.fromEntries(F.TOPICS.filter(t => t.defOff).map(t => [t.id, 1])), pages: {}, words: []}); draw(); } };
   }

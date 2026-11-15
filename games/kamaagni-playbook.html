@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Play Book</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.pl-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.pl-chips::-webkit-scrollbar{display:none}
+.pl-chips button{flex:0 0 auto;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.pl-chips button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.pl-q{width:100%;box-sizing:border-box;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:8px 12px;margin:6px 0 8px}
+.pl-c{border:1px solid var(--border2);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:10px;overflow:hidden}
+.pl-c>button{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:14px 16px;cursor:pointer;min-height:56px}
+.pl-c>button:focus-visible{outline:2px solid #f0be3c;outline-offset:-2px}
+.pl-c .nm{flex:1;min-width:0}.pl-c .nm b{font-family:'Cormorant Garamond',serif;font-size:21px;display:block;line-height:1.15}
+.pl-c .nm small{color:var(--muted);font-size:13px}.pl-d{color:#f0be3c;font-size:13px;white-space:nowrap}
+.pl-b{padding:0 16px 14px;font-size:15px;line-height:1.55}.pl-b p{margin:6px 0}.pl-b .lb{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#f4a0ae;font-weight:700;display:block;margin-top:8px}
+.pl-tags{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.pl-tags span{font-size:12px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06)}
+.pl-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pl-day{border-color:rgba(240,190,60,.55)!important;background:linear-gradient(135deg,rgba(240,190,60,.08),rgba(232,99,122,.06))!important}
+.pb-v{display:flex;gap:6px;margin:8px 0}.pb-v button{flex:1;min-height:40px;border-radius:10px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
+.pb-v button.on{color:#fff;border-color:rgba(232,99,122,.6);background:rgba(232,99,122,.14)}
+.pb-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:4px 0 12px}.pb-bar i{display:block;height:100%;background:linear-gradient(90deg,#e8637a,#f0be3c)}
+.pl-b ul{margin:4px 0 0 18px;padding:0}
+.pb-link{all:unset;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:20px;line-height:1.2;min-height:32px;display:inline-block;text-decoration:underline;text-decoration-color:rgba(240,190,60,.5)}.pb-link:focus-visible{outline:2px solid #f0be3c}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const HN = ['', 'Sweet', 'Spicy', 'Wild'];
+  let D = {chapters: {}, games: []};
+  try { D = await (await fetch('../data/playbook.json')).json(); } catch (e) {}
+  const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+  const heat = KX.heat();
+  /* v83: your own games (st.mine) join the book; they skip the topic filter because you wrote them */
+  let ALL = [];
+  const rebuild = () => { ALL = KF(D.games).concat((st0().mine || []).map(x => Object.assign({}, x, {mine: 1}))).filter(x => x.h <= heat); };
+  function st0() { return LS.get('ka_playbook', {}) || {}; }
+  const CH = [['all', 'All']].concat(Object.entries(D.chapters));
+  const st = LS.get('ka_playbook', {done: {}, fav: {}}) || {done: {}, fav: {}}; st.done = st.done || {}; st.fav = st.fav || {};
+  const save = () => LS.set('ka_playbook', st);
+  st.mine = Array.isArray(st.mine) ? st.mine : []; rebuild();
+  const TW = ['Blindfold the one receiving', 'Whispers only, no normal talking', 'Double the time', 'Swap who leads halfway', 'No hands for the first two minutes', 'Play it in a room you’ve never used for this', 'Loser of a coin toss undresses first', 'Slow motion: everything at half speed', 'Eyes locked the whole time', 'Add one ice cube'];
+  let twist = {};
+  const both = () => (window.KA_BOTH ? new Set(KA_BOTH.partner('pb')) : new Set());
+  const isBoth = n => st.fav[n] && both().has(n);
+  let f = {c: 'all', mine: '', q: ''}, open = null, ver = {}, shown = 15;
+  try { const g = new URLSearchParams(location.search).get('g'); if (g && ALL.some(x => x.n === g)) { open = g; const ix = ALL.findIndex(x => x.n === g); if (ix >= shown) shown = ix + 1; setTimeout(() => { const el = app.querySelector(`[data-o="${CSS.escape(g)}"]`); if (el) el.scrollIntoView({block: 'center'}); }, 300); } } catch (e) {}
+  const today = new Date(), seed = today.getFullYear() * 400 + today.getMonth() * 32 + today.getDate();
+  const list = () => ALL.filter(x => (f.c === 'all' || x.c === f.c) && (!f.mine || (f.mine === 'ours' ? x.mine : f.mine === 'done' ? st.done[x.n] : f.mine === 'fav' ? st.fav[x.n] : f.mine === 'both' ? isBoth(x.n) : !st.done[x.n])) && (!f.q || (x.n + ' ' + x.need + ' ' + x.sw + ' ' + x.sp).toLowerCase().includes(f.q.toLowerCase())));
+  function card(x, day) {
+    const o = open === x.n, v = ver[x.n] || (heat >= 2 ? 'sp' : 'sw');
+    return `<div class="pl-c ${day ? 'pl-day' : ''}"><button aria-expanded="${o}" data-o="${esc(x.n)}"><div class="nm">${day ? '<small style="color:#f0be3c;font-weight:700">✨ TONIGHT’S GAME</small>' : ''}<b>${esc(x.n)}</b><small>${x.mine ? '✍️ Ours · ' : ''}${esc(D.chapters[x.c] || '')} · ${HN[x.h]}${st.done[x.n] ? ' · ✓ played' : ''}${isBoth(x.n) ? ' · ♥♥ you both love it' : st.fav[x.n] ? ' · ♥' : ''}</small></div></button>
+      ${o ? `<div class="pl-b">${x.need ? `<span class="lb">You need</span><p>${esc(x.need)}</p>` : ''}${x.set ? `<span class="lb">Set it up</span><p>${esc(x.set)}</p>` : ''}
+        <div class="pb-v" role="group" aria-label="Version"><button data-v="sw" data-n="${esc(x.n)}" class="${v === 'sw' ? 'on' : ''}" aria-pressed="${v === 'sw'}">🌸 Sweet & safe</button>${heat >= 2 ? `<button data-v="sp" data-n="${esc(x.n)}" class="${v === 'sp' ? 'on' : ''}" aria-pressed="${v === 'sp'}">🌶️ Hot & spicy</button>` : ''}</div>
+        <p>${esc(v === 'sp' ? (x.sp || x.sw) : x.sw)}</p>${twist[x.n] ? `<p style="color:#f0be3c"><b>🎲 Twist:</b> ${esc(twist[x.n])}</p>` : ''}
+        ${heat >= 2 && x.up && x.up.length ? `<span class="lb">Turn it up</span><ul>${x.up.map(u => `<li>${esc(u)}</li>`).join('')}</ul>` : ''}
+        <div class="pl-act">${x.mine ? `<button class="kx-btn sm ghost" data-ed="${esc(x.n)}">✏️ Edit</button><button class="kx-btn sm ghost" data-del="${esc(x.n)}">🗑 Delete</button>` : ''}<button class="kx-btn sm ${st.done[x.n] ? '' : 'ghost'}" data-d="${esc(x.n)}" aria-pressed="${!!st.done[x.n]}">${st.done[x.n] ? '✓ We played it' : 'Mark played'}</button><button class="kx-btn sm ghost" data-f="${esc(x.n)}" aria-pressed="${!!st.fav[x.n]}">${st.fav[x.n] ? '♥ A favourite' : '♡ Favourite'}</button>${st.fav[x.n] ? `<button class="kx-btn sm ${isBoth(x.n) ? 'gold' : 'ghost'}" data-plan="${esc(x.n)}">📅 Plan it</button>` : ''}</div></div>` : ''}</div>`;
+  }
+  /* Night menu (v82): a starter, a main and a dessert from different chapters */
+  const COURSES = [['🥂 Starter', ['house', 'food']], ['🔥 Main', ['pos', 'fan', 'dare']], ['🍓 Dessert', ['toys', 'out', 'food']]];
+  const CAP = [2, 3, 3]; /* starters stay gentle so the evening builds */
+  const pickFor = (k, avoid) => { const pool0 = ALL.filter(x => COURSES[k][1].includes(x.c) && !avoid.includes(x.n)), capped = pool0.filter(x => x.h <= CAP[k]), pool = capped.length ? capped : pool0; const fresh = pool.filter(x => !st.done[x.n]); const P2 = (fresh.length ? fresh : pool); const pref = P2.filter(x => isBoth(x.n) || st.fav[x.n]); const from = pref.length && Math.random() < .5 ? pref : P2; return from.length ? from[Math.floor(Math.random() * from.length)].n : null; };
+  function newMenu() { const n = []; COURSES.forEach((c, k) => { const x = pickFor(k, n); if (x) n.push(x); }); st.menu = {n, at: Date.now()}; save(); draw(); const el = document.getElementById('menu'); if (el) el.scrollIntoView({block: 'start', behavior: 'smooth'}); }
+  function menuHTML() {
+    const m = st.menu, G = m && m.n ? m.n.map(n => ALL.find(x => x.n === n)) : [];
+    if (!G.length || G.some(x => !x)) return `<div class="kx-card" id="menu" style="margin:0 0 12px"><b>🍽️ Tonight’s menu</b><p class="kx-muted" style="margin:4px 0 8px">A starter, a main and a dessert from different chapters: a whole evening, planned in one tap.</p><button class="kx-btn sm gold" id="mnew">Plan our night</button></div>`;
+    return `<div class="kx-card" id="menu" style="margin:0 0 12px"><b>🍽️ Tonight’s menu</b>${G.map((x, k) => `<div style="display:flex;gap:8px;align-items:center;margin:8px 0;${st.done[x.n] ? 'opacity:.6' : ''}"><div style="flex:1;min-width:0"><small class="kx-muted">${COURSES[k][0]}</small><br><button class="pb-link" data-go="${esc(x.n)}">${esc(x.n)}${st.done[x.n] ? ' ✓' : ''}</button></div><button class="kx-btn sm ghost" data-swap="${k}" aria-label="Swap the ${COURSES[k][0].slice(3).toLowerCase()}">↻</button></div>`).join('')}
+      <div class="kx-row" style="margin-top:6px"><button class="kx-btn sm gold" id="mdone">✓ We did it</button><button class="kx-btn sm ghost" id="mplan">📅 Plan it</button><button class="kx-btn sm ghost" id="mnew">New menu</button></div></div>`;
+  }
+  /* Dice (v83): chapter, version and a twist */
+  /* v84: when linked, a roll is sent to the partner's phone (couple event 'dice'), which shows the very same roll */
+  const linked = () => window.KA_REMOTE && KA_REMOTE.linked();
+  const pname = () => (KX.names && KX.names()[1]) || 'Your partner';
+  function roll() {
+    const chs = Object.keys(D.chapters).filter(c => ALL.some(x => x.c === c));
+    if (!chs.length) return;
+    const c = chs[Math.floor(Math.random() * chs.length)], v = heat >= 2 && Math.random() < .6 ? 'sp' : 'sw', t = TW[Math.floor(Math.random() * TW.length)];
+    const pool = ALL.filter(x => x.c === c), fresh = pool.filter(x => !st.done[x.n]), g = (fresh.length ? fresh : pool)[Math.floor(Math.random() * (fresh.length ? fresh : pool).length)];
+    if (linked()) { try { KA_CLOUD.couple.send('dice', {c, v, t, n: g.n, g: g.mine ? {n: g.n, c: g.c, h: g.h, need: g.need, set: g.set, sw: g.sw, sp: g.sp, up: g.up} : null, at: Date.now()}); } catch (e) {} }
+    showRoll(c, v, t, g, '');
+  }
+  function showRoll(c, v, t, g, from) {
+    const chs = Object.keys(D.chapters); const old = document.querySelector('[aria-label="Dice roll"]'); if (old) old.remove();
+    const d = document.createElement('div'); d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Dice roll');
+    d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(5,6,15,.94);display:flex;align-items:center;justify-content:center;padding:18px';
+    const face = (lab, id) => `<div style="flex:1;min-width:0;border:1px solid rgba(240,190,60,.5);border-radius:16px;padding:14px 8px;text-align:center;background:rgba(255,255,255,.04)"><small class="kx-muted">${lab}</small><div id="${id}" style="font-weight:700;font-size:17px;min-height:46px;margin-top:6px;display:flex;align-items:center;justify-content:center">🎲</div></div>`;
+    d.innerHTML = `<div style="max-width:440px;width:100%"><h2 style="margin:0 0 12px;font-family:'Cormorant Garamond',serif;font-size:28px;text-align:center">${from ? esc(from) + ' rolled…' : 'Rolling…'}</h2><div style="display:flex;gap:8px">${face('Chapter', 'dc')}${face('Version', 'dv')}${face('Twist', 'dt')}</div><div id="dr" style="min-height:120px;margin-top:14px;text-align:center"></div><div class="kx-row" style="justify-content:center;margin-top:8px"><button class="kx-btn gold" id="dgo" disabled>Play it</button><button class="kx-btn ghost" id="dre">Roll again</button><button class="kx-btn ghost" id="dx">Close</button></div></div>`;
+    document.body.appendChild(d);
+    const set = (id, txt) => { const e = d.querySelector('#' + id); if (e) e.textContent = txt; };
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let k = 0; const iv = setInterval(() => { k++; set('dc', D.chapters[chs[k % chs.length]]); set('dv', k % 2 ? '🌸 Sweet' : '🌶️ Spicy'); set('dt', TW[k % TW.length]); try { KA_FX && KA_FX.tick && KA_FX.tick(); } catch (e) {} if (k > (reduce ? 1 : 12)) { clearInterval(iv); set('dc', D.chapters[c]); set('dv', v === 'sp' ? '🌶️ Spicy' : '🌸 Sweet'); set('dt', t); d.querySelector('h2').textContent = from ? from + ' rolled…' : linked() ? 'You rolled (on both phones)…' : 'You rolled…';
+      d.querySelector('#dr').innerHTML = `<b style="font-family:'Cormorant Garamond',serif;font-size:26px">${esc(g.n)}</b><p class="kx-muted" style="margin:4px 0 0">${esc(g.set || '')}</p>` + (!ALL.some(x => x.n === g.n) && (g.sw || g.sp) ? `<p style="margin:8px 0 0">${esc(v === 'sp' ? (g.sp || g.sw) : g.sw)}</p><p style="color:#f0be3c;margin:6px 0 0">🎲 Twist: ${esc(t)}</p><p class="kx-muted" style="font-size:13px">One of ${esc(pname())}’s own games.</p>` : ''); const go = d.querySelector('#dgo'); go.disabled = false; go.focus(); try { navigator.vibrate && navigator.vibrate([30, 30, 60]); } catch (e) {} } }, 90);
+    const close = () => { clearInterval(iv); d.remove(); };
+    d.querySelector('#dx').onclick = close; d.querySelector('#dre').onclick = () => { close(); roll(); };
+    if (!ALL.some(x => x.n === g.n)) { d.querySelector('#dgo').style.display = 'none'; }
+    d.querySelector('#dgo').onclick = () => { if (!ALL.some(x => x.n === g.n)) return; close(); ver[g.n] = v; twist[g.n] = t; open = g.n; f = {c: 'all', mine: '', q: ''}; const ix = list().findIndex(x => x.n === g.n); if (ix >= shown) shown = ix + 1; draw(); const el = app.querySelector(`[data-o="${CSS.escape(g.n)}"]`); if (el) el.scrollIntoView({block: 'center', behavior: 'smooth'}); };
+  }
+  /* Write your own (v83): saved in ka_playbook.mine */
+  function editor(name) {
+    const old = name ? st.mine.find(x => x.n === name) : null, x = old || {n: '', c: 'house', h: Math.min(2, heat), need: '', set: '', sw: '', sp: '', up: []};
+    const d = document.createElement('div'); d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Write your own game');
+    d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(5,6,15,.94);overflow:auto;padding:18px';
+    const fld = (id, lab, val, ta, ph) => `<label style="display:block;margin:10px 0 0;font-weight:700;font-size:14px" for="${id}">${lab}</label>` + (ta ? `<textarea id="${id}" rows="3" class="pl-q" placeholder="${esc(ph || '')}" style="resize:vertical">${esc(val)}</textarea>` : `<input id="${id}" class="pl-q" value="${esc(val)}" placeholder="${esc(ph || '')}">`);
+    d.innerHTML = `<div style="max-width:520px;margin:0 auto"><h2 style="margin:0 0 4px;font-family:'Cormorant Garamond',serif;font-size:28px">${old ? 'Edit our game' : '✍️ Write our own game'}</h2><p class="kx-muted" style="margin:0">It joins your Play Book on this phone and your account.</p>` +
+      fld('e-n', 'Name *', x.n, 0, 'e.g. Sunday Pancakes in Bed') +
+      `<div style="display:flex;gap:8px"><div style="flex:1"><label style="display:block;margin:10px 0 0;font-weight:700;font-size:14px" for="e-c">Chapter</label><select id="e-c" class="pl-q">${Object.entries(D.chapters).map(([k, l]) => `<option value="${k}" ${x.c === k ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select></div><div style="flex:0 0 120px"><label style="display:block;margin:10px 0 0;font-weight:700;font-size:14px" for="e-h">Heat</label><select id="e-h" class="pl-q">${[1, 2, 3].map(h => `<option value="${h}" ${x.h === h ? 'selected' : ''}>${HN[h]}</option>`).join('')}</select></div></div>` +
+      fld('e-need', 'You need', x.need, 0, 'Props, place, music') + fld('e-set', 'Set it up', x.set, 1, 'How it starts') + fld('e-sw', '🌸 Sweet & safe version *', x.sw, 1, 'The gentle way to play') + fld('e-sp', '🌶️ Hot & spicy version', x.sp, 1, 'The hotter way (optional)') + fld('e-up', 'Turn it up (one idea per line)', (x.up || []).join('\n'), 1, 'Optional extras') +
+      `<p id="e-err" role="alert" style="color:#ff8a9a;min-height:20px;margin:8px 0 0"></p><div class="kx-row" style="margin-top:6px"><button class="kx-btn gold" id="e-ok">${old ? 'Save changes' : 'Add to our Play Book'}</button><button class="kx-btn ghost" id="e-x">Cancel</button></div></div>`;
+    document.body.appendChild(d); d.querySelector('#e-n').focus();
+    const close = () => d.remove();
+    d.querySelector('#e-x').onclick = close;
+    d.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+    d.querySelector('#e-ok').onclick = () => {
+      const v = id => d.querySelector('#' + id).value.trim();
+      const g = {n: v('e-n').slice(0, 80), c: v('e-c'), h: +v('e-h'), need: v('e-need'), set: v('e-set'), sw: v('e-sw'), sp: v('e-sp'), up: v('e-up').split('\n').map(z => z.trim()).filter(Boolean).slice(0, 6), at: Date.now()};
+      const err = d.querySelector('#e-err');
+      if (!g.n || !g.sw) { err.textContent = 'Give it a name and a sweet version.'; return; }
+      if ((g.n !== name) && (D.games.some(z => z.n.toLowerCase() === g.n.toLowerCase()) || st.mine.some(z => z.n.toLowerCase() === g.n.toLowerCase()))) { err.textContent = 'There’s already a game with that name.'; return; }
+      if (old) { st.mine = st.mine.map(z => z.n === name ? g : z); if (name !== g.n) { ['done', 'fav'].forEach(k => { if (st[k][name]) { st[k][g.n] = st[k][name]; delete st[k][name]; } }); } } else st.mine.unshift(g);
+      save(); rebuild(); close(); open = g.n; f = {c: 'all', mine: 'ours', q: ''}; draw();
+      try { KX.toast && KX.toast(old ? 'Saved' : 'Added to your Play Book'); } catch (e) {}
+    };
+  }
+  const confirmDel = b => { if (b.dataset.sure) return true; b.dataset.sure = 1; b.textContent = 'Tap again to delete'; setTimeout(() => { if (b.isConnected) { delete b.dataset.sure; b.textContent = '🗑 Delete'; } }, 3000); return false; };
+  (window.KA_EV_HOOKS = window.KA_EV_HOOKS || []).push(evs => {
+    let seen = +(LS.get('ka_dice_seen', 0) || 0), last = null;
+    evs.forEach(e => { if (e.kind === 'dice' && e.id > seen) { seen = e.id; if (!e.mine && e.body && Date.now() - (e.body.at || 0) < 120000) last = e.body; } });
+    LS.set('ka_dice_seen', seen);
+    if (!last) return;
+    const g = ALL.find(x => x.n === last.n) || last.g || {n: last.n, set: '', c: last.c};
+    showRoll(last.c, last.v, last.t, g, pname());
+  });
+  function draw() {
+    const L = list(), day = ALL.length ? ALL[seed % ALL.length] : null, dc = ALL.filter(x => st.done[x.n]).length;
+    const chips = (A, k, lab) => `<div class="pl-chips" role="group" aria-label="${lab}">${A.map(([v, l]) => `<button data-k="${k}" data-val="${esc(v)}" class="${f[k] === v ? 'on' : ''}" aria-pressed="${f[k] === v}">${esc(l)}</button>`).join('')}</div>`;
+    app.innerHTML = top('The Play Book', `${ALL.length} games for around the house, food, water, positions, daring nights, fantasies and toys, plus any you write yourselves. Each has a sweet version and a spicy one.`) +
+      `<p class="kx-muted" style="margin:-4px 0 4px">You’ve played ${dc} of ${ALL.length}.${heat < 3 ? ` Showing games up to ${HN[heat]} heat (change it in Settings).` : ''}</p><div class="pb-bar" aria-hidden="true"><i style="width:${ALL.length ? Math.round(dc * 100 / ALL.length) : 0}%"></i></div>` +
+      menuHTML() + (day && f.c === 'all' && !f.q && !f.mine ? card(day, true) : '') +
+      `<input class="pl-q" id="q" type="search" placeholder="Search (e.g. shower, chocolate, blindfold)" value="${esc(f.q)}" aria-label="Search games">` +
+      chips(CH, 'c', 'Chapter') + chips([['', 'All'], ['new', 'Not played yet'], ['done', '✓ Played'], ['fav', '♥ Favourites']].concat(both().size ? [['both', '♥♥ We both love']] : [], st.mine.length ? [['ours', '✍️ Our own']] : []), 'mine', 'Yours') +
+      `<div class="kx-row" style="margin:6px 0 12px"><button class="kx-btn gold" id="rnd">🎯 Pick a game for us (${L.length})</button><button class="kx-btn" id="roll">🎲 Roll the dice</button><button class="kx-btn ghost" id="wr">✍️ Write our own</button></div>` +
+      (L.length ? L.slice(0, shown).map(x => card(x)).join('') + (L.length > shown ? `<button class="kx-btn ghost" id="more" style="display:block;margin:10px auto">Show more (${L.length - shown} left)</button>` : '') : '<p class="kx-muted">Nothing matches. Try fewer filters.</p>') +
+      `<p style="margin-top:14px"><a href="kamaagni-print.html?src=${Object.keys(st.fav).length ? 'pb:fav' : 'pb:all'}" style="color:#ffc861;text-decoration:underline">🖨️ Print ${Object.keys(st.fav).length ? 'your favourite games' : 'these games'} as cards</a>${st.mine.length ? ` · <a href="kamaagni-print.html?src=pb:own" style="color:#ffc861;text-decoration:underline">print the ones you wrote</a>` : ''}</p><p class="kx-muted" style="font-size:13px;margin-top:6px">Anything daring is written for a private space: nobody watches who hasn’t agreed to. Agree a stop word before any game with restraints.</p>`;
+    const $ = id => document.getElementById(id);
+    $('q').oninput = e => { f.q = e.target.value; shown = 15; const c = e.target.selectionStart; draw(); const q = $('q'); q.focus(); q.setSelectionRange(c, c); };
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { f[b.dataset.k] = b.dataset.val; shown = 15; open = null; draw(); });
+    app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { open = open === b.dataset.o ? null : b.dataset.o; draw(); });
+    app.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { ver[b.dataset.n] = b.dataset.v; draw(); });
+    app.querySelectorAll('[data-d]').forEach(b => b.onclick = () => { const n = b.dataset.d; if (st.done[n]) delete st.done[n]; else { st.done[n] = Date.now(); try { KA_TRACK.award('playbook', 5); } catch (e) {} } save(); draw(); });
+    app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const n = b.dataset.f; if (st.fav[n]) delete st.fav[n]; else st.fav[n] = 1; save(); try { window.KA_BOTH && KA_BOTH.sync('pb', Object.keys(st.fav)); } catch (e) {} draw(); });
+    const plan = (d, href) => { try { KA_NEXT.plan({u: 'games/kamaagni-playbook.html', d, href}); } catch (e) {} };
+    app.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => plan((isBoth(b.dataset.plan) ? '♥♥ ' : '') + b.dataset.plan, 'games/kamaagni-playbook.html?g=' + encodeURIComponent(b.dataset.plan)));
+    app.querySelectorAll('[data-swap]').forEach(b => b.onclick = () => { const k = +b.dataset.swap, x = pickFor(k, st.menu.n); if (x) { st.menu.n[k] = x; save(); draw(); } });
+    app.querySelectorAll('[data-go]').forEach(b => b.onclick = () => { const n = b.dataset.go; open = n; f = {c: 'all', mine: '', q: ''}; const ix = list().findIndex(x => x.n === n); if (ix >= shown) shown = ix + 1; draw(); const el = app.querySelector(`[data-o="${CSS.escape(n)}"]`); if (el) el.scrollIntoView({block: 'center', behavior: 'smooth'}); });
+    if ($('mnew')) $('mnew').onclick = newMenu;
+    if ($('mdone')) $('mdone').onclick = () => { st.menu.n.forEach(n => { if (!st.done[n]) st.done[n] = Date.now(); }); try { KA_TRACK.award('playbook', 10); } catch (e) {} delete st.menu; save(); try { KX.toast && KX.toast('Three courses done! 🍽️'); } catch (e) {} draw(); };
+    if ($('mplan')) $('mplan').onclick = () => plan('Menu: ' + st.menu.n.join(' → '), 'games/kamaagni-playbook.html');
+    $('roll').onclick = roll; $('wr').onclick = () => editor();
+    app.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => editor(b.dataset.ed));
+    app.querySelectorAll('[data-del]').forEach(b => b.onclick = () => { const n = b.dataset.del; if (!confirmDel(b)) return; st.mine = st.mine.filter(z => z.n !== n); delete st.done[n]; delete st.fav[n]; save(); rebuild(); open = null; if (!st.mine.length && f.mine === 'ours') f.mine = ''; draw(); });
+    if ($('more')) $('more').onclick = () => { shown += 15; const y = scrollY; draw(); scrollTo(0, y); };
+    $('rnd').onclick = () => { const L2 = list().filter(x => !st.done[x.n]); const C = L2.length ? L2 : list(); if (!C.length) return; const x = C[Math.floor(Math.random() * C.length)]; open = x.n; const ix = list().indexOf(x); if (ix >= shown) shown = ix + 1; draw(); const el = app.querySelector(`[data-o="${CSS.escape(x.n)}"]`); if (el) el.scrollIntoView({block: 'center', behavior: 'smooth'}); };
+  }
+  draw();
+  setTimeout(() => { try { if (window.KA_BOTH) KA_BOTH.sync('pb', Object.keys(st.fav)); } catch (e) {} if (both().size && document.activeElement.id !== 'q') draw(); }, 1500);
+  addEventListener('ka:both', () => { if (document.activeElement.id !== 'q') draw(); });
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

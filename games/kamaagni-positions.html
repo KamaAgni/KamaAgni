@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Position Library</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.pl-chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0 8px;scrollbar-width:none}.pl-chips::-webkit-scrollbar{display:none}
+.pl-chips button{flex:0 0 auto;min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer;white-space:nowrap}
+.pl-chips button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.pl-q{width:100%;box-sizing:border-box;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:8px 12px;margin:6px 0 8px}
+.pl-c{border:1px solid var(--border2);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:10px;overflow:hidden}
+.pl-c>button{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:center;width:100%;padding:14px 16px;cursor:pointer;min-height:56px}
+.pl-c>button:focus-visible{outline:2px solid #f0be3c;outline-offset:-2px}
+.pl-c .nm{flex:1;min-width:0}.pl-c .nm b{font-family:'Cormorant Garamond',serif;font-size:21px;display:block;line-height:1.15}
+.pl-c .nm small{color:var(--muted);font-size:13px}.pl-d{color:#f0be3c;font-size:13px;white-space:nowrap}
+.pl-b{padding:0 16px 14px;font-size:15px;line-height:1.55}.pl-b p{margin:6px 0}.pl-b .lb{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#f4a0ae;font-weight:700;display:block;margin-top:8px}
+.pl-tags{display:flex;flex-wrap:wrap;gap:5px;margin:6px 0}.pl-tags span{font-size:12px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.06)}
+.pl-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pl-day{border-color:rgba(240,190,60,.55)!important;background:linear-gradient(135deg,rgba(240,190,60,.08),rgba(232,99,122,.06))!important}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const FAM = [['all', 'All'], ['face', '💞 Face to face'], ['top', '👑 She’s on top'], ['behind', '🔥 From behind'], ['side', '🛌 Side by side'], ['sitting', '🪷 Sitting & lap'], ['standing', '🧍 Standing'], ['furniture', '🛋️ Furniture'], ['kama', '📜 Kama Sutra classics'], ['advanced', '🤸 Adventurous']];
+  const GOOD = [['', 'Any'], ['clitoral', 'Clitoral'], ['g-spot', 'G-spot'], ['deep', 'Deep'], ['intimate', 'Intimate'], ['slow', 'Slow'], ['beginner', 'Easy'], ['she leads', 'She leads'], ['quick', 'Quick'], ['relaxed', 'Lazy'], ['tantric', 'Tantric'], ['power', 'Power play']];
+  const DIFF = ['', 'Easy', 'Some effort', 'Adventurous'];
+  let P = []; try { P = await (await fetch('../data/positions.json')).json(); } catch (e) {}
+  const st = LS.get('ka_pos', {tried: {}, fav: {}}) || {tried: {}, fav: {}}; st.tried = st.tried || {}; st.fav = st.fav || {};
+  const save = () => LS.set('ka_pos', st);
+  let f = {fam: 'all', g: '', d: 0, q: '', mine: ''}, open = null, shown = 20;
+  const both = () => (window.KA_BOTH ? new Set(KA_BOTH.partner('pos')) : new Set());
+  const isBoth = n => st.fav[n] && both().has(n);
+  /* Tonight's deck: three positions from different families, gentle first, the hottest last */
+  const ORDER = ['side', 'face', 'sitting', 'kama', 'top', 'furniture', 'behind', 'standing', 'advanced'];
+  const VIBE = {gentle: ['🌙 Gentle', 1], mixed: ['🔥 Mixed', 2], wild: ['🤸 Adventurous', 3]};
+  function deal(v) {
+    const max = VIBE[v][1], pool = P.filter(p => p.d <= max && (v !== 'wild' || true));
+    const score = p => Math.random() * 3 + (st.tried[p.n] ? 0 : 1.5) + (st.fav[p.n] ? 1 : 0) + (isBoth(p.n) ? 2 : 0) + (v === 'wild' && p.d === 3 ? 1.5 : 0) + (v === 'gentle' && /intimate|slow|relaxed/.test(p.g.join(' ')) ? 1 : 0);
+    const ranked = pool.map(p => [score(p), p]).sort((a, b) => b[0] - a[0]).map(x => x[1]);
+    const pick = [], fams = new Set();
+    for (const p of ranked) { if (pick.length === 3) break; if (fams.has(p.f)) continue; fams.add(p.f); pick.push(p); }
+    pick.sort((a, b) => ORDER.indexOf(a.f) - ORDER.indexOf(b.f) || a.d - b.d);
+    st.deck = {v, n: pick.map(p => p.n), i: -1}; save(); draw();
+    const el = document.getElementById('deck'); if (el) el.scrollIntoView({block: 'start', behavior: 'smooth'});
+  }
+  function deckHTML() {
+    const dk = st.deck, cards = dk && dk.n ? dk.n.map(n => P.find(p => p.n === n)).filter(Boolean) : [];
+    if (!cards.length) return `<div class="kx-card" id="deck" style="margin:0 0 12px"><b>🃏 Tonight’s deck</b><p class="kx-muted" style="margin:4px 0 8px">Three positions from different families, easiest first, so the night builds. Five minutes each.</p><div class="kx-row">${Object.entries(VIBE).map(([k, [l]]) => `<button class="kx-btn sm ghost" data-deal="${k}">${l}</button>`).join('')}</div></div>`;
+    const i = dk.i;
+    return `<div class="kx-card" id="deck" style="margin:0 0 12px"><b>🃏 Tonight’s deck · ${esc(VIBE[dk.v][0])}</b>
+      <ol style="margin:8px 0 8px 18px;padding:0">${cards.map((p, k) => `<li style="margin:6px 0;${k === i ? 'color:#ffc861' : k < i ? 'opacity:.6' : ''}"><b>${esc(p.n)}</b>${k === i ? ' · now' : k < i ? ' ✓' : ''}<br><small class="kx-muted">${esc((p.st && p.st[0]) || p.s)}</small></li>`).join('')}</ol>
+      ${i >= 0 && i < cards.length ? `<p style="margin:4px 0 8px"><b>${esc(cards[i].n)}:</b> ${esc(cards[i].s)}</p>` : ''}
+      <div class="kx-row"><button class="kx-btn sm gold" id="dkgo">${i < 0 ? '▶ Start (5 min each)' : i < cards.length - 1 ? '▶ Next position' : '✓ Finish'}</button>${i >= 0 && i < cards.length ? `<button class="kx-btn sm ghost" id="dkopen">Open card</button>` : ''}<button class="kx-btn sm ghost" id="dkre">↻ Deal again</button><button class="kx-btn sm ghost" id="dkx">✕</button></div></div>`;
+  }
+  /* who's who: write him/her parts with your names when you're a man and a woman */
+  const N = KX.names(), G = KX.genders(), wi = G.indexOf('f'), mi = G.indexOf('m');
+  const herN = wi >= 0 && mi >= 0 ? N[wi] : 'Her', himN = wi >= 0 && mi >= 0 ? N[mi] : 'Him';
+  try { const q0 = new URLSearchParams(location.search).get('p'); if (q0 && P.some(x => x.n === q0)) { open = q0; setTimeout(() => { const ix = list().findIndex(x => x.n === q0); if (ix >= shown) { shown = ix + 1; draw(); } const el = app.querySelector(`[data-o="${CSS.escape(q0)}"]`); if (el) el.scrollIntoView({block: 'center'}); }, 300); } } catch (e) {}
+  try { const qs = new URLSearchParams(location.search); if (qs.has('walk') && qs.get('p')) setTimeout(() => walk(qs.get('p'), +qs.get('walk') || 0, false), 400); } catch (e) {}
+  const today = new Date(), seed = today.getFullYear() * 400 + today.getMonth() * 32 + today.getDate();
+  function list() {
+    return P.filter(p => (f.fam === 'all' || p.f === f.fam) && (!f.g || p.g.includes(f.g)) && (!f.d || p.d <= f.d) && (!f.mine || (f.mine === 'tried' ? st.tried[p.n] : f.mine === 'fav' ? st.fav[p.n] : f.mine === 'both' ? isBoth(p.n) : !st.tried[p.n])) && (!f.q || (p.n + ' ' + p.s + ' ' + p.g.join(' ')).toLowerCase().includes(f.q.toLowerCase())));
+  }
+  function card(p, day) {
+    const o = open === p.n;
+    return `<div class="pl-c ${day ? 'pl-day' : ''}"><button aria-expanded="${o}" data-o="${esc(p.n)}"><div class="nm">${day ? '<small style="color:#f0be3c;font-weight:700">✨ POSITION OF THE DAY</small>' : ''}<b>${esc(p.n)}</b><small>${esc((FAM.find(x => x[0] === p.f) || [, ''])[1])}${st.tried[p.n] ? ' · ✓ tried' : ''}${isBoth(p.n) ? ' · ♥♥ you both love it' : st.fav[p.n] ? ' · ♥' : ''}</small></div><span class="pl-d" aria-label="${DIFF[p.d]}">${'●'.repeat(p.d)}${'○'.repeat(3 - p.d)}</span></button>
+      ${o ? `<div class="pl-b"><div class="pl-tags">${p.g.map(t => `<span>${esc(t)}</span>`).join('')}<span>${DIFF[p.d]}</span></div>
+        <span class="lb">How</span><p>${esc(p.s)}</p>${p.st ? `<span class="lb">Step by step</span><ol style="margin:4px 0 0 18px;padding:0">${p.st.map(x => `<li>${esc(x)}</li>`).join('')}</ol>` : ''}
+        <span class="lb">${esc(herN)}</span><p>${esc(p.her)}</p>
+        <span class="lb">${esc(himN)}</span><p>${esc(p.him)}</p>
+        <span class="lb">Why it works</span><p>${esc(p.w)}</p>
+        <span class="lb">Tip</span><p>${esc(p.t)}</p>${p.x ? `<span class="lb">Take it further</span><p>${esc(p.x)}</p>` : ''}
+        <div class="pl-act"><button class="kx-btn sm ${st.tried[p.n] ? '' : 'ghost'}" data-t="${esc(p.n)}" aria-pressed="${!!st.tried[p.n]}">${st.tried[p.n] ? '✓ We tried it' : 'Mark tried'}</button><button class="kx-btn sm ghost" data-f="${esc(p.n)}" aria-pressed="${!!st.fav[p.n]}">${st.fav[p.n] ? '♥ A favourite' : '♡ Favourite'}</button><button class="kx-btn sm ghost" data-tm="${esc(p.n)}">⏱ 5-minute try</button>${p.st ? `<button class="kx-btn sm ghost" data-walk="${esc(p.n)}">👣 Walk us through it</button>` : ''}${st.fav[p.n] ? `<button class="kx-btn sm ${isBoth(p.n) ? 'gold' : 'ghost'}" data-plan="${esc(p.n)}">📅 Plan it</button>` : ''}</div></div>` : ''}</div>`;
+  }
+  /* Walkthrough (v82): one stage at a time, full screen, with a short timer for each */
+  /* v83: shared walkthrough. When linked, each stage change goes to the partner's phone (couple event 'walk'),
+     which opens the same walkthrough at the same stage. Either phone can move it on. */
+  const linked = () => window.KA_REMOTE && KA_REMOTE.linked();
+  const bc = (n, i, end) => { if (!linked()) return; try { KA_CLOUD.couple.send('walk', {n, i, end: !!end, at: Date.now()}); } catch (e) {} };
+  let WK = null; /* the open walkthrough: {n, set(i), close()} */
+  (window.KA_EV_HOOKS = window.KA_EV_HOOKS || []).push(evs => {
+    let seen = +(LS.get('ka_walk_seen', 0) || 0), last = null;
+    evs.forEach(e => { if (e.kind === 'walk' && e.id > seen) { seen = e.id; if (!e.mine && e.body && Date.now() - (e.body.at || 0) < 90000) last = e.body; } });
+    LS.set('ka_walk_seen', seen);
+    if (!last) return;
+    if (last.end) { if (WK && WK.n === last.n) WK.close(true); return; }
+    if (WK && WK.n === last.n) WK.set(last.i, true); else walk(last.n, last.i, true);
+  });
+  setInterval(() => { if (WK && linked() && window.KA_CHROME && KA_CHROME.check) try { KA_CHROME.check(); } catch (e) {} }, 3000);
+  function walk(n, start, fromPartner) {
+    const p = P.find(x => x.n === n); if (!p || !p.st) return;
+    if (WK) WK.close(true);
+    const S2 = p.st.concat(['Stay here and enjoy it. ' + (p.x ? 'When you want more: ' + p.x : p.t)]), secs = [45, 60, 60, 180];
+    let i = 0, left = 0, iv = null; const pn = (KX.names && KX.names()[1]) || 'Your partner';
+    const d = document.createElement('div'); d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', p.n + ' walkthrough');
+    d.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(5,6,15,.96);display:flex;align-items:center;justify-content:center;padding:20px';
+    const paint = () => {
+      d.innerHTML = `<div style="max-width:460px;width:100%;text-align:center"><small style="color:#f0be3c;font-weight:700;letter-spacing:.08em">${esc(p.n.toUpperCase())} · ${i < S2.length - 1 ? 'STAGE ' + (i + 1) + ' OF ' + (S2.length - 1) : 'ENJOY'}</small>
+        <p style="font-family:'Cormorant Garamond',serif;font-size:27px;line-height:1.3;margin:16px 0">${esc(S2[i])}</p>
+        <div aria-live="off" style="font-size:40px;font-weight:700;color:#f4a0ae;margin:6px 0 14px" id="wk-t">${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}</div>
+        <div class="kx-row" style="justify-content:center">${i > 0 ? '<button class="kx-btn ghost" id="wk-b">← Back</button>' : ''}<button class="kx-btn gold" id="wk-n">${i < S2.length - 1 ? 'Next stage →' : '✓ Done'}</button><button class="kx-btn ghost" id="wk-x">Close</button></div>
+        <p class="kx-muted" style="margin-top:12px;font-size:13px">The next stage comes up when the timer ends. Go at your own pace.${linked() ? ' 🔗 Following along on ' + esc(pn) + '’s phone too.' : ''}</p></div>`;
+      d.querySelector('#wk-n').onclick = () => go(1); d.querySelector('#wk-x').onclick = close; const b = d.querySelector('#wk-b'); if (b) b.onclick = () => go(-1);
+      d.querySelector('#wk-n').focus();
+    };
+    const tick = () => { left = Math.max(0, left - 1); const t = d.querySelector('#wk-t'); if (t) t.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; if (!left && i < S2.length - 1) go(1, true); };
+    const go = (k, quiet) => { if (!quiet) bc(n, Math.min(i + k, S2.length), i + k >= S2.length); if (i + k >= S2.length) { if (!st.tried[p.n]) { st.tried[p.n] = Date.now(); save(); try { KA_TRACK.award('pos', 5); } catch (e) {} } close(true); draw(); return; } i = Math.max(0, i + k); left = secs[Math.min(i, secs.length - 1)]; paint(); try { navigator.vibrate && navigator.vibrate(40); } catch (e) {} };
+    const close = quiet => { if (quiet !== true) bc(n, i, true); clearInterval(iv); d.remove(); document.removeEventListener('keydown', esc1); WK = null; };
+    const esc1 = e => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', esc1);
+    i = Math.max(0, Math.min(start || 0, S2.length - 1));
+    document.body.appendChild(d); left = secs[Math.min(i, secs.length - 1)]; paint(); iv = setInterval(tick, 1000);
+    WK = {n, close, set: (j, q) => { if (j >= S2.length) { go(S2.length - i, true); return; } i = j; left = secs[Math.min(i, secs.length - 1)]; paint(); }};
+    if (fromPartner) { try { KA_CHROME.notify({icon: '👣', title: pn + ' started a walkthrough', text: p.n, kind: 'remote'}); } catch (e) {} } else bc(n, i);
+  }
+  function draw() {
+    const L = list(), day = P.length ? P[seed % P.length] : null, tc = Object.keys(st.tried).length;
+    const chips = (A, k, lab) => `<div class="pl-chips" role="group" aria-label="${lab}">${A.map(([v, l]) => `<button data-k="${k}" data-v="${esc(String(v))}" class="${String(f[k]) === String(v) ? 'on' : ''}" aria-pressed="${String(f[k]) === String(v)}">${esc(l)}</button>`).join('')}</div>`;
+    app.innerHTML = top('Position Library', `${P.length} positions explained simply: how to get into it, what each of you can do, why it works and a comfort tip.`) +
+      `<p class="kx-muted" style="margin:-4px 0 10px">You’ve tried ${tc} of ${P.length}. Go slowly, use plenty of lube, and stop anything that hurts.</p>` +
+      deckHTML() + (day && f.fam === 'all' && !f.q && !f.g && !f.mine ? card(day, true) : '') +
+      `<input class="pl-q" id="q" type="search" placeholder="Search (e.g. lotus, standing, deep)" value="${esc(f.q)}" aria-label="Search positions">` +
+      chips(FAM, 'fam', 'Family') + chips(GOOD, 'g', 'Good for') + chips([[0, 'Any difficulty'], [1, 'Easy only'], [2, 'Up to some effort']], 'd', 'Difficulty') + chips([['', 'All'], ['new', 'Not tried yet'], ['tried', '✓ Tried'], ['fav', '♥ Favourites']].concat(both().size ? [['both', '♥♥ We both love']] : []), 'mine', 'Yours') +
+      `<div class="kx-row" style="margin:6px 0 12px"><button class="kx-btn gold" id="rnd">🎲 Pick one for us (${L.length})</button></div>` +
+      (L.length ? L.slice(0, shown).map(p => card(p)).join('') + (L.length > shown ? `<button class="kx-btn ghost" id="more" style="display:block;margin:10px auto">Show more (${L.length - shown} left)</button>` : '') : '<p class="kx-muted">Nothing matches. Try fewer filters.</p>') +
+      `<p class="kx-muted" style="font-size:13px;margin-top:14px">See photos in the <a href="intimacy_Position_Selector_page.html" style="color:#ffc861">Position Selector</a>, or the seven <a href="kamaagni-position-families.html" style="color:#ffc861">Position Families</a>.</p>`;
+    const $ = id => document.getElementById(id);
+    $('q').oninput = e => { f.q = e.target.value; shown = 20; const c = e.target.selectionStart; draw(); const q = $('q'); q.focus(); q.setSelectionRange(c, c); };
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const k = b.dataset.k; f[k] = k === 'd' ? +b.dataset.v : b.dataset.v; shown = 20; open = null; draw(); });
+    app.querySelectorAll('[data-o]').forEach(b => b.onclick = () => { open = open === b.dataset.o ? null : b.dataset.o; draw(); });
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const n = b.dataset.t; if (st.tried[n]) delete st.tried[n]; else { st.tried[n] = Date.now(); try { KA_TRACK.award('pos', 5); } catch (e) {} } save(); draw(); });
+    app.querySelectorAll('[data-f]').forEach(b => b.onclick = () => { const n = b.dataset.f; if (st.fav[n]) delete st.fav[n]; else { st.fav[n] = 1; try { KA.saveFav && KA.saveFav('pos', n); } catch (e) {} } save(); try { window.KA_BOTH && KA_BOTH.sync('pos', Object.keys(st.fav)); } catch (e) {} draw(); });
+    app.querySelectorAll('[data-tm]').forEach(b => b.onclick = () => { try { KA.timer ? KA.timer(300, b.dataset.tm) : KX.toast('Take 5 minutes'); } catch (e) { KX.toast('Take 5 minutes'); } });
+    app.querySelectorAll('[data-walk]').forEach(b => b.onclick = () => walk(b.dataset.walk));
+    app.querySelectorAll('[data-plan]').forEach(b => b.onclick = () => { const n = b.dataset.plan; try { KA_NEXT.plan({u: 'games/kamaagni-positions.html', d: (isBoth(n) ? '♥♥ ' : '') + n, href: 'games/kamaagni-positions.html?p=' + encodeURIComponent(n)}); } catch (e) {} });
+    app.querySelectorAll('[data-deal]').forEach(b => b.onclick = () => deal(b.dataset.deal));
+    if ($('dkre')) $('dkre').onclick = () => deal(st.deck.v);
+    if ($('dkx')) $('dkx').onclick = () => { delete st.deck; save(); draw(); };
+    if ($('dkopen')) $('dkopen').onclick = () => { const n = st.deck.n[st.deck.i]; open = n; f = {fam: 'all', g: '', d: 0, q: '', mine: ''}; const ix = list().findIndex(p => p.n === n); if (ix >= shown) shown = ix + 1; draw(); const el = app.querySelector(`[data-o="${CSS.escape(n)}"]`); if (el) el.scrollIntoView({block: 'center', behavior: 'smooth'}); };
+    if ($('dkgo')) $('dkgo').onclick = () => { const dk = st.deck; if (dk.i >= dk.n.length - 1) { dk.n.forEach(n => { if (!st.tried[n]) st.tried[n] = Date.now(); }); try { KA_TRACK.award('pos', 10); } catch (e) {} delete st.deck; save(); KX.toast && KX.toast('Deck done! All three marked tried.'); draw(); return; } dk.i++; save(); draw(); try { KA.timer ? KA.timer(300, dk.n[dk.i]) : 0; } catch (e) {} };
+    if ($('more')) $('more').onclick = () => { shown += 20; const y = scrollY; draw(); scrollTo(0, y); };
+    $('rnd').onclick = () => { const L2 = list().filter(p => !st.tried[p.n]); const C = L2.length ? L2 : list(); if (!C.length) return; const p = C[Math.floor(Math.random() * C.length)]; open = p.n; f.q = ''; const ix = list().indexOf(p); if (ix >= shown) shown = ix + 1; draw(); const el = app.querySelector(`[data-o="${CSS.escape(p.n)}"]`); if (el) el.scrollIntoView({block: 'center', behavior: 'smooth'}); };
+  }
+  draw();
+  setTimeout(() => { try { if (window.KA_BOTH) KA_BOTH.sync('pos', Object.keys(st.fav)); } catch (e) {} if (both().size && document.activeElement.id !== 'q') draw(); }, 1500);
+  addEventListener('ka:both', () => { if (document.activeElement.id !== 'q') draw(); });
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

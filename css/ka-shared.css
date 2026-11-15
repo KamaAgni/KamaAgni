@@ -45,7 +45,7 @@ h1.kx-title{font-family:'Cinzel',serif;font-size:clamp(24px,5vw,34px);font-weigh
 .kx-item.done{opacity:.55}
 .kx-item.done .kx-it{text-decoration:line-through}
 .kx-it{flex:1}
-.kx-check{width:26px;height:26px;border-radius:8px;border:2px solid var(--border2);background:transparent;cursor:pointer;color:#fff;font-size:15px;line-height:1;flex-shrink:0}
+.kx-check{width:32px;height:32px;position:relative;border-radius:8px;border:2px solid var(--border2);background:transparent;cursor:pointer;color:#fff;font-size:15px;line-height:1;flex-shrink:0}
 .kx-check.on{background:var(--rose);border-color:var(--rose)}
 .kx-scale{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:440px}
 .kx-scale button{padding:13px 10px;border-radius:14px;border:1px solid var(--border2);background:var(--surface2);color:var(--text);font:inherit;font-size:13px;font-weight:700;cursor:pointer;min-height:48px}
@@ -68,3 +68,4 @@ h1.kx-title{font-family:'Cinzel',serif;font-size:clamp(24px,5vw,34px);font-weigh
 .kx-note{font-size:12px;color:var(--muted);line-height:1.6;margin-top:18px;text-align:center}
 .kx-hide{display:none!important}
 @media(max-width:480px){.kx{padding:16px 12px 120px}.kx-card{padding:18px 14px}}
+.kx-check::after{content:"";position:absolute;inset:-7px}

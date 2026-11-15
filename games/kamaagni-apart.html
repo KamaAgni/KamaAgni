@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Long-distance</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.ap-clk{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ap-clk div{border:1px solid var(--border2);border-radius:16px;padding:12px;text-align:center;background:rgba(255,255,255,.03)}
+.ap-clk b{display:block;font-family:'Cormorant Garamond',serif;font-size:34px;line-height:1.1;color:#fff}
+.ap-clk small{color:var(--muted);font-size:12px}
+.ap-sel,.ap-in{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:8px 10px;margin:4px 0 8px;box-sizing:border-box}
+.ap-big{font-family:'Cormorant Garamond',serif;font-size:46px;line-height:1;color:#f3d27a;text-align:center;margin:6px 0}
+.ap-task{font-family:'Cormorant Garamond',serif;font-size:22px;line-height:1.4;margin:8px 0 12px}
+.ap-nd{display:flex;flex-wrap:wrap;gap:8px}
+.ap-nd button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:#fff;font:inherit;font-size:14px;cursor:pointer}
+.ap-nd button:hover{border-color:rgba(232,99,122,.6)}
+.ap-g{display:grid;gap:8px}@media(min-width:640px){.ap-g{grid-template-columns:1fr 1fr}}
+.ap-g a{display:flex;gap:10px;align-items:center;padding:12px 14px;border-radius:14px;border:1px solid var(--border2);color:inherit;text-decoration:none;background:rgba(255,255,255,.03);min-height:56px}
+.ap-g a span{font-size:24px}.ap-g a small{display:block;color:var(--muted);font-size:12px}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-catalog.js"></script>
+<script src="../js/ka-nudge.js"></script>
+<script>
+const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a, i) : i;   /* position in the original pack (filters can remove items) */
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const [me, pa] = KX.names();
+  const here = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  const st = LS.get('ka_apart', {tz: '', meet: '', done: {}});
+  st.done = st.done || {};
+  const save = () => LS.set('ka_apart', st);
+  let zones = []; try { zones = Intl.supportedValuesOf('timeZone'); } catch (e) { zones = ['UTC', 'Australia/Sydney', 'Asia/Kolkata', 'Europe/London', 'America/New_York', 'America/Los_Angeles', 'Asia/Dubai', 'Asia/Singapore']; }
+  const day = new Date().toISOString().slice(0, 10);
+  /* daily task: same pick for both of you each day, from the long-distance and by-phone packs */
+  let pool = [];
+  const WHO = await KX.whoLoad();
+  for (const id of ['longdist', 'phone']) { try { const L = await (await fetch('../data/packs/' + id + '.json')).json(); pool = pool.concat(L.map((t, i) => ({t: String(t), w: (WHO[id] || '')[OI(L, i)] || 'x'}))); } catch (e) {} }
+  /* respect the heat level: intense tasks (same word list as the Task Deck) only at Wild; nothing above Sweet at Sweet */
+  const INTENSE = /urethra|sounding|chok|strangl|torture|humiliat|spit|piss|golden|gag|cane|whip|flog|clamp|needle|fist|rimjob|pegg|swallow|degrad|slap|crop\b|trampl|forc|mummif|straitjacket|breath|slave|brutal|rough|anal|ass\b.*fuck|cum (?:in|on|into)|kneel|collar|leash|cage|whore|slut|bitch/i;
+  const EXPLICIT = /cock|dick|pussy|clit|cum|fuck|naked|nude|plug|dildo|vibrator|orgasm|masturbat|touch yourself|nipple|tits|breasts?/i;
+  const H = KX.heat();
+  pool = pool.filter(x => H >= 3 ? true : H === 2 ? !INTENSE.test(x.t) : !INTENSE.test(x.t) && !EXPLICIT.test(x.t));
+  const seed = [...day].reduce((a, c) => a * 31 + c.charCodeAt(0) | 0, 7) >>> 0;
+  const RIT = ['Send a voice note describing your favourite memory of the two of you.', 'Watch the same film at the same time and text your reactions.', 'Fall asleep on a call tonight.', 'Each cook the same recipe and eat “together” on video.', 'Send a photo of something that made you think of them today.', 'Write a short letter by hand and post it.', 'Plan one detail of your next visit: a place, a meal or a surprise.', 'Swap three questions you’ve never asked each other.', 'Wear something of theirs today, and tell them.', 'Read the same chapter of a book and talk about it tonight.'];
+  const NUDGE = [['☀️', 'Good morning, gorgeous'], ['🌙', 'Goodnight. Dream of me'], ['💭', 'Thinking about you right now'], ['🥺', 'I miss you so much'], ['📞', 'Call me when you can?'], ['🔥', 'Can’t stop thinking about last time…']];
+  const STORIES = [[91, '📺', 'The Private Show', 'A show over video, every request needs a tip'], [90, '📱', 'The Dating App Match', 'Flirty texts all day, then a video “first date”'], [87, '💌', 'The Secret Admirer', 'Anonymous messages that build all day']];
+  function clock(tz) { try { return new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', timeZone: tz}); } catch (e) { return '--:--'; } }
+  function hourIn(tz) { try { return +new Date().toLocaleString('en-GB', {hour: '2-digit', hour12: false, timeZone: tz}); } catch (e) { return 12; } }
+  function draw() {
+    const tz = st.tz || here, h1 = hourIn(here), h2 = hourIn(tz), both = h1 >= 7 && h1 < 23 && h2 >= 7 && h2 < 23;
+    /* packs are mostly written to the woman; name who the task is for and resolve him/her for the other partner */
+    const it = pool.length ? pool[seed % pool.length] : null, doer = it ? KX.forTag(it.w) : -1;
+    const task = it ? KX.forText(it.t, it.w) : '';
+    const forWho = doer >= 0 ? 'For ' + [me, pa][doer] : 'For both of you';
+    const rit = RIT[seed % RIT.length];
+    const days = st.meet ? Math.ceil((new Date(st.meet + 'T00:00') - new Date(day + 'T00:00')) / 864e5) : null;
+    const two = (window.KA_CATALOG || []).filter(c => (c.modes || []).includes('two')).slice(0, 8);
+    app.innerHTML = top('Long-distance', 'Close, even when you’re apart. Your times, a countdown, a little something every day, and games that work on two phones.') + `
+      <div class="kx-card"><div class="ap-clk"><div><small>${esc(me)} · ${esc(here.split('/').pop().replace(/_/g, ' '))}</small><b>${clock(here)}</b></div><div><small>${esc(pa)} · ${esc(tz.split('/').pop().replace(/_/g, ' '))}</small><b>${clock(tz)}</b></div></div>
+        <p style="margin:10px 0 4px;text-align:center">${both ? '💚 You’re both awake. A good time to call.' : '🌙 One of you is probably asleep. Leave a voice note instead.'}</p>
+        <label class="kx-turn" for="tz" style="display:block;margin-top:8px">${esc(pa)}’s time zone</label><select id="tz" class="ap-sel">${zones.map(z => `<option${z === tz ? ' selected' : ''}>${esc(z)}</option>`).join('')}</select></div>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">⏳ Until we’re together</div>
+        ${days != null ? (days > 0 ? `<div class="ap-big">${days} ${days === 1 ? 'day' : 'days'}</div>` : days === 0 ? '<div class="ap-big">Today! 💞</div>' : '<div class="ap-big">Set your next date</div>') : ''}
+        <label for="mt" class="kx-muted" style="display:block">Next time we meet</label><input id="mt" type="date" class="ap-in" value="${esc(st.meet)}"></div>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">🔥 Today’s task for the two of you</div>
+        ${task ? `<span class="kx-chip">${esc(forWho)}</span><div class="ap-task">${esc(task)}</div>` : '<p class="kx-muted">No long-distance tasks available at your current settings.</p>'}
+        <div class="kx-turn" style="margin-top:6px">💞 Today’s ritual</div><p style="margin:6px 0 10px;line-height:1.6">${esc(rit)}</p>
+        <button class="kx-btn ${st.done[day] ? '' : 'ghost'}" id="dn">${st.done[day] ? '✓ Done today' : 'Mark done'}</button></div>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">💌 Quick nudge to ${esc(pa)}</div>
+        <div class="ap-nd">${NUDGE.map(([i, t], k) => `<button data-n="${k}">${i} ${esc(t)}</button>`).join('')}</div>
+        ${KA_NUDGE.linked() ? '' : '<p class="kx-muted" style="margin-top:8px">Link with your partner (👤 → Link partner) to send these straight to their phone. Until then, tapping copies the message.</p>'}
+        <a class="kx-btn sm ghost" style="margin-top:10px" href="kamaagni-invite.html">💌 Invites &amp; secret wishes →</a></div>
+      <div class="kx-sec">Stories you can play apart</div><div class="ap-g">${STORIES.map(([n, i, t, d]) => `<a href="kamaagni-roleplay.html?n=${n}"><span>${i}</span><div><b>${esc(t)}</b><small>${esc(d)}</small></div></a>`).join('')}</div>
+      ${two.length ? `<div class="kx-sec">Games for two phones</div><div class="ap-g">${two.map(c => `<a href="../${esc(c.u)}"><span>${c.i || '🎲'}</span><div><b>${esc(c.t)}</b><small>${esc(c.d || '')}</small></div></a>`).join('')}</div>` : ''}`;
+    const $ = id => document.getElementById(id);
+    $('tz').onchange = e => { st.tz = e.target.value; save(); draw(); };
+    $('mt').onchange = e => { st.meet = e.target.value; save(); draw(); };
+    $('dn').onclick = () => { st.done[day] = st.done[day] ? 0 : 1; save(); if (st.done[day]) try { window.KA_TRACK && KA_TRACK.award('apart', 10); } catch (e) {} draw(); };
+    app.querySelectorAll('[data-n]').forEach(b => b.onclick = async () => { const [i, t] = NUDGE[+b.dataset.n];
+      if (KA_NUDGE.linked()) return KA_NUDGE.send('ldr', {t: i + ' ' + t}).then(() => KX.toast('Sent 💌'), e => KX.toast(e.message));
+      try { if (navigator.share) await navigator.share({text: i + ' ' + t}); else { await navigator.clipboard.writeText(i + ' ' + t); KX.toast('Copied 💌'); } } catch (e) {} });
+  }
+  draw();
+  setInterval(() => { if (!document.hidden && !document.activeElement.matches('select,input')) draw(); }, 60000);
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

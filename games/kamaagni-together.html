@@ -8,12 +8,23 @@
 <link rel="stylesheet" href="../css/fonts.css"/>
 <link rel="stylesheet" href="../css/premium.css"/>
 <link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.tg-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:12px}
+.tg-st{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;text-align:center;color:var(--muted);line-height:1.25}
+.tg-st span{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;border:1px solid rgba(255,255,255,.25);font-weight:700;font-size:13px}
+.tg-st.ok{color:#9be7b4}.tg-st.ok span{background:rgba(74,222,128,.18);border-color:rgba(74,222,128,.6)}
+.tg-st.now{color:#fff;font-weight:700}.tg-st.now span{background:rgba(232,99,122,.25);border-color:#e8637a}
+.tg-un{display:grid;gap:10px;margin-top:8px}@media(min-width:640px){.tg-un{grid-template-columns:1fr 1fr}}
+.tg-un>div{display:flex;gap:10px;align-items:flex-start}.tg-un span{font-size:22px;width:34px;flex:0 0 34px;text-align:center}.tg-un small{display:block;color:var(--muted);font-size:13px}
+.tg-qr{background:#fff;border-radius:16px;padding:10px;width:min(260px,70vw);margin:0 auto}.tg-qr svg{width:100%;height:auto;display:block}
+</style>
 </head><body>
 <style>@keyframes tgpop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}@keyframes tgroll{0%{transform:rotate(0) scale(.5);opacity:.2}30%{transform:rotate(200deg) scale(1.15)}60%{transform:rotate(340deg) scale(.95)}100%{transform:rotate(360deg) scale(1);opacity:1}}.tg-pop{animation:tgpop .5s ease both}.tg-roll{animation:tgroll .8s ease both}</style>
 <main class="kx app" id="app"></main>
-<script src="../js/ka-common.js"></script>
+<script src="../js/ka-common.js"></script><script src="../js/vendor/qrcode.min.js"></script>
 <script src="../js/ka-data.js"></script>
 <script>
+const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a, i) : i;   /* position in the original pack (filters can remove items) */
 (() => {
   const {LS, esc, top, pick} = KX; const app = document.getElementById('app');
   const C = () => window.KA_CLOUD, S = () => (C() ? C().state() : {enabled: false});
@@ -22,6 +33,8 @@
   const ev = {nudges: [], msgs: [], tomb: {}, draws: {}, resps: {}, timer: null, sig: {}, chk: {}, match: {}};
   const fill = t => String(t == null ? '' : t).replace(/\{A\}/g, KX.names()[0]).replace(/\{B\}/g, pname || 'your partner');
   const HASH = (location.hash.match(/join=([^&]+)/) || [])[1];
+  /* an invite link opened while Together is already open: reload so the invite is picked up */
+  window.addEventListener('hashchange', () => { if (/join=/.test(location.hash) && !HASH) location.reload(); });
 
   function apply(e) {
     const b = e.body; if (!b) return; const who = e.mine ? 'me' : 'them';
@@ -40,25 +53,40 @@
   }
   const send = (k, o) => C().couple.send(k, {...o, n: me()}).catch(x => KX.toast(x.message));
 
+  /* ---- guided linking: 4 steps, what it unlocks, QR invite ---- */
+  const UNLOCK = [['💌', 'Invitations', 'sent to their phone, worded the way they like to be asked'], ['🌠', 'Secret wishes', 'see only the ones you both picked'], ['📱📱', 'Two-phone games', 'Truth or Dare, Poker, Ludo, Showdown and more, live'], ['✨', 'Shared plans', 'send tonight’s plan; they can skip one step'], ['🌍', 'Nudges', 'good morning, missing you, call me, in one tap'], ['🗂️', 'Shared lists', 'dates, memories, films and playlist on both phones'], ['⚙️', 'One set of settings', 'heat, topics and names stay the same on both phones'], ['🔔', 'Partner alerts', 'a notification when they send you something']];
+  function steps(n) {
+    const L = ['Sign in', 'Unlock your vault', 'Invite or join', 'Partner joins'];
+    return `<div class="kx-card tg-steps" aria-label="Linking steps">${L.map((t, i) => `<div class="tg-st ${i < n ? 'ok' : i === n ? 'now' : ''}"><span>${i < n ? '✓' : i + 1}</span>${t}</div>`).join('')}</div>`;
+  }
+  const unlocks = () => `<div class="kx-card"><div class="kx-turn">What linking unlocks</div><div class="tg-un">${UNLOCK.map(([i, t, d]) => `<div><span aria-hidden="true">${i}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div><p class="kx-muted" style="margin:8px 0 0;font-size:13px">Everything you share is end-to-end encrypted with a key only your two phones have.</p></div>`;
+  function qrSvg(text) { try { const q = qrcode(0, 'M'); q.addData(text); q.make(); return q.createSvgTag({cellSize: 6, margin: 3, scalable: true}); } catch (e) { return ''; } }
+  let joinPoll = 0;
   function gate() {
     const s = S();
     if (!s.enabled) return top('Together', '') + `<div class="kx-card"><b>Cloud sync isn't switched on yet</b><p class="kx-muted">Partner features need the free online account. The site owner sets this up once (see SETUP-CLOUD.md). Everything else works as normal.</p></div>`;
     if (!s.ready) return top('Together', '') + '<div class="kx-card">Connecting…</div>';
-    if (!s.user) return top('Together', 'Play and talk together, wherever you are.') + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Sign in first</div><p class="kx-muted">Your account keeps your data on every device and lets you link with your partner.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">👤 Sign in / Create account</button>${HASH ? '<p class="kx-muted">Your invite is saved in this page link. Come back here after signing in.</p>' : ''}</div>`;
-    if (s.vault !== 'ready') return top('Together', '') + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Unlock your vault</div><p class="kx-muted">Enter your vault passphrase to continue.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">🔒 Unlock</button></div>`;
+    if (!s.user) return top('Together', 'Play and talk together, wherever you are.') + steps(0) + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Sign in first</div><p class="kx-muted">Your account keeps your data on every device and lets you link with your partner.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">👤 Sign in / Create account</button>${HASH ? '<p class="kx-muted">Your invite is saved in this page link. Come back here after signing in.</p>' : ''}</div>` + unlocks();
+    if (s.vault !== 'ready') return top('Together', '') + steps(1) + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Unlock your vault</div><p class="kx-muted">Enter your vault passphrase to continue.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">🔒 Unlock</button></div>` + unlocks();
     return null;
   }
 
   function linkView() {
     const s = S(); const c = s.couple;
-    if (!c) return top('Together', 'Connect with your partner, as if you were in the same room.') + `<div class="kx-card"><b>1 · Invite your partner</b><p class="kx-muted">Creates a private link. Send it only to them (it contains the key that encrypts everything you share).</p><button class="kx-btn" id="mk">Create invite link</button></div>
-      <div class="kx-card"><b>2 · Or join your partner's invite</b><input class="kx-input" id="jl" placeholder="Paste the invite link here" value="${esc(HASH ? 'join=' + HASH : '')}"><button class="kx-btn" id="jn" style="margin-top:8px">Join</button><div class="kx-muted" id="jm"></div></div>`;
-    if (!c.partnerJoined) return top('Together', 'Waiting for your partner') + `<div class="kx-card"><b>Invite ready</b><p class="kx-muted">Send this link. It works once.</p><input class="kx-input" id="il" readonly value="${esc(C().couple.link())}"><div class="kx-row" style="margin-top:8px"><button class="kx-btn" id="cp">Copy link</button>${navigator.share ? '<button class="kx-btn ghost" id="shr">Share…</button>' : ''}<button class="kx-btn ghost" id="lv">Cancel</button></div></div>`;
+    if (!c) return top('Together', 'Link your phones once. Then play, plan and flirt across both.') + steps(2) + (HASH ? `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">You’ve been invited 💞</div><p class="kx-muted">Tap to link with your partner.</p><input type="hidden" id="jl" value="${esc('join=' + HASH)}"><button class="kx-btn" id="jn">Join my partner</button><div class="kx-muted" id="jm"></div></div>` :
+      `<div class="kx-card"><b>Invite your partner</b><p class="kx-muted">You get a QR code. Your partner points their phone camera at it, and that’s it.</p><button class="kx-btn" id="mk">💞 Create my invite</button></div>
+      <div class="kx-card"><b>Has your partner invited you?</b><p class="kx-muted" style="margin:4px 0 8px">Scan their QR code with your phone camera, or paste their link here.</p><input class="kx-input" id="jl" placeholder="Paste the invite link" value=""><button class="kx-btn ghost" id="jn" style="margin-top:8px">Join</button><div class="kx-muted" id="jm"></div></div>`) + unlocks();
+    if (!c.partnerJoined) { const lk = C().couple.link(); return top('Together', 'Waiting for your partner') + steps(3) + `<div class="kx-card kx-center"><b>Scan to join</b><p class="kx-muted" style="margin:4px 0 10px">On your partner’s phone: open the camera, point it at this code, tap the link, and sign in.</p><div class="tg-qr" role="img" aria-label="QR code with your private invite link">${qrSvg(lk)}</div>
+      <p class="kx-muted" style="font-size:13px;margin:10px 0 6px">Not together right now? Send the link instead. It works once and holds the key that encrypts what you share, so send it only to them.</p>
+      <input class="kx-input" id="il" readonly value="${esc(lk)}" aria-label="Invite link"><div class="kx-row" style="margin-top:8px;justify-content:center">${navigator.share ? '<button class="kx-btn" id="shr">📤 Share link</button>' : ''}<button class="kx-btn ghost" id="cp">Copy link</button><button class="kx-btn ghost" id="lv">Cancel</button></div>
+      <p class="kx-muted" style="font-size:13px;margin-top:10px">⏳ This page updates by itself when they join.</p></div>`; }
     if (!c.hasKey) return top('Together', '') + `<div class="kx-card"><b>This device doesn't have your shared key</b><p class="kx-muted">Open the original invite link on this device, or unlink and create a new invite.</p><button class="kx-btn ghost" id="lv">Unlink</button></div>`;
     return null;
   }
 
   function bindLink() {
+    clearInterval(joinPoll);
+    const sc = S().couple; if (sc && !sc.partnerJoined) joinPoll = setInterval(() => { if (document.hidden) return; C().couple.refresh().then(c => { if (c && c.partnerJoined) { clearInterval(joinPoll); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 30}); KX.toast('💞 You’re linked! Everything for two is unlocked.'); } }).catch(() => {}); }, 5000);
     const g = id => document.getElementById(id), C0 = C().couple;
     if (g('mk')) g('mk').onclick = () => C0.create().then(draw, e => KX.toast(e.message));
     if (g('jn')) g('jn').onclick = () => C0.join(g('jl').value).then(() => { history.replaceState(null, '', location.pathname); draw(); }, e => { g('jm').textContent = e.message; });
@@ -125,7 +153,7 @@
   const getj = async u => cache[u] || (cache[u] = await (await fetch(u)).json());
   async function drawGame(g) {
     try {
-      if (g === 'card') { const idx = await getj('../data/packs/index.json'); const pk = pick(idx.filter(x => x.h <= KX.heat())); const items = await getj('../data/packs/' + pk.id + '.json'); if (!items.length) return KX.toast('Try again'); return send('draw', {g, t: pick(items), p: pk.l}); }
+      if (g === 'card') { const idx = await getj('../data/packs/index.json'); const pk = pick(idx.filter(x => x.h <= KX.heat())); const items = await getj('../data/packs/' + pk.id + '.json'); if (!items.length) return KX.toast('Try again'); const W = (await KX.whoLoad())[pk.id] || '', ii = Math.floor(Math.random() * items.length), w = W[OI(items, ii)] || 'x'; return send('draw', {g, t: KX.forText(String(items[ii]), w), p: pk.l + (KX.forTag(w) >= 0 ? (w === 'f' ? ' · for her' : ' · for him') : '')}); }
       if (g === 'tod') return;  // chosen with the two buttons below
       if (g === 'wyp') { const pr = pick(KA_DATA.wyp || []); if (!pr) return KX.toast('Nothing to show with your settings'); return send('draw', {g, t: pr[0] + '  ⚖️  ' + pr[1], a: pr[0], b: pr[1], p: 'Would you prefer'}); }
       if (g === 'dice') { const D = await getj('../data/dice_faces.json'); const set = D.sex || D.bdsm || Object.values(D)[0] || []; if (set.length < 2) return KX.toast('Nothing to roll with your settings'); return send('draw', {g, p: 'Dice', t: pick(set) + '  +  ' + pick(set), v: [1 + Math.floor(Math.random() * 6), 1 + Math.floor(Math.random() * 6)]}); }

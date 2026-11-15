@@ -8,12 +8,12 @@
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var G = 'games/';
   var MENU = [
-    ['Tonight', [['🕯️', 'Guided Session', G + 'kamaagni-session.html'], ['🎓', 'Intimacy Experts', G + 'kamaagni-experts.html'], ['💞', 'Together (partner)', G + 'kamaagni-together.html'], ['🎉', 'Free-time Fun', G + 'kamaagni-fun.html'], ['💌', 'Secret Envelope', G + 'kamaagni-secret.html'], ['🗓️', 'Plan Tonight', G + 'kamaagni-tonight.html']]],
-    ['Play', [['🎮', 'All Games (pick for me)', 'play.html'], ['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Connection Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['⚔️', 'Seduction Showdown', G + 'kamaagni-showdown.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html'], ['🙋', 'Never Have I Ever', G + 'kamaagni-never-have-i-ever.html'], ['👉', "Who's Most Likely", G + 'kamaagni-whos-most-likely.html'], ['🔎', 'How Well Do You Know Me', G + 'kamaagni-know-me.html'], ['💬', 'Love Languages', G + 'kamaagni-love-languages.html'], ['🎬', 'Movie Night', G + 'kamaagni-movies.html'], ['🎓', 'Bedroom Skills', G + 'kamaagni-skills.html'], ['📅', 'Date Planner', G + 'kamaagni-planner.html'], ['🗓️', 'Our week', G + 'kamaagni-week.html'], ['📖', 'Memory Book', G + 'kamaagni-memories.html'], ['🎵', 'Playlist', G + 'kamaagni-playlist.html'], ['🩺', 'Health & Wellbeing', G + 'kamaagni-health.html'], ['🌳', 'Life Stages', G + 'kamaagni-life-stages.html'], ['🗺️', 'Roadmap & Review', G + 'kamaagni-roadmap.html'], ['🔎', 'Search', G + 'kamaagni-search.html'], ['⏱️', 'Quick-Fire', G + 'kamaagni-quick-fire.html'], ['🎰', 'Intimate Bingo', G + 'kamaagni-bingo.html'], ['❌', 'Tic-Tac-Tease', G + 'kamaagni-tic-tac-tease.html'], ['🚪', 'Mystery Doors', G + 'kamaagni-mystery-doors.html'], ['🎟️', 'Scratch-Off Book', G + 'kamaagni-scratch-book.html']]],
+    ['Tonight', [['🕯️', 'Guided Session', G + 'kamaagni-session.html'], ['🎓', 'Intimacy Experts', G + 'kamaagni-experts.html'], ['💞', 'Together (partner)', G + 'kamaagni-together.html'], ['💌', 'Invites & Wishes', G + 'kamaagni-invite.html'], ['🌍', 'Long-distance', G + 'kamaagni-apart.html'], ['🎉', 'Free-time Fun', G + 'kamaagni-fun.html'], ['💌', 'Secret Envelope', G + 'kamaagni-secret.html'], ['🗓️', 'Plan Tonight', G + 'kamaagni-tonight.html']]],
+    ['Play', [['🎮', 'All Games (pick for me)', 'play.html'], ['🎲', 'Intimacy Dice', G + 'intimacy_dice_game_single_page.html'], ['🃏', 'Connection Cards', G + 'intimacy_cards_game_single_page.html'], ['🏁', 'Intimacy Ludo', G + 'intimacy_ludo_dice_game_single_page.html'], ['💘', 'Desire Match', G + 'kamaagni-desire-match.html'], ['⚖️', 'Would You Prefer', G + 'kamaagni-would-you-prefer.html'], ['🎭', 'Truth or Dare', G + 'kamaagni-truth-or-dare.html'], ['⚔️', 'Seduction Showdown', G + 'kamaagni-showdown.html'], ['🎩', 'Hornopoly', G + 'kamaagni-hornopoly.html'], ['🎲', 'Dice Sets', G + 'kamaagni-kinky-dice.html'], ['♠️', 'Quick Poker', G + 'kamaagni-poker-quick.html'], ['🌹', 'Connect & Foreplay', G + 'kamaagni-connect-foreplay.html'], ['🙋', 'Never Have I Ever', G + 'kamaagni-never-have-i-ever.html'], ['👉', "Who's Most Likely", G + 'kamaagni-whos-most-likely.html'], ['🔎', 'How Well Do You Know Me', G + 'kamaagni-know-me.html'], ['💬', 'Love Languages', G + 'kamaagni-love-languages.html'], ['🎬', 'Movie Night', G + 'kamaagni-movies.html'], ['🎓', 'Bedroom Skills', G + 'kamaagni-skills.html'], ['📖', 'Position Library', G + 'kamaagni-positions.html'], ['🎲', 'The Play Book', G + 'kamaagni-playbook.html'], ['🌟', 'New for Us', G + 'kamaagni-month.html'], ['📅', 'Date Planner', G + 'kamaagni-planner.html'], ['🗓️', 'Our week', G + 'kamaagni-week.html'], ['📖', 'Memory Book', G + 'kamaagni-memories.html'], ['🎵', 'Playlist', G + 'kamaagni-playlist.html'], ['🩺', 'Health & Wellbeing', G + 'kamaagni-health.html'], ['🌳', 'Life Stages', G + 'kamaagni-life-stages.html'], ['🗺️', 'Roadmap & Review', G + 'kamaagni-roadmap.html'], ['🔎', 'Search', G + 'kamaagni-search.html'], ['⏱️', 'Quick-Fire', G + 'kamaagni-quick-fire.html'], ['🎰', 'Intimate Bingo', G + 'kamaagni-bingo.html'], ['❌', 'Tic-Tac-Tease', G + 'kamaagni-tic-tac-tease.html'], ['🚪', 'Mystery Doors', G + 'kamaagni-mystery-doors.html'], ['🎟️', 'Scratch-Off Book', G + 'kamaagni-scratch-book.html']]],
     ['Rituals & plans', [['🧘', 'Connection Rituals', G + 'kamaagni-rituals.html'], ['🕯️', 'Date Night Kits', G + 'kamaagni-date-kits.html'], ['✍️', 'Our Own Cards', G + 'kamaagni-custom.html'], ['🍽️', 'Bedroom Menu', G + 'kamaagni-bedroom-menu.html'], ['🎁', 'Fantasy Box', G + 'kamaagni-fantasy-box.html'], ['🗺️', 'Body Map', G + 'kamaagni-body-map.html']]],
     ['Explore', [['🃏', 'Task Deck', G + 'kamaagni-task-deck.html'], ['⛓️', 'BDSM Journey', G + 'kamaagni-journey.html'], ['🏆', 'Challenges', G + 'kamaagni-challenges.html'], ['🎭', 'Roleplay Studio', G + 'kamaagni-roleplay.html'], ['🧭', 'Kink Explorer', G + 'kamaagni-kink-explorer.html'], ['🧘', 'Position Selector', G + 'intimacy_Position_Selector_page.html'], ['👄', 'Oral Selector', G + 'intimacy_Oral_Position_Selector_page.html']]],
-    ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['🌱', '30-Day Spark', G + 'kamaagni-spark-challenge.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
-    ['Learn', [['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
+    ['Keep & reflect', [['📓', 'Our Journal', G + 'kamaagni-journal.html'], ['📈', 'Monthly Check-in', G + 'kamaagni-checkin.html'], ['🗓️', 'Our Dates', G + 'kamaagni-dates.html'], ['🫶', 'Us at a glance', G + 'kamaagni-us.html'], ['🕘', 'History', G + 'kamaagni-history.html'], ['📈', 'Progress & Badges', G + 'kamaagni-progress.html'], ['🪣', 'Bucket List', G + 'kamaagni-bucket-list.html'], ['🌱', '30-Day Spark', G + 'kamaagni-spark-challenge.html'], ['🎟️', 'Love Coupons', G + 'kamaagni-love-coupons.html'], ['✍️', 'Reflection Prompts', G + 'kamaagni-prompts.html']]],
+    ['Learn', [['💬', 'Talk Kit', G + 'kamaagni-talk.html'], ['🎛️', 'Brakes & Accelerators', G + 'kamaagni-brakes.html'], ['🛡️', 'Learn: consent & aftercare', G + 'kamaagni-learn.html'], ['📚', 'Printable Library', G + 'kamaagni-library.html'], ['🖨️', 'Print Studio', G + 'kamaagni-print.html'], ['⚙️', 'Settings (hide topics)', G + 'kamaagni-settings.html'], ['ℹ️', 'About & Privacy', 'about.html']]]
   ];
   var NAV = [['🎮', 'Games', 'play.html'], ['🕯️', 'Session', G + 'kamaagni-session.html'], ['🎉', 'Fun', G + 'kamaagni-fun.html'], ['💞', 'Together', G + 'kamaagni-together.html'], ['🎓', 'Experts', G + 'kamaagni-experts.html']];
   var u = function (p) { return BASE + p; };
@@ -51,9 +51,10 @@
     '.kh-logo{display:inline-flex;align-items:center;min-height:44px}.kh-logo img{height:19px;width:auto;display:block;background:none}',
     '#kh-back{font-size:32px!important;font-weight:300;line-height:1;padding:0 10px;min-width:40px;margin-right:-4px}',
     '#ka-ftr a{display:inline-flex;align-items:center;min-height:40px;padding:0 6px}',
+    '.kd-more{margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:6px}.kd-more>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:48px;justify-content:center;padding:6px 2px}.kd-more>summary::-webkit-details-marker{display:none}.kd-more>summary b{display:flex;justify-content:space-between;font-size:15px}.kd-more>summary b::after{content:"+";opacity:.7;font-size:20px;line-height:1}.kd-more[open]>summary b::after{content:"\\2212"}.kd-more>summary span{font-size:13px;color:var(--kv-mute,#9aa3bd)}',
     '.kd-start{position:sticky;bottom:84px;z-index:30;padding:12px 0 6px;margin-left:-4px;background:linear-gradient(to top,rgba(10,8,20,.96) 70%,transparent)}',
     '.kd-act{position:sticky;bottom:84px;z-index:40;padding:14px 0 8px;background:linear-gradient(to top,#07060f 65%,transparent)}',
-    '.kx-check{position:relative;width:28px;height:28px;min-width:0;min-height:0;align-self:center}.kx-check::after{content:"";position:absolute;inset:-9px}',
+    '.kx-check{position:relative;width:32px;height:32px;min-width:0;min-height:0;align-self:center}.kx-check::after{content:"";position:absolute;inset:-8px}.kx-check::after{content:"";position:absolute;inset:-9px}',
     '.kx-chip,.card-tag,.gc .new,.gc .cont,.hub-chips .lbl,.gc .meta span,.gc .meta,.kx-sec,.kx-heat-lbl,.kd-all button,.kd-grp,.kd-cat em{font-size:12px!important}',
     '.kd-all button,#kd-on,#kd-off,.cf-chip{min-height:36px;padding-left:12px;padding-right:12px}',
     '.kx-note a{display:inline-block;padding:8px 0}',
@@ -61,7 +62,7 @@
     'label:has(>input[type=checkbox]):not(.toggle-switch),label:has(>input[type=radio]){min-height:40px;display:inline-flex;align-items:center;gap:8px}',
     ':focus-visible{outline:2px solid #ffb27a;outline-offset:2px}',
     '@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}',
-    '@media(max-width:480px){.kh-logo img{height:17px}}'
+    '@media(max-width:480px){.kh-logo img{height:17px}}#ka-hdr .kh-logo{flex:0 1 auto;min-width:0;overflow:hidden}#ka-hdr .kh-logo img{max-width:100%;object-fit:contain;object-position:left center}@media(max-width:420px){#ka-hdr .kh-b{min-width:38px;padding:0 6px}#ka-hdr{gap:2px!important}}@media(max-width:350px){#ka-hdr .kh-b{min-width:34px;padding:0 4px}}'
   ].join('\n');
   doc.head.appendChild(css);
   root.classList.add('ka-chrome');
@@ -169,7 +170,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v64</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v84</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */
@@ -185,6 +186,19 @@
   window.addEventListener('ka:cloud', paint);
   /* load the cloud layer (skips itself when no backend is configured) */
   var sc = doc.createElement('script'); sc.src = BASE + 'js/ka-cloud.js'; sc.onload = paint; doc.body.appendChild(sc);
+  /* "what next", plans and untried features (v67) */
+  var nx = doc.createElement('script'); nx.src = BASE + 'js/ka-next.js'; doc.body.appendChild(nx);
+  /* printable originals: links to the source PDF folders on GitHub (v72) */
+  var ksrc = doc.createElement('script'); ksrc.src = BASE + 'js/ka-sources.js'; doc.body.appendChild(ksrc);
+  var kvo = doc.createElement('script'); kvo.src = BASE + 'js/ka-voice.js'; doc.body.appendChild(kvo);
+  var ksh = doc.createElement('script'); ksh.src = BASE + 'js/ka-shared.js'; doc.body.appendChild(ksh);
+  var kfb = doc.createElement('script'); kfb.src = BASE + 'js/ka-fb.js'; doc.body.appendChild(kfb);
+  var klm = doc.createElement('script'); klm.src = BASE + 'js/ka-limits.js'; doc.body.appendChild(klm);
+  var kaf = doc.createElement('script'); kaf.src = BASE + 'js/ka-after.js'; doc.body.appendChild(kaf);
+  var kbo = doc.createElement('script'); kbo.src = BASE + 'js/ka-both.js'; doc.body.appendChild(kbo);
+  var krm = doc.createElement('script'); krm.src = BASE + 'js/ka-remote.js'; doc.body.appendChild(krm);
+  var kpu = doc.createElement('script'); kpu.src = BASE + 'js/ka-push.js'; doc.body.appendChild(kpu);
+  if (/kamaagni-(poker-quick|connect-foreplay|showdown)\.html/.test(location.pathname)) { var ktd = doc.createElement('script'); ktd.src = BASE + 'js/ka-tidy.js'; doc.body.appendChild(ktd); }
   paint();
 
   /* ---- calm settings ---- */
@@ -218,6 +232,12 @@
       case 'draw': return { icon: '🔥', title: n + ' drew a card', text: 'Join in. Open Together → Play', href: TOG };
       case 'chk': return { icon: '💗', title: n + ' checked in', text: 'See how you both feel this week', kind: 'chk', href: TOG };
       case 'sig': return b.s === 'r' ? { icon: '🛑', title: n + ' pressed STOP', text: 'Pause and check in', kind: 'stop', href: TOG } : (b.s === 'y' ? { icon: '🟡', title: n, text: 'Slow down a little', href: TOG } : null);
+      case 'inv': return { icon: '💌', title: n + ' invited you', text: b.t || 'Tonight?', kind: 'nudge', href: 'games/kamaagni-invite.html#inbox' };
+      case 'rsvp': return { icon: b.r === 'yes' ? '🔥' : b.r === 'later' ? '🌙' : '📅', title: n + (b.r === 'yes' ? ' said yes!' : b.r === 'later' ? ': not tonight, but…' : ' wants to plan it'), text: b.t || (b.r === 'yes' ? 'See you soon 😉' : ''), kind: 'nudge', href: 'games/kamaagni-invite.html#inbox' };
+      case 'plan': return { icon: '📅', title: n + ' shared a plan', text: b.t || '', href: 'games/kamaagni-invite.html#inbox' };
+      case 'wish': return { icon: '🌠', title: n + ' updated their secret wishes', text: 'See if you have a new match', href: 'games/kamaagni-invite.html#wish' };
+      case 'veto': return { icon: '↻', title: n + ' would rather skip one step', text: '“' + (b.t || 'a step') + '”. Swap it in Plan Tonight.', href: 'games/kamaagni-tonight.html' };
+      case 'ldr': return { icon: '🌍', title: n, text: b.t || 'Thinking of you from afar', kind: 'nudge', href: 'games/kamaagni-apart.html' };
       case 'fun': return b.say ? { icon: b.ic || '🎉', title: n, text: b.say, href: 'games/kamaagni-fun.html' } : null;
       default: return null;
     }
@@ -226,6 +246,7 @@
   function checkNudges() {
     var C = window.KA_CLOUD, s = C && C.state(); if (!s || !s.couple || !s.couple.partnerJoined || s.vault !== 'ready' || doc.hidden) return;
     C.couple.list(0).then(function (evs) {
+      (window.KA_EV_HOOKS || []).forEach(function (f) { try { f(evs); } catch (e) {} });
       var seen = +localStorage.getItem('ka_cloud_nudge') || 0, tomb = {}, mx = 0, fresh = [];
       evs.forEach(function (e) { mx = Math.max(mx, e.id); if (e.kind === 'tomb' && e.body) tomb[e.body.x] = 1; });
       evs.forEach(function (e) { if (!e.mine && e.body && !tomb[e.id] && e.id > seen && describe(e)) fresh.push(e); });
@@ -234,6 +255,9 @@
       var prev = unseen; unseen = calm().nudges ? fresh.length : 0;
       var pd = doc.getElementById('kh-pd'); if (pd) { pd.textContent = unseen ? (unseen > 9 ? '9+' : unseen) : ''; pd.classList.toggle('n', !!unseen); }
       if (unseen > prev && calm().nudges) { var last = fresh[fresh.length - 1], dsc = describe(last); notify(dsc); }
+      /* v83: a partner's STOP always gets through, even with partner notifications muted */
+      else { var ss = +localStorage.getItem('ka_stop_seen') || 0, stp = null; fresh.forEach(function (e) { if (e.kind === 'sig' && e.body && e.body.s === 'r' && e.id > ss) stp = e; }); if (stp && !calm().nudges) notify(describe(stp)); }
+      fresh.forEach(function (e) { if (e.kind === 'sig' && e.body && e.body.s === 'r') localStorage.setItem('ka_stop_seen', String(Math.max(e.id, +localStorage.getItem('ka_stop_seen') || 0))); });
     }, function () {});
   }
   var onTogether = /kamaagni-together|kamaagni-fun/.test(location.pathname);
@@ -251,7 +275,7 @@
     }, 10000);
     function showPause(min) {
       if (doc.getElementById('ka-pause')) return;
-      var d = doc.createElement('div'); d.id = 'ka-pause'; d.setAttribute('role', 'dialog'); d.style.cssText = 'position:fixed;inset:0;z-index:2147483400;background:rgba(5,6,15,.92);display:flex;align-items:center;justify-content:center;padding:22px;font-family:"DM Sans",system-ui,sans-serif;color:#dce9ff;text-align:center';
+      var d = doc.createElement('div'); d.id = 'ka-pause'; d.setAttribute('role', 'dialog'); d.setAttribute('aria-label', 'Time to be together'); d.style.cssText = 'position:fixed;inset:0;z-index:2147483400;background:rgba(5,6,15,.92);display:flex;align-items:center;justify-content:center;padding:22px;font-family:"DM Sans",system-ui,sans-serif;color:#dce9ff;text-align:center';
       d.innerHTML = '<div class="ka-card" style="max-width:400px"><div style="font-size:44px">🕯️</div><h2>Time to be together</h2><p>You have spent about ' + min + ' minutes here today. The best part happens off the screen: put the phone down and enjoy each other.</p><button class="ka-bt" id="kp-ok">Good idea</button><button class="ka-bt g" id="kp-more" style="margin-top:8px">Keep going</button><p style="font-size:12px;margin-top:12px">You can change this reminder in Settings → Healthy use.</p></div>';
       doc.body.appendChild(d);
       d.querySelector('#kp-ok').onclick = function () { location.href = u('index.html'); d.remove(); };
@@ -259,6 +283,44 @@
     }
   })();
 
-  window.KA_CHROME = { openAccount: openAcct, MENU: MENU, notify: notify, describe: describe };
+  /* ---- v66 accessibility layer: one main region, one site header/footer, a name for every control ---- */
+  (function () {
+    function landmarks() {
+      var kids = [].slice.call(doc.body.children).filter(function (e) { return !/^(ka-|kh-|kf-)/.test(e.id || '') && !/^(SCRIPT|STYLE|NOSCRIPT|TEMPLATE)$/.test(e.tagName) && !e.classList.contains('kg'); });
+      [].forEach.call(doc.querySelectorAll('header:not(#ka-hdr), footer:not(#ka-ftr)'), function (e) { if (!e.hasAttribute('role')) e.setAttribute('role', 'none'); });
+      if (!doc.querySelector('main, [role="main"]')) {
+        var km = doc.getElementById('ka-main'); if (km && km.tagName !== 'A') { km.setAttribute('role', 'main'); return; }
+        kids = kids.filter(function (e) { return !/^(A|CANVAS|SVG|IMG|BUTTON)$/.test(e.tagName) && !/modal|overlay|toast|skip/i.test((e.className || '') + ' ' + (e.id || '')); });
+        var best = null, bl = -1;
+        kids.forEach(function (e) { var l = (e.textContent || '').length + e.querySelectorAll('button, a, input, canvas, svg').length * 40; if (l > bl) { bl = l; best = e; } });
+        if (best) best.setAttribute('role', 'main');
+      }
+    }
+    function nameOf(el) {
+      var t = el.getAttribute('placeholder') || el.title || '';
+      if (!t) { var lab = el.closest('label'); if (lab) { t = lab.textContent; if (!t.trim() && lab.nextElementSibling) t = lab.nextElementSibling.textContent; } }
+      if (!t || !t.trim()) { var p = el.previousElementSibling; if (p && /^(LABEL|SPAN|B|STRONG|SMALL|P|DIV|H\d)$/.test(p.tagName)) t = p.textContent; }
+      if (!t || !t.trim()) { var n = el.nextElementSibling; if (n && /^(LABEL|SPAN|B|SMALL)$/.test(n.tagName)) t = n.textContent; }
+      if (!t || !t.trim()) { var pr = el.parentElement; if (pr && pr.textContent.trim().length < 60) t = pr.textContent; }
+      if ((!t || !t.trim()) && el.tagName === 'SELECT' && el.options[0]) t = 'Choose: ' + el.options[0].text;
+      return (t || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    }
+    function controls() {
+      [].forEach.call(doc.querySelectorAll('input:not([type=hidden]), select, textarea'), function (el) {
+        if (el.getAttribute('aria-label') || el.getAttribute('aria-labelledby') || (el.id && doc.querySelector('label[for="' + el.id + '"]'))) return;
+        var lab = el.closest('label'); if (lab && lab.textContent.trim()) return;
+        var t = nameOf(el); if (t) el.setAttribute('aria-label', t);
+      });
+      [].forEach.call(doc.querySelectorAll('[role="dialog"]:not([aria-labelledby]), dialog:not([aria-labelledby])'), function (d) {
+        if ((d.getAttribute('aria-label') || '').trim()) return;
+        var h = d.querySelector('h1, h2, h3, [class*="title"], [class*="head"], b, strong'); if (h && h.textContent.trim()) d.setAttribute('aria-label', h.textContent.replace(/\s+/g, ' ').trim().slice(0, 60));
+      });
+    }
+    var pend = 0; function run() { pend = 0; try { landmarks(); controls(); } catch (e) {} }
+    run(); setTimeout(run, 800);
+    try { new MutationObserver(function () { if (!pend) pend = setTimeout(run, 400); }).observe(doc.body, { childList: true, subtree: true }); } catch (e) {}
+  })();
+
+  window.KA_CHROME = { openAccount: openAcct, MENU: MENU, notify: notify, describe: describe, check: checkNudges };
 })();
 

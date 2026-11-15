@@ -2,6 +2,7 @@
    Cloud sync + partner linking need a free Supabase project (see SETUP-CLOUD.md).
    Leave SUPABASE_URL blank and the app works fully offline on one device. */
 window.KA_CONFIG = {
+  VAPID_PUBLIC_KEY: '', // partner alerts (phone notifications). Leave empty until you follow SETUP-PUSH.md.
   LIBRARY: true,        // PDF Library (links to the source repo). Set false if you do not want to share PDFs.
   SHARE_URL: '',        // your public site URL; blank = current page
   APP_NAME: 'KamaAgni',

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Print Studio</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.pr-sel{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:8px 10px;margin:4px 0 12px}
+.pr-opts{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.pr-opts button{min-height:42px;padding:6px 14px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.pr-opts button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.pr-prev{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-top:10px}
+.pr-prev div{background:#fff;color:#222;border-radius:10px;padding:12px;font-size:13px;line-height:1.4;min-height:110px;position:relative}
+.pr-prev small{position:absolute;bottom:8px;left:12px;font-size:12px;color:#b0465a;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+#sheet{display:none}
+@media print{
+  @page{size:A4;margin:8mm}
+  body *{visibility:hidden!important}
+  #sheet,#sheet *{visibility:visible!important}
+  #sheet{display:block!important;position:absolute;left:0;top:0;width:100%;background:#fff}
+  .pg{display:grid;gap:0;page-break-after:always;break-after:page}
+  .pg.s8{grid-template-columns:repeat(2,1fr);grid-auto-rows:66mm}
+  .pg.s4{grid-template-columns:repeat(2,1fr);grid-auto-rows:135mm}
+  .pg.s12{grid-template-columns:repeat(3,1fr);grid-auto-rows:66mm}
+  .cd{border:1px dashed #bbb;padding:7mm 6mm;box-sizing:border-box;font-family:'Cormorant Garamond',Georgia,serif;color:#1a1020;display:flex;flex-direction:column;justify-content:center;text-align:center;position:relative;overflow:hidden}
+  .cd .tx{font-size:15pt;line-height:1.3}
+  .s4 .cd .tx{font-size:20pt}.s12 .cd .tx{font-size:11.5pt}
+  .cd .tg{position:absolute;bottom:4mm;left:0;right:0;font:700 7pt 'DM Sans',Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#b0465a}
+  .cd .lg{position:absolute;top:3.5mm;left:0;right:0;font:700 7pt 'Cinzel',serif;letter-spacing:.2em;color:#c9a227}
+  .cd.bk{background:radial-gradient(circle at 50% 40%,#3a0d1d,#12030a);color:#f3d27a}
+  .pg.lt{display:block;height:270mm}.lt-in{padding:18mm 20mm;font-family:'Cormorant Garamond',Georgia,serif;color:#1a1020;font-size:15pt;line-height:1.6;border:1.5px solid #c9a227;height:100%;box-sizing:border-box;border-radius:4mm}
+  .lt-h{font:700 24pt 'Cinzel',serif;color:#b0465a;margin-bottom:8mm;letter-spacing:.04em}.lt-f{margin-top:10mm;font-style:italic}
+  .cd.bk .bl{font:700 22pt 'Cinzel',serif;letter-spacing:.12em}.cd.bk .bs{font:10pt 'DM Sans',sans-serif;color:#f4a0ae;margin-top:3mm}
+}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<div id="sheet" aria-hidden="true"></div>
+<script src="../js/ka-common.js"></script>
+<script>
+const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a, i) : i;   /* position in the original pack (filters can remove items) */
+(async () => {
+  const {LS, esc, top, shuffle} = KX;
+  const app = document.getElementById('app');
+  const DECKS = [['truth', '💬 Truth questions'], ['dare', '🔥 Dares'], ['wyp', '⚖️ Would You Prefer'], ['nhie', '🙈 Never Have I Ever'], ['who', '👉 Who’s Most Likely To'], ['know', '🧠 How Well Do You Know Me'], ['conn', '💞 Connection cards'], ['coupons', '🎟 Love coupons'], ['scratch', '✨ Scratch-off ideas']];
+  const st = LS.get('ka_print', {src: 'deck:truth', cat: '', size: 8, n: 16, back: true, mix: true});
+  try { const q0 = new URLSearchParams(location.search).get('src'); if (q0 && /^(pb:(all|fav|own)|fav|own|gift|deck:[\w-]+|pack:[\w-]+)$/.test(q0)) { st.src = q0; st.cat = ''; if (/^pb:/.test(q0) && st.size === 12) st.size = 8; } } catch (e) {}
+  let packs = []; try { packs = await (await fetch('../data/packs/index.json')).json(); } catch (e) {}
+  const cache = {};
+  const txt = x => typeof x === 'string' ? x : Array.isArray(x) ? (x.length === 2 ? x[0] + '  …or…  ' + x[1] : x[0] + (x.length > 1 ? ' (' + x.slice(1).join(' / ') + ')' : '')) : (x.n ? x.n + ': ' + (x.d || '') : (x.t || x.q || ''));
+  async function items() {
+    const [kind, id] = st.src.split(':');
+    if (kind === 'deck') {
+      const d = cache[id] = cache[id] || await (await fetch('../data/deck/' + id + '.json')).json();
+      const cats = (d.cats || []).map(c => [c.id, c.l || c.n || c.id]);
+      const L = []; Object.entries(d.items).forEach(([c, a]) => { if (!st.cat || st.cat === c) a.forEach(x => L.push({t: txt(x), g: (cats.find(z => z[0] === c) || [, c])[1]})); });
+      return {L, cats};
+    }
+    if (kind === 'pack') {
+      const p = cache[id] = cache[id] || await (await fetch('../data/packs/' + id + '.json')).json();
+      const m = packs.find(z => z.id === id) || {l: id}; const N = KX.names();
+      const W = (await KX.whoLoad())[id] || '';
+      return {L: p.map((t, i) => { const w = W[OI(p, i)] || 'x', f = KX.forTag(w); return {t: KX.forText(String(t), w).replace(/\{A\}/g, N[0]).replace(/\{B\}/g, N[1]), g: m.l + (f >= 0 ? ' · for ' + N[f] : '')}; }), cats: []};
+    }
+    if (kind === 'fav') return {L: (LS.get('ka_fav_cards', []) || []).map(t => ({t: String(t), g: 'Saved'})), cats: []};
+    if (kind === 'pb') { /* v84: Play Book games as cards, the version for your heat level */
+      const d = cache.pb = cache.pb || await (await fetch('../data/playbook.json')).json();
+      const S = LS.get('ka_playbook', {}) || {}, h = KX.heat(), KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+      let G = KF(d.games).concat((S.mine || []).map(x => Object.assign({}, x, {mine: 1}))).filter(x => x.h <= h);
+      if (id === 'fav') G = G.filter(x => (S.fav || {})[x.n]); if (id === 'own') G = G.filter(x => x.mine);
+      const cats = id === 'all' ? Object.entries(d.chapters) : [];
+      if (st.cat && id === 'all') G = G.filter(x => x.c === st.cat);
+      const cut = (t, n) => t.length > n ? t.slice(0, n - 1).replace(/\s+\S*$/, '') + '…' : t;
+      return {L: G.map(x => ({t: x.n + ': ' + cut(((x.set ? x.set + ' ' : '') + ((h >= 2 && x.sp ? x.sp : x.sw) || '')).trim(), 240), g: (d.chapters[x.c] || '').replace(/^\S+\s/, '') + (x.mine ? ' · ours' : '') + (h >= 2 && x.sp ? ' · spicy' : ' · sweet')})), cats};
+    }
+    if (kind === 'own') { const A = (window.KA_CUSTOM && KA_CUSTOM.all()) || {}; const L = []; Object.entries(A).forEach(([k, a]) => (a || []).forEach(x => L.push({t: txt(x), g: 'Our cards'}))); return {L, cats: []}; }
+    return {L: [], cats: []};
+  }
+  /* ---- Gift box: a letter page + love coupons + role-play invitations, ready to cut and put in an envelope ---- */
+  const STARTERS = ['The moment I knew I loved you was…', 'Three things I adore about you are…', 'What I want more of with you this year is…', 'Tonight I want to…'];
+  async function giftItems() {
+    const N = KX.names(), h = KX.heat(), out = [];
+    let cp = []; try { const d = cache.coupons = cache.coupons || await (await fetch('../data/deck/coupons.json')).json(); Object.values(d.items).forEach(a => a.forEach(x => cp.push(txt(x)))); } catch (e) {}
+    shuffle(cp).slice(0, +st.gc || 6).forEach(t => out.push({t: '🎟 ' + t, g: 'Love coupon · from ' + N[0]}));
+    let rp = []; try { rp = cache.rp = cache.rp || await (await fetch('../data/roleplay.json')).json(); } catch (e) {}
+    shuffle(rp.filter(o => (o.h || 1) <= h)).slice(0, +st.gr || 3).forEach(o => out.push({t: '🎭 Redeem for one night of “' + o.t + '”' + (o.line ? '. I’ll start with: “' + o.line + '”' : ''), g: 'Role-play invitation'}));
+    return out;
+  }
+  function giftForm(L) {
+    const N = KX.names();
+    app.innerHTML = top('Print Studio', 'A gift box: a letter in your own words, love coupons and role-play invitations to cut out and hand over.') + `
+      <div class="kx-card">
+        <label class="kx-turn" for="src" style="display:block">What to print</label><select id="src" class="pr-sel"><option value="gift" selected>🎁 Gift box</option><option value="deck:coupons">🎟 Love coupons only</option><option value="deck:truth">← Back to all decks</option></select>
+        <label class="kx-turn" for="gl" style="display:block">Your letter to ${esc(N[1])}</label>
+        <textarea id="gl" class="pr-sel" rows="7" style="min-height:150px;line-height:1.5" placeholder="Write from the heart. Tap a starter below if you’re stuck.">${esc(st.letter || '')}</textarea>
+        <div class="pr-opts">${STARTERS.map((x, i) => `<button data-st="${i}">${esc(x)}</button>`).join('')}</div>
+        <div class="kx-turn">Love coupons</div><div class="pr-opts">${[4, 6, 8].map(v => `<button data-gc="${v}" class="${(+st.gc || 6) === v ? 'on' : ''}">${v}</button>`).join('')}</div>
+        <div class="kx-turn">Role-play invitations</div><div class="pr-opts">${[0, 2, 3, 4].map(v => `<button data-gr="${v}" class="${(st.gr == null ? 3 : +st.gr) === v ? 'on' : ''}">${v || 'None'}</button>`).join('')}</div>
+        <div class="kx-row"><button class="kx-btn" id="gp">🖨️ Print the gift box</button><button class="kx-btn ghost" id="gs">🔀 New picks</button></div>
+        <p class="kx-muted" style="margin-top:8px">Page 1 is your letter, then the cards (8 per page, with backs if “card backs” is on in the deck view). Fold the letter, cut the cards, and put it all in an envelope.</p></div>
+      <div class="kx-turn" style="margin-top:12px">Preview</div><div class="pr-prev">${L.map(x => `<div>${esc(x.t.slice(0, 160))}<small>${esc(x.g)}</small></div>`).join('')}</div>`;
+    const $ = id => document.getElementById(id);
+    $('src').onchange = e => { st.src = e.target.value; LS.set('ka_print', st); draw(); };
+    $('gl').oninput = e => { st.letter = e.target.value; LS.set('ka_print', st); };
+    app.querySelectorAll('[data-st]').forEach(b => b.onclick = () => { const t = $('gl'); t.value = (t.value ? t.value.replace(/\s*$/, '\n\n') : '') + STARTERS[+b.dataset.st] + ' '; st.letter = t.value; LS.set('ka_print', st); t.focus(); });
+    app.querySelectorAll('[data-gc]').forEach(b => b.onclick = () => { st.gc = +b.dataset.gc; LS.set('ka_print', st); draw(); });
+    app.querySelectorAll('[data-gr]').forEach(b => b.onclick = () => { st.gr = +b.dataset.gr; LS.set('ka_print', st); draw(); });
+    $('gs').onclick = () => draw();
+    $('gp').onclick = () => { if (!(st.letter || '').trim() && !confirm('Print without a letter?')) return;
+      const keep = st.size; st.size = 8; build(L); st.size = keep;
+      const letter = (st.letter || '').trim() ? `<div class="pg lt"><div class="lt-in"><div class="lt-h">For ${esc(N[1])}</div>${esc(st.letter).split(/\n{2,}/).map(p => '<p>' + p.replace(/\n/g, '<br>') + '</p>').join('')}<div class="lt-f">With all my love,<br>${esc(N[0])}</div></div></div>` : '';
+      const sh = document.getElementById('sheet'); sh.innerHTML = letter + sh.innerHTML; setTimeout(() => window.print(), 150); };
+  }
+  async function draw() {
+    if (st.src === 'gift') return giftForm(await giftItems());
+    let D; try { D = await items(); } catch (e) { D = {L: [], cats: []}; }
+    let L = D.L.filter(x => x.t && x.t.trim());
+    const total = L.length;
+    if (st.mix) L = shuffle(L.slice());
+    L = L.slice(0, st.n === 'all' ? L.length : +st.n);
+    app.innerHTML = top('Print Studio', 'Turn any deck, task pack, your favourites or your own cards into cut-out cards. Print, cut, and play anywhere.') + `
+      <div class="kx-card">
+        <label class="kx-turn" for="src" style="display:block">What to print</label>
+        <select id="src" class="pr-sel">
+          <optgroup label="Card decks">${DECKS.map(([k, l]) => `<option value="deck:${k}"${st.src === 'deck:' + k ? ' selected' : ''}>${l}</option>`).join('')}</optgroup>
+          <optgroup label="Yours"><option value="gift"${st.src === 'gift' ? ' selected' : ''}>🎁 Gift box: letter, coupons and role-play invitations</option><option value="fav"${st.src === 'fav' ? ' selected' : ''}>♥ Saved favourites</option><option value="own"${st.src === 'own' ? ' selected' : ''}>✍️ Our own cards</option></optgroup>
+          <optgroup label="The Play Book"><option value="pb:all"${st.src === 'pb:all' ? ' selected' : ''}>🎲 Play Book games (by chapter)</option><option value="pb:fav"${st.src === 'pb:fav' ? ' selected' : ''}>♥ Our favourite games</option><option value="pb:own"${st.src === 'pb:own' ? ' selected' : ''}>✍️ Games we wrote</option></optgroup>
+          <optgroup label="Task packs">${packs.map(p => `<option value="pack:${p.id}"${st.src === 'pack:' + p.id ? ' selected' : ''}>${esc(p.l)} (${p.n})</option>`).join('')}</optgroup>
+        </select>
+        ${D.cats.length ? `<label class="kx-turn" for="cat" style="display:block">Category</label><select id="cat" class="pr-sel"><option value="">All categories</option>${D.cats.map(([k, l]) => `<option value="${esc(k)}"${st.cat === k ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select>` : ''}
+        <div class="kx-turn">Card size</div><div class="pr-opts" role="group" aria-label="Card size">${[[12, 'Small · 12 per page'], [8, 'Classic · 8 per page'], [4, 'Big · 4 per page']].map(([v, l]) => `<button data-s="${v}" class="${+st.size === v ? 'on' : ''}">${l}</button>`).join('')}</div>
+        <div class="kx-turn">How many</div><div class="pr-opts" role="group" aria-label="How many cards">${[8, 16, 24, 48, 'all'].map(v => `<button data-n="${v}" class="${String(st.n) === String(v) ? 'on' : ''}">${v === 'all' ? 'All ' + total : v}</button>`).join('')}</div>
+        <div class="pr-opts"><button id="mx" class="${st.mix ? 'on' : ''}" aria-pressed="${st.mix}">🔀 Random mix</button><button id="bk" class="${st.back ? 'on' : ''}" aria-pressed="${st.back}">🂠 Print card backs</button></div>
+        <div class="kx-row"><button class="kx-btn" id="pr" ${L.length ? '' : 'disabled'}>🖨️ Print ${L.length} cards</button></div>
+        <p class="kx-muted" style="margin-top:8px">Tip: choose A4, scale “100%” / “Actual size”. For backs, print the back pages on the reverse side (flip on the long edge), or on separate paper and glue. Your topic filters in Settings apply here too.</p>
+      </div>
+      <div class="kx-turn" style="margin-top:12px">Preview</div>
+      ${L.length ? `<div class="pr-prev">${L.slice(0, 12).map(x => `<div>${esc(x.t.slice(0, 160))}<small>${esc(x.g || '')}</small></div>`).join('')}</div>${L.length > 12 ? `<p class="kx-muted">…and ${L.length - 12} more</p>` : ''}` : '<p class="kx-muted">Nothing here yet.</p>'}`;
+    const $ = id => document.getElementById(id);
+    $('src').onchange = e => { st.src = e.target.value; st.cat = ''; LS.set('ka_print', st); draw(); };
+    if ($('cat')) $('cat').onchange = e => { st.cat = e.target.value; LS.set('ka_print', st); draw(); };
+    app.querySelectorAll('[data-s]').forEach(b => b.onclick = () => { st.size = +b.dataset.s; LS.set('ka_print', st); draw(); });
+    app.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { st.n = b.dataset.n === 'all' ? 'all' : +b.dataset.n; LS.set('ka_print', st); draw(); });
+    $('mx').onclick = () => { st.mix = !st.mix; LS.set('ka_print', st); draw(); };
+    $('bk').onclick = () => { st.back = !st.back; LS.set('ka_print', st); draw(); };
+    $('pr').onclick = () => { build(L); setTimeout(() => window.print(), 150); };
+  }
+  function build(L) {
+    const per = +st.size, cls = 's' + per, out = [];
+    for (let i = 0; i < L.length; i += per) {
+      const chunk = L.slice(i, i + per);
+      out.push(`<div class="pg ${cls}">${chunk.map(x => `<div class="cd"><div class="lg">KAMAAGNI</div><div class="tx">${esc(x.t)}</div><div class="tg">${esc(x.g || '')}</div></div>`).join('')}</div>`);
+      if (st.back) {
+        /* mirror each row so backs line up when printed double-sided (flip on long edge) */
+        const cols = per === 12 ? 3 : 2, rows = []; for (let r = 0; r < chunk.length; r += cols) rows.push(chunk.slice(r, r + cols));
+        out.push(`<div class="pg ${cls}">${rows.map(r => { const cells = r.map(() => '<div class="cd bk"><div class="bl">🔥<br>KAMAAGNI</div><div class="bs">for the two of us</div></div>'); while (cells.length < cols) cells.push('<div></div>'); return cells.reverse().join(''); }).join('')}</div>`);
+      }
+    }
+    document.getElementById('sheet').innerHTML = out.join('');
+  }
+  draw();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

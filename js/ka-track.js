@@ -29,9 +29,18 @@
     var p = a.pages[m[1]] || { n: 0 }; p.n++; p.last = Date.now(); a.pages[m[1]] = p;
     a.last = m[1]; a.lastAt = Date.now();
     a.seen = a.seen || {}; var key = t + ':' + m[1];
-    if (!a.seen[key]) { a.seen[key] = 1; var ks = Object.keys(a.seen); if (ks.length > 80) ks.slice(0, ks.length - 80).forEach(function (x) { delete a.seen[x]; }); if (!/^kamaagni-(history|settings|journal|library|custom|progress|learn|experts|prompts|tonight|about)$/.test(m[1])) setTimeout(function () { log('play', 'Played ' + (document.title || m[1]).replace(/^KamaAgni\s*[—-]?\s*/, '')); }, 0); }
+    if (!a.seen[key]) { var ks = Object.keys(a.seen); if (ks.length > 80) ks.slice(0, ks.length - 80).forEach(function (x) { delete a.seen[x]; }); if (!/^kamaagni-(history|settings|journal|library|custom|progress|learn|experts|prompts|tonight|about|search|week|memories|planner|dates|print|checkin|invite|roadmap|health|life-stages|playlist|movies)$/.test(m[1]) && m[1] !== 'pdf-viewer') played(key, m[1]); }
     a.xp += first ? 15 : (p.n % 3 === 1 ? 4 : 1);             // daily bonus, small per-game credit
     put(a);
+  }
+  /* Only log "Played X" once you actually play: a few taps inside the game, or three minutes on the page.
+     Just opening a page to look around no longer fills History and Our Week. */
+  function played(key, slug) {
+    var done = false, taps = 0, t0 = 0, vis = 0;
+    function fire() { if (done) return; done = true; D.removeEventListener('click', onTap, true); clearInterval(iv); try { var a2 = get(); a2.seen = a2.seen || {}; if (a2.seen[key]) return; a2.seen[key] = 1; put(a2); } catch (e) {} D.removeEventListener('click', onTap, true); clearInterval(iv); log('play', 'Played ' + (D.title || slug).replace(/^KamaAgni\s*[—-]?\s*/, '')); }
+    function onTap(e) { var t = e.target; if (!t.closest || t.closest('header,footer,nav,#ka-next,.kn-wrap,#ka-src,#kh,.kh-b,[id^="kx-"],[id^="ka-"]:not(#ka-main)')) return; if (t.closest('button,a,[role="button"],input,select,label,canvas,.kx-card')) { if (++taps >= 3) fire(); } }
+    var D = document; D.addEventListener('click', onTap, true);
+    var iv = setInterval(function () { if (!D.hidden && ++vis >= 18) fire(); }, 10000);
   }
   /* history log: KA_TRACK.log('session','Guided session','Playful') — viewable and deletable on the History page */
   function log(type, title, detail) {

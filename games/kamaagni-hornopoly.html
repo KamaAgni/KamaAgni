@@ -34,7 +34,8 @@ let S = null, pool = [], pi = 0, stop = null;
 const D = KA_DUO.init({g: 'horno', key: KEY, get: () => S, onState: st => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
 S = D.load();
 const N = () => D.names(S), two = () => !!(S && S.mode === 'two'), mine = () => !two() || S.turn === D.me;
-const fill = (t, who) => { const n = N(), a = n[who], b = n[1 - who]; return t.replace(/\{A\}/g, a).replace(/\{B\}/g, b); };
+const GN = () => { const g = KX.genders(); return two() && D.me === 1 ? [g[1], g[0]] : g; };
+const fill = (t, who) => { const n = N(), a = n[who], b = n[1 - who]; return KX.gfix(t, GN()[1 - who]).replace(/\{A\}/g, a).replace(/\{B\}/g, b); };
 function build() {
   const sel = new Set(S.cats), out = [];
   PACKS.forEach(p => { if (sel.has(p.id) && p.h <= S.heat) DATA[p.id].forEach(t => out.push({p: p.id, pl: p.l, h: p.h, t})); });

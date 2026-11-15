@@ -45,7 +45,7 @@
     const app=document.getElementById('app');
     app.insertAdjacentHTML('beforeend','<div class="kx-sec">Your '+yr+' together</div><div class="kx-card kx-center"><div class="kx-big">'+mine.length+'</div><p class="kx-muted">'+lines.slice(1).map(esc).join(' · ')+'</p><button class="kx-btn" id="pg-share">📤 Share as image</button></div><div class="kx-sec">More badges</div><div class="kx-list">'+extra.map(b=>'<div class="kx-item'+(b[2]?'':' done')+'"><span style="font-size:22px">'+(b[2]?b[0]:'🔒')+'</span><span class="kx-it">'+esc(b[1])+'</span></div>').join('')+'</div>');
     { // charts
-      const bars=(vals,labels,color)=>{const mx=Math.max(1,...vals),w=300/vals.length;return '<svg viewBox="0 0 300 120" style="width:100%" role="img" aria-label="chart">'+vals.map((v,i)=>'<rect x="'+(i*w+3)+'" y="'+(100-90*v/mx)+'" width="'+(w-6)+'" height="'+(90*v/mx)+'" rx="3" fill="'+color+'"/><text x="'+(i*w+w/2)+'" y="'+(97-90*v/mx)+'" font-size="8" fill="#ccc" text-anchor="middle">'+(v||'')+'</text><text x="'+(i*w+w/2)+'" y="113" font-size="7" fill="#999" text-anchor="middle">'+esc(labels[i])+'</text>').join('')+'</svg>'};
+      const bars=(vals,labels,color)=>{const mx=Math.max(1,...vals),w=300/vals.length;return '<svg viewBox="0 0 300 120" style="width:100%" role="img" aria-label="chart">'+vals.map((v,i)=>'<rect x="'+(i*w+3)+'" y="'+(100-90*v/mx)+'" width="'+(w-6)+'" height="'+(90*v/mx)+'" rx="3" fill="'+color+'"/><text x="'+(i*w+w/2)+'" y="'+(97-90*v/mx)+'" font-size="12" fill="#ccc" text-anchor="middle">'+(v||'')+'</text><text x="'+(i*w+w/2)+'" y="113" font-size="12" fill="#aaa" text-anchor="middle">'+esc(labels[i])+'</text>').join('')+'</svg>'};
       const now=Date.now(),wk=12,weeks=Array(wk).fill(0),labs=[];
       H.forEach(h=>{const a=Math.floor((now-h.t)/(7*864e5));if(a>=0&&a<wk)weeks[wk-1-a]++});
       for(let i=0;i<wk;i++){const d=new Date(now-(wk-1-i)*7*864e5);labs.push((d.getMonth()+1)+'/'+d.getDate())}
@@ -54,7 +54,7 @@
       const tl=Object.entries(typ).sort((a,b)=>b[1]-a[1]).slice(0,6);
       app.insertAdjacentHTML('beforeend','<div class="kx-sec">Activity charts</div><div class="kx-card"><b>Moments per week (last 12 weeks)</b>'+bars(weeks,labs,'#ff5d8f')+'</div><div class="kx-card"><b>Which days you connect</b>'+bars(dow,['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],'#ffb84d')+'</div><div class="kx-card"><b>What you do together</b>'+(tl.length?tl.map(t=>'<div class="kx-item"><span class="kx-it">'+esc(t[0])+'</span><b>'+t[1]+'</b></div>').join(''):'<p class="kx-muted">Play something to see this fill in.</p>')+'</div>');
     }
-    document.getElementById('pg-share').onclick=()=>KA_SHARE&&KA_SHARE.share({kicker:'Our '+yr+' together',title:nm,big:String(mine.length),lines:lines.slice(1)});
+    document.getElementById('pg-share').onclick=()=>window.KA_SHARE&&KA_SHARE.share&&KA_SHARE.share({kicker:'Our '+yr+' together',title:nm,big:String(mine.length),lines:lines.slice(1)});
   }catch(e){}
 })();
 </script>

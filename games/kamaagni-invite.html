@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Invites &amp; Wishes</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.iv-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.iv-tabs button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.iv-tabs button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.iv-t{display:block;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;padding:12px 14px;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);margin:6px 0;line-height:1.45}
+.iv-t.on{border-color:rgba(232,99,122,.7);background:rgba(232,99,122,.12)}
+.iv-t small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.iv-ta,.iv-in{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:inherit;font:inherit;padding:10px;box-sizing:border-box;margin:6px 0 10px}
+.iv-msg{border-radius:16px;padding:12px 14px;margin:8px 0;background:rgba(255,255,255,.04);border:1px solid var(--border2)}
+.iv-msg.in{border-color:rgba(232,99,122,.45);background:rgba(232,99,122,.08)}
+.iv-msg .h{font-size:12px;color:var(--muted);margin-bottom:4px}
+.iv-msg .b{font-family:'Cormorant Garamond',serif;font-size:20px;line-height:1.35}
+.iv-w{display:flex;flex-wrap:wrap;gap:8px}
+.iv-w button{min-height:42px;padding:8px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+.iv-w button.on{background:rgba(232,99,122,.18);border-color:rgba(232,99,122,.6)}
+.iv-w button.m{background:rgba(243,210,122,.18);border-color:rgba(243,210,122,.7)}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script src="../js/ka-nudge.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const N = KA_NUDGE, [me, pa] = KX.names();
+  let tab = (location.hash || '#send').slice(1), pickT = 0, evs = [];
+  const talk = LS.get('ka_talk', {}) || {};
+  const partnerAsk = (talk.ask || [])[1] || null;
+  const wishes = LS.get('ka_wish', {mine: []});
+  const ago = t => { const m = Math.round((Date.now() - new Date(t).getTime()) / 6e4); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : new Date(t).toLocaleDateString(); };
+
+  function frame(inner) {
+    app.innerHTML = top('Invites & Wishes', 'Ask the way your partner loves to be asked, answer kindly, and discover the wishes you share.') +
+      `<div class="iv-tabs" role="tablist">${[['send', '💌 Invite'], ['inbox', '📬 Inbox'], ['wish', '🌠 Secret wishes']].map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" data-t="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>` +
+      (N.linked() ? '' : `<div class="kx-card" style="margin-bottom:12px"><b>Not linked yet</b><p class="kx-muted" style="margin:4px 0 0">Link your accounts (👤 → Link partner) to send invites straight to ${esc(pa)}’s phone. Until then, you can copy or share them.</p></div>`) + inner;
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; location.hash = tab; render(); });
+  }
+
+  function send() {
+    const T = N.templates(partnerAsk);
+    frame(`<div class="kx-card">${partnerAsk && (partnerAsk.yes || []).length ? `<p class="kx-muted" style="margin:0 0 6px">💡 ${esc(pa)} likes: ${esc(partnerAsk.yes.join(', '))}.${partnerAsk.alt ? ' Their “not tonight, but…”: ' + esc(partnerAsk.alt) : ''}</p>` : `<p class="kx-muted" style="margin:0 0 6px">Tip: fill in “How I like to be asked” in the <a href="kamaagni-talk.html#ask" style="color:var(--rose)">Talk Kit</a> together, and invitations will match ${esc(pa)}’s style.</p>`}
+      <div class="kx-turn">Pick an invitation</div>${T.map((x, i) => `<button class="iv-t${pickT === i ? ' on' : ''}" data-i="${i}">${esc(x.t)}${x.s ? `<small>Style: ${esc(x.s)}</small>` : ''}</button>`).join('')}
+      <label class="kx-turn" for="own" style="display:block;margin-top:10px">…or write your own</label><textarea id="own" class="iv-ta" placeholder="Your words"></textarea>
+      <label class="kx-turn" for="wh" style="display:block">When (optional)</label><input id="wh" class="iv-in" type="datetime-local">
+      <div class="kx-row"><button class="kx-btn" id="go">💌 Send to ${esc(pa)}</button><button class="kx-btn ghost" id="cp">📋 Copy / share</button></div></div>`);
+    app.querySelectorAll('[data-i]').forEach(b => b.onclick = () => { pickT = +b.dataset.i; send(); });
+    const text = () => (document.getElementById('own').value.trim() || T[pickT].t);
+    document.getElementById('go').onclick = () => { const w = document.getElementById('wh').value; N.send('inv', {t: text(), w}).then(() => { KX.toast('Invitation sent 💌'); tab = 'inbox'; render(); }, e => KX.toast(e.message)); };
+    document.getElementById('cp').onclick = async () => { const t = text(); try { if (navigator.share) await navigator.share({text: t}); else { await navigator.clipboard.writeText(t); KX.toast('Copied. Paste it to ' + pa); } } catch (e) {} };
+  }
+
+  async function inbox() {
+    frame('<div id="ib"><p class="kx-muted">Loading…</p></div>');
+    const box = document.getElementById('ib');
+    if (!N.linked()) { box.innerHTML = '<p class="kx-muted">Your inbox fills up once you’re linked.</p>'; return; }
+    try { evs = await KA_CLOUD.couple.list(0); } catch (e) { box.innerHTML = '<p class="kx-muted">Could not load messages. Check your connection.</p>'; return; }
+    const R = {}, V = {}; evs.filter(e => e.kind === 'rsvp').forEach(e => { R[e.body.to] = e; }); evs.filter(e => e.kind === 'veto').forEach(e => { V[e.body.to] = e; });
+    const L = evs.filter(e => ['inv', 'plan'].includes(e.kind)).slice(-30).reverse();
+    if (!L.length) { box.innerHTML = '<p class="kx-muted">No invitations yet. Be the first to send one 💌</p>'; return; }
+    const alt = talk.ask && talk.ask[0] && talk.ask[0].alt;
+    box.innerHTML = L.map(e => { const b = e.body || {}, r = R[e.id], who = e.mine ? 'You' : (b.n || pa);
+      const ans = r ? `<p style="margin:8px 0 0"><b>${r.mine ? 'You' : esc(r.body.n || pa)} replied:</b> ${r.body.r === 'yes' ? '🔥 Yes!' : r.body.r === 'later' ? '🌙 Not tonight, but… ' + esc(r.body.t || '') : '📅 Let’s plan it: ' + esc(r.body.t || '')}</p>` : '';
+      const v = V[e.id];
+      const steps = (e.kind === 'plan' && Array.isArray(b.s) && b.s.length) ? `<div style="margin-top:8px">${b.s.map((t, si) => `<div class="kx-row" style="justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,.07);padding:4px 0"><span style="${v && v.body.s === si ? 'text-decoration:line-through;opacity:.6' : ''}">${si + 1}. ${esc(t)}</span>${!e.mine && !v ? `<button class="kx-btn sm ghost" data-v="${si}" data-e="${e.id}" aria-label="Skip ${esc(t)}">✗ Not this one</button>` : ''}</div>`).join('')}${v ? `<p class="kx-muted" style="margin:6px 0 0">${v.mine ? 'You' : esc(v.body.n || pa)} would rather skip “${esc(v.body.t || '')}”.</p>` : !e.mine ? '<p class="kx-muted" style="margin:6px 0 0;font-size:13px">You can skip one step. The plan swaps it for something else.</p>' : ''}</div>` : '';
+      const btns = (!e.mine && !r) ? `<div class="kx-row" style="margin-top:8px"><button class="kx-btn sm" data-r="yes" data-e="${e.id}">🔥 Yes</button><button class="kx-btn sm ghost" data-r="later" data-e="${e.id}">🌙 Not tonight, but…</button><button class="kx-btn sm ghost" data-r="plan" data-e="${e.id}">📅 Let’s plan it</button></div>` : '';
+      return `<div class="iv-msg${e.mine ? '' : ' in'}"><div class="h">${esc(who)} · ${e.kind === 'plan' ? 'shared a plan' : 'invited'} · ${ago(e.at)}${b.w ? ' · for ' + esc(new Date(b.w).toLocaleString([], {weekday: 'short', hour: '2-digit', minute: '2-digit'})) : ''}</div><div class="b">${esc(b.t || '')}</div>${steps}${b.u ? `<a class="kx-btn sm ghost" style="margin-top:6px" href="../${esc(b.u)}">Open ${esc(b.title || 'it')} →</a>` : ''}${ans}${btns}</div>`; }).join('');
+    box.querySelectorAll('[data-v]').forEach(b => b.onclick = () => { const e = evs.find(x => x.id === +b.dataset.e), si = +b.dataset.v; if (!e) return;
+      N.send('veto', {to: e.id, pid: e.body.pid, s: si, t: e.body.s[si]}).then(() => { KX.toast('Skipped. They’ll swap it 💞'); inbox(); }, er => KX.toast(er.message)); });
+    box.querySelectorAll('[data-r]').forEach(b => b.onclick = () => {
+      const r = b.dataset.r; let t = '';
+      if (r === 'later') t = prompt('Not tonight, but…', alt || 'a long cuddle instead?') || alt || 'a cuddle instead?';
+      if (r === 'plan') t = prompt('When works for you?', 'Saturday night?') || 'Soon';
+      N.send('rsvp', {to: +b.dataset.e, r, t}).then(() => { KX.toast('Sent 💞'); inbox(); }, e => KX.toast(e.message));
+    });
+  }
+
+  async function wish() {
+    let theirs = {};
+    if (N.linked()) { try { evs = await KA_CLOUD.couple.list(0); evs.filter(e => e.kind === 'wish' && !e.mine).forEach(e => { theirs = {}; (e.body.k || []).forEach(k => theirs[k] = 1); }); } catch (e) {} }
+    const mine = new Set(wishes.mine);
+    const matches = N.WISHES.filter(w => mine.has(N.wishKey(w)) && theirs[N.wishKey(w)]);
+    frame(`<div class="kx-card"><p class="kx-muted" style="margin:0 0 8px">Tap the things you secretly wish for. ${esc(pa)} does the same on their phone. You only ever see the wishes you <b>both</b> picked, never the ones only one of you chose.</p>
+      <div class="iv-w">${N.WISHES.map(w => { const k = N.wishKey(w), on = mine.has(k), m = on && theirs[k]; return `<button data-w="${k}" class="${m ? 'm' : on ? 'on' : ''}" aria-pressed="${on}">${m ? '✨ ' : ''}${esc(w)}</button>`; }).join('')}</div>
+      <div class="kx-row" style="margin-top:12px"><button class="kx-btn" id="sv">🌠 ${N.linked() ? 'Save & share secretly' : 'Save'}</button></div></div>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">✨ Wishes you share</div>${matches.length ? matches.map(w => `<div class="iv-msg in"><div class="b">${esc(w)}</div></div>`).join('') + '<p class="kx-muted">Pick one and make a plan for it 💞</p>' : `<p class="kx-muted" style="margin:6px 0 0">${N.linked() ? 'No shared wishes yet. Once you’ve both saved, matches appear here.' : 'Link with your partner to find your shared wishes.'}</p>`}</div>`);
+    app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { const k = b.dataset.w; mine.has(k) ? mine.delete(k) : mine.add(k); wishes.mine = [...mine]; LS.set('ka_wish', wishes); b.classList.toggle('on'); b.setAttribute('aria-pressed', mine.has(k)); });
+    document.getElementById('sv').onclick = () => { LS.set('ka_wish', wishes); if (!N.linked()) return KX.toast('Saved'); N.send('wish', {k: wishes.mine}).then(() => { KX.toast('Saved secretly 🌠'); wish(); }, e => KX.toast(e.message)); };
+  }
+  function render() { ({send, inbox, wish}[tab] || send)(); }
+  render();
+  let wasLinked = N.linked();
+  window.addEventListener('ka:cloud', () => { const l = N.linked(); if (l !== wasLinked) { wasLinked = l; render(); } });
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

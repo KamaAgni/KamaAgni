@@ -21,6 +21,7 @@
 const {esc, shuffle, LS, pick} = KX, U = KA_UI, app = document.getElementById('app'), KEY = 'ka_coupons_v2';
 let DK;
 try { DK = await (await fetch('../data/deck/coupons.json')).json(); } catch (e) { app.innerHTML = '<div class="kx-card">Could not load. Open this page from your hosted site.</div>'; return; }
+let shown = 12; /* wallet: show 12 at a time */
 /* wallet state: used {id:date}, custom [{t,h}], cat filter, tab */
 let st = LS.get(KEY, null);
 if (!st) { const o = LS.get('ka_coupons', {used: {}, custom: []}); st = {used: {}, custom: (o.custom || []).map(t => ({t, h: 1})), cat: 'all', tab: 'wallet'}; Object.keys(o.used || {}).forEach(k => { st.used['b:' + k.replace(/^b:/, '')] = o.used[k]; }); }
@@ -52,12 +53,14 @@ function render() {
   app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { st.tab = b.dataset.t; save(); render(); });
   app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => { st.cat = b.dataset.c; save(); render(); });
   const body = document.getElementById('body'), byId = Object.fromEntries(all().map(c => [c.id, c]));
+  if (window.__cpKey !== st.cat + st.tab) { window.__cpKey = st.cat + st.tab; shown = 12; }
   const bind = () => {
+    { const mb = document.getElementById('more'); if (mb) mb.onclick = () => { shown += 12; render(); }; }
     body.querySelectorAll('[data-u]').forEach(b => b.onclick = () => { const id = b.dataset.u; if (st.used[id]) delete st.used[id]; else { st.used[id] = new Date().toLocaleDateString(); window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 18}); try { KA_TRACK.log('play', 'Love Coupons', byId[id].t.slice(0, 70)); } catch (e) {} } save(); render(); });
     body.querySelectorAll('[data-s]').forEach(b => b.onclick = async () => { const text = '🎟 Love coupon: ' + byId[b.dataset.s].t; try { if (navigator.share) { await navigator.share({text}); return; } await navigator.clipboard.writeText(text); KX.toast('Copied. Paste it to your partner'); } catch (e) {} });
     body.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { const id = b.dataset.x; st.custom = st.custom.filter(x => 'c:' + x.t !== id); delete st.used[id]; save(); render(); });
   };
-  if (st.tab === 'wallet') body.innerHTML = `<div class="kx-row" style="justify-content:flex-end;margin-bottom:8px"><button class="kx-btn sm ghost" id="prt">🖨 Print unused</button></div><div class="kd-cpns">${list.map(cp).join('') || '<p class="kx-muted">Nothing here at your heat level.</p>'}</div>`;
+  if (st.tab === 'wallet') body.innerHTML = `<div class="kx-row" style="justify-content:flex-end;margin-bottom:8px"><button class="kx-btn sm ghost" id="prt">🖨 Print unused</button></div><div class="kd-cpns">${list.slice(0, shown).map(cp).join('') || '<p class="kx-muted">Nothing here at your heat level.</p>'}</div>${list.length > shown ? `<div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn ghost" id="more">Show more (${list.length - shown} left)</button></div>` : ''}`;
   else if (st.tab === 'draw') {
     body.innerHTML = unused.length ? '<div id="drawn"></div><div class="kd-pass" style="margin-top:14px"><button class="kx-btn gold" id="dr">🎲 Draw a coupon</button></div>' : '<p class="kx-muted" style="text-align:center">Every coupon here is redeemed. Pick another category.</p>';
     const dr = document.getElementById('dr');

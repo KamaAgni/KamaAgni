@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni New for Us</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.nf-c{display:flex;gap:12px;align-items:flex-start;padding:14px;border:1px solid var(--border2);border-radius:16px;background:rgba(255,255,255,.03);margin-bottom:10px}
+.nf-c.done{border-color:rgba(123,226,138,.5);background:rgba(123,226,138,.06)}
+.nf-i{font-size:30px;line-height:1}.nf-c b{font-family:'Cormorant Garamond',serif;font-size:22px;display:block;line-height:1.15}
+.nf-c small{color:var(--muted)}.nf-act{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.nf-bar{height:10px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:6px 0 14px}.nf-bar i{display:block;height:100%;background:linear-gradient(90deg,#e8637a,#f0be3c)}
+.nf-m{display:flex;gap:6px;flex-wrap:wrap}.nf-m span{font-size:13px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.06)}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+/* New for Us (v82): each month, one new position, one new game and one new skill. Picks are saved for the month in
+   ka_month {m, pos, game, skill, won:{YYYY-MM:1}}; done-ness comes from the Position Library, Play Book and Bedroom Skills. */
+(async () => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const SK = [[0, "Kissing well", "💋", 1], [1, "Nipples and chest", "🫶", 1], [2, "Female anatomy basics", "🧭", 1], [3, "Male anatomy basics", "🧭", 1], [4, "Touching her with your hands", "🖐️", 1], [5, "Touching him with your hands", "✋", 1], [6, "Touching yourself with your partner watching", "🪞", 2], [7, "Oral sex on a vulva", "👄", 2], [8, "Oral sex on a penis", "👄", 2], [9, "Giving and getting oral safely", "⭕", 2], [10, "Making intercourse more pleasurable", "🔁", 2], [11, "Sex during a period", "🩸", 2], [12, "Building intensity together", "🎯", 2], [13, "Lube explained", "🧴", 1], [14, "Shaving, scent and grooming", "🛁", 2], [15, "Aftercare and pillow talk", "🌙", 1], [16, "Spanking, done well", "🖐️", 3], [17, "Restraints for beginners", "🎀", 3], [18, "Setting up a fantasy", "🎭", 3], [19, "Toys for two", "🔋", 3], [20, "Condoms that feel good", "🛡️", 1], [21, "Prostate and perineum play", "🌰", 3], [22, "Lasting longer: a training plan", "⏱️", 2], [23, "When it’s hard to finish", "🌄", 2], [24, "When sex hurts", "🩺", 2], [25, "Sex during pregnancy", "🤰", 2], [26, "Dirty talk for beginners", "🗣️", 2], [27, "Multiple orgasms", "🌊", 3], [28, "Pelvic floor training (for both)", "💪", 2], [29, "Watching porn together", "📺", 3], [30, "Anal play, slowly and safely", "🍑", 3]]; /* [id, title, emoji, level] from Bedroom Skills */
+  let P = [], B = {games: []};
+  try { P = await (await fetch('../data/positions.json')).json(); } catch (e) {}
+  try { B = await (await fetch('../data/playbook.json')).json(); } catch (e) {}
+  const KF = a => (window.KA_FILTER && KA_FILTER.keep) ? KA_FILTER.keep(a) : a;
+  const heat = KX.heat(), now = new Date(), M = now.toISOString().slice(0, 7), seed = now.getFullYear() * 12 + now.getMonth();
+  const MN = now.toLocaleString(undefined, {month: 'long'});
+  const pos = () => LS.get('ka_pos', {tried: {}, fav: {}}) || {tried: {}, fav: {}};
+  const pb = () => LS.get('ka_playbook', {done: {}, fav: {}}) || {done: {}, fav: {}};
+  const sk = () => { const d = LS.get('ka_skills_done', []); return Array.isArray(d) ? d : []; };
+  const order = (arr, salt) => arr.map((x, i) => [((seed * 9301 + (i + 1) * 49297 + salt * 233) % 233280), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  let st = LS.get('ka_month', {}) || {}; st.won = st.won || {};
+  if (st.m !== M) {
+    const tp = pos().tried || {}, dp = pb().done || {}, ds = sk();
+    const p = order(P.filter(x => x.d <= 2), 1).find(x => !tp[x.n]);
+    const g = order(KF(B.games).filter(x => x.h <= heat), 2).find(x => !dp[x.n]);
+    const k = order(SK.filter(x => x[3] <= 2), 3).find(x => !ds.includes(x[0]));
+    st = {m: M, pos: p ? p.n : null, game: g ? g.n : null, skill: k ? k[0] : null, won: st.won};
+    LS.set('ka_month', st);
+  }
+  function state() {
+    const items = [];
+    if (st.pos) items.push({k: 'pos', i: '📖', l: 'A new position', n: st.pos, d: !!(pos().tried || {})[st.pos], u: 'kamaagni-positions.html?p=' + encodeURIComponent(st.pos), sub: (P.find(x => x.n === st.pos) || {}).s || ''});
+    if (st.game) items.push({k: 'game', i: '🎲', l: 'A new game', n: st.game, d: !!(pb().done || {})[st.game], u: 'kamaagni-playbook.html?g=' + encodeURIComponent(st.game), sub: (B.games.find(x => x.n === st.game) || {}).set || ''});
+    if (st.skill != null) { const s = SK.find(x => x[0] === st.skill); if (s) items.push({k: 'skill', i: s[2], l: 'A new skill', n: s[1], d: sk().includes(s[0]), u: 'kamaagni-skills.html?s=' + s[0], sub: 'A short how-to guide from Bedroom Skills'}); }
+    return items;
+  }
+  function mark(k) {
+    if (k === 'pos') { const o = pos(); o.tried = o.tried || {}; if (o.tried[st.pos]) delete o.tried[st.pos]; else o.tried[st.pos] = Date.now(); LS.set('ka_pos', o); }
+    if (k === 'game') { const o = pb(); o.done = o.done || {}; if (o.done[st.game]) delete o.done[st.game]; else o.done[st.game] = Date.now(); LS.set('ka_playbook', o); }
+    if (k === 'skill') { let d = sk(); d = d.includes(st.skill) ? d.filter(x => x !== st.skill) : d.concat(st.skill); LS.set('ka_skills_done', d); }
+    draw();
+  }
+  function draw() {
+    const I = state(), dn = I.filter(x => x.d).length, all = I.length && dn === I.length;
+    if (all && !st.won[M]) { st.won[M] = 1; LS.set('ka_month', st); try { KA_TRACK.award('month', 25); } catch (e) {} try { window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 50}); } catch (e) {} }
+    const W = Object.keys(st.won).sort();
+    app.innerHTML = top('New for Us', `Each month: one position, one game and one skill you haven’t tried yet. Do all three for this month’s badge.`) +
+      `<p style="margin:0"><b>${esc(MN)}</b>: ${dn} of ${I.length} done</p><div class="nf-bar" aria-hidden="true"><i style="width:${I.length ? dn * 100 / I.length : 0}%"></i></div>` +
+      (all ? `<div class="kx-card" style="text-align:center;margin-bottom:12px"><div style="font-size:40px">🌟</div><b>${esc(MN)} badge earned!</b><p class="kx-muted" style="margin:4px 0 0">Three new things together this month. New picks arrive on the 1st.</p></div>` : '') +
+      I.map(x => `<div class="nf-c ${x.d ? 'done' : ''}"><span class="nf-i" aria-hidden="true">${x.i}</span><div style="flex:1;min-width:0"><small>${esc(x.l)}${x.d ? ' · ✓ done' : ''}</small><b>${esc(x.n)}</b><small>${esc(x.sub)}</small>
+        <div class="nf-act"><a class="kx-btn sm gold" href="${x.u}">Open</a><button class="kx-btn sm ${x.d ? '' : 'ghost'}" data-mk="${x.k}" aria-pressed="${x.d}">${x.d ? '✓ Done' : 'Mark done'}</button></div></div></div>`).join('') +
+      (I.length < 3 ? '<p class="kx-muted">You’ve tried everything in one of the lists. Impressive.</p>' : '') +
+      `<h2 style="font-size:20px;margin:18px 0 6px">Badges</h2>` + (W.length ? `<div class="nf-m">${W.map(m => `<span>🌟 ${esc(new Date(m + '-15').toLocaleString(undefined, {month: 'short', year: 'numeric'}))}</span>`).join('')}</div>` : '<p class="kx-muted">Your first badge is waiting.</p>');
+    app.querySelectorAll('[data-mk]').forEach(b => b.onclick = () => mark(b.dataset.mk));
+  }
+  draw();
+  addEventListener('pageshow', e => { if (e.persisted) draw(); });
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

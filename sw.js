@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v66';
+const CACHE = 'kamaagni-v86';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -12,7 +12,7 @@ const ASSETS = [
   p('css/fonts.css'), p('css/premium.css'),
   p('css/ka-shared.css'),
   p('css/ka-theme.css'),
-  p('js/ka-motion.js'),
+  p('js/ka-motion.js'), p('js/ka-next.js'), p('js/ka-sources.js'),
   p('js/ka-catalog.js'),
   p('js/ka-duo.js'),
   p('js/ka-ui.js'),
@@ -116,9 +116,9 @@ const ASSETS = [
   p('games/kamaagni-task-deck.html'),
   p('games/kamaagni-kink-explorer.html'),
   p('games/kamaagni-learn.html'),
-  p('games/kamaagni-tonight.html'),
+  p('games/kamaagni-tonight.html'), p('games/kamaagni-invite.html'), p('games/kamaagni-checkin.html'), p('games/kamaagni-print.html'), p('games/kamaagni-apart.html'), p('js/ka-nudge.js'), p('games/kamaagni-dates.html'), p('js/ka-voice.js'), p('js/vendor/qrcode.min.js'), p('js/ka-shared.js'), p('js/ka-fb.js'), p('js/ka-push.js'), p('js/ka-tidy.js'), p('js/ka-limits.js'), p('js/ka-after.js'), p('games/kamaagni-us.html'), p('games/kamaagni-afterglow.html'), p('games/kamaagni-positions.html'), p('data/positions.json'), p('games/kamaagni-playbook.html'), p('data/playbook.json'), p('js/ka-both.js'), p('js/ka-remote.js'), p('games/kamaagni-month.html'),
   p('games/kamaagni-journal.html'),
-  p('games/kamaagni-library.html'), p('games/kamaagni-progress.html'), p('games/kamaagni-roleplay.html'), p('games/kamaagni-session.html'), p('games/kamaagni-secret.html'), p('js/ka-track.js'), p('games/kamaagni-journey.html'), p('games/kamaagni-challenges.html'), p('games/kamaagni-kinky-dice.html'), p('games/kamaagni-hornopoly.html'), p('games/kamaagni-prompts.html'), p('data/bdsm500.json'), p('data/challenges.json'), p('data/wishlist.json'), p('data/dice_faces.json'), p('data/journal_prompts.json'), p('data/roleplay_hooks.json'), p('data/roleplay.json'), p('about.html'), p('games/pdf-viewer.html'), p('js/vendor/pdf.min.js'), p('js/vendor/pdf.worker.min.js'), p('js/ka-config.js'), p('js/ka-enhance.js'), p('js/ka-gate.js'), p('data/packs/index.json'),
+  p('games/kamaagni-library.html'), p('games/kamaagni-progress.html'), p('games/kamaagni-roleplay.html'), p('games/kamaagni-talk.html'), p('games/kamaagni-brakes.html'), p('games/kamaagni-session.html'), p('games/kamaagni-secret.html'), p('js/ka-track.js'), p('games/kamaagni-journey.html'), p('games/kamaagni-challenges.html'), p('games/kamaagni-kinky-dice.html'), p('games/kamaagni-hornopoly.html'), p('games/kamaagni-prompts.html'), p('data/bdsm500.json'), p('data/challenges.json'), p('data/wishlist.json'), p('data/dice_faces.json'), p('data/journal_prompts.json'), p('data/roleplay_hooks.json'), p('data/roleplay.json'), p('about.html'), p('games/pdf-viewer.html'), p('js/vendor/pdf.min.js'), p('js/vendor/pdf.worker.min.js'), p('js/ka-config.js'), p('js/ka-enhance.js'), p('js/ka-gate.js'), p('data/packs/index.json'), p('data/packs/who.json'),
   p('data/tasks.json'), p('data/pagetext.json'), p('data/kinks.json'), p('data/library.json'), p('data/extras.json'),
 
   p('css/fonts/cinzel-latin-400-normal.woff2'),
@@ -144,7 +144,7 @@ self.addEventListener('install', event => event.waitUntil(
 
 self.addEventListener('activate', event => event.waitUntil(
   caches.keys()
-    .then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))
+    .then(keys => Promise.all(keys.filter(key => key !== CACHE && key !== 'ka-pdf-offline').map(key => caches.delete(key))))
     .then(() => self.clients.claim())
 ));
 
@@ -171,4 +171,22 @@ self.addEventListener('fetch', event => {
       return Response.error();
     }
   })());
+});
+
+/* Partner alerts (v78): show the notification sent by supabase/functions/notify-partner, open the right page on tap. */
+self.addEventListener('push', event => {
+  let d = {}; try { d = event.data ? event.data.json() : {}; } catch (e) { d = { title: 'KamaAgni', body: event.data ? event.data.text() : '' }; }
+  const scope = self.registration.scope;
+  event.waitUntil(self.registration.showNotification(d.title || 'KamaAgni', {
+    body: d.body || 'Your partner sent you something.', tag: d.tag || 'ka', renotify: true,
+    icon: scope + 'assets/icons/icon-192.png', badge: scope + 'assets/icons/icon-192.png', data: { url: scope + (d.url || 'index.html') }
+  }));
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || self.registration.scope;
+  event.waitUntil(clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) if (c.url.startsWith(self.registration.scope) && 'focus' in c) { c.navigate(url); return c.focus(); }
+    return clients.openWindow(url);
+  }));
 });

@@ -89,11 +89,14 @@ function match(g) {
   if (f.q) { const t = (g.t + ' ' + g.d + ' ' + g.tag + ' ' + VIBE[g.v]).toLowerCase(); if (!f.q.toLowerCase().split(/\s+/).every(w => t.includes(w))) return false; }
   return true;
 }
+/* NEW = recently added AND you haven't opened it yet */
+const OPENED = (() => { try { return (JSON.parse(localStorage.getItem('ka_act')) || {}).pages || {}; } catch (e) { return {}; } })();
+const fresh = g => g.isNew && !OPENED[(g.u.match(/([^\/]+)\.html$/) || [])[1]];
 function card(g) {
   const modes = g.modes.map(m => m === 'one' ? '<span>📱 One phone</span>' : m === 'two' ? '<span class="two">📱📱 Two phones</span>' : '<span>👤 Solo</span>').join('');
   const fl = '🔥'.repeat(Math.min(3, Math.max(1, Math.min(g.h[1], heat()))));
   return `<a class="gc" href="${g.u}" data-id="${g.id}" aria-label="${esc(g.t)}">
-    ${g.isNew ? '<div class="new">NEW</div>' : ''}${saved(g) ? '<div class="cont">CONTINUE</div>' : ''}
+    ${fresh(g) ? '<div class="new">NEW</div>' : ''}${saved(g) ? '<div class="cont">CONTINUE</div>' : ''}
     <button class="star ${favs.includes(g.id) ? 'on' : ''}" data-fav="${g.id}" aria-label="Favourite">${favs.includes(g.id) ? '★' : '☆'}</button>
     <div class="art" style="--g:${ART[g.v]}"><i>${g.i}</i></div>
     <div class="bd"><h3>${esc(g.t)}</h3><p>${esc(g.d)}</p>
@@ -115,7 +118,7 @@ function render(keepFocus) {
   const list = KA_CATALOG.filter(match), all = KA_CATALOG.filter(g => !hidden(g));
   const cont = list.filter(saved), fv = list.filter(g => favs.includes(g.id) && !saved(g));
   const rest = list.filter(g => !saved(g) && !favs.includes(g.id));
-  const lp = lastPlayed(); rest.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+  const lp = lastPlayed(); rest.sort((a, b) => (fresh(b) ? 1 : 0) - (fresh(a) ? 1 : 0));
   const heatHidden = all.filter(g => g.h[0] > heat()).length;
   const nact = ['mode', 'vibe', 'time'].filter(k => f[k] !== 'all').length;
   const wasOpen = (document.getElementById('flt') || {}).open;
@@ -162,11 +165,13 @@ function surprise(mood) {
 }
 function spin() {
   const sm = document.getElementById('sm'), reel = document.getElementById('reel'); sm.classList.add('show');
-  let pick = pool[Math.floor(Math.random() * pool.length)]; if (cur && pool.length > 1) while (pick.id === cur.id) pick = pool[Math.floor(Math.random() * pool.length)];
+  const sm2 = window.KA_NEXT && KA_NEXT.smart ? KA_NEXT.smart(pool, {exclude: cur && pool.length > 1 ? cur.id : null}) : null;
+  let pick = sm2 ? sm2.g : pool[Math.floor(Math.random() * pool.length)]; if (!sm2 && cur && pool.length > 1) while (pick.id === cur.id) pick = pool[Math.floor(Math.random() * pool.length)];
+  const why = sm2 && sm2.why ? sm2.why : '';
   cur = pick; const seq = shuffle(pool).slice(0, 12).concat([pick]);
   reel.innerHTML = seq.map(g => `<div class="r">${g.i}<span>${esc(g.t)}</span></div>`).join(''); reel.style.transition = 'none'; reel.style.transform = 'translateY(0)';
   document.getElementById('smt').textContent = ''; document.getElementById('smd').textContent = '';
-  const done = () => { document.getElementById('smt').textContent = pick.t; document.getElementById('smd').textContent = pick.d; document.getElementById('smgo').href = pick.u; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 26, y: innerHeight * .4}); };
+  const done = () => { document.getElementById('smt').textContent = pick.t; document.getElementById('smd').textContent = pick.d + (why ? ' ✨ ' + why : ''); document.getElementById('smgo').href = pick.u; window.KA_MOTION && KA_MOTION.burst({kind: 'hearts', n: 26, y: innerHeight * .4}); };
   if (window.KA_MOTION && KA_MOTION.reduced) { reel.style.transform = `translateY(-${(seq.length - 1) * 130}px)`; return done(); }
   requestAnimationFrame(() => requestAnimationFrame(() => { reel.style.transition = 'transform 1.8s cubic-bezier(.12,.7,.15,1)'; reel.style.transform = `translateY(-${(seq.length - 1) * 130}px)`; setTimeout(done, 1850); }));
 }

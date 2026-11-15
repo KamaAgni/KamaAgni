@@ -69,12 +69,12 @@ function render() {
     U.flip(app, 100);
     const dn = document.getElementById('dn');
     if (dn) {
-      dn.onclick = () => { const c = S.cur; S.conn += XP[c.h]; S.total += XP[c.h]; S.hist.push(c.t); if (S.hist.length > 3) S.hist.shift(); S.count++; try { KA_TRACK.log('play', 'Connection Cards', c.n); } catch (e) {}
+      dn.onclick = () => { const c = S.cur; if (!c) return; S.conn += XP[c.h]; S.total += XP[c.h]; S.hist.push(c.t); if (S.hist.length > 3) S.hist.shift(); S.count++; try { KA_TRACK.log('play', 'Connection Cards', c.n); } catch (e) {}
         const cb = checkCombo(); let msg = ''; if (cb) { S.conn += cb.b; S.total += cb.b; S.combos.push(cb.n); S.hist = []; msg = '✨ Combo: ' + cb.n + ' +' + cb.b; window.KA_MOTION && KA_MOTION.burst({kind: 'embers', n: 30}); }
         if (S.conn >= 100) { S.lvl++; S.conn -= 100; msg = (msg ? msg + ' · ' : '') + '🎉 Level ' + S.lvl + ': ' + RANK(S.lvl); window.KA_MOTION && KA_MOTION.burst({kind: 'confetti', n: 40}); }
         nextTurn(msg); };
       document.getElementById('sk').onclick = () => { S.hist = []; nextTurn(''); };
-      document.getElementById('sv').onclick = e => { KX.fav('cards', S.cur.n + ': ' + S.cur.d); e.target.textContent = '♥ Saved'; };
+      document.getElementById('sv').onclick = e => { if (!S.cur) return; KX.fav('cards', S.cur.n + ': ' + S.cur.d); e.target.textContent = '♥ Saved'; };
     }
   }
 }

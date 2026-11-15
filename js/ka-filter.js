@@ -24,9 +24,22 @@
   var LS = window.localStorage;
   var cache = null, cacheRaw = null;
   function read() { var raw = null; try { raw = LS.getItem('ka_filter'); } catch (e) {} if (raw === cacheRaw && cache) return cache; var f = {}; try { f = JSON.parse(raw) || {}; } catch (e) {} f.off = f.off || null; f.pages = f.pages || {}; f.words = f.words || []; if (!f.off) { f.off = {}; TOPICS.forEach(function (t) { if (t.defOff) f.off[t.id] = 1; }); } cacheRaw = raw; cache = f; cache.re = null; build(cache); return cache; }
-  function build(f) { var parts = [], by = []; TOPICS.forEach(function (t) { if (f.off[t.id]) { parts.push(t.re); by.push(t); } }); f.words.forEach(function (w) { w = String(w).trim(); if (w) parts.push('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'); }); try { f.re = parts.length ? new RegExp(parts.join('|'), 'i') : null; } catch (e) { f.re = null; } f.topics = by; }
-  function save(f) { var o = { off: f.off, pages: f.pages, words: f.words, v: 1 }; LS.setItem('ka_filter', JSON.stringify(o)); cacheRaw = null; cache = null; try { window.dispatchEvent(new CustomEvent('ka:filter')); } catch (e) {} }
-  function bad(s) { var f = read(); return !!(f.re && typeof s === 'string' && f.re.test(s)); }
+  function build(f) { var parts = [], by = []; TOPICS.forEach(function (t) { if (f.off[t.id]) { parts.push(t.re); by.push(t); } }); f.words.forEach(function (w) { w = String(w).trim(); if (w) parts.push('\\b' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b'); });
+    /* "Not for me" answers (js/ka-limits.js): auto.me from this phone, auto.you from a linked partner */
+    var au = f.auto || {}; [au.me, au.you].forEach(function (a) { if (!a) return; Object.keys(a.off || {}).forEach(function (id) { if (!f.off[id]) { var t = TOPICS.filter(function (x) { return x.id === id; })[0]; if (t) { parts.push(t.re); if (by.indexOf(t) < 0) by.push(t); } } }); (a.rx || []).forEach(function (r) { try { new RegExp(r); parts.push(r); } catch (e) {} }); }); try { f.re = parts.length ? new RegExp(parts.join('|'), 'i') : null; } catch (e) { f.re = null; } f.topics = by; }
+  function save(f) { var o = { off: f.off, pages: f.pages, words: f.words, v: 1 }; if (f.auto) o.auto = f.auto; LS.setItem('ka_filter', JSON.stringify(o)); cacheRaw = null; cache = null; try { window.dispatchEvent(new CustomEvent('ka:filter')); } catch (e) {} }
+  /* 👎 cards (ka_fb.down): a fingerprint that ignores names and him/her wording, so the hidden card stays hidden
+     whichever way it was worded for you. Set by js/ka-fb.js. */
+  var GW = /\b(him|her|hers|his|he|she|himself|herself|master|mistress|sir|madam|boyfriend|girlfriend|husband|wife|king|queen|dick|cock|penis|pussy|player ?[12]|partner ?[12]?)\b/g;
+  function fp(t) {
+    var c = {}; try { c = JSON.parse(LS.getItem('ka_couple')) || {}; } catch (e) {}
+    var x = String(t || '').toLowerCase().replace(/\{[ab]\}/g, ' ');
+    [c.p1, c.p2].forEach(function (n) { if (n && String(n).length > 1) x = x.split(String(n).toLowerCase()).join(' '); });
+    return x.replace(GW, ' ').replace(/[^a-z]+/g, '').slice(0, 90);
+  }
+  var fbRaw = null, fbSet = null;
+  function downSet() { var raw = null; try { raw = LS.getItem('ka_fb'); } catch (e) {} if (raw !== fbRaw) { fbRaw = raw; var o = {}; try { o = (JSON.parse(raw) || {}).down || {}; } catch (e) {} fbSet = Object.keys(o).length ? o : null; } return fbSet; }
+  function bad(s) { var f = read(); if (typeof s !== 'string') return false; if (f.re && f.re.test(s)) return true; var d = downSet(); return !!(d && s.length > 12 && d[fp(s)]); }
   function leaf(el) { // text used to judge an array element
     if (typeof el === 'string') return el;
     if (Array.isArray(el)) return el.filter(function (x) { return typeof x === 'string'; }).join(' ');
@@ -35,7 +48,7 @@
   }
   var SKIP_KEYS = { cats: 1, levels: 1, p_unused: 1 };
   function deep(x, key, safe) {
-    var f = read(); if (!f.re) return x;
+    var f = read(); if (!f.re && !downSet()) return x;
     if (Array.isArray(x)) {
       if (SKIP_KEYS[key]) return x;
       var out = [], idx = [], i, el, t;
@@ -69,7 +82,7 @@
   var of = window.fetch;
   if (of) window.fetch = function (u, o) {
     var url = typeof u === 'string' ? u : (u && u.url) || '';
-    if (!/\/data\/[^?#]*\.json/.test(url) || /programs\.json|experts_qa\.json/.test(url) || !read().re) return of.apply(this, arguments);
+    if (!/\/data\/[^?#]*\.json/.test(url) || /programs\.json|experts_qa\.json/.test(url) || (!read().re && !downSet())) return of.apply(this, arguments);
     return of.apply(this, arguments).then(function (r) {
       if (!r.ok) return r;
       var id = (url.match(/\/([^\/?#]+)\.json/) || [])[1] || '';
@@ -98,5 +111,5 @@
   ready(function () { sweep(); setTimeout(sweep, 400); setTimeout(sweep, 1500); });
   window.addEventListener('ka:filter', sweep);
 
-  window.KA_FILTER = { TOPICS: TOPICS, get: read, save: save, bad: bad, ok: function (s) { return !bad(s); }, deep: deep, keep: keep, topicOff: topicOff, pageHidden: pageHidden, origIdx: origIdx, sweep: sweep };
+  window.KA_FILTER = { fp: fp, TOPICS: TOPICS, get: read, save: save, bad: bad, ok: function (s) { return !bad(s); }, deep: deep, keep: keep, topicOff: topicOff, pageHidden: pageHidden, origIdx: origIdx, sweep: sweep };
 })();

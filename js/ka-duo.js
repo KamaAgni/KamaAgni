@@ -20,9 +20,13 @@
       S.seq = (S.seq || 0) + 1;
       C().couple.send('fun', { g: o.g, st: S, n: myName() }).catch(function () { toast('Could not reach your partner. Check your connection.'); });
     };
-    D.save = function (S) { LSset(o.key, S); D.publish(S); };
+    /* resume: a game in progress shows as "Continue" on Home */
+    function resume(S) { try { var R = window.KA_RESUME; if (!R) return; var u = 'games/' + location.pathname.split('/').pop();
+      if (S && S.phase && S.phase !== 'end') R.set({ u: u, t: (document.title || '').replace(/^KamaAgni\s*/, ''), s: S.round ? 'Round ' + S.round : (S.turn != null && S.names ? (S.names[S.turn] || '') + '’s turn' : 'In progress') });
+      else R.clear(u); } catch (e) {} }
+    D.save = function (S) { LSset(o.key, S); D.publish(S); resume(S); };
     D.load = function () { var s = LSget(o.key, null); return s && s.phase && s.phase !== 'end' ? s : null; };
-    D.clear = function () { try { localStorage.removeItem(o.key); } catch (e) {} };
+    D.clear = function () { try { localStorage.removeItem(o.key); } catch (e) {} resume(null); };
     D.quit = function (S) {
       if (!S) return; var id = S.gid, two = S.mode === 'two'; D.clear();
       if (two && D.linked() && id) C().couple.send('fun', { g: o.g, q: id, n: myName() }).catch(function () {});

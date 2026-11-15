@@ -16,6 +16,7 @@
   function place() {
     if (!on()) { var o = document.querySelector('.ka-spark'); if (o) o.remove(); return; }
     var h = document.querySelector('main h1, #app h1, h1.kx-title, h1'); if (!h || h.closest('.kg, #kd-guide, .ka-overlay')) return;
+    try { var hr = h.getBoundingClientRect(); if (hr.width < 4 || hr.height < 4) return; } catch (e) {}
     var nx = h.nextElementSibling; if (nx && nx.classList.contains('ka-spark')) return;
     var old = document.querySelector('.ka-spark'); if (old) old.remove();
     var d = document.createElement('div'); d.className = 'ka-spark'; d.innerHTML = '<i>' + ['💋', '🔥', '💞', '✨'][new Date().getDate() % 4] + '</i><span></span>'; d.lastChild.textContent = pickLine();

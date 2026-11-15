@@ -36,6 +36,7 @@ let S = null, timerStop = null, pools = {truth: [], dare: []}, pi = {truth: 0, d
 const D = KA_DUO.init({g: 'tod', key: KEY, get: () => S, onState: (st) => { S = st; render(); }, onQuit: () => { S = null; render(); }, onLink: () => { if (!S) render(); }});
 S = D.load(); if (S && S.mode === 'two' && !D.linked()) { /* linked later */ }
 const N = () => D.names(S);
+const GN = () => { const g = KX.genders(); return S && S.mode === 'two' && D.me === 1 ? [g[1], g[0]] : g; };
 const two = () => !!(S && S.mode === 'two');
 const mine = () => !two() || S.turn === D.me;
 const save = () => D.save(S);
@@ -103,7 +104,7 @@ function render() {
   } else {
     const c = S.cur, secs = S.timer ? U.parseSecs(c.t) : 0;
     const ty = c.ty === 'truth' ? '💬 Truth' : '🔥 Dare';
-    body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who()}<div style="margin:14px 0 4px">${U.card('<span>' + (c.ty === 'truth' ? '💬' : '🔥') + '</span>', `<span class="kx-chip h${c.h}">${ty} · ${esc(c.cl)}</span><div class="kx-big">${esc(c.t)}</div>${secs && act ? '<div id="tm"></div>' : ''}`, 'tone-' + c.h)}</div>
+    body = `<div class="kx-card" data-nofx="1" style="text-align:center">${who()}<div style="margin:14px 0 4px">${U.card('<span>' + (c.ty === 'truth' ? '💬' : '🔥') + '</span>', `<span class="kx-chip h${c.h}">${ty} · ${esc(c.cl)}</span><div class="kx-big">${esc(KX.gfix(c.t, GN()[1 - S.turn]))}</div>${secs && act ? '<div id="tm"></div>' : ''}`, 'tone-' + c.h)}</div>
       ${act ? `<div class="kd-pass"><button class="kx-btn gold" id="dn">✓ Done</button><button class="kx-btn ghost" id="ps" ${S.passes[S.turn] <= 0 && !S.fo ? 'disabled' : ''}>⏭ Pass</button><button class="kx-btn ghost" id="sv">♡ Save</button></div>` : `<p class="kx-muted" style="margin-top:12px">${esc(n[S.turn])} is on it. Cheer them on.</p>`}</div>`;
   }
   app.innerHTML = '<h1 class="kx-title"><span>Truth or Dare</span></h1>' + bar() + body;

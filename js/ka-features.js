@@ -164,7 +164,9 @@ function injectCSS() {
 .ka-toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(8px);background:#12152a;border:1px solid rgba(255,255,255,0.14);color:#dce9ff;padding:10px 22px;border-radius:999px;font-size:13px;font-weight:600;z-index:10000;opacity:0;transition:opacity .24s,transform .24s;white-space:nowrap;pointer-events:none;box-shadow:0 8px 28px rgba(0,0,0,0.5)}
 .ka-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 #ka-timer-pill{position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9500;display:flex;align-items:center;gap:10px;background:#12152a;border:1px solid rgba(232,99,122,.5);border-radius:999px;padding:8px 10px 8px 16px;box-shadow:0 8px 30px rgba(0,0,0,.55);font-weight:700;font-size:15px;color:#dce9ff;font-variant-numeric:tabular-nums}
-#ka-timer-pill button{background:rgba(255,255,255,.08);border:none;color:#dce9ff;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;min-height:30px}
+#ka-timer-pill button{background:rgba(255,255,255,.08);border:none;color:#dce9ff;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:700;cursor:pointer;min-height:36px;min-width:36px}
+#ka-tmr-sp{height:52px}
+#ka-tp-t{max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #ka-timer-pill.done{background:#2a1020;animation:kaGlow .6s ease infinite}
 .ka-presets{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
 #ka-panic{position:fixed;inset:0;z-index:9900;background:#000;color:#222;display:flex;align-items:center;justify-content:center;font-family:system-ui,sans-serif;font-size:64px;font-weight:200;user-select:none;cursor:default}
@@ -273,7 +275,9 @@ async function checkPinOnLoad() {
 
 /* ─── Couple profile ─────────────────────────────────── */
 function openCoupleProfile() {
-  const p = LS.get('ka_couple', {});
+  const p = LS.get('ka_couple', {}) || {};
+  const gopts = (k, v) => [['m', '♂ Man'], ['f', '♀ Woman'], ['x', '⚧ Other']].map(([g, l]) => `<label class="kcp-o"><input type="radio" name="${k}" value="${g}"${v === g ? ' checked' : ''}> ${l}</label>`).join('');
+  if (!document.getElementById('kcp-css')) { const cs = document.createElement('style'); cs.id = 'kcp-css'; cs.textContent = '.kcp-g{display:flex;gap:6px;margin:6px 0 4px}.kcp-o{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:1px solid rgba(255,255,255,.18);border-radius:12px;font-size:14px;cursor:pointer;color:#dce9ff}.kcp-o:has(input:checked){background:rgba(232,99,122,.18);border-color:rgba(232,99,122,.6)}.kcp-o input{accent-color:#e8637a}'; document.head.appendChild(cs); }
   const ov = document.createElement('div');
   ov.className = 'ka-overlay';
   ov.innerHTML = `
@@ -281,8 +285,13 @@ function openCoupleProfile() {
       <button class="ka-x" id="kcp-x">×</button>
       <h2>Your Couple Profile</h2>
       <p class="ka-sub">Personalise your KamaAgni experience</p>
-      <input class="ka-input" id="kcp-p1" placeholder="Partner 1 name" value="${esc(p.p1)}">
-      <input class="ka-input" id="kcp-p2" placeholder="Partner 2 name" value="${esc(p.p2)}">
+      <label style="font-size:12px;color:#9aa3bd;display:block;margin:4px 0 4px;text-align:left">Partner 1</label>
+      <input class="ka-input" id="kcp-p1" placeholder="Partner 1 name" value="${esc(p.p1)}" aria-label="Partner 1 name">
+      <div class="kcp-g" role="radiogroup" aria-label="Partner 1 is">${gopts('g1', p.g1 || 'm')}</div>
+      <label style="font-size:12px;color:#9aa3bd;display:block;margin:10px 0 4px;text-align:left">Partner 2</label>
+      <input class="ka-input" id="kcp-p2" placeholder="Partner 2 name" value="${esc(p.p2)}" aria-label="Partner 2 name">
+      <div class="kcp-g" role="radiogroup" aria-label="Partner 2 is">${gopts('g2', p.g2 || 'f')}</div>
+      <p style="font-size:12px;color:#9aa3bd;margin:6px 0 10px;text-align:left">Used to give each of you the right roles, costumes and wording in games.</p>
       <label style="font-size:11px;color:#7a8aab;display:block;margin:-2px 0 6px;text-align:left">Anniversary date</label>
       <input class="ka-input" id="kcp-ann" type="date" value="${esc(p.ann)}">
       <button class="ka-btn ka-btn-rose" id="kcp-save">Save Profile</button>
@@ -294,11 +303,15 @@ function openCoupleProfile() {
   document.getElementById('kcp-cancel').onclick = close;
   ov.addEventListener('click', e => { if (e.target === ov) close(); });
   document.getElementById('kcp-save').onclick = () => {
-    LS.set('ka_couple', {
+    const gv = k => (ov.querySelector('input[name="' + k + '"]:checked') || {}).value;
+    LS.set('ka_couple', Object.assign({}, p, {
       p1:  document.getElementById('kcp-p1').value.trim(),
       p2:  document.getElementById('kcp-p2').value.trim(),
+      g1:  gv('g1') || 'm',
+      g2:  gv('g2') || 'f',
       ann: document.getElementById('kcp-ann').value
-    });
+    }));
+    try { window.dispatchEvent(new Event('ka:couple')); } catch (e) {}
     close(); renderCoupleBanner(); toast('Profile saved.');
   };
 }
@@ -413,7 +426,12 @@ const ALL_GAMES = [
   GAME('kamaagni-task-deck.html'),
 ];
 function surpriseMe() {
-  (window.KA_go || (u => { window.location.href = u; }))(ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)]);
+  const go = window.KA_go || (u => { window.location.href = u; });
+  /* smarter pick (js/ka-next.js) when the catalogue is loaded; random otherwise */
+  const C = window.KA_CATALOG, base = /\/games\//.test(location.pathname) ? '../' : '';
+  const sm = C && window.KA_NEXT && KA_NEXT.smart ? KA_NEXT.smart(C, {}) : null;
+  if (sm) { try { sessionStorage.setItem('ka_surprise_why', sm.why || ''); } catch (e) {} return go(base + sm.g.u); }
+  go(ALL_GAMES[Math.floor(Math.random() * ALL_GAMES.length)]);
 }
 
 function injectSurpriseBtn() {
@@ -421,7 +439,7 @@ function injectSurpriseBtn() {
   if (!games || document.getElementById('ka-surprise-wrap')) return;
   const wrap = document.createElement('div');
   wrap.id = 'ka-surprise-wrap';
-  wrap.innerHTML = `<button id="ka-surprise-btn">🎲 Surprise Us Tonight</button>`;
+  wrap.innerHTML = `<button id="ka-surprise-btn" aria-label="Surprise us tonight">🎲 Surprise Us Tonight</button>`;
   games.parentNode.insertBefore(wrap, games);
   document.getElementById('ka-surprise-btn').addEventListener('click', surpriseMe);
 }
@@ -572,13 +590,13 @@ function beep() {
   try { navigator.vibrate && navigator.vibrate([250, 120, 250]); } catch {}
 }
 const fmt = n => String(Math.floor(n / 60)).padStart(2, '0') + ':' + String(n % 60).padStart(2, '0');
-function clearTimer() { if (tmr) { clearInterval(tmr.iv); tmr = null; } const p = document.getElementById('ka-timer-pill'); if (p) p.remove(); }
+function clearTimer() { if (tmr) { clearInterval(tmr.iv); tmr = null; } const p = document.getElementById('ka-timer-pill'); if (p) p.remove(); document.documentElement.classList.remove('ka-tmr'); const sp = document.getElementById('ka-tmr-sp'); if (sp) sp.remove(); }
 function startTimer(sec, label) {
   clearTimer();
   tmr = { end: Date.now() + sec * 1000, label: label || '', sec: sec };
   const pill = document.createElement('div'); pill.id = 'ka-timer-pill'; pill.setAttribute('role', 'timer');
-  pill.innerHTML = '<span id="ka-tp-t"></span><button type="button" id="ka-tp-re" title="Start over">↺</button><button type="button" id="ka-tp-add">+1 min</button><button type="button" id="ka-tp-x">✕</button>';
-  document.body.appendChild(pill);
+  pill.innerHTML = '<span id="ka-tp-t"></span><button type="button" id="ka-tp-re" title="Start over" aria-label="Start over">↺</button><button type="button" id="ka-tp-add" aria-label="Add one minute">+1 min</button><button type="button" id="ka-tp-x" aria-label="Stop timer">✕</button>';
+  document.body.appendChild(pill); document.documentElement.classList.add('ka-tmr'); if (!document.getElementById('ka-tmr-sp')) { const sp = document.createElement('div'); sp.id = 'ka-tmr-sp'; sp.setAttribute('aria-hidden', 'true'); document.body.insertBefore(sp, document.body.firstChild); }
   document.getElementById('ka-tp-x').onclick = clearTimer;
   document.getElementById('ka-tp-re').onclick = () => { const s = tmr ? tmr.sec : sec, l = tmr ? tmr.label : label; startTimer(s, l); };
   document.getElementById('ka-tp-add').onclick = () => { if (tmr) tmr.end += 60000; };
@@ -591,6 +609,7 @@ function startTimer(sec, label) {
   tmr.iv = setInterval(tick, 250); tick();
 }
 function openTimer() {
+  if (document.getElementById('ktm-c')) return;
   const ov = document.createElement('div'); ov.className = 'ka-overlay';
   ov.innerHTML = `<div class="ka-modal"><button class="ka-x" id="ktm-x" aria-label="Close">×</button><h2>Timer</h2><p class="ka-sub">Runs in the background while you play.</p>
     <div class="ka-presets">${[1, 2, 3, 5, 10, 15].map(m => `<button class="ka-btn ka-btn-ghost" style="margin:0" data-m="${m}">${m} min</button>`).join('')}</div>
@@ -598,9 +617,11 @@ function openTimer() {
     <button class="ka-btn ka-btn-rose" id="ktm-go">Start</button></div>`;
   document.body.appendChild(ov);
   const close = () => ov.remove();
-  document.getElementById('ktm-x').onclick = close;
+  ov.querySelector('#ktm-x').onclick = close;
   ov.addEventListener('click', e => { if (e.target === ov) close(); const b = e.target.closest('[data-m]'); if (b) { startTimer(+b.dataset.m * 60); close(); } });
-  document.getElementById('ktm-go').onclick = () => { const v = +document.getElementById('ktm-c').value; if (v > 0) { startTimer(v * 60); close(); } };
+  const inp = ov.querySelector('#ktm-c'), go = () => { const v = +inp.value; if (v > 0) { startTimer(Math.min(180, v) * 60); close(); } else { inp.focus(); inp.style.borderColor = '#e8637a'; } };
+  ov.querySelector('#ktm-go').onclick = go; inp.addEventListener('keydown', e => { if (e.key === 'Enter') go(); });
+  try { inp.focus(); } catch (e) {}
 }
 
 /* ─── Quick hide (panic screen) ──────────────────────── */
@@ -746,6 +767,7 @@ else init();
 
 /* ─── Public API ─────────────────────────────────────── */
 window.KA = {
+  profile: openCoupleProfile,
   saveFav(type, text) {
     const k = { cards: 'ka_fav_cards', pos: 'ka_fav_pos', dice: 'dice_favorites' }[type] || 'dice_favorites';
     const list = LS.get(k, []);

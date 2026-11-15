@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Talk Kit</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.tk-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.tk-tabs button{flex:none;min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.tk-tabs button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.tk-topic{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;font:inherit;color:inherit;cursor:pointer}
+.tk-q{margin:8px 0;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);line-height:1.5}
+.tk-s{font-family:'Cormorant Garamond',serif;font-size:19px;font-style:italic;margin:6px 0;line-height:1.35}
+.tk-who{display:flex;gap:8px;margin:6px 0 12px}
+.tk-who button{flex:1;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-weight:700;cursor:pointer}
+.tk-who button.on{color:#fff;border-color:rgba(232,99,122,.6);background:rgba(232,99,122,.14)}
+.tk-opts{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 14px}
+.tk-opts button{min-height:40px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+.tk-opts button.y{background:rgba(80,200,120,.16);border-color:rgba(80,200,120,.55)}
+.tk-opts button.n{background:rgba(232,99,122,.14);border-color:rgba(232,99,122,.55);text-decoration:line-through;color:var(--muted)}
+.tk-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tk-sum div{border:1px solid var(--border2);border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.5}
+.tk-scale{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px}
+.tk-scale button{min-width:44px;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:transparent;color:inherit;font:inherit;font-weight:700;cursor:pointer}
+.tk-scale button.on{background:var(--rose);border-color:var(--rose);color:#fff}
+.tk-ta{width:100%;min-height:60px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:inherit;font:inherit;padding:10px;box-sizing:border-box}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const [A, B] = KX.names();
+  const P = [A, B];
+
+  /* Conversation guides: ideas drawn from Stella Harris (Tongue Tied), Laura Berman (Loving Sex) and Emily Nagoski (Come As You Are); wording is KamaAgni's own. */
+  const TALKS = [
+    {id: 'new', i: '🌱', t: 'Trying something new', when: 'A relaxed moment with clothes on, not in the middle of sex.',
+     q: ['What excites you about this idea?', 'What makes you nervous about it?', 'What would help it feel safe: a time limit, a safe word, a practice run?', 'How will we know if one of us wants to stop?', 'What would make this a success, even if we only try a little?'],
+     s: ['“I keep thinking about trying… Would you be curious about it?”', '“We could try a small version first and see how it feels.”'],
+     tip: 'A “maybe” is a real answer. Agree to revisit it, not to push it.'},
+    {id: 'no', i: '🛑', t: 'Saying and hearing “no”', when: 'Before you need it, so it’s easy in the moment.',
+     q: ['How do you like to say no: words, a signal, or both?', 'What helps you hear a no without feeling rejected?', 'Is there a “not now, but ask me later” version?', 'What would you like your partner to do straight after a no?'],
+     s: ['“Not that, but I’d love this instead…”', '“Thank you for telling me. I’m glad you did.”'],
+     tip: 'A no to an activity isn’t a no to the person. Thank them for being honest; it makes every yes more trustworthy.'},
+    {id: 'more', i: '🎚️', t: 'Asking for more (or less)', when: 'During sex, keep it short. Afterwards, go into detail.',
+     q: ['Do you prefer “more / less” words, a hand on top of mine, or sounds?', 'What’s one thing you’d like a little more of?', 'What’s one thing you’d like a little less of?', 'Which words feel sexy to you, and which feel like a correction?'],
+     s: ['“Yes, just like that… a little slower.”', '“Put your hand on mine and show me.”'],
+     tip: 'Start with what’s working, then add the request. It lands as an invitation, not criticism.'},
+    {id: 'pace', i: '⏳', t: 'Pace and speed', when: 'Over a coffee, or after a night that felt rushed or too slow.',
+     q: ['How long do you like the warm-up to last?', 'What helps your body catch up with your mind?', 'When do you most like things to slow down?', 'What’s a sign that you’re ready for more?'],
+     s: ['“Can we take the long way tonight?”', '“I love it when you make me wait.”'],
+     tip: 'Many people only start to really want sex once things have begun. A slow start gives desire time to arrive.'},
+    {id: 'invite', i: '💌', t: 'How we start sex', when: 'Any calm evening. Fill in “How I like to be asked” together after.',
+     q: ['What’s the best way someone has invited you to sex?', 'What kind of invitation makes it easy to say yes, or to say “not tonight”?', 'Do you like planned nights, surprises, or both?', 'What could “not tonight, but…” look like for us?'],
+     s: ['“I’ve been thinking about you all day.”', '“Not tonight, but I’d love a long cuddle.”'],
+     tip: 'When one partner always asks and the other always answers, both get tired. Take turns initiating.'},
+    {id: 'debrief', i: '🌙', t: 'After-play debrief', when: 'Right after with a cuddle, then a short check-in the next day.',
+     q: ['What was your favourite moment?', 'Was there anything that didn’t feel good?', 'How are you feeling now, in your body and your mood?', 'What do you need from me tonight or tomorrow?', 'What would you like to repeat?'],
+     s: ['“My favourite part was when you…”', '“Next time, could we…?”'],
+     tip: 'Some feelings show up a day later. A quick message tomorrow is part of aftercare.'},
+    {id: 'thanks', i: '💐', t: 'Compliments and gratitude', when: 'Any time. Especially after something went well.',
+     q: ['What do you love about how your partner touches you?', 'What did they do recently that made you feel wanted?', 'Which part of their body do you never tell them you love?'],
+     s: ['“I love the way you…”', '“Thank you for being so open with me.”'],
+     tip: 'Specific beats general: “the way you held my face” stays with someone longer than “that was great”.'},
+    {id: 'history', i: '📖', t: 'Our sexual stories', when: 'Only if you both want to. Go slowly; nobody owes details.',
+     q: ['What did you learn about sex growing up, and what have you unlearned since?', 'What’s a time you felt really desired?', 'Is there anything from the past that helps me understand what you need now?', 'What would you like to leave in the past?'],
+     s: ['“You don’t have to answer, but I’d love to know…”', '“Thank you for trusting me with that.”'],
+     tip: 'Listen to understand, not to compare. Curiosity, not judgement.'},
+    {id: 'differ', i: '⚖️', t: 'When we want different things', when: 'When one of you wants more (or less, or something else), and it keeps coming up.',
+     q: ['What does sex give you, beyond the physical: closeness, relief, feeling wanted?', 'What else could meet some of that need on nights we don’t have sex?', 'What would a fair middle ground look like for a normal week?', 'When we disagree in the moment, what’s our tiebreaker: try it for five minutes, or default to no?'],
+     s: ['“I don’t want you to feel pushed, and I don’t want to feel shut out. Can we find our middle?”', '“Let’s try it for five minutes and check in. Stopping is fine.”'],
+     tip: 'Different desire levels are the most common thing couples face. Nobody is the problem; the gap is something you solve together.'},
+    {id: 'future', i: '🔭', t: 'Our future perfect', when: 'A relaxed evening, maybe with a drink. Dream big first, plan second.',
+     q: ['Imagine our sex life a year from now, exactly how you’d love it. What’s happening?', 'How often, where, and how does it feel?', 'What’s one thing in that picture we could start this month?', 'What would get in the way, and how could we handle it?'],
+     s: ['“In my perfect version of us, we…”', '“The first small step could be…”'],
+     tip: 'Take turns describing, without negotiating yet. Then look for overlap, and pick one step together.'},
+    {id: 'plan', i: '🗓️', t: 'Planning sex without killing the mood', when: 'Sunday evening, looking at the week together.',
+     q: ['Which nights this week could be “ours”?', 'What would make a planned night feel like a date, not a chore?', 'How should we tease each other in the hours before?', 'What’s our easy, no-guilt plan B if one of us is too tired?'],
+     s: ['“Thursday is ours. I’ll be thinking about it all day.”', '“Plan B: shower together and see where it goes.”'],
+     tip: 'Planned doesn’t mean pressured. Anticipation is part of desire: a text at lunch can do half the work.'},
+    {id: 'help', i: '🧭', t: 'When to get outside help', when: 'If a problem keeps coming back, causes pain, or makes either of you dread intimacy.',
+     q: ['Is there something about sex that worries either of us and hasn’t improved in months?', 'Is anything physically painful or difficult?', 'Would we feel better with a sex therapist, a doctor or a couples counsellor helping?', 'What would make it easier to book that first appointment?'],
+     s: ['“I love us, and I think a little expert help could make things even better.”', '“Would you come with me? We can choose the person together.”'],
+     tip: 'Pain during sex, ongoing loss of desire or arousal, and conflicts that keep repeating are all common and very treatable. Getting help early is a strength.'}
+  ];
+  const WORDS = [
+    {k: 'chest', l: 'Chest', o: ['breasts', 'boobs', 'tits', 'chest', 'nipples']},
+    {k: 'vulva', l: 'Her genitals', o: ['pussy', 'vulva', 'clit', 'down there', 'cunt']},
+    {k: 'penis', l: 'His genitals', o: ['cock', 'dick', 'penis', 'shaft', 'balls']},
+    {k: 'bum', l: 'Behind', o: ['bum', 'butt', 'ass', 'cheeks']},
+    {k: 'sex', l: 'Sex', o: ['make love', 'have sex', 'fuck', 'be inside you', 'ride']},
+    {k: 'oral', l: 'Oral', o: ['go down on', 'lick', 'suck', 'taste', 'eat out']},
+    {k: 'cum', l: 'Orgasm', o: ['come', 'cum', 'finish', 'orgasm', 'let go']},
+    {k: 'pet', l: 'Pet names', o: ['baby', 'darling', 'good girl', 'good boy', 'sir', 'my love', 'slut']}
+  ];
+  const ASK = ['A text earlier in the day', 'A long, slow kiss', 'Say it out loud, plainly', 'A touch while we’re busy', 'Put it in our plans', 'A playful dare', 'Start with a massage', 'Undress me without asking', 'A look across the room', 'Ask “Do you want to…?”', 'Send a song or a photo', 'Run a bath for us'];
+  const ASKNOT = ['Waking me up for it', 'Asking when I’m stressed', 'Asking in front of others', 'Repeating after a no', 'Only when you want it', 'Starting while I’m busy with work'];
+
+  const st = LS.get('ka_talk', {words: [{}, {}], ask: [{}, {}], done: {}, cal: []});
+  st.words = st.words || [{}, {}]; st.ask = st.ask || [{}, {}]; st.done = st.done || {}; st.cal = st.cal || []; st.love = st.love || [{}, {}];
+  const save = () => LS.set('ka_talk', st);
+  let tab = 'talks', who = 0;
+
+  function frame(inner) {
+    app.innerHTML = top('Talk Kit', 'Easy ways to say what you want, hear each other and keep getting better together.') +
+      `<div class="tk-tabs" role="tablist">${[['talks', '💬 Conversations'], ['words', '🗣️ Our words'], ['ask', '💌 How I like to be asked'], ['love', '💐 Notice & love'], ['cal', '🎚️ Touch calibration']].map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" data-t="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>` + inner;
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+    window.scrollTo(0, 0);
+  }
+  const whoBar = () => `<div class="tk-who" role="group" aria-label="Whose answers">${P.map((n, i) => `<button data-w="${i}" class="${who === i ? 'on' : ''}">${esc(n)}</button>`).join('')}</div>`;
+  const bindWho = () => app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { who = +b.dataset.w; render(); });
+
+  function talks() {
+    frame(`<p class="kx-muted" style="margin:0 0 12px">Couples who talk about sex tend to enjoy it more. Pick one topic, put the phones away, take turns answering.</p>
+      <div class="kx-list">${TALKS.map(o => `<button class="kx-item tk-topic" data-c="${o.id}"><span style="font-size:26px">${o.i}</span><span class="kx-it"><b>${esc(o.t)}</b><br><span class="kx-muted">${st.done[o.id] ? '✓ Talked ' + new Date(st.done[o.id]).toLocaleDateString() : esc(o.when)}</span></span><span>›</span></button>`).join('')}</div>`);
+    app.querySelectorAll('[data-c]').forEach(b => b.onclick = () => talk(TALKS.find(o => o.id === b.dataset.c)));
+  }
+  function talk(o) {
+    frame(`<div class="kx-card"><div style="font-size:32px">${o.i}</div><h2 style="margin:4px 0 2px">${esc(o.t)}</h2><p class="kx-muted">🕰️ ${esc(o.when)}</p>
+      <div class="kx-turn" style="margin-top:12px">Take turns answering</div>${o.q.map((q, i) => `<div class="tk-q"><b>${i % 2 ? esc(B) : esc(A)}:</b> ${esc(q)}</div>`).join('')}
+      <div class="kx-turn" style="margin-top:12px">Words you can borrow</div>${o.s.map(s => `<div class="tk-s">${esc(s)}</div>`).join('')}
+      <div class="kx-turn" style="margin-top:12px">Listening tip</div><p style="margin:6px 0">${esc(o.tip)}</p></div>
+      <div class="kx-row" style="margin-top:14px;justify-content:center"><button class="kx-btn" id="dn">✓ We talked about it</button><button class="kx-btn ghost" id="bk">All topics</button></div>`);
+    document.getElementById('dn').onclick = () => { st.done[o.id] = Date.now(); save(); try { window.KA_TRACK && KA_TRACK.award('talk', 15); } catch (e) {} KX.toast('Lovely. That builds trust 💞'); talks(); };
+    document.getElementById('bk').onclick = talks;
+  }
+
+  function words() {
+    const W = st.words[who] = st.words[who] || {};
+    frame(`<p class="kx-muted" style="margin:0 0 6px">Words can turn someone on or off instantly. Each of you taps once for words you love (green) and twice for words you don’t want to hear (crossed out).</p>${whoBar()}
+      ${WORDS.map(g => `<div class="kx-turn">${g.l}</div><div class="tk-opts">${g.o.map(w => { const v = (W[g.k] || {})[w]; return `<button data-g="${g.k}" data-o="${esc(w)}" class="${v === 1 ? 'y' : v === -1 ? 'n' : ''}" aria-pressed="${v === 1}">${esc(w)}</button>`; }).join('')}</div>`).join('')}
+      <div class="kx-card" style="margin-top:8px"><div class="kx-turn">Side by side</div><div class="tk-sum">${P.map((n, i) => { const M = st.words[i] || {}; const yes = [], no = []; Object.values(M).forEach(g => Object.entries(g).forEach(([w, v]) => (v === 1 ? yes : v === -1 ? no : []).push(w))); return `<div><b>${esc(n)}</b><br>💚 ${yes.length ? esc(yes.join(', ')) : '<span class="kx-muted">nothing picked yet</span>'}<br>🚫 ${no.length ? esc(no.join(', ')) : '<span class="kx-muted">none</span>'}</div>`; }).join('')}</div></div>`);
+    bindWho();
+    app.querySelectorAll('[data-g]').forEach(b => b.onclick = () => { const g = W[b.dataset.g] = W[b.dataset.g] || {}; const v = g[b.dataset.o] || 0; g[b.dataset.o] = v === 0 ? 1 : v === 1 ? -1 : 0; save(); render(); });
+  }
+
+  function ask() {
+    const M = st.ask[who] = st.ask[who] || {};
+    const row = (L, key) => `<div class="tk-opts">${L.map(w => `<button data-a="${key}" data-o="${esc(w)}" class="${(M[key] || []).includes(w) ? (key === 'no' ? 'n' : 'y') : ''}" aria-pressed="${(M[key] || []).includes(w)}">${esc(w)}</button>`).join('')}</div>`;
+    frame(`<p class="kx-muted" style="margin:0 0 6px">The same invitation can feel exciting to one person and pressuring to another. Pick what works for you, then read your partner’s.</p>${whoBar()}
+      <div class="kx-turn">💚 Invite me like this</div>${row(ASK, 'yes')}
+      <div class="kx-turn">🚫 Please avoid</div>${row(ASKNOT, 'no')}
+      <label class="kx-turn" for="nt" style="display:block">My easy “not tonight, but…”</label><textarea id="nt" class="tk-ta" placeholder="e.g. Not tonight, but hold me while we fall asleep">${esc(M.alt || '')}</textarea>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">Side by side</div><div class="tk-sum">${P.map((n, i) => { const x = st.ask[i] || {}; return `<div><b>${esc(n)}</b><br>💚 ${esc((x.yes || []).join(', ') || '…')}<br>🚫 ${esc((x.no || []).join(', ') || '…')}${x.alt ? '<br>🌙 ' + esc(x.alt) : ''}</div>`; }).join('')}</div></div>`);
+    bindWho();
+    app.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { const L = M[b.dataset.a] = M[b.dataset.a] || []; const i = L.indexOf(b.dataset.o); if (i >= 0) L.splice(i, 1); else L.push(b.dataset.o); save(); render(); });
+    document.getElementById('nt').onchange = e => { M.alt = e.target.value.trim(); save(); };
+  }
+
+  /* Notice & love: specific appreciation across many sides of a person (idea adapted from an appreciation exercise in Beyond Satisfied). */
+  const LOVE = [['body', 'Your body'], ['touch', 'The way you touch me'], ['mind', 'Your mind and ideas'], ['work', 'How you work or create'], ['energy', 'Your energy and humour'], ['values', 'What you stand for'], ['care', 'How you care for people'], ['dreams', 'Your dreams'], ['desire', 'Your desire and fantasies']];
+  function love() {
+    const M = st.love[who] = st.love[who] || {}, to = P[1 - who];
+    frame(`<p class="kx-muted" style="margin:0 0 6px">Being truly seen is one of the strongest turn-ons there is. Write one honest, specific compliment for ${esc(to)} in as many areas as you can. Then read them out loud to each other.</p>${whoBar()}
+      ${LOVE.map(([k, l]) => `<label class="kx-turn" for="lv-${k}" style="display:block;margin-top:10px">${l}</label><textarea id="lv-${k}" data-l="${k}" class="tk-ta" placeholder="I’ve noticed… and I love it.">${esc(M[k] || '')}</textarea>`).join('')}
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">Read to each other</div><div class="tk-sum">${P.map((n, i) => { const x = st.love[i] || {}, L = LOVE.filter(([k]) => x[k]); return `<div><b>From ${esc(n)} to ${esc(P[1 - i])}</b>${L.length ? L.map(([k, l]) => `<br>💐 <i>${esc(l)}:</i> ${esc(x[k])}`).join('') : '<br><span class="kx-muted">Nothing written yet</span>'}</div>`; }).join('')}</div></div>`);
+    bindWho();
+    app.querySelectorAll('[data-l]').forEach(t => t.onchange = () => { M[t.dataset.l] = t.value.trim(); save(); });
+  }
+
+  /* Touch calibration: inspired by the "feel, then calibrate" learning loop in Kenneth Play's Beyond Satisfied. */
+  let cal = null;
+  const AREAS = ['Neck', 'Back', 'Inner thighs', 'Chest', 'Hands', 'Feet', 'Lower back', 'Ears', 'Anywhere I guide you'];
+  function calib() {
+    if (!cal) cal = {area: AREAS[0], p: 5, s: 5, r: 0, giver: 0};
+    const g = P[cal.giver], rc = P[1 - cal.giver];
+    const scale = (key, lo, hi) => `<div class="tk-scale" role="group" aria-label="${key === 'p' ? 'Pressure' : 'Speed'}">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => `<button data-k="${key}" data-v="${n}" class="${cal[key] === n ? 'on' : ''}" aria-label="${key === 'p' ? 'Pressure' : 'Speed'} ${n}">${n}</button>`).join('')}</div><div class="kx-muted" style="display:flex;justify-content:space-between;font-size:12px;margin-top:-6px">${lo}<span>${hi}</span></div>`;
+    frame(`<p class="kx-muted" style="margin:0 0 10px">A 10-minute game for learning each other’s touch. The giver touches, the receiver answers only with numbers. No guessing, no hurt feelings, just data you both enjoy collecting.</p>
+      <div class="kx-card"><div class="kx-turn">Who gives?</div><div class="tk-who">${P.map((n, i) => `<button data-gv="${i}" class="${cal.giver === i ? 'on' : ''}">${esc(n)}</button>`).join('')}</div>
+        <div class="kx-turn">Where</div><div class="tk-opts">${AREAS.map(a => `<button data-ar="${esc(a)}" class="${cal.area === a ? 'y' : ''}">${esc(a)}</button>`).join('')}</div>
+        <p style="margin:4px 0 10px"><b>${esc(g)}</b> touches the ${esc(cal.area.toLowerCase())} for 30 seconds. <b>${esc(rc)}</b> calls out what they want next:</p>
+        <div class="kx-turn">Pressure</div>${scale('p', 'feather', 'firm')}
+        <div class="kx-turn" style="margin-top:10px">Speed</div>${scale('s', 'very slow', 'fast')}
+        <div class="kx-row" style="margin-top:14px"><button class="kx-btn gold" id="rd">⏱ 30 seconds</button><button class="kx-btn" id="sv">♥ That’s the one, save it</button></div></div>
+      <div class="kx-card" style="margin-top:12px"><div class="kx-turn">💋 Follow my lead</div><p style="margin:6px 0;line-height:1.6">Most people kiss the way they like to be kissed. For two minutes, one of you leads every kiss: pace, pressure, tongue or no tongue. The other only mirrors. Then swap, and tell each other one thing you learned.</p><button class="kx-btn ghost" id="kl">⏱ 2 minutes</button></div>
+      ${st.cal.length ? `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">Your saved favourites</div>${st.cal.slice(0, 12).map(c => `<div class="tk-q">${esc(c.who)} loves: <b>${esc(c.area)}</b>, pressure ${c.p}/10, speed ${c.s}/10</div>`).join('')}</div>` : ''}`);
+    app.querySelectorAll('[data-gv]').forEach(b => b.onclick = () => { cal.giver = +b.dataset.gv; calib(); });
+    app.querySelectorAll('[data-ar]').forEach(b => b.onclick = () => { cal.area = b.dataset.ar; calib(); });
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { cal[b.dataset.k] = +b.dataset.v; calib(); });
+    document.getElementById('rd').onclick = () => window.KA && KA.timer(30, 'Touch: ' + cal.area);
+    document.getElementById('kl').onclick = () => window.KA && KA.timer(120, 'Follow my lead');
+    document.getElementById('sv').onclick = () => { st.cal.unshift({who: rc, area: cal.area, p: cal.p, s: cal.s, d: Date.now()}); st.cal = st.cal.slice(0, 40); save(); KX.toast('Saved 💞'); calib(); };
+  }
+
+  function render() { ({talks, words, ask, love, cal: calib})[tab](); }
+  const h = (location.hash || '').slice(1); if (['words', 'ask', 'love', 'cal'].includes(h)) tab = h;
+  render();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

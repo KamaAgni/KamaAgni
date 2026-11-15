@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Monthly Check-in</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.ci-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:4px 0 14px}
+.ci-tabs button,.ci-who button,.ci-m button{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.ci-tabs button.on,.ci-who button.on,.ci-m button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.ci-who{display:flex;gap:8px;margin:0 0 12px}.ci-who button{flex:1;border-radius:12px}
+.ci-q{padding:12px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.ci-q b{display:block;margin-bottom:8px}
+.ci-s{display:flex;gap:6px}
+.ci-s button{flex:1;min-height:48px;border-radius:12px;border:1px solid var(--border2);background:transparent;font-size:22px;cursor:pointer}
+.ci-s button.on{background:rgba(232,99,122,.2);border-color:rgba(232,99,122,.7)}
+.ci-ta{width:100%;min-height:60px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,.04);color:inherit;font:inherit;padding:10px;box-sizing:border-box;margin-top:6px}
+.ci-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:14px}
+.ci-row span.v{font-weight:800;min-width:56px;text-align:right}
+.ci-up{color:#9fe3c2}.ci-dn{color:#f4a0ae}
+.ci-m{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 10px}.ci-m button{min-height:38px;padding:5px 12px;font-size:13px}
+.ci-leg{display:flex;gap:14px;font-size:13px;color:var(--muted);margin-top:4px}.ci-leg i{display:inline-block;width:14px;height:3px;border-radius:2px;vertical-align:middle;margin-right:5px}
+svg.ci-ch text{fill:var(--muted,#9aa3bd);font-size:11px;font-family:'DM Sans',sans-serif}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const P = KX.names();
+  const Q = [
+    ['close', 'How close have we felt this month?', 'kamaagni-rituals.html', 'Connection Rituals'],
+    ['desire', 'How much have I wanted us?', 'kamaagni-brakes.html', 'Brakes & Accelerators'],
+    ['sex', 'How happy am I with our sex life?', 'kamaagni-tonight.html', 'Plan Tonight'],
+    ['talk', 'How easy is it to talk about sex?', 'kamaagni-talk.html', 'Talk Kit'],
+    ['wanted', 'How wanted and appreciated do I feel?', 'kamaagni-talk.html#love', 'Notice & love'],
+    ['fun', 'How much fun have we had together?', '../play.html', 'the Games hub'],
+    ['calm', 'How calm has life been (less stress = higher)?', 'kamaagni-brakes.html#unwind', 'Unwind first']
+  ];
+  const FACE = ['😞', '😕', '😐', '🙂', '😍'];
+  const mk = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  const label = k => new Date(k + '-15').toLocaleDateString([], {month: 'short', year: '2-digit'});
+  const db = LS.get('ka_checkin', {m: {}}); db.m = db.m || {};
+  const save = () => LS.set('ka_checkin', db);
+  const cur = mk(new Date());
+  let tab = 'do', who = 0, metric = 'avg';
+  const M = k => (db.m[k] = db.m[k] || {a: [{}, {}], n: ['', '']});
+  const done = (k, i) => { const x = db.m[k]; return x && x.a[i] && Q.every(([q]) => x.a[i][q]); };
+  const score = (k, i, q) => { const x = db.m[k] && db.m[k].a[i]; if (!x) return null; if (q === 'avg') { const v = Q.map(([z]) => x[z]).filter(Boolean); return v.length === Q.length ? v.reduce((a, b) => a + b, 0) / v.length : null; } return x[q] || null; };
+  const months = () => Object.keys(db.m).filter(k => done(k, 0) || done(k, 1)).sort();
+
+  function frame(inner) {
+    app.innerHTML = top('Monthly Check-in', 'Five minutes once a month. See how you’re both really doing, and what’s getting better over time.') +
+      `<div class="ci-tabs" role="tablist">${[['do', '📝 This month'], ['res', '📊 Results'], ['trend', '📈 Trends']].map(([k, l]) => `<button role="tab" aria-selected="${tab === k}" data-t="${k}" class="${tab === k ? 'on' : ''}">${l}</button>`).join('')}</div>` + inner;
+    app.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { tab = b.dataset.t; render(); });
+  }
+  function doIt() {
+    const X = M(cur), A = X.a[who];
+    frame(`<p class="kx-muted" style="margin:0 0 8px">${label(cur)} · Answer on your own first, then compare. Be honest. Low scores are useful, not bad.</p>
+      <div class="ci-who" role="group" aria-label="Who is answering">${P.map((p, i) => `<button data-w="${i}" class="${who === i ? 'on' : ''}">${done(cur, i) ? '✓ ' : ''}${esc(p)}</button>`).join('')}</div>
+      <div class="kx-card">${Q.map(([k, q]) => `<div class="ci-q"><b>${esc(q)}</b><div class="ci-s" role="group" aria-label="${esc(q)}">${FACE.map((f, v) => `<button data-k="${k}" data-v="${v + 1}" class="${A[k] === v + 1 ? 'on' : ''}" aria-label="${v + 1} of 5" aria-pressed="${A[k] === v + 1}">${f}</button>`).join('')}</div></div>`).join('')}
+        <label class="kx-turn" for="nt" style="display:block;margin-top:12px">One thing that would make next month better</label><textarea id="nt" class="ci-ta" placeholder="e.g. One evening a week with no phones">${esc(X.n[who] || '')}</textarea></div>
+      <div class="kx-row" style="justify-content:center;margin-top:12px"><button class="kx-btn" id="nx">${who === 0 && !done(cur, 1) ? 'Next: ' + esc(P[1]) + ' →' : 'See our results →'}</button></div>`);
+    app.querySelectorAll('[data-w]').forEach(b => b.onclick = () => { who = +b.dataset.w; render(); });
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { const y = scrollY; A[b.dataset.k] = +b.dataset.v; X.d = Date.now(); save(); render(); scrollTo(0, y); });
+    document.getElementById('nt').onchange = e => { X.n[who] = e.target.value.trim(); save(); };
+    document.getElementById('nx').onclick = () => { if (!done(cur, who)) return KX.toast('Answer all seven first'); if (who === 0 && !done(cur, 1)) { who = 1; render(); scrollTo(0, 0); } else { try { window.KA_TRACK && KA_TRACK.award('checkin', 25); } catch (e) {} tab = 'res'; render(); scrollTo(0, 0); } };
+  }
+  function res() {
+    const ms = months(), k = ms.includes(cur) ? cur : ms[ms.length - 1];
+    if (!k) return frame('<div class="kx-card kx-center"><p>No check-ins yet. It takes five minutes.</p><button class="kx-btn" id="st">Start this month’s →</button></div>'), document.getElementById('st').onclick = () => { tab = 'do'; render(); };
+    const prev = ms[ms.indexOf(k) - 1];
+    const avg = (kk, q) => { const v = [0, 1].map(i => score(kk, i, q)).filter(x => x != null); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    const rows = Q.map(([q, txt]) => { const a = score(k, 0, q), b = score(k, 1, q), now = avg(k, q), was = prev ? avg(prev, q) : null, d = now != null && was != null ? now - was : 0; return {q, txt, a, b, now, d}; });
+    const low = rows.filter(r => r.now != null).sort((x, y) => x.now - y.now)[0];
+    const lowQ = low && Q.find(z => z[0] === low.q);
+    const X = db.m[k];
+    frame(`<div class="kx-card"><div class="kx-turn">${label(k)}${prev ? ' · compared with ' + label(prev) : ''}</div>
+      <div class="ci-row" style="font-size:12px;color:var(--muted)"><span></span><span>${esc(P[0])} · ${esc(P[1])}</span><span>Change</span></div>
+      ${rows.map(r => `<div class="ci-row"><span>${esc(r.txt.replace(/\?.*$/, '?'))}</span><span class="v">${r.a ? FACE[r.a - 1] : '–'} ${r.b ? FACE[r.b - 1] : '–'}</span><span class="v ${r.d > 0.01 ? 'ci-up' : r.d < -0.01 ? 'ci-dn' : ''}">${prev && r.now != null ? (r.d > 0.01 ? '▲ ' : r.d < -0.01 ? '▼ ' : '● ') + Math.abs(r.d).toFixed(1) : 'new'}</span></div>`).join('')}</div>
+      ${lowQ ? `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">💡 Something to try this month</div><p style="margin:6px 0 10px;line-height:1.6">Your lowest area is “${esc(lowQ[1].replace(/\?.*$/, ''))}”. Small step: open <b>${esc(lowQ[3])}</b> together this week.</p><a class="kx-btn sm" href="${lowQ[2]}">Open ${esc(lowQ[3])} →</a></div>` : ''}
+      ${(X.n || []).some(Boolean) ? `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">Your wishes for next month</div>${X.n.map((t, i) => t ? `<p style="margin:6px 0"><b>${esc(P[i])}:</b> ${esc(t)}</p>` : '').join('')}<p class="kx-muted">Agree on one, and put it in your plans 📅</p>${window.KA_NEXT ? '<button class="kx-btn sm ghost" id="pl">📅 Make a plan</button>' : ''}</div>` : ''}`);
+    const pl = document.getElementById('pl'); if (pl) pl.onclick = () => KA_NEXT.plan();
+  }
+  function trend() {
+    const ms = months().slice(-12);
+    if (ms.length < 2) return frame(`<div class="kx-card kx-center"><p>Trends appear after your second monthly check-in.</p><p class="kx-muted">${ms.length ? 'Come back next month 🗓️' : 'Start with this month.'}</p></div>`);
+    const W = 640, H = 240, L = 34, R = 12, T = 14, B = 30, x = i => L + (ms.length === 1 ? 0 : i * (W - L - R) / (ms.length - 1)), y = v => T + (5 - v) * (H - T - B) / 4;
+    const line = i => { const pts = ms.map((k, j) => { const v = score(k, i, metric); return v == null ? null : [x(j), y(v)]; }); let d = '', pen = false; pts.forEach(p => { if (!p) { pen = false; return; } d += (pen ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1) + ' '; pen = true; }); return {d, pts}; };
+    const C = ['#e8637a', '#f3d27a'], ln = [line(0), line(1)];
+    const desc = P.map((p, i) => p + ': ' + ms.map(k => { const v = score(k, i, metric); return label(k) + ' ' + (v == null ? 'none' : v.toFixed(1)); }).join(', ')).join('. ');
+    frame(`<div class="kx-card"><div class="ci-m" role="group" aria-label="Measure">${[['avg', 'Overall'], ...Q.map(([k, q]) => [k, {close: 'Closeness', desire: 'Desire', sex: 'Sex life', talk: 'Talking', wanted: 'Feeling wanted', fun: 'Fun', calm: 'Calm'}[k]])].map(([k, l]) => `<button data-m="${k}" class="${metric === k ? 'on' : ''}">${l}</button>`).join('')}</div>
+      <svg class="ci-ch" viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${esc(desc)}">
+        ${[1, 2, 3, 4, 5].map(v => `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(255,255,255,.08)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v}</text>`).join('')}
+        ${ms.map((k, j) => `<text x="${x(j)}" y="${H - 8}" text-anchor="middle">${label(k)}</text>`).join('')}
+        ${ln.map((l, i) => `<path d="${l.d}" fill="none" stroke="${C[i]}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${l.pts.map(p => p ? `<circle cx="${p[0]}" cy="${p[1]}" r="4.5" fill="${C[i]}" stroke="#12152a" stroke-width="2"/>` : '').join('')}`).join('')}
+      </svg>
+      <div class="ci-leg">${P.map((p, i) => `<span><i style="background:${C[i]}"></i>${esc(p)}</span>`).join('')}</div>
+      <p class="kx-muted" style="margin-top:10px">1 = 😞, 5 = 😍. Look for the direction over a few months, not single dips: every couple has hard months.</p></div>`);
+    app.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { metric = b.dataset.m; render(); });
+  }
+  function render() { ({do: doIt, res, trend})[tab](); }
+  if (done(cur, 0) && done(cur, 1)) tab = 'res';
+  render();
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

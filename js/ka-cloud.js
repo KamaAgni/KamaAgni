@@ -63,6 +63,8 @@
           .subscribe(function (status) { if (status === 'SUBSCRIBED') ch.track(meta); });
         return function () { c.removeChannel(ch); };
       },
+      pushSave: function (sub, ex) { var row = { endpoint: sub.endpoint, user_id: uid(), sub: sub }; if (ex) for (var k in ex) row[k] = ex[k]; return c.from('push_subs').upsert(row, { onConflict: 'endpoint' }).then(chk0); },
+      pushDel: function (endpoint) { return c.from('push_subs').delete().eq('endpoint', endpoint).then(chk0); },
       deleteAccount: function () { return c.rpc('delete_my_account').then(chk0); }
     };
     function chk0(r) { if (r && r.error) throw new Error(r.error.message || r.error); return true; }
@@ -94,6 +96,8 @@
       deleteEvent: function (id) { return call('deleteEvent', { id: id }); },
       subscribe: function () { return function () {}; },                               /* mock relies on polling */
       presence: function (cid, meta, cb) { var go = function () { call('presence', { couple_id: cid, meta: meta }).then(cb, function () {}); }; go(); var t = setInterval(go, 5000); return function () { clearInterval(t); }; },
+      pushSave: function (sub, ex) { return call('pushSave', { sub: sub, ex: ex || null }); },
+      pushDel: function (endpoint) { return call('pushDel', { endpoint: endpoint }); },
       deleteAccount: function () { return call('deleteAccount'); }
     };
   }
@@ -291,6 +295,7 @@
   window.KA_CLOUD = {
     state: function () { return st; }, init: init, signUp: signUp, signIn: signIn, signOut: signOut, resetPassword: resetPassword, unlock: unlock,
     syncNow: syncNow, pushDirty: pushDirty, wipeCloud: wipeCloud,
+    push: { save: function (sub, ex) { if (!A || !st.user) return Promise.reject(new Error('Sign in first')); return A.pushSave(sub, ex); }, del: function (ep) { return A && st.user ? A.pushDel(ep) : Promise.resolve(); } },
     couple: { create: createInvite, join: joinInvite, leave: leave, link: inviteLink, info: linkInfo, refresh: refreshCouple, send: sendEvent, list: listEvents, del: deleteEvent, live: startLive, stop: stopLive }
   };
   /* notice when the partner joins/leaves: poll while a couple exists */

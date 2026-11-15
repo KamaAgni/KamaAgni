@@ -632,6 +632,28 @@ body::after {
   .wordmark { font-size:clamp(38px,12vw,64px); }
 }
   .hero-logo{display:block;margin:6px auto 4px;width:min(86vw,460px);height:auto}
+
+/* v65: compact game rows on phones (the home page was ~14,000px of full cards) */
+@media(max-width:640px){
+  .games{gap:8px}
+  .game-card{display:grid;grid-template-columns:44px 1fr 18px;align-items:center;gap:4px 14px;padding:12px 14px;border-radius:16px}
+  .game-card .card-icon{width:44px;height:44px;font-size:22px;border-radius:12px}
+  .game-card .card-tag{display:none}
+  .game-card .card-title{font-size:19px;margin-bottom:2px}
+  .game-card .card-desc{font-size:13px;line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .game-card .card-cta{position:static;align-self:center;padding:0;background:none!important;box-shadow:none!important;color:var(--muted)!important;font-size:0;min-height:0}
+  .game-card .card-cta .cta-arrow{font-size:18px}
+  .game-card .card-cta::after{content:'';position:absolute;inset:0;border-radius:16px}
+  .game-card:active{transform:scale(.985)}
+}
+.home-all{max-width:960px;margin:28px auto 0}
+.home-all>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:4px;padding:16px 18px;border-radius:16px;border:1px solid rgba(255,255,255,.16);background:rgba(255,255,255,.04);min-height:56px}
+.home-all>summary::-webkit-details-marker{display:none}
+.home-all>summary span{font-weight:700;font-size:17px;display:flex;justify-content:space-between}
+.home-all>summary span::after{content:'+';opacity:.7;font-size:22px;line-height:1}
+.home-all[open]>summary span::after{content:'\2212'}
+.home-all>summary small{opacity:.75;font-size:13px}.home-all>summary a{color:var(--rose2,#f4a0ae)}
+.home-all[open]>summary{margin-bottom:8px}
 </style>
 </head>
 <body>
@@ -736,6 +758,15 @@ body::after {
     <form class="ka-home-search" action="games/kamaagni-search.html" method="get" role="search" style="max-width:560px;margin:14px auto 0;padding:0 16px">
       <input name="q" type="search" placeholder="🔎 Search games, guides, ideas…" aria-label="Search the site" style="width:100%;min-height:48px;padding:10px 16px;border-radius:999px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:inherit;font:inherit;box-sizing:border-box">
     </form>
+    <div class="feature-banner">
+      <div>
+        <span class="card-tag rose">New · Tonight</span>
+        <div class="card-title" style="font-size:28px">Plan Tonight</div>
+        <p class="card-desc" style="max-width:420px">Pick your mood and how much time you have. Get a complete evening: warm-up, main event and aftercare, with timers, a calendar invite and a message to send.</p>
+      </div>
+      <a href="games/kamaagni-tonight.html" class="card-cta rose">Plan our evening <span class="cta-arrow">→</span></a>
+    </div>
+
     <section class="dash" id="dash" aria-label="Tonight">
       <h2 id="d-hi"><span>Welcome back</span></h2>
       <p class="d-sub" id="d-sub">How are you two feeling tonight?</p>
@@ -752,15 +783,9 @@ body::after {
       <div class="d-next" id="d-next"></div>
     </section>
 
-    <div class="feature-banner">
-      <div>
-        <span class="card-tag rose">New · Tonight</span>
-        <div class="card-title" style="font-size:28px">Plan Tonight</div>
-        <p class="card-desc" style="max-width:420px">Pick your mood and how much time you have. Get a complete evening: warm-up, main event and aftercare, with timers, a calendar invite and a message to send.</p>
-      </div>
-      <a href="games/kamaagni-tonight.html" class="card-cta rose">Plan our evening <span class="cta-arrow">→</span></a>
-    </div>
-
+    <details class="home-all" id="home-all">
+      <summary><span>🗂️ Browse everything</span><small>All games, tools and guides on one page.</small></summary>
+      <p style="margin:4px 4px 10px;font-size:14px"><a href="play.html" style="color:#ffc861;text-decoration:underline">Or filter by mood and time in the Games hub →</a></p>
     <p class="section-label">Play together</p>
     <div class="games">
       <div class="game-card">
@@ -867,7 +892,7 @@ body::after {
         <div>
           <span class="card-tag gold">Cards</span>
           <div class="card-title">Truth or Dare</div>
-          <p class="card-desc">300+ truths and dares, plus an intense Brave mode.</p>
+          <p class="card-desc">312 truths and 300 dares in 16 categories. Pass is always allowed.</p>
         </div>
         <a href="games/kamaagni-truth-or-dare.html" class="card-cta gold">Play Now <span class="cta-arrow">→</span></a>
       </div>
@@ -878,7 +903,7 @@ body::after {
         <div>
           <span class="card-tag indigo">Tasks</span>
           <div class="card-title">Task Deck</div>
-          <p class="card-desc">2,500+ tasks in 15 packs: light femdom, switch, long-distance, Christmas and more.</p>
+          <p class="card-desc">8,000+ tasks in 48 packs, each marked with who it’s for. Draw one at a time.</p>
         </div>
         <a href="games/kamaagni-task-deck.html" class="card-cta indigo">Draw <span class="cta-arrow">→</span></a>
       </div>
@@ -904,7 +929,7 @@ body::after {
         <div>
           <span class="card-tag rose">Learn</span>
           <div class="card-title">Kink Explorer</div>
-          <p class="card-desc">53 kinks explained in plain language. Mark curious, maybe or not for me.</p>
+          <p class="card-desc">Kinks explained in plain language. Mark curious, maybe or not for me.</p>
         </div>
         <a href="games/kamaagni-kink-explorer.html" class="card-cta rose">Explore <span class="cta-arrow">→</span></a>
       </div>
@@ -919,6 +944,36 @@ body::after {
         </div>
         <a href="games/intimacy_Position_Selector_page.html" class="card-cta indigo">Play Now <span class="cta-arrow">→</span></a>
       </div>
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">📖</div>
+        <div>
+          <span class="card-tag rose">Learn</span>
+          <div class="card-title">Position Library</div>
+          <p class="card-desc">155 positions explained simply, with what each of you does, why it works and a tip.</p>
+        </div>
+        <a href="games/kamaagni-positions.html" class="card-cta rose">Explore <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🎲</div>
+        <div>
+          <span class="card-tag rose">Play</span>
+          <div class="card-title">The Play Book</div>
+          <p class="card-desc">74 games for every room, food, water, fantasies and toys, each with a sweet and a spicy version.</p>
+        </div>
+        <a href="games/kamaagni-playbook.html" class="card-cta rose">Play <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">🌟</div>
+        <div>
+          <span class="card-tag rose">Monthly</span>
+          <div class="card-title">New for Us</div>
+          <p class="card-desc">One new position, game and skill each month. Do all three for the badge.</p>
+        </div>
+        <a href="games/kamaagni-month.html" class="card-cta rose">See this month <span class="cta-arrow">→</span></a>
+      </div>
 
       <div class="game-card">
         <div class="card-bar rose"></div>
@@ -931,6 +986,90 @@ body::after {
         <a href="games/intimacy_Oral_Position_Selector_page.html" class="card-cta rose">Play Now <span class="cta-arrow">→</span></a>
       </div>
 
+    </div>
+
+    <p class="section-label">Closer together</p>
+    <div class="games">
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">💌</div>
+        <div>
+          <span class="card-tag rose">Partner</span>
+          <div class="card-title">Invites &amp; Secret Wishes</div>
+          <p class="card-desc">Invite them the way they love to be asked, and find the wishes you both share.</p>
+        </div>
+        <a href="games/kamaagni-invite.html" class="card-cta rose">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🫶</div>
+        <div>
+          <span class="card-tag gold">Us</span>
+          <div class="card-title">Us at a glance</div>
+          <p class="card-desc">Everything you’ve each told the app side by side, with ideas made for you two.</p>
+        </div>
+        <a href="games/kamaagni-us.html" class="card-cta gold">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">💬</div>
+        <div>
+          <span class="card-tag indigo">Talk</span>
+          <div class="card-title">Talk Kit</div>
+          <p class="card-desc">Twelve guided conversations, the words you each love, and how you like to be asked.</p>
+        </div>
+        <a href="games/kamaagni-talk.html" class="card-cta indigo">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🎛️</div>
+        <div>
+          <span class="card-tag gold">Discover</span>
+          <div class="card-title">Brakes &amp; Accelerators</div>
+          <p class="card-desc">What turns each of you on, what gets in the way, and how to switch off one brake.</p>
+        </div>
+        <a href="games/kamaagni-brakes.html" class="card-cta gold">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar rose"></div>
+        <div class="card-icon">📈</div>
+        <div>
+          <span class="card-tag rose">Monthly</span>
+          <div class="card-title">Monthly Check-in</div>
+          <p class="card-desc">Seven quick questions each month, with trends for both of you.</p>
+        </div>
+        <a href="games/kamaagni-checkin.html" class="card-cta rose">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🗓️</div>
+        <div>
+          <span class="card-tag gold">Dates</span>
+          <div class="card-title">Our Dates</div>
+          <p class="card-desc">Anniversaries and birthdays with countdowns and ideas for the day.</p>
+        </div>
+        <a href="games/kamaagni-dates.html" class="card-cta gold">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar indigo"></div>
+        <div class="card-icon">🌍</div>
+        <div>
+          <span class="card-tag indigo">Apart</span>
+          <div class="card-title">Long-distance</div>
+          <p class="card-desc">Both clocks, a countdown, a daily task and nudges for when you’re apart.</p>
+        </div>
+        <a href="games/kamaagni-apart.html" class="card-cta indigo">Open <span class="cta-arrow">→</span></a>
+      </div>
+      <div class="game-card">
+        <div class="card-bar gold"></div>
+        <div class="card-icon">🖨️</div>
+        <div>
+          <span class="card-tag gold">Make</span>
+          <div class="card-title">Print Studio</div>
+          <p class="card-desc">Turn any deck or pack into cut-out cards, or print a gift box.</p>
+        </div>
+        <a href="games/kamaagni-print.html" class="card-cta gold">Open <span class="cta-arrow">→</span></a>
+      </div>
     </div>
 
     <p class="section-label">Keep &amp; plan</p>
@@ -952,7 +1091,7 @@ body::after {
         <div>
           <span class="card-tag indigo">Tracker</span>
           <div class="card-title">Our Bucket List</div>
-          <p class="card-desc">Over 120 experiences to tick off, with search and a random pick.</p>
+          <p class="card-desc">124 experiences to tick off, with search and a random pick.</p>
         </div>
         <a href="games/kamaagni-bucket-list.html" class="card-cta indigo">Open <span class="cta-arrow">→</span></a>
       </div>
@@ -1099,7 +1238,7 @@ body::after {
         <div>
           <span class="card-tag indigo">Roleplay</span>
           <div class="card-title">Roleplay Studio</div>
-          <p class="card-desc">25 scenarios with props, plots and roles. Nurse, boss, strangers, spy and more.</p>
+          <p class="card-desc">90 stories with roles, scripts, costumes and a safe-word check. Strangers, boss, heist and more.</p>
         </div>
         <a href="games/kamaagni-roleplay.html" class="card-cta indigo">Play <span class="cta-arrow">→</span></a>
       </div>
@@ -1121,7 +1260,7 @@ body::after {
         <div>
           <span class="card-tag indigo">Long game</span>
           <div class="card-title">Challenges &amp; Wish List</div>
-          <p class="card-desc">100 challenges for couples, him and her to tick off, plus a shared wish list.</p>
+          <p class="card-desc">92 challenges for couples, him and her to tick off, plus a shared wish list.</p>
         </div>
         <a href="games/kamaagni-challenges.html" class="card-cta indigo">Start <span class="cta-arrow">→</span></a>
       </div>
@@ -1182,6 +1321,8 @@ body::after {
       </div>
 
     </div>
+
+    </details>
 
     <!-- Footer -->
     <div id="spark" class="kx-card kx-center" style="max-width:560px;margin:24px auto 0"></div>
@@ -1490,7 +1631,7 @@ $('d-next').innerHTML=nx;
 try{var fx=document.createElement('div');fx.id='d-focus';fx.style.cssText='margin-top:14px';$('d-next').parentNode.insertBefore(fx,$('d-next').nextSibling);
 window.KA_FOCUS&&KA_FOCUS.build('').then(function(f){var r=f.recap;
 var LOOP=[['🗣️','Talk','games/kamaagni-experts.html?t=ask'],['🌿','Touch','games/kamaagni-session.html?mood=gentle'],['🔥','Play','games/kamaagni-task-deck.html'],['🫶','Afterglow','games/kamaagni-session.html'],['📓','Reflect','games/kamaagni-journal.html']];
-var loop='<div style="margin-bottom:12px"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">The loop that works</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+LOOP.map(function(l,i){return '<a href="'+l[2]+'" style="flex:1;min-width:64px;text-align:center;padding:9px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#dce9ff;font-size:12px">'+l[0]+'<br><b>'+l[1]+'</b></a>'}).join('')+'</div></div>';
+var loop='<div style="margin-bottom:12px"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">The loop that works</div><div style="display:flex;gap:6px;flex-wrap:wrap">'+LOOP.map(function(l,i){return '<a href="'+l[2]+'" style="flex:1;min-width:76px;text-align:center;padding:9px 4px;border-radius:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#dce9ff;font-size:12px">'+l[0]+'<br><b>'+l[1]+'</b></a>'}).join('')+'</div></div>';
 fx.innerHTML='<div class="d-next" style="display:block">'+loop+'<div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#8a99b8;margin-bottom:6px">This week</div>'+
 '<div style="font-size:14px;color:#dce9ff;margin-bottom:10px">'+(r.total?r.sessions+' session'+(r.sessions===1?'':'s')+', '+r.acts+' activit'+(r.acts===1?'y':'ies')+(r.top?', top mood '+esc(r.top):'')+'.':'A fresh week. Start with one small thing together.')+'</div>'+
 '<div style="display:flex;gap:8px;flex-wrap:wrap">'+f.items.slice(0,4).map(function(i){return '<a href="'+i.href+'" style="flex:1;min-width:170px;padding:11px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#a8bcd8;font-size:12.5px">'+i.icon+' '+esc(i.label)+'<b style="display:block;color:#fff;font-size:13.5px;margin-top:2px">'+esc(i.title)+'</b></a>'}).join('')+'</div></div>'})}catch(e){}
@@ -1516,5 +1657,6 @@ $('d-cal').onclick=function(){
 }catch(e){console.error(e)}})();
 </script>
 <script src="js/ka-chrome.js"></script>
+<script>(function(){var d=document.getElementById('home-all');if(!d)return;try{if(localStorage.getItem('ka_home_all')==='1')d.open=true;}catch(e){}d.addEventListener('toggle',function(){try{localStorage.setItem('ka_home_all',d.open?'1':'0')}catch(e){}});})();</script>
 </body>
 </html>

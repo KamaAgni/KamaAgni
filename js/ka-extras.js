@@ -32,7 +32,7 @@
     o = doc.createElement('div'); o.id = 'kx-pause'; o.setAttribute('role', 'dialog'); o.setAttribute('aria-label', 'Pause');
     o.innerHTML = '<div class="kp-in"><div class="kp-t">⏸ Pause</div><p>Everything is paused. How are you both doing?</p>' +
       '<div class="kp-row"><button data-k="g" class="kp-g">🟢 I am good, continue</button><button data-k="a" class="kp-a">🟡 Slow down</button><button data-k="r" class="kp-r">🔴 Stop</button></div><div id="kp-msg" class="kp-msg"></div>' +
-      '<div class="kp-row"><button data-k="snd" class="kp-s">' + (SND.on() ? '🔊 Sound on' : '🔇 Sound off') + '</button><button data-k="x" class="kp-s">Close</button></div></div>';
+      '<div class="kp-row"><button data-k="snd" class="kp-s">' + (SND.on() ? '🔊 Sound on' : '🔇 Sound off') + '</button><button data-k="dk" class="kp-s">' + (window.KA_DARK && KA_DARK.on() ? '🌙 Dark room on' : '🌙 Dark room off') + '</button><button data-k="x" class="kp-s">Close</button></div></div>';
     doc.body.appendChild(o); doc.body.style.overflow = 'hidden';
     function close() { o.remove(); doc.body.style.overflow = ''; }
     o.onclick = function (e) { if (e.target === o) close(); };
@@ -41,6 +41,7 @@
       if (k === 'g' || k === 'x') close();
       else if (k === 'a') m.innerHTML = '<b>Slower is fine.</b> Take a breath. Say what you would like more or less of. Continue only when you both feel good.';
       else if (k === 'r') m.innerHTML = '<b>Stop. Thank you for saying so.</b> Pause everything, hold each other if you both want, and talk when you are ready. No explanations needed. A "no" is always respected.<br><br><a href="' + (window.KA_BASE || '') + 'games/kamaagni-learn.html" style="color:#ff8fb0">Open aftercare tips</a>';
+      else if (k === 'dk' && window.KA_DARK) { KA_DARK.set(!KA_DARK.on()); b.textContent = KA_DARK.on() ? '🌙 Dark room on' : '🌙 Dark room off'; }
       else if (k === 'snd') { SND.set(!SND.on()); b.textContent = SND.on() ? '🔊 Sound on' : '🔇 Sound off'; if (SND.on()) SND.play('hearts'); }
     }; });
   }
@@ -99,8 +100,21 @@
 
   /* ---------- step-by-step walkthrough for older games ---------- */
   var HOW = {
-    'kamaagni-showdown': ['Showdown', ['Pick your categories and heat level. Both of you agree before you start.', 'Take turns. On your turn, a challenge appears. Do it or pass.', 'Winners of each round earn points. Losers deliver the prize.', 'First to the target wins. Check in with each other as often as you like. Use the pause button any time.']],
-    'kamaagni-connect-foreplay': ['Connect Foreplay', ['Each card is a small step: touch, look, breathe or talk. Do them in order.', 'Move slowly. There is no goal beyond enjoying each step.', 'Say "more", "less" or "different" any time.', 'Skip any card you do not both want.']],
+    'kamaagni-showdown': ['Seduction Showdown', ['Each round you both build a line-up: contenders, then add-ons (+ or −) and twists.', 'Play one card or pass each turn. When both pass in a row, the higher total wins the round.', 'The round winner picks a prize challenge; the other partner can bail twice per game.', 'Most rounds won takes the final reward. Pass is always allowed.']],
+    'kamaagni-connect-foreplay': ['Connect Foreplay', ['Take turns dropping a disc into a column, like Connect Four.', 'Four in a row (across, down or diagonal) wins the round and unlocks a challenge.', 'The winner decides who does each challenge and can re-draw one. The other can always pass.', 'Rounds get hotter as you go. Choose Sweet, Spicy or Wild before you start.']],
+    'kamaagni-task-deck': ['Task Deck', ['Tick the packs you both want (each shows its heat), or tap Surprise me.', 'Draw a task. The chip says who it’s for when a task is written for one of you.', 'Done ✓ removes it from the deck; Pass draws another. Timed tasks get a timer.', 'Task of the day stays the same all day. Pass or stop any time.']],
+    'kamaagni-secret': ['Secret Envelope', ['Write a dare, promise or message, or tap the dice for an idea.', 'Optionally lock it until a date and time.', 'Seal & share sends a private link. It opens only on their phone, never stored online in plain text.', 'They can reply from the envelope.']],
+    'kamaagni-challenges': ['Challenges', ['Pick Couple, For him or For her, and set a start date if you like.', 'Do them in order (easiest first) or jump to any one. Tick each one when done.', 'Add things you both want to the Wish list.', 'A safe word always stops the challenge.']],
+    'kamaagni-journey': ['BDSM Journey', ['500 beginner tasks in 10 categories and 5 levels.', 'Agree a reward for finishing each level before you start.', 'Tap Pick a task, or choose from the list. Tick it when done.', 'Agree a safe word first. Stop or skip any time.']],
+    'kamaagni-fun': ['Free-time Fun', ['Pick an activity at the top: date wheel, questions, fantasy or story builder, quiz, two truths.', 'Play face to face on one phone, or live on two phones when linked in Together.', 'Everything follows your heat level and topic filters.']],
+    'kamaagni-love-languages': ['Love Languages', ['Each of you answers 15 either-or questions on your own.', 'See your top love language, then compare side by side.', 'Try the “speak their language this week” idea.']],
+    'kamaagni-invite': ['Invites & Secret Wishes', ['Invite: pick a line worded the way your partner likes to be asked (from the Talk Kit), or write your own, then send or copy.', 'Inbox: answer Yes, Not tonight but…, or Let’s plan. On a shared plan you can skip one step.', 'Secret wishes: tick what you’d love. You only ever see the wishes you both picked.', 'Sending to their phone needs you to be linked; otherwise copy and share.']],
+    'kamaagni-print': ['Print Studio', ['Choose what to print: a deck, a task pack, your favourites, your own cards or a gift box.', 'Pick a size (12, 8 or 4 per A4), how many, and whether to print card backs.', 'Print at “Actual size”. For backs, print double-sided and flip on the long edge.']],
+    'kamaagni-dates': ['Our Dates', ['Add anniversaries, birthdays and firsts. Tick “Every year” for yearly dates.', 'Each date shows a countdown and how many years.', 'In the last week you get ideas for the day and a one-tap Memory Book page. Home reminds you too.']],
+    'kamaagni-apart': ['Long-distance', ['Set your partner’s time zone to see both clocks and whether it’s a good time to call.', 'Set the date you next meet for a countdown.', 'Do today’s task and ritual together, then mark it done.', 'Send a quick nudge, or play a story or two-phone game apart.']],
+    'kamaagni-memories': ['Memory Book', ['Tap + New after a special night, trip or moment.', 'Add a date, notes, tags and a rating from each of you.', 'Search and filter later, and mark ones you want to do again.']],
+    'kamaagni-movies': ['Movie Night', ['Filter by mood, heat and length, or search a title.', 'Tap Pick one for us, or add films to Our list with ♡.', 'Each of you stars films you want; Together shows the ones you both want.', 'Mark watched and rate it together.']],
+    'kamaagni-playlist': ['Our Playlist', ['Filter songs by mood, or search.', 'Tap Play to open the song; ♡ saves it to your list.', 'Make tonight’s set picks five songs for the mood.']],
     'intimacy_ludo_dice_game_single_page': ['Ludo Dice', ['Roll the dice and move your token around the board.', 'Landing on a tile gives you a card to do together.', 'Your heat level in Settings decides how spicy cards can be.', 'Pass any card you do not both want. First home wins.']],
     'intimacy_dice_game_single_page': ['Dice', ['Roll the dice. Each face is an action or a place.', 'Do what the faces say together, or pass.', 'Turn the heat down in Settings any time.']],
     'kamaagni-poker-quick': ['Poker Night', ['Play a hand of poker. Winners choose a forfeit from the list.', 'The loser carries it out, or both pass.', 'Everything is optional. Pause any time.']],

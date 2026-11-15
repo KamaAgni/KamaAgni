@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Us at a glance</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.us-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.us-2>div{border:1px solid var(--border2);border-radius:14px;padding:10px 12px;background:rgba(255,255,255,.03);min-width:0}
+.us-2 b.n{display:block;font-family:'Cormorant Garamond',serif;font-size:19px;margin-bottom:4px}
+.us-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}.us-tags span{font-size:13px;padding:4px 9px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+.us-tags span.y{background:rgba(74,222,128,.12);border-color:rgba(74,222,128,.4)}.us-tags span.n{background:rgba(232,99,122,.12);border-color:rgba(232,99,122,.4);text-decoration:line-through}
+.us-tags span.both{background:rgba(240,190,60,.16);border-color:rgba(240,190,60,.55)}
+.us-empty{font-size:14px;color:var(--muted)}.us-empty a,.us-go{color:#ffc861}
+.us-sug{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid rgba(255,255,255,.08)}.us-sug:first-of-type{border-top:0}
+.us-sug span{font-size:22px;width:30px;flex:0 0 30px;text-align:center}.us-sug a{color:#ffc861;font-weight:700;text-decoration:none;display:inline-block;margin-top:4px;min-height:32px}
+.us-bar{height:8px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin:3px 0 6px}.us-bar i{display:block;height:100%;background:linear-gradient(90deg,#e8637a,#f0be3c)}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const P = KX.names();
+  const LL = {words: ['💬', 'Words', 'Send one specific compliment about their body today.'], time: ['🕰️', 'Time', 'Book a phone-free hour this week, and say what it’s for.'], touch: ['🤲', 'Touch', 'Offer a 10-minute massage with no strings attached.'], surprise: ['🎁', 'Surprise', 'Plan a mystery date and only tell them what to wear.'], service: ['🛠️', 'Helping', 'Take one task off their list so they have energy for you.']};
+  const CQ = {close: ['Closeness', 'kamaagni-rituals.html', 'Connection Rituals'], desire: ['Desire', 'kamaagni-brakes.html', 'Brakes & Accelerators'], sex: ['Sex life', 'kamaagni-tonight.html', 'Plan Tonight'], talk: ['Talking about sex', 'kamaagni-talk.html', 'Talk Kit'], wanted: ['Feeling wanted', 'kamaagni-talk.html#love', 'Notice & love'], fun: ['Fun together', '../play.html', 'a game'], calm: ['Calm', 'kamaagni-brakes.html#unwind', 'Unwind first']};
+  const tags = (L, cls) => L.length ? `<div class="us-tags">${L.map(t => `<span class="${cls || ''}">${esc(t)}</span>`).join('')}</div>` : '';
+  const none = (t, u, l) => `<p class="us-empty">${t} <a href="${u}">${l} →</a></p>`;
+  function draw() {
+    const ll = (LS.get('ka_ll_v1', {r: {}}) || {}).r || {}, br = (LS.get('ka_brakes', {}) || {}).r || [{}, {}];
+    const tk = LS.get('ka_talk', {}) || {}, ck = (LS.get('ka_checkin', {}) || {}).m || {}, wish = (LS.get('ka_wish', {}) || {}).mine || [];
+    const sug = [];
+    /* 1. love languages */
+    const top2 = s => s ? Object.keys(LL).sort((a, b) => (s[b] || 0) - (s[a] || 0)).slice(0, 2) : null;
+    const L0 = top2(ll[0]), L1 = top2(ll[1]);
+    let h = `<div class="kx-card"><div class="kx-turn">💗 How you each feel loved</div>${L0 || L1 ? `<div class="us-2">${[L0, L1].map((t, i) => `<div><b class="n">${esc(P[i])}</b>${t ? `<div style="font-size:15px">${LL[t[0]][0]} <b>${LL[t[0]][1]}</b><span class="kx-muted"> then ${LL[t[1]][1].toLowerCase()}</span></div>` : '<p class="us-empty">Not taken yet</p>'}</div>`).join('')}</div>` : none('Take the 2-minute quiz, each of you.', 'kamaagni-love-languages.html', 'Love Languages')}</div>`;
+    const llSug = []; [L0, L1].forEach((t, i) => { if (t) llSug.push([LL[t[0]][0], `For ${P[i]}: ${LL[t[0]][2]}`, `${P[i]} feels most loved through ${LL[t[0]][1].toLowerCase()}.`, 'kamaagni-love-languages.html', 'Love Languages']); });
+    /* 2. brakes & accelerators */
+    const lists = R => { const on = [], off = []; Object.entries(R || {}).forEach(([k, v]) => { const t = k.split(':').slice(1).join(':'); if (v === 1) on.push(t); if (v === -1) off.push(t); }); return {on, off}; };
+    const B0 = lists(br[0]), B1 = lists(br[1]), bothOn = B0.on.filter(x => B1.on.includes(x));
+    h += `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">🎛️ What turns you on, and what gets in the way</div>${B0.on.length + B0.off.length + B1.on.length + B1.off.length ? `
+      ${bothOn.length ? `<p style="margin:4px 0 2px;font-size:14px"><b>You both love:</b></p>${tags(bothOn.slice(0, 8), 'both')}` : ''}
+      <div class="us-2" style="margin-top:10px">${[B0, B1].map((b, i) => `<div><b class="n">${esc(P[i])}</b>${b.on.length ? '<small class="kx-muted">🔥 Turns me on</small>' + tags(b.on.filter(x => !bothOn.includes(x)).slice(0, 6), 'y') : ''}${b.off.length ? '<small class="kx-muted" style="display:block;margin-top:6px">🛑 Puts the brakes on</small>' + tags(b.off.slice(0, 6)) : ''}${!b.on.length && !b.off.length ? '<p class="us-empty">Not done yet</p>' : ''}</div>`).join('')}</div>`
+      : none('Each of you rates 37 little things in two minutes.', 'kamaagni-brakes.html', 'Brakes & Accelerators')}</div>`;
+    if (bothOn.length) sug.push(['🔥', `Build tonight around “${bothOn[0]}”`, 'You both said it turns you on.', 'kamaagni-tonight.html', 'Plan Tonight']);
+    const brk = B0.off.concat(B1.off);
+    if (brk.length) sug.push(['🛠️', `Switch off one brake: “${brk[0]}”`, 'Removing one brake often does more than adding spice.', 'kamaagni-brakes.html#plan', 'Make a plan']);
+    /* 3. words + how to ask */
+    const W = i => { const y = [], n = []; Object.values(((tk.words || [])[i]) || {}).forEach(g => Object.entries(g || {}).forEach(([w, v]) => { if (v === 1) y.push(w); if (v === -1) n.push(w); })); return {y, n}; };
+    const A = i => ((tk.ask || [])[i]) || {};
+    const W0 = W(0), W1 = W(1), A0 = A(0), A1 = A(1);
+    const anyT = W0.y.length + W0.n.length + W1.y.length + W1.n.length + (A0.yes || []).length + (A1.yes || []).length;
+    h += `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">💬 Words and how to ask</div>${anyT ? `<div class="us-2">${[[W0, A0], [W1, A1]].map(([w, a], i) => `<div><b class="n">${esc(P[i])}</b>
+      ${w.y.length ? '<small class="kx-muted">Words I love</small>' + tags(w.y.slice(0, 6), 'y') : ''}${w.n.length ? '<small class="kx-muted" style="display:block;margin-top:6px">Please don’t say</small>' + tags(w.n.slice(0, 5), 'n') : ''}
+      ${(a.yes || []).length ? '<small class="kx-muted" style="display:block;margin-top:6px">💚 Invite me like this</small>' + tags(a.yes.slice(0, 4), 'y') : ''}${(a.no || []).length ? '<small class="kx-muted" style="display:block;margin-top:6px">Not like this</small>' + tags(a.no.slice(0, 3), 'n') : ''}
+      ${!w.y.length && !w.n.length && !(a.yes || []).length ? '<p class="us-empty">Not done yet</p>' : ''}</div>`).join('')}</div>` : none('Pick the words you love and how you like to be asked.', 'kamaagni-talk.html', 'Talk Kit')}</div>`;
+    [A0, A1].forEach((a, i) => { if ((a.yes || []).length) sug.push(['💌', `Invite ${P[i]} the way they like: “${a.yes[0]}”`, 'Invitations worded their way are ready to send.', 'kamaagni-invite.html', 'Invites']); });
+    /* 4. check-in */
+    const mo = Object.keys(ck).filter(k => (ck[k].a || []).some(x => x && Object.keys(x).length)).sort().pop();
+    if (mo) { const a = ck[mo].a || [{}, {}], av = k => { const v = [a[0] && a[0][k], a[1] && a[1][k]].filter(x => x > 0); return v.length ? v.reduce((x, y) => x + y, 0) / v.length : 0; };
+      const ks = Object.keys(CQ).filter(k => av(k) > 0).sort((x, y) => av(y) - av(x));
+      h += `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">📈 This month (${esc(new Date(mo + '-15').toLocaleDateString(undefined, {month: 'long'}))})</div>${ks.map(k => `<div style="display:flex;justify-content:space-between;font-size:14px"><span>${CQ[k][0]}</span><b>${av(k).toFixed(1)}</b></div><div class="us-bar" aria-hidden="true"><i style="width:${av(k) / 5 * 100}%"></i></div>`).join('')}<a class="us-go" href="kamaagni-checkin.html">See trends →</a></div>`;
+      if (ks.length > 1) { const lo = ks[ks.length - 1]; sug.unshift(['🌱', `Give “${CQ[lo][0].toLowerCase()}” some love`, 'It was your lowest this month.', CQ[lo][1], CQ[lo][2]]); } }
+    else h += `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">📈 How you’re doing</div>${none('Seven quick questions each month.', 'kamaagni-checkin.html', 'Monthly check-in')}</div>`;
+    /* 5. wishes + kinks (private: counts only) */
+    const kx = LS.get('ka_kinkex', {}) || {}, cur = Object.values(kx).filter(v => v === 'y').length;
+    h += `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">🌠 Wishes and curiosities</div><p style="margin:4px 0;font-size:14px">${wish.length ? `You’ve picked <b>${wish.length}</b> secret ${wish.length === 1 ? 'wish' : 'wishes'}. Only the ones you both pick are ever shown.` : 'No secret wishes picked yet.'} <a class="us-go" href="kamaagni-invite.html#wish">Secret wishes →</a></p>
+      <p style="margin:4px 0;font-size:14px">${cur ? `<b>${cur}</b> ${cur === 1 ? 'kink' : 'kinks'} marked 🔥 Curious on this phone (kept private).` : 'Nothing marked Curious yet.'} <a class="us-go" href="kamaagni-kink-explorer.html">Kink Explorer →</a></p></div>`;
+    /* suggestions first: weakest area, shared turn-on, a brake, invitations, then love languages */
+    const S = sug.concat(llSug).slice(0, 5);
+    const sugBox = `<div class="kx-card" style="border-color:rgba(240,190,60,.5)"><div class="kx-turn">✨ Ideas made for you two</div>${S.length ? S.map(([i, t, d, u, l]) => `<div class="us-sug"><span aria-hidden="true">${i}</span><div><b>${esc(t)}</b><div class="kx-muted" style="font-size:13px">${esc(d)}</div><a href="${u}">${esc(l)} →</a></div></div>`).join('') : '<p class="us-empty">Answer a couple of the sections below and ideas made for you two show up here.</p>'}</div>`;
+    const done = [L0 || L1, B0.on.length + B1.on.length + B0.off.length + B1.off.length, anyT, mo].filter(Boolean).length;
+    app.innerHTML = top('Us at a glance', 'Everything you’ve each told KamaAgni, side by side, with ideas made for the two of you.') +
+      `<p class="kx-muted" style="margin:-4px 0 12px">${done} of 4 sections filled in.${done < 4 ? ' Each one takes about two minutes.' : ''}</p>` + sugBox + `<div style="margin-top:12px">${h}</div>`;
+  }
+  draw();
+  window.addEventListener('ka:shared', draw);
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

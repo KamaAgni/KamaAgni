@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en"><head>
+<script src="../js/ka-boot.js"></script><script src="../js/ka-filter.js"></script><script src="../js/ka-custom.js"></script><script src="../js/ka-fx.js"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#05060f"/>
+<title>KamaAgni Our Dates</title>
+<link rel="stylesheet" href="../css/fonts.css"/><link rel="stylesheet" href="../css/premium.css"/><link rel="stylesheet" href="../css/ka-shared.css"/>
+<style>
+.od-in{width:100%;min-height:44px;border-radius:12px;border:1px solid var(--border2);background:#0b0d1c;color:#fff;font:inherit;padding:8px 10px;margin:4px 0 10px;box-sizing:border-box}
+.od-k{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.od-k button{min-height:42px;padding:6px 12px;border-radius:999px;border:1px solid var(--border2);background:transparent;color:var(--muted);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.od-k button.on{color:#fff;background:rgba(232,99,122,.16);border-color:rgba(232,99,122,.6)}
+.od-e{display:flex;gap:12px;align-items:center}
+.od-e .n{min-width:74px;text-align:center;font-family:'Cormorant Garamond',serif;color:#f3d27a;line-height:1}
+.od-e .n b{display:block;font-size:34px}.od-e .n small{font-size:12px;color:var(--muted)}
+.od-e .t{flex:1;min-width:0}.od-e .t b{font-family:'Cormorant Garamond',serif;font-size:21px}
+.od-now{border-color:rgba(243,210,122,.6)!important;box-shadow:0 0 0 1px rgba(243,210,122,.3) inset}
+.od-ideas a{display:inline-flex;align-items:center;min-height:40px;margin:4px 6px 0 0;padding:6px 12px;border-radius:12px;border:1px solid var(--border2);color:#fff;text-decoration:none;font-size:14px}
+</style>
+</head><body>
+<main class="kx app" id="app"></main>
+<script src="../js/ka-common.js"></script>
+<script>
+(() => {
+  const {LS, esc, top} = KX;
+  const app = document.getElementById('app');
+  const [A, B] = KX.names();
+  const KIND = {
+    anniv: ['💞', 'Our anniversary', 'Anniversary'], wed: ['💍', 'Wedding anniversary', 'Anniversary'], first: ['🌹', 'Our first date', 'First time'],
+    kiss: ['💋', 'Our first kiss', 'First time'], moved: ['🏡', 'Moved in together', 'At home'], engaged: ['💎', 'Got engaged', 'Anniversary'],
+    bday1: ['🎂', A + '’s birthday', 'Romantic'], bday2: ['🎂', B + '’s birthday', 'Romantic'], other: ['⭐', 'Something special', 'Romantic']
+  };
+  /* ideas for the day, from what's already in KamaAgni */
+  const IDEAS = {
+    anniv: [['kamaagni-roleplay.html?n=37', '🎭 Old Flames Reunited'], ['kamaagni-date-kits.html', '🧺 A Date Night Kit'], ['kamaagni-roadmap.html', '🗺️ Our yearly review']],
+    wed: [['kamaagni-roleplay.html?n=84', '🎭 The Wedding Night'], ['kamaagni-love-coupons.html', '🎟 Love Coupons'], ['kamaagni-roadmap.html', '🗺️ Our yearly review']],
+    first: [['kamaagni-roleplay.html?n=32', '🎭 Strangers at the Bar'], ['kamaagni-eight-dates.html', '🗓 Eight Dates'], ['kamaagni-know-me.html', '🧠 How Well Do You Know Me']],
+    kiss: [['kamaagni-kama-studio.html', '💋 Kisses in Kama Studio'], ['kamaagni-rituals.html', '🧘 The 6-second kiss ritual'], ['kamaagni-roleplay.html?n=31', '🎭 First Time All Over Again']],
+    moved: [['kamaagni-pamper.html', '🛁 Pamper Prelude'], ['kamaagni-sensory-night.html', '🕯️ Sensory Night'], ['kamaagni-planner.html', '📅 Plan the next adventure']],
+    engaged: [['kamaagni-roleplay.html?n=36', '🎭 The Hotel Concierge'], ['kamaagni-bucket-list.html', '🪣 Bucket List'], ['kamaagni-tonight.html', '✨ Plan Tonight']],
+    bday1: [['kamaagni-secret.html', '💌 A Secret Envelope'], ['kamaagni-love-coupons.html', '🎟 Birthday coupons'], ['kamaagni-print.html', '🎁 Print a gift box']],
+    bday2: [['kamaagni-secret.html', '💌 A Secret Envelope'], ['kamaagni-love-coupons.html', '🎟 Birthday coupons'], ['kamaagni-print.html', '🎁 Print a gift box']],
+    other: [['kamaagni-tonight.html', '✨ Plan Tonight'], ['kamaagni-date-kits.html', '🧺 A Date Night Kit'], ['kamaagni-scratch-book.html', '✨ Scratch-Off Book']]
+  };
+  const st = LS.get('ka_dates', {e: []}); st.e = st.e || [];
+  const save = () => LS.set('ka_dates', st);
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  /* next time this date comes round (yearly), or the date itself (one-off) */
+  function next(e) {
+    const [y, m, d] = e.d.split('-').map(Number);
+    if (!e.y) return new Date(y, m - 1, d);
+    let n = new Date(today.getFullYear(), m - 1, d); if (n < today) n = new Date(today.getFullYear() + 1, m - 1, d); return n;
+  }
+  const days = e => Math.round((next(e) - today) / 864e5);
+  const years = e => next(e).getFullYear() - +e.d.slice(0, 4);
+  let ed = null, kind = 'anniv';
+  /* weekly date night (ka_datenight {on, dow, t}); shared with your partner's phone when linked */
+  const DN_DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], DN_FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  function dnCard() {
+    const dn = LS.get('ka_datenight', {on: 0, dow: 5, t: '19:30'}) || {on: 0, dow: 5, t: '19:30'};
+    const nextIn = (() => { const n = new Date(); let d = (dn.dow - n.getDay() + 7) % 7; const [hh, mm] = dn.t.split(':').map(Number); if (d === 0 && (n.getHours() * 60 + n.getMinutes()) > hh * 60 + mm + 180) d = 7; return d; })();
+    return `<div class="kx-card" style="margin-bottom:12px;${dn.on ? 'border-color:rgba(232,99,122,.55)' : ''}"><div class="kx-turn">🌹 Weekly date night</div>
+      <p class="kx-muted" style="margin:4px 0 8px;font-size:14px">Pick your regular night once. It shows on Home on the day${window.KA_PUSH && KA_PUSH.available() ? ', and with partner alerts on, both phones get a reminder that morning' : ''}.</p>
+      <div class="od-k" role="group" aria-label="Day">${DN_DAYS.map((d, i) => `<button data-dw="${i}" class="${dn.dow === i ? 'on' : ''}" aria-pressed="${dn.dow === i}">${d}</button>`).join('')}</div>
+      <label for="dnt" class="kx-muted">Time</label><input id="dnt" type="time" class="od-in" value="${esc(dn.t)}" style="max-width:180px">
+      <div class="kx-row"><button class="kx-btn ${dn.on ? 'ghost' : ''}" id="dno">${dn.on ? 'Turn off' : '🌹 Turn on'}</button>${dn.on ? '<button class="kx-btn ghost" id="dnc">📅 Add to calendar</button>' : ''}</div>
+      ${dn.on ? `<p style="margin:8px 0 0;font-size:14px">Next: <b>${nextIn === 0 ? 'tonight' : nextIn === 1 ? 'tomorrow' : DN_FULL[dn.dow]}</b> at ${esc(dn.t)}.</p>` : ''}</div>`;
+  }
+  function dnBind() {
+    const $ = id => document.getElementById(id), get = () => LS.get('ka_datenight', {on: 0, dow: 5, t: '19:30'}) || {on: 0, dow: 5, t: '19:30'}, put = o => { LS.set('ka_datenight', o); draw(); };
+    app.querySelectorAll('[data-dw]').forEach(b => b.onclick = () => { const o = get(); o.dow = +b.dataset.dw; put(o); });
+    $('dnt').onchange = e => { const o = get(); if (/^\d\d:\d\d$/.test(e.target.value)) { o.t = e.target.value; put(o); } };
+    $('dno').onclick = () => { const o = get(); o.on = o.on ? 0 : 1; put(o); KX.toast(o.on ? '🌹 Date night every ' + DN_FULL[o.dow] : 'Date night reminder off'); };
+    if ($('dnc')) $('dnc').onclick = () => { const o = get(), n = new Date(); let d = (o.dow - n.getDay() + 7) % 7; const st = new Date(n.getFullYear(), n.getMonth(), n.getDate() + d), [hh, mm] = o.t.split(':');
+      const f = x => x.getFullYear() + String(x.getMonth() + 1).padStart(2, '0') + String(x.getDate()).padStart(2, '0');
+      const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//KamaAgni//Date night//EN', 'BEGIN:VEVENT', 'UID:ka-datenight-' + Date.now() + '@kamaagni', 'DTSTAMP:' + f(n) + 'T000000', 'DTSTART:' + f(st) + 'T' + hh + mm + '00', 'DURATION:PT3H', 'RRULE:FREQ=WEEKLY;BYDAY=' + ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'][o.dow], 'SUMMARY:Date night 🌹', 'DESCRIPTION:Plan it in KamaAgni: Plan Tonight', 'BEGIN:VALARM', 'TRIGGER:-PT9H', 'ACTION:DISPLAY', 'DESCRIPTION:Date night tonight', 'END:VALARM', 'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([ics], {type: 'text/calendar'})); a.download = 'date-night.ics'; a.click(); };
+  }
+  function draw() {
+    const L = st.e.slice().sort((a, b) => days(a) - days(b));
+    app.innerHTML = top('Our Dates', 'Anniversaries, birthdays and firsts. A countdown for each, and ideas from KamaAgni when the day is near.') + dnCard() +
+      (L.length ? L.map(e => { const n = days(e), k = KIND[e.k] || KIND.other, yr = e.y ? years(e) : 0, near = n >= 0 && n <= 7;
+        return `<div class="kx-card ${n === 0 ? 'od-now' : ''}" style="margin-bottom:10px"><div class="od-e"><div class="n">${n === 0 ? '<b>🎉</b><small>today</small>' : n > 0 ? `<b>${n}</b><small>${n === 1 ? 'day' : 'days'}</small>` : '<b>✓</b><small>past</small>'}</div>
+          <div class="t"><b>${k[0]} ${esc(e.t || k[1])}</b><div class="kx-muted" style="font-size:13px">${esc(next(e).toLocaleDateString([], {weekday: 'short', day: 'numeric', month: 'long', year: 'numeric'}))}${yr > 0 ? ' · ' + yr + (yr === 1 ? ' year' : ' years') : ''}</div></div>
+          <button class="kx-btn ghost sm" data-ed="${e.id}" aria-label="Edit ${esc(e.t || k[1])}">✎</button></div>
+          ${near ? `<div class="od-ideas" style="margin-top:10px"><div class="kx-turn">${n === 0 ? 'Make today special' : 'Ideas for the day'}</div>${(IDEAS[e.k] || IDEAS.other).map(([u, l]) => `<a href="${u}">${l}</a>`).join('')}<a href="kamaagni-memories.html?new=1&t=${encodeURIComponent((e.t || k[1]) + (yr > 0 ? ' · ' + yr + ' years' : ''))}&d=${iso(next(e))}&g=${encodeURIComponent(k[2])}">📸 Add a Memory Book page</a></div>` : ''}</div>`; }).join('')
+        : '<div class="kx-card kx-center"><p>Add the dates that matter to you two. KamaAgni will count down and remind you on Home a week before.</p></div>') +
+      `<div class="kx-card" style="margin-top:12px"><div class="kx-turn">${ed && ed.id ? 'Edit date' : '➕ Add a date'}</div>
+        <div class="od-k" role="group" aria-label="Kind of date">${Object.entries(KIND).map(([k, v]) => `<button data-k="${k}" class="${(ed ? ed.k : kind) === k ? 'on' : ''}">${v[0]} ${esc(v[1])}</button>`).join('')}</div>
+        <label for="ti" class="kx-muted">Name (optional)</label><input id="ti" class="od-in" maxlength="60" value="${esc(ed ? ed.t : '')}" placeholder="${esc(KIND[ed ? ed.k : kind][1])}">
+        <label for="dt" class="kx-muted">Date</label><input id="dt" type="date" class="od-in" value="${esc(ed ? ed.d : '')}">
+        <label style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" id="yr" ${!ed || ed.y ? 'checked' : ''} style="width:22px;height:22px"> Every year</label>
+        <div class="kx-row"><button class="kx-btn" id="sv">${ed && ed.id ? 'Save' : 'Add date'}</button>${ed && ed.id ? '<button class="kx-btn ghost" id="cx">Cancel</button><button class="kx-btn ghost" id="rm">Delete</button>' : ''}</div></div>`;
+    dnBind();
+    const $ = id => document.getElementById(id);
+    app.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { if (ed) ed.k = b.dataset.k; else kind = b.dataset.k; keep(); draw(); });
+    app.querySelectorAll('[data-ed]').forEach(b => b.onclick = () => { ed = Object.assign({}, st.e.find(x => x.id === b.dataset.ed)); draw(); $('ti').focus(); });
+    function keep() { if (!ed) ed = {id: '', k: kind, t: '', d: '', y: 1}; ed.t = $('ti').value.trim(); ed.d = $('dt').value; ed.y = $('yr').checked ? 1 : 0; }
+    $('sv').onclick = () => { keep(); if (!/^\d{4}-\d\d-\d\d$/.test(ed.d)) { $('dt').focus(); return KX.toast('Pick the date'); }
+      if (ed.id) st.e = st.e.map(x => x.id === ed.id ? ed : x); else { ed.id = 'd' + Date.now().toString(36); st.e.push(ed); }
+      save(); ed = null; KX.toast('Saved 💞'); draw(); };
+    if ($('cx')) $('cx').onclick = () => { ed = null; draw(); };
+    if ($('rm')) $('rm').onclick = () => { if (!confirm('Delete this date?')) return; st.e = st.e.filter(x => x.id !== ed.id); save(); ed = null; draw(); };
+  }
+  draw();
+  window.addEventListener('ka:shared', draw);
+})();
+</script>
+<script src="../js/ka-config.js"></script><script src="../js/ka-features.js"></script><script src="../js/app-shell.js"></script><script src="../js/ka-gate.js"></script>
+<script src="../js/ka-track.js"></script>
+<script src="../js/ka-chrome.js"></script>
+</body></html>

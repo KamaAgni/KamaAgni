@@ -24,7 +24,7 @@
   const save = () => LS.set('ka_kinkex', st);
   const L = {y: '🔥 Curious', m: '🤔 Maybe', n: '🚫 Not for me'};
   function draw() {
-    app.innerHTML = top('Kink Explorer', 'Read what each one means, then mark how you feel. Marks stay private on this device.') + `
+    app.innerHTML = top('Kink Explorer', 'Read what each one means, then mark how you feel. Marks stay private. Anything marked 🚫 Not for me is hidden from every game (on your partner’s phone too, without saying what).') + `
       <input class="kx-input" id="q" type="search" placeholder="Search (e.g. bondage, gag, spanking)" value="${esc(q)}">
       <div class="kx-tabs"><button data-f="all" class="${f === 'all' ? 'on' : ''}">All (${kinks.length})</button><button data-f="y" class="${f === 'y' ? 'on' : ''}">Curious</button><button data-f="m" class="${f === 'm' ? 'on' : ''}">Maybe</button><button data-f="n" class="${f === 'n' ? 'on' : ''}">Not for me</button></div>
       <div class="kx-list" id="l"></div>

@@ -524,8 +524,8 @@ function setupScreen(){
   wrap.innerHTML = `
     <div class="eyebrow">Before you begin</div>
     <p class="muted" style="margin-bottom:18px;">Two players, five clothing items each (a pair of socks or shoes counts as one). Play in a room where you won't be interrupted for about 90 minutes. Everything is optional, and either of you can stop at any time.</p>
-    <label>Player One</label><input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16">
-    <label>Player Two</label><input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16">
+    <label>Player One</label><input type="text" id="nameA" placeholder="e.g. Priya" maxlength="16" value="${(()=>{try{const c=JSON.parse(localStorage.getItem('ka_couple'))||{};return String(c.p1||'').replace(/[<>"&]/g,'')}catch(e){return ''}})()}">
+    <label>Player Two</label><input type="text" id="nameB" placeholder="e.g. Dev" maxlength="16" value="${(()=>{try{const c=JSON.parse(localStorage.getItem('ka_couple'))||{};return String(c.p2||'').replace(/[<>"&]/g,'')}catch(e){return ''}})()}">
     <label>The finale you both agreed on (optional)</label><input type="text" id="finale" placeholder="e.g. A long bath together, then bed" maxlength="90">
     <button class="btn-primary" id="startBtn">Deal the First Hand</button>`;
   wrap.querySelector('#startBtn').onclick = () => {

@@ -227,7 +227,7 @@
   setInterval(function () { if (!document.hidden) pull(); }, 15000);
   window.addEventListener('ka:cloud', function () { setTimeout(pull, 800); });
   setTimeout(pull, 2500);
-  window.KA_SHARE = { pull: pull, keys: KEYS };
+  window.KA_PSHARE = { pull: pull, keys: KEYS };
 })();
 
 /* ---- Comfort settings (text size, high contrast), iPhone install hint, Start here, Surprise me ---- */
@@ -238,11 +238,22 @@
   function applyComfort() {
     var z = rd('ka_textsize', 100); root.style.fontSize = z === 100 ? '' : z + '%';
     root.classList.toggle('ka-hc', !!rd('ka_hicontrast', false));
+    var dk = !!rd('ka_darkroom', false); root.classList.toggle('ka-dark', dk);
+    if (dk && z < 115) root.style.fontSize = '112%';
+    if (dk) quiet();
   }
+  /* Dark-room mode: dim warm screen, bigger text, no sounds and no vibration (for use in bed) */
+  function quiet() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if (AC && !AC.__kaDark) { var W = function () { var c = new AC(); try { c.suspend(); } catch (e) {} c.resume = function () { return Promise.resolve(); }; return c; }; W.prototype = AC.prototype; W.__kaDark = 1; window.AudioContext = W; window.webkitAudioContext = W; }
+    try { navigator.vibrate = function () { return false; }; } catch (e) {}
+    try { HTMLMediaElement.prototype.play = function () { this.muted = true; return Promise.resolve(); }; } catch (e) {}
+  }
+  window.KA_DARK = { on: function () { return !!rd('ka_darkroom', false); }, set: function (v) { wr('ka_darkroom', !!v); if (v) applyComfort(); else location.reload(); } };
   applyComfort();
   var st = D.createElement('style');
-  st.textContent = '.ka-hc body,.ka-hc .kx{color:#fff!important}.ka-hc .g-m,.ka-hc p,.ka-hc small,.ka-hc .card-desc{color:#f2f2f2!important;opacity:1!important}.ka-hc a{text-decoration:underline}.ka-hc button,.ka-hc .g-card,.ka-hc .game-card{border-color:rgba(255,255,255,.7)!important}' +
-    '.ka-box{margin:12px auto;max-width:720px;padding:16px;border-radius:16px;border:1px solid rgba(255,176,102,.4);background:rgba(20,12,24,.85);color:#fff}.ka-box h3{margin:0 0 8px;font-size:1.1rem}.ka-box .r{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.ka-box button,.ka-box a.b{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffb066;background:transparent;color:inherit;font:inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}.ka-row button,.ka-row a.b{padding:8px 11px;font-size:.92rem}.ka-box button.on{background:#ffb066;color:#1a0f12}';
+  st.textContent = 'html.ka-dark::after{content:"";position:fixed;inset:0;background:rgba(18,2,6,.42);pointer-events:none;z-index:2147483000}html.ka-dark{filter:none}html.ka-dark *{animation-duration:.01ms!important;transition-duration:.01ms!important}' + '.ka-hc body,.ka-hc .kx{color:#fff!important}.ka-hc .g-m,.ka-hc p,.ka-hc small,.ka-hc .card-desc{color:#f2f2f2!important;opacity:1!important}.ka-hc a{text-decoration:underline}.ka-hc button,.ka-hc .g-card,.ka-hc .game-card{border-color:rgba(255,255,255,.7)!important}' +
+    '.ka-box{margin:12px auto;max-width:720px;padding:16px;border-radius:16px;border:1px solid rgba(255,176,102,.4);background:rgba(20,12,24,.85);color:#fff}.ka-box h2,.ka-box h3{margin:0 0 8px;font-size:1.1rem}.ka-box .r{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}.ka-box button,.ka-box a.b{min-height:44px;padding:8px 14px;border-radius:999px;border:1px solid #ffb066;background:transparent;color:inherit;font:inherit;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center}.ka-row button,.ka-row a.b{padding:8px 11px;font-size:.92rem}.ka-box button.on{background:#ffb066;color:#1a0f12}';
   D.head.appendChild(st);
   function ready(f) { if (D.readyState !== 'loading') f(); else D.addEventListener('DOMContentLoaded', f); }
 
@@ -254,13 +265,18 @@
       var b = D.createElement('div'); b.id = 'ka-comfort'; b.className = 'ka-box';
       function paint() {
         var z = rd('ka_textsize', 100), hc = rd('ka_hicontrast', false);
-        b.innerHTML = '<h3>Comfort: text size and contrast</h3><div class="r" role="group" aria-label="Text size">' +
+        b.innerHTML = '<h2>Comfort: text size and contrast</h2><div class="r" role="group" aria-label="Text size">' +
           [[100, 'Normal'], [115, 'Large'], [130, 'Extra large']].map(function (o) { return '<button data-z="' + o[0] + '" class="' + (z === o[0] ? 'on' : '') + '" aria-pressed="' + (z === o[0]) + '">' + o[1] + '</button>'; }).join('') +
-          '</div><div class="r"><button data-hc="1" class="' + (hc ? 'on' : '') + '" aria-pressed="' + hc + '">High contrast: ' + (hc ? 'on' : 'off') + '</button></div>';
+          '</div><div class="r"><button data-hc="1" class="' + (hc ? 'on' : '') + '" aria-pressed="' + hc + '">High contrast: ' + (hc ? 'on' : 'off') + '</button>' +
+          '<button data-dk="1" class="' + (rd('ka_darkroom', false) ? 'on' : '') + '" aria-pressed="' + !!rd('ka_darkroom', false) + '">🌙 Dark-room mode: ' + (rd('ka_darkroom', false) ? 'on' : 'off') + '</button></div><p style="margin:4px 0 0;font-size:13px;opacity:.8">Dark-room mode dims the screen, makes text bigger and turns off all sounds and vibration. Also in the ⏸ panel.</p>';
         b.querySelectorAll('[data-z]').forEach(function (x) { x.onclick = function () { wr('ka_textsize', +x.dataset.z); applyComfort(); paint(); }; });
         b.querySelector('[data-hc]').onclick = function () { wr('ka_hicontrast', !rd('ka_hicontrast', false)); applyComfort(); paint(); };
+        b.querySelector('[data-dk]').onclick = function () { KA_DARK.set(!KA_DARK.on()); paint(); };
       }
-      paint(); app.insertBefore(b, app.children[1] || null);
+      paint();
+      /* below the page title and the Names & genders card, above the topic switches */
+      var sub = app.querySelector('.kx-sub'), after = sub && sub.nextElementSibling && /Names/.test(sub.nextElementSibling.textContent || '') ? sub.nextElementSibling : sub;
+      if (after && after.parentNode) after.parentNode.insertBefore(b, after.nextSibling); else app.insertBefore(b, app.children[1] || null);
     }, 150);
   });
 
@@ -303,19 +319,19 @@
     var box = D.createElement('section'); box.id = 'ka-start'; box.className = 'ka-box'; box.setAttribute('aria-label', 'Start here');
     function step() {
       if (!a.mood) {
-        box.innerHTML = '<h3>👋 Start here: 3 quick questions</h3><p>What mood are you in tonight?</p><div class="r">' +
+        box.innerHTML = '<h2>👋 Start here: 3 quick questions</h2><p>What mood are you in tonight?</p><div class="r">' +
           Object.keys(VIBE).map(function (k) { return '<button data-m="' + k + '">' + VIBE[k] + '</button>'; }).join('') + '</div><div class="r"><button data-skip>Not now</button></div>';
         box.querySelectorAll('[data-m]').forEach(function (b) { b.onclick = function () { a.mood = b.dataset.m; step(); }; });
       } else if (!a.mins) {
-        box.innerHTML = '<h3>How much time do you have?</h3><div class="r">' + [[10, '10 minutes'], [30, 'About 30'], [90, 'All evening']].map(function (o) { return '<button data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+        box.innerHTML = '<h2>How much time do you have?</h2><div class="r">' + [[10, '10 minutes'], [30, 'About 30'], [90, 'All evening']].map(function (o) { return '<button data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
         box.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { a.mins = +b.dataset.t; step(); }; });
       } else if (!a.heat) {
-        box.innerHTML = '<h3>How spicy?</h3><p>You can change this any time. Nothing here is a promise.</p><div class="r">' + [[1, '🌸 Sweet'], [2, '🔥 Warm'], [3, '🌶️ Hot']].map(function (o) { return '<button data-h="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+        box.innerHTML = '<h2>How spicy?</h2><p>You can change this any time. Nothing here is a promise.</p><div class="r">' + [[1, '🌸 Sweet'], [2, '🔥 Warm'], [3, '🌶️ Hot']].map(function (o) { return '<button data-h="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
         box.querySelectorAll('[data-h]').forEach(function (b) { b.onclick = function () { a.heat = +b.dataset.h; step(); }; });
       } else {
         cat(function (C) {
           var L = shuf(match(C, a.mood, a.mins, a.heat)).slice(0, 3);
-          box.innerHTML = '<h3>Good places to begin</h3>' + (L.length ? L.map(function (c, i) { return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)"><b>' + c.i + ' ' + c.t + '</b><div style="opacity:.85;font-size:.92em">' + c.d + '</div><div class="r"><a class="b" href="' + c.u + '">Open</a><button data-p="' + i + '">' + (pinned(c.u) ? '★ Saved' : '☆ Save to favourites') + '</button></div></div>'; }).join('') : '<p>Try the All Games page: it has everything.</p>') +
+          box.innerHTML = '<h2>Good places to begin</h2>' + (L.length ? L.map(function (c, i) { return '<div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.1)"><b>' + c.i + ' ' + c.t + '</b><div style="opacity:.85;font-size:.92em">' + c.d + '</div><div class="r"><a class="b" href="' + c.u + '">Open</a><button data-p="' + i + '">' + (pinned(c.u) ? '★ Saved' : '☆ Save to favourites') + '</button></div></div>'; }).join('') : '<p>Try the All Games page: it has everything.</p>') +
             '<div class="r"><button data-again>Try different answers</button><button data-done>Done</button></div>';
           box.querySelectorAll('[data-p]').forEach(function (b) { b.onclick = function () { pin(L[+b.dataset.p]); b.textContent = '★ Saved'; }; });
           box.querySelector('[data-again]').onclick = function () { a = { mood: '', mins: 0, heat: 0 }; step(); };
@@ -343,7 +359,7 @@
         try { var mt = JSON.parse(localStorage.getItem('ka_mood') || 'null'); if (mt && mt.v) mood = mt.v; } catch (e) {}
         var L = C.filter(function (c) { return c.u && c.h && c.h[0] <= heat && (!mood || c.v === mood) && !/kamaagni-(settings|history|search)/.test(c.u); });
         if (!L.length) L = C.filter(function (c) { return c.u; });
-        var c = shuf(L)[0]; if (c) location.href = c.u;
+        var sm = window.KA_NEXT && KA_NEXT.smart ? KA_NEXT.smart(C, { mood: mood }) : null; var c = sm ? sm.g : shuf(L)[0]; if (sm) try { sessionStorage.setItem('ka_surprise_why', sm.why || ''); } catch (e) {} if (c) location.href = c.u;
       });
     };
   }

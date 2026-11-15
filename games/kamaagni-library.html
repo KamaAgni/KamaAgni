@@ -11,6 +11,7 @@
 </head><body>
 <main class="kx app" id="app"></main>
 <script src="../js/ka-common.js"></script>
+<script src="../js/ka-catalog.js"></script><script src="../js/ka-sources.js"></script>
 <script>
 
 (async () => {
@@ -24,30 +25,61 @@
   let items = [];
   try { items = await (await fetch('../data/library.json')).json(); }
   catch { app.innerHTML = top('Library', '') + '<div class="kx-card kx-center">Could not load the library list. Open this page from your hosted site.</div>'; return; }
-  const cats = ['All', '⭐ Featured', ...[...new Set(items.map(i => i.c))]];
+  const cats = ['All', '⭐ Featured', '📥 On this device', ...[...new Set(items.map(i => i.c))]];
   let cat = '⭐ Featured', q = '';
   const recent = () => LS.get('ka_lib_recent', []);
   app.innerHTML = top('Library', 'Printable games, cards, task books and guides. Preview in your browser or download.') + `
     <input class="kx-input" id="q" type="search" placeholder="Search the library (e.g. coupons, bondage, calendar)">
     <div class="kx-tabs" id="tabs" style="flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px"></div>
+    <div id="cont"></div>
     <div class="kx-list" id="list"></div>
     <p class="kx-note">Files open from your KamaAgniPDF library on GitHub. Big files (50 MB+) can take a moment on mobile data. Print at "Actual size" for cards.</p>`;
   const tabs = document.getElementById('tabs');
   tabs.innerHTML = cats.map(c => `<button data-c="${esc(c)}" style="flex:0 0 auto;min-width:0;padding:10px 14px">${esc(c)}</button>`).join('');
+  /* which games use each PDF (from js/ka-sources.js) */
+  const usedBy = {};
+  try { const M = (window.KA_SOURCES && KA_SOURCES.map) || {}, C = window.KA_CATALOG || [];
+    const title = s => { const c = C.find(x => (x.u || '').endsWith('/' + s + '.html')); return c ? [c.t, c.u, c.i] : null; };
+    Object.entries(M).forEach(([slug, F]) => { const t = title(slug); if (!t) return; F.forEach(f => items.forEach(i => { if (i.p === f || i.p.indexOf(f + '/') === 0) (usedBy[i.p] = usedBy[i.p] || []).some(x => x[0] === t[0]) || usedBy[i.p].push(t); })); }); } catch (e) {}
+  const cont = () => {
+    const M = LS.get('ka_pdf_meta', {}) || {}, B = LS.get('ka_pdf_bm', {}) || {};
+    const L = Object.entries(M).filter(([f, o]) => o && o.p && o.n).sort((a, b) => b[1].at - a[1].at).slice(0, 4);
+    document.getElementById('cont').innerHTML = L.length ? `<div class="kx-sec">📖 Continue reading</div><div class="kx-list" style="margin-bottom:14px">${L.map(([f, o]) => { const pc = Math.round(Math.max(o.max || o.last || 1, o.last || 1) / o.n * 100), nb = (B[f] || []).length; return `<a class="kx-card" style="display:block;padding:14px 16px;text-decoration:none;color:inherit" href="${esc(view(o.p, o.t))}"><div class="kx-row" style="justify-content:space-between"><b>${esc(o.t)}</b><span class="kx-muted">p. ${o.last || 1} / ${o.n}${nb ? ' · 🔖 ' + nb : ''}</span></div><div class="kx-prog" style="margin-top:8px" role="progressbar" aria-valuenow="${pc}" aria-valuemin="0" aria-valuemax="100" aria-label="Read ${pc}%"><i style="width:${pc}%"></i></div></a>`; }).join('')}</div>` : '';
+  };
+  /* PDFs kept on this device for offline reading (Cache Storage 'ka-pdf-offline'; the Reader opens them from there) */
+  let OFF = new Set();
+  const offList = async () => { try { const c = await caches.open('ka-pdf-offline'); OFF = new Set((await c.keys()).map(r => r.url)); } catch (e) { OFF = new Set(); } };
+  await offList();
   const draw = () => {
+    if (!q && (cat === '⭐ Featured' || cat === 'All')) cont(); else document.getElementById('cont').innerHTML = '';
     tabs.querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.c === cat && !q));
     let l = items.filter(i => q ? (i.t + ' ' + i.d + ' ' + i.c).toLowerCase().includes(q)
-      : cat === 'All' ? true : cat.startsWith('⭐') ? i.f : i.c === cat);
+      : cat === 'All' ? true : cat.startsWith('⭐') ? i.f : cat.startsWith('📥') ? OFF.has(raw(i.p)) : i.c === cat);
     document.getElementById('list').innerHTML = l.map(i => `<div class="kx-card" style="padding:16px 16px 14px">
       <div class="kx-row" style="justify-content:space-between;align-items:flex-start;gap:8px"><div><span class="kx-chip">${esc(i.c)}</span>
       <div style="font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;margin:8px 0 2px;line-height:1.25">${esc(i.t)}</div></div>
       <span class="kx-muted" style="white-space:nowrap">${i.pg ? i.pg + ' pp · ' : ''}${i.mb >= 1 ? Math.round(i.mb) + ' MB' : '<1 MB'}</span></div>
-      <p class="kx-muted" style="margin:2px 0 12px">${esc(i.d)}</p>
+      <p class="kx-muted" style="margin:2px 0 ${usedBy[i.p] ? 6 : 12}px">${esc(i.d)}</p>
+      ${usedBy[i.p] ? `<p style="margin:0 0 12px;font-size:13px"><span class="kx-muted">Used in:</span> ${usedBy[i.p].map(([t, u, ic]) => `<a href="../${esc(u)}" style="color:var(--rose);text-decoration:none;margin-right:10px">${ic || ''} ${esc(t)}</a>`).join('')}</p>` : ''}
+      ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).n ? `<p class="kx-muted" style="margin:-6px 0 10px;font-size:12px">📖 You read up to page ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).last} of ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).n}</p>` : ''}
       <div class="kx-row"><a class="kx-btn sm" href="${esc(view(i.p, i.t))}">👁 Read</a>
       <a class="kx-btn sm gold" href="${esc(raw(i.p))}" data-dl="${esc(i.p)}" rel="noopener">⬇ Download</a>
-      <a class="kx-btn sm ghost" href="${gh(i.p)}" target="_blank" rel="noopener">GitHub</a></div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
+      <a class="kx-btn sm ghost" href="${gh(i.p)}" target="_blank" rel="noopener">GitHub</a>
+      ${window.caches ? `<button class="kx-btn sm ghost" data-off="${esc(i.p)}" aria-pressed="${OFF.has(raw(i.p))}">${OFF.has(raw(i.p)) ? '✓ On this device' : '📥 Keep offline'}</button>` : ''}</div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
   };
   document.getElementById('list').addEventListener('click', async e => {
+    const o = e.target.closest('[data-off]');
+    if (o) {
+      const u = raw(o.dataset.off), c = await caches.open('ka-pdf-offline');
+      if (OFF.has(u)) { if (!confirm('Remove this PDF from this device? You can still read it online.')) return; await c.delete(u); KX.toast('Removed from this device'); }
+      else {
+        o.disabled = true; o.textContent = 'Saving…';
+        try { try { navigator.storage && navigator.storage.persist && await navigator.storage.persist(); } catch (x) {}
+          const r = await fetch(u); if (!r.ok) throw 0; await c.put(u, r); KX.toast('📥 Saved. It opens even without internet.'); }
+        catch (x) { KX.toast('Could not save it. Check your connection and free space.'); }
+      }
+      await offList(); draw(); return;
+    }
     const a = e.target.closest('[data-dl]'); if (!a) return; e.preventDefault();
     const old = a.textContent; a.textContent = 'Downloading…';
     try { const r = await fetch(a.href); if (!r.ok) throw 0; const bl = await r.blob(); const l = document.createElement('a'); l.href = URL.createObjectURL(bl); l.download = a.dataset.dl.split('/').pop(); document.body.appendChild(l); l.click(); setTimeout(() => { URL.revokeObjectURL(l.href); l.remove(); }, 4000); a.textContent = '✓ Saved'; setTimeout(() => a.textContent = old, 2500); }

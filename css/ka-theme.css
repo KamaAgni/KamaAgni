@@ -241,3 +241,8 @@ body{overflow-x:hidden}
   .kx-card,.card{padding-top:10px;padding-bottom:10px}
   #ka-ftr{padding-top:12px}
 }
+
+/* v65: readability and tap-size minimums found in the full-site audit */
+button.kx-chip{min-height:36px;padding:6px 13px;font-size:12px}
+.kd-cat em,.kd-rc em,.kd-tk em,.kd-door em,.kd-stats span{font-size:12px!important}
+.die-label,.dice-label,.header-eyebrow,.panel-label,.stat-label,.player-turn-label,.slider-label,.kbd-hint,.board-hint{font-size:12px!important}
