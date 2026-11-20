@@ -130,6 +130,8 @@
     d.style.cssText = 'position:fixed;left:12px;right:12px;bottom:84px;z-index:9500;max-width:520px;margin:0 auto;padding:12px 14px;border-radius:14px;background:#2a1d14;border:1px solid #ffb066;color:#f6e9d6;font:14px/1.4 system-ui,sans-serif;display:flex;gap:10px;align-items:center';
     d.innerHTML = '<span style="flex:1">☁️ ' + (s.vault === 'new' ? 'Your data is not syncing yet. Create your vault passphrase to back it up and see it on every device.' : 'Unlock your vault with your passphrase to load your data on this device.') + '</span><button type="button" id="ka-vgo" style="min-height:44px;padding:8px 14px;border-radius:10px;border:0;background:#ffb066;color:#1d140e;font:inherit;font-weight:700;cursor:pointer">Set up</button><button type="button" id="ka-vx" aria-label="Dismiss" style="min-height:44px;min-width:44px;border:0;background:none;color:inherit;font-size:20px;cursor:pointer">✕</button>';
     document.body.appendChild(d);
+    /* gone as soon as the vault is set up or unlocked */
+    addEventListener('ka:cloud', function (e) { var t = e.detail || (window.KA_CLOUD && KA_CLOUD.state()); if (t && t.vault === 'ready' && d.parentNode) d.remove(); });
     document.getElementById('ka-vx').onclick = function () { sessionStorage.setItem('ka_vnag', '1'); d.remove(); };
     document.getElementById('ka-vgo').onclick = function () { sessionStorage.setItem('ka_vnag', '1'); d.remove(); var a = document.getElementById('kh-acct'); if (a) a.click(); };
   }, 500);
@@ -319,14 +321,14 @@
     var box = D.createElement('section'); box.id = 'ka-start'; box.className = 'ka-box'; box.setAttribute('aria-label', 'Start here');
     function step() {
       if (!a.mood) {
-        box.innerHTML = '<h2>👋 Start here: 3 quick questions</h2><p>What mood are you in tonight?</p><div class="r">' +
+        box.innerHTML = '<h2>👋 Start here: 3 quick questions</h2><p><small style="opacity:.75">1 of 3</small> · What mood are you in tonight?</p><div class="r">' +
           Object.keys(VIBE).map(function (k) { return '<button data-m="' + k + '">' + VIBE[k] + '</button>'; }).join('') + '</div><div class="r"><button data-skip>Not now</button></div>';
         box.querySelectorAll('[data-m]').forEach(function (b) { b.onclick = function () { a.mood = b.dataset.m; step(); }; });
       } else if (!a.mins) {
-        box.innerHTML = '<h2>How much time do you have?</h2><div class="r">' + [[10, '10 minutes'], [30, 'About 30'], [90, 'All evening']].map(function (o) { return '<button data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+        box.innerHTML = '<h2>How much time do you have?</h2><p><small style="opacity:.75">2 of 3</small></p><div class="r">' + [[10, '10 minutes'], [30, 'About 30'], [90, 'All evening']].map(function (o) { return '<button data-t="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
         box.querySelectorAll('[data-t]').forEach(function (b) { b.onclick = function () { a.mins = +b.dataset.t; step(); }; });
       } else if (!a.heat) {
-        box.innerHTML = '<h2>How spicy?</h2><p>You can change this any time. Nothing here is a promise.</p><div class="r">' + [[1, '🌸 Sweet'], [2, '🔥 Warm'], [3, '🌶️ Hot']].map(function (o) { return '<button data-h="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
+        box.innerHTML = '<h2>How spicy?</h2><p><small style="opacity:.75">3 of 3</small> · You can change this any time. Nothing here is a promise.</p><div class="r">' + [[1, '🌸 Sweet'], [2, '🔥 Warm'], [3, '🌶️ Hot']].map(function (o) { return '<button data-h="' + o[0] + '">' + o[1] + '</button>'; }).join('') + '</div>';
         box.querySelectorAll('[data-h]').forEach(function (b) { b.onclick = function () { a.heat = +b.dataset.h; step(); }; });
       } else {
         cat(function (C) {
@@ -340,9 +342,12 @@
         });
         return;
       }
+      if (a.mood) { var bk = D.createElement('div'); bk.className = 'r'; bk.innerHTML = '<button data-back>← Back</button>'; box.appendChild(bk);
+        bk.querySelector('[data-back]').onclick = function () { if (a.mins) a.mins = 0; else a.mood = ''; step(); }; }
       var sk = box.querySelector('[data-skip]'); if (sk) sk.onclick = function () { wr('ka_started', 1); box.remove(); };
     }
-    step(); dash.parentNode.insertBefore(box, dash);
+    /* near the top, just under the search box, so a new couple sees it first */
+    var at = D.querySelector('.feature-banner') || dash; step(); at.parentNode.insertBefore(box, at);
     if (force) box.scrollIntoView({ block: 'center' });
   }
 
@@ -350,7 +355,7 @@
     var dash = D.getElementById('dash'); if (!dash || D.getElementById('ka-surp')) return;
     var w = D.createElement('div'); w.id = 'ka-surp'; w.className = 'r'; w.style.cssText = 'max-width:720px;margin:8px auto;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 16px';
     w.className = 'ka-box ka-row'; w.style.cssText += ';background:none;border:0;padding:0';
-    w.innerHTML = '<button id="ka-sp">🎁 Surprise me</button><button id="ka-sh">👋 Start</button><a class="b" href="games/kamaagni-week.html">🗓️ Week</a>';
+    w.innerHTML = '<button id="ka-sp">🎁 Surprise me</button><button id="ka-sh">🧭 Help me pick</button><a class="b" href="games/kamaagni-week.html">🗓️ Week</a>';
     dash.parentNode.insertBefore(w, dash);
     w.querySelector('#ka-sh').onclick = function () { guide(true); };
     w.querySelector('#ka-sp').onclick = function () {
@@ -364,4 +369,6 @@
     };
   }
   ready(function () { surprise(); if (!rd('ka_started', 0) && rd('ka_welcomed', 0)) setTimeout(function () { guide(false); }, 600); });
+  /* first visit: the welcome screen finishes after the page has loaded, so show the guide then */
+  addEventListener('ka-welcomed', function () { if (!rd('ka_started', 0)) setTimeout(function () { guide(false); }, 400); });
 })();

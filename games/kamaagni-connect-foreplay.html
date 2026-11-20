@@ -449,7 +449,7 @@ function setupScreen(){
       <button type="button" class="on" data-m="one"><b>📱 One phone</b><span>Share this phone and take turns tapping the board.</span></button>
       <button type="button" data-m="two" ${linked()?'':'disabled'}><b>📱📱 Two phones</b><span>${linked()?'Each of you plays on your own phone, live. Your partner joins by themselves.':'Needs a linked partner. Sign in and link in Together first.'}</span></button>
     </div>
-    ${linked()?'':'<p class="muted" style="font-size:12px;margin:6px 0 0"><a href="kamaagni-together.html" style="color:var(--gold)">Open Together to link</a></p>'}
+    ${linked()?'':'<p class="muted" style="font-size:14px;margin:4px 0 12px"><a href="kamaagni-together.html" style="color:var(--gold);display:inline-flex;align-items:center;min-height:40px">🔗 Open Together to link your phones</a></p>'}
     <label>Naughtiness</label>
     <div class="mode-pick" id="heat" style="grid-template-columns:repeat(3,1fr)">${[[1,'🌸 Sweet','Spark + Blaze'],[2,'🔥 Spicy','All three rounds'],[3,'🌋 Wild','Blaze + Inferno']].map(h=>`<button type="button" data-h="${h[0]}"><b>${h[1]}</b><span>${h[2]}</span></button>`).join('')}</div>
     <details style="margin:10px 0"><summary style="cursor:pointer;color:var(--gold)">Challenge types (tap to turn off)</summary>

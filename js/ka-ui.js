@@ -47,7 +47,7 @@
         '<div class="kx-card kd-setup" data-nofx="1">' +
         (canTwo ? '<div class="kx-sec" style="margin-top:0">How do you want to play?</div><div class="kd-modes"><button type="button" data-m="one" class="' + (mode === 'one' ? 'on' : '') + '"><b>📱 One phone</b><span>Share this phone and take turns.</span></button>' +
           '<button type="button" data-m="two" class="' + (mode === 'two' ? 'on' : '') + '" ' + (linked ? '' : 'disabled') + '><b>📱📱 Two phones</b><span>' + (linked ? 'Each on your own phone, live. Your partner joins by themselves.' : 'Needs a linked partner. Link once in Together.') + '</span></button></div>' +
-          (linked ? '' : '<p class="kx-note" style="margin-top:6px"><a href="kamaagni-together.html" style="color:var(--kv-rose2)">Open Together to link</a></p>') : '') +
+          (linked ? '' : '<p class="kx-note" style="margin:4px 0 10px"><a href="kamaagni-together.html" style="color:var(--kv-rose2);display:inline-flex;align-items:center;min-height:40px;padding:0 6px">🔗 Open Together to link your phones</a></p>') : '') +
         '<div class="kx-sec">Heat level</div><div id="kd-heat"></div>' +
         '<div class="kx-row kd-start" style="margin-top:16px"><button class="kx-btn gold" id="kd-go">' + esc(cfg.startLabel || 'Start') + '</button>' + (cfg.guide ? '<button class="kx-btn ghost" id="kd-gd">📖 How to play</button>' : '') + '</div>' +
         '<details class="kd-more" id="kd-more"' + (LSget('ka_setup_open', 0) ? ' open' : '') + '><summary><b>⚙️ Customise</b><span>' + esc(summary()) + '</span></summary>' +
@@ -83,7 +83,12 @@
       (o && o.guide ? '<button class="kx-chip kd-b" data-kd="guide">📖 Guide</button>' : '') + (o && o.quit ? '<button class="kx-chip kd-b" data-kd="quit">✕ End game</button>' : '') + '</div>';
   }
   function bindBar(root, o) {
-    root.querySelectorAll('[data-kd]').forEach(function (b) { b.onclick = function () { if (b.dataset.kd === 'guide' && o.guide) guide(o.guideTitle || 'How to play', o.guide); else if (b.dataset.kd === 'quit' && o.quit) { if (confirm('End this game' + (o.two ? ' for both players' : '') + '?')) o.quit(); } }; });
+    root.querySelectorAll('[data-kd]').forEach(function (b) { b.onclick = function () { if (b.dataset.kd === 'guide' && o.guide) guide(o.guideTitle || 'How to play', o.guide); else if (b.dataset.kd === 'quit' && o.quit) {
+          /* tap twice instead of a system pop-up: the first tap asks, a second tap within 3 seconds ends */
+          if (b.dataset.arm) { clearTimeout(+b.dataset.arm); o.quit(); return; }
+          var old = b.textContent; b.textContent = o.two ? 'Tap again to end for both' : 'Tap again to end'; b.style.borderColor = '#ff8a8a'; b.style.color = '#ffd0d0';
+          b.dataset.arm = setTimeout(function () { delete b.dataset.arm; b.textContent = old; b.style.borderColor = ''; b.style.color = ''; }, 3000);
+        } }; });
   }
 
   /* 3D flip card: returns html. Add class 'back' (via flip()) to reveal. */

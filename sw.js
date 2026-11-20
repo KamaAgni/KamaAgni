@@ -1,5 +1,5 @@
 /* KamaAgni service worker — resilient offline-first cache */
-const CACHE = 'kamaagni-v86';
+const CACHE = 'kamaagni-v94';
 
 /* Resolve every asset relative to this file's own scope so the cache
    still works correctly if the site is deployed under a sub-path
@@ -116,7 +116,7 @@ const ASSETS = [
   p('games/kamaagni-task-deck.html'),
   p('games/kamaagni-kink-explorer.html'),
   p('games/kamaagni-learn.html'),
-  p('games/kamaagni-tonight.html'), p('games/kamaagni-invite.html'), p('games/kamaagni-checkin.html'), p('games/kamaagni-print.html'), p('games/kamaagni-apart.html'), p('js/ka-nudge.js'), p('games/kamaagni-dates.html'), p('js/ka-voice.js'), p('js/vendor/qrcode.min.js'), p('js/ka-shared.js'), p('js/ka-fb.js'), p('js/ka-push.js'), p('js/ka-tidy.js'), p('js/ka-limits.js'), p('js/ka-after.js'), p('games/kamaagni-us.html'), p('games/kamaagni-afterglow.html'), p('games/kamaagni-positions.html'), p('data/positions.json'), p('games/kamaagni-playbook.html'), p('data/playbook.json'), p('js/ka-both.js'), p('js/ka-remote.js'), p('games/kamaagni-month.html'),
+  p('games/kamaagni-tonight.html'), p('games/kamaagni-invite.html'), p('games/kamaagni-checkin.html'), p('games/kamaagni-print.html'), p('games/kamaagni-apart.html'), p('js/ka-nudge.js'), p('games/kamaagni-dates.html'), p('js/ka-voice.js'), p('js/vendor/qrcode.min.js'), p('js/ka-shared.js'), p('js/ka-fb.js'), p('js/ka-push.js'), p('js/ka-tidy.js'), p('js/ka-limits.js'), p('js/ka-after.js'), p('games/kamaagni-us.html'), p('games/kamaagni-afterglow.html'), p('games/kamaagni-positions.html'), p('data/positions.json'), p('games/kamaagni-playbook.html'), p('data/playbook.json'), p('js/ka-both.js'), p('js/ka-remote.js'), p('data/pdf-clean.json'), p('games/kamaagni-month.html'),
   p('games/kamaagni-journal.html'),
   p('games/kamaagni-library.html'), p('games/kamaagni-progress.html'), p('games/kamaagni-roleplay.html'), p('games/kamaagni-talk.html'), p('games/kamaagni-brakes.html'), p('games/kamaagni-session.html'), p('games/kamaagni-secret.html'), p('js/ka-track.js'), p('games/kamaagni-journey.html'), p('games/kamaagni-challenges.html'), p('games/kamaagni-kinky-dice.html'), p('games/kamaagni-hornopoly.html'), p('games/kamaagni-prompts.html'), p('data/bdsm500.json'), p('data/challenges.json'), p('data/wishlist.json'), p('data/dice_faces.json'), p('data/journal_prompts.json'), p('data/roleplay_hooks.json'), p('data/roleplay.json'), p('about.html'), p('games/pdf-viewer.html'), p('js/vendor/pdf.min.js'), p('js/vendor/pdf.worker.min.js'), p('js/ka-config.js'), p('js/ka-enhance.js'), p('js/ka-gate.js'), p('data/packs/index.json'), p('data/packs/who.json'),
   p('data/tasks.json'), p('data/pagetext.json'), p('data/kinks.json'), p('data/library.json'), p('data/extras.json'),

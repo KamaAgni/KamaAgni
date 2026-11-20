@@ -28,6 +28,13 @@
 .hub-chips button.on{background:linear-gradient(135deg,rgba(255,93,143,.32),rgba(139,108,255,.26));border-color:var(--kv-rose)}
 .hub-sec{display:flex;align-items:baseline;justify-content:space-between;margin:24px 2px 10px}
 .hub-sec h2{font-family:'Cinzel',serif;font-size:15px;letter-spacing:.1em;text-transform:uppercase;color:var(--kv-rose2)}.hub-sec span{font-size:12px;color:var(--kv-mute)}
+.hub-jump{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin:0 0 4px;scrollbar-width:none;position:sticky;top:var(--hdr,56px);z-index:5;background:linear-gradient(var(--kv-bg,#0b0d1c) 80%,transparent)}
+.hub-jump::-webkit-scrollbar{display:none}
+.hub-jump a{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border-radius:999px;border:1px solid var(--kv-line2,rgba(255,255,255,.18));background:rgba(255,255,255,.04);color:inherit;text-decoration:none;font-size:14px;white-space:nowrap}
+.hub-jump small{opacity:.7;font-size:12px}
+.hub-sec h3{margin:0;font-size:18px}
+.hub-sec[id]{scroll-margin-top:calc(var(--hdr,56px) + 60px)}
+.gc p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
 .hub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
 .gc{position:relative;display:flex;flex-direction:column;border-radius:22px;overflow:hidden;border:1px solid var(--kv-line);background:var(--kv-glass);box-shadow:var(--kv-shadow);transition:transform .3s var(--kv-ease),border-color .3s,box-shadow .3s;color:inherit}
 .gc:hover{transform:translateY(-6px);border-color:var(--kv-rose);box-shadow:var(--kv-glow)}
@@ -114,6 +121,20 @@ function today() {
   const days = new Set((st.log || []).map(l => l.d)); let n = 0, x = new Date(); if (!days.has(x.toISOString().slice(0, 10))) x.setDate(x.getDate() - 1); while (days.has(x.toISOString().slice(0, 10))) { n++; x.setDate(x.getDate() - 1); }
   return `<div class="hub-today"><div class="hub-t1"><span class="kx-turn">Today for you two</span><a class="hub-ritual" href="games/kamaagni-rituals.html"><span class="em">${r[0]}</span><span><b>${r[1]}</b><br><small>${r[2]} · ritual of the day${n ? ' · 🔥 ' + n + '-day streak' : ''}</small></span></a></div><div class="hub-t2"><span class="kx-turn">Question of the day</span><p>${q}</p></div></div>`;
 }
+/* browsing with no search or vibe filter: new games first, then one section per vibe with a jump row, so 80+ games aren't one long wall */
+const VIBES = [['playful', '😜 Playful', 'Games to laugh, tease and compete'], ['wild', '🔥 Wild', 'Turn the heat right up'], ['sweet', '💗 Romantic & close', 'Slow, tender, connected'], ['learn', '📖 Learn & explore', 'Guides, skills and ideas'], ['plan', '🗓️ Plan & keep', 'Dates, memories and plans']];
+function groups(rest, list, more) {
+  if (!list.length) return '<div class="hub-sec"><h2>All games</h2><span>0 shown</span></div><div class="hub-empty">Nothing matches. Try clearing a filter.<br><br><button class="kx-btn ghost sm" id="clr">Clear filters</button></div>';
+  if (f.q || f.vibe !== 'all' || rest.length < 12)
+    return `<div class="hub-sec"><h2>${more ? 'More games' : 'All games'}</h2><span>${list.length} shown</span></div>${rest.length ? `<div class="hub-grid">${rest.map(card).join('')}</div>` : ''}`;
+  const nw = rest.filter(fresh), left = rest.filter(g => !fresh(g));
+  const secs = VIBES.map(([v, t, sub]) => [v, t, sub, left.filter(g => g.v === v)]).filter(x => x[3].length);
+  const other = left.filter(g => !VIBES.some(x => x[0] === g.v)); if (other.length) secs.push(['more', '✨ More', '', other]);
+  return `<div class="hub-sec"><h2>${more ? 'More games' : 'All games'}</h2><span>${list.length} shown</span></div>
+  <nav class="hub-jump" aria-label="Jump to a section">${nw.length ? '<a href="#sec-new">🆕 New</a>' : ''}${secs.map(x => `<a href="#sec-${x[0]}">${x[1]} <small>${x[3].length}</small></a>`).join('')}</nav>
+  ${nw.length ? `<div class="hub-sec" id="sec-new"><h3>🆕 New</h3><span>Just added</span></div><div class="hub-grid">${nw.map(card).join('')}</div>` : ''}
+  ${secs.map(x => `<div class="hub-sec" id="sec-${x[0]}"><h3>${x[1]}</h3><span>${x[2]}</span></div><div class="hub-grid">${x[3].map(card).join('')}</div>`).join('')}`;
+}
 function render(keepFocus) {
   const list = KA_CATALOG.filter(match), all = KA_CATALOG.filter(g => !hidden(g));
   const cont = list.filter(saved), fv = list.filter(g => favs.includes(g.id) && !saved(g));
@@ -138,8 +159,7 @@ function render(keepFocus) {
   ${f.mode === 'two' && !linked() ? '<div class="kx-card" style="margin-bottom:14px"><b>📱📱 Two phones needs a link.</b><p class="kx-muted">Sign in and link with your partner once in <a href="games/kamaagni-together.html" style="color:var(--kv-rose2)">Together</a>, then every two-phone game works.</p></div>' : ''}
   ${cont.length ? `<div class="hub-sec"><h2>Continue</h2><span>Pick up where you left off</span></div><div class="hub-grid">${cont.map(card).join('')}</div>` : ''}
   ${fv.length ? `<div class="hub-sec"><h2>Your favourites</h2></div><div class="hub-grid">${fv.map(card).join('')}</div>` : ''}
-  <div class="hub-sec"><h2>${cont.length || fv.length ? 'More games' : 'All games'}</h2><span>${list.length} shown</span></div>
-  ${rest.length ? `<div class="hub-grid">${rest.map(card).join('')}</div>` : (list.length ? '' : '<div class="hub-empty">Nothing matches. Try clearing a filter.<br><br><button class="kx-btn ghost sm" id="clr">Clear filters</button></div>')}
+  ${groups(rest, list, cont.length || fv.length)}
   ${heatHidden ? `<p class="hub-note">${heatHidden} more game${heatHidden > 1 ? 's' : ''} appear at a higher heat level. Change it above.</p>` : ''}`;
   const fl = document.getElementById('flt'); fl.open = wasOpen !== undefined ? wasOpen : matchMedia('(min-width:760px)').matches;
   KX.heatBar(document.getElementById('heatrow'), () => render());

@@ -532,3 +532,101 @@ All 91 pages were opened at four screen sizes with random tapping (no script err
 - **🔗 Yearly review from both phones** (Roadmap): when you're linked, each phone sends its own year summary once a day, encrypted (couple event `yr`, stored as `ka_year_p`). "Our year in KamaAgni" then combines both phones: the same game logged on both within 3 hours counts once, positions, games and badges count once, and memories use the larger count. It says when it's from both phones and when it was last updated. `KA_BOTH.yearData(Y)` / `KA_BOTH.merged(Y)`.
 - Tested on two simulated phones on the mock backend: same dice roll on both (1.8 s), remote history logged as sent and received, combined yearly review on both phones (shared Truth or Dare counted once, positions merged). Also the changed pages at four sizes with random tapping, and axe-core on all 96 pages (no issues).
 - Version v84, cache kamaagni-v86.
+
+## v85: KamaAgni view for PDFs (the same text under the KamaAgni logo, printable)
+- **📝 KamaAgni view** in the PDF reader (games/pdf-viewer.html): one tap turns any PDF from the Library into clean KamaAgni pages. pdf.js pulls each page's own text in the browser (nothing is uploaded or rewritten) and lays it out under the KamaAgni logo:
+  - Headings (from the PDF's larger type), paragraphs and numbered or bulleted lists. Lines that wrap are joined back together, and table-of-contents dot leaders are tidied.
+  - Two-column pages and card grids are read one column (one card) at a time, not interleaved.
+  - Pages that are only pictures (coupons, illustrated cards, scans) are shown as the original page image under the same header, with a note.
+  - Each page has the KamaAgni logo and the book's title at the top, and "From: *title* · Page N of M" at the bottom, so the source stays credited.
+  - The − / + buttons change the text size; bookmarks and the page counter work in both views; the reader remembers which view you used last.
+- **🖨️ Print** (KamaAgni view): prepares every page (with a counter), then opens the print dialog. Each original page starts a new A4 sheet, on white, with the logo and credit line; the app's header, menus and background are left out.
+- **Library:** every book now has "👁 Read" (the original pages) and "📝 KamaAgni view". Links: `pdf-viewer.html?p=…&view=tv` or `&view=pg`.
+- Phone toolbar is compact (icons with labels for screen readers; every button at least 40px).
+- Tested with Library PDFs (journal prompts, two-column week cards, picture-only coupons): text order, print output (checked as a generated PDF), four screen sizes with no overflow, and axe-core with no issues.
+- Version v85, cache kamaagni-v87.
+
+## v86: KamaAgni view without the source credit (permission received)
+- G&J Passionate Press gave KamaAgni written permission on 16/08/2026 to reproduce, modify, rebrand and distribute their PDFs (copyright stays with them; KamaAgni must not claim ownership of the originals or grant rights to third parties).
+- So the KamaAgni view's page footer now reads "KamaAgni · Page N of M" instead of "From: *title*". The book's title stays in the header as its name. Nothing says "© KamaAgni", in line with term 5 of the letter.
+- Version v86, cache kamaagni-v88.
+
+## v87: KamaAgni view leaves out everything that isn't KamaAgni (all 70 Library PDFs)
+Under the G&J Passionate Press permission (16/08/2026, see the project note), the KamaAgni view now removes the shop's branding and anything about the shop from every PDF in the Library:
+- **New `tools/pdf-clean.py`** scans every page of every Library PDF (PyMuPDF for text, tesseract OCR at 220 dpi for picture pages) and writes **`data/pdf-clean.json`**: pages to skip, boxes to cover on picture pages, and files to show as pictures. Re-run it after adding PDFs (instructions at the top of the file). Result: **110 pages skipped, 121 picture pages with the logo or shop text covered, 15 files shown as cleaned pictures**.
+- **Pages skipped:** thank-you-for-your-order pages, "we're always improving our products" pages, copyright-only pages, logo-only pages, adverts for other products, bundle download lists, the printing-service and discount-code guide, and the about-us, FAQ and product-catalogue sections of The Complete Naughty Guide (marked by hand in the tool). The Whole Shop Bundle Overview is entirely shop links, so it is hidden from the Library.
+- **Removed from text pages:** the "G&J PASSIONATE PRESS" header (also in spaced and split forms), copyright and "No part of this publication…" lines, Etsy, email, discount-code and Instagram lines, and shop sentences inside otherwise useful pages (for example "Do you have any questions? Feel free to ask me on Etsy!", "Send me a message on Etsy! – Gabriella", "You can find such a chart in our store"). The rest of each page is kept. Task lines such as "Thank you, Sir" are untouched.
+- **Covered on picture pages:** the round logo and name, the @GJ_Passionate_Press handle, copyright small print, Etsy sign-offs, "Gabriella, co-founder/course creator" signatures, and advert blocks ("Want to know even more fetishes? Try Kink List 3.0 · Click here"). Each is filled with the most common colour around it, so it blends into the page.
+- **Shown as pictures:** calendars, game boards, dice nets and fill-in trackers keep their layout as cleaned page pictures instead of flowing text.
+- **Also tidied:** the original's printed page numbers are dropped and pages are numbered without gaps; text a PDF draws twice (shadow effects) is shown once; file names like "ETSYlovecouponsforher" are replaced by the Library title; heading levels stay in order; pictures fit one A4 sheet when printed.
+- **Library:** "📖 Read" now opens KamaAgni view (the reader also defaults to it), "📄 Original" opens the source PDF, and "⬇ Download" is replaced by "🖨️ Print / PDF" (opens KamaAgni view with a note; choose Save as PDF in the print window to keep a clean copy). In KamaAgni view the download button is hidden.
+- Checked by preparing all 70 PDFs in the browser and searching every page for G&J, Etsy, copyright, Gabriella, discount, shop or store: none left in any file. Print output checked as generated PDFs; axe-core on the reader with real files and on all 96 pages: no issues.
+- Version v87, cache kamaagni-v89.
+
+## v88: KamaAgni view keeps each PDF's original look; print at the original size
+- **The KamaAgni view now shows the original pages** (their colours, page size, proportions and layout) as one long web page you scroll, not as reflowed text and not in a PDF-reader frame. Each page is drawn in the browser with pdf.js and shown as a sharp picture (1200–1700px wide).
+- **G&J branding is covered on every page.** The skip list still drops shop, thank-you and advert pages, and the clean-up boxes now apply to text pages too: their name in headers, copyright lines, Etsy and shop sentences, contact cards and signatures are painted over in the page's own background colour.
+- **The round G&J logo is found by its shape**, also where it stands alone with no name beside it (page headers, game boards, the corners of the Hornopoly play money): 2,951 found and covered across the Library. A random sample of matches was checked by eye, and all were the logo.
+- **KamaAgni front page:** a single KamaAgni cover (logo, title, page count) comes before the first page on screen. No other page carries KamaAgni branding.
+- **🖨️ Print / PDF** opens a small panel: "Add the KamaAgni front page" is off by default, so the printed or saved PDF is just the cleaned original pages. Each page prints on its own sheet at the original's page size (for example 596×842pt for A4 books), with no margins or app chrome.
+- The old reflowed-text code (headings, columns, header and footer per page) is removed.
+- Checked: printed Kink List 4.0 (39 pages without the cover, 40 with it, same size as the original) and Hornopoly; OCR of every printed page found no G&J, Etsy, copyright, Gabriella, store or bundle text; axe-core on the reader with real files.
+- Version v88, cache kamaagni-v90.
+
+## v89: bug fixes in the PDF reader
+- **Toolbar hidden behind the app header:** the reader's toolbar (page counter, zoom, bookmark, view switch, print) is meant to stay at the top while you scroll, but it slid underneath the app's fixed header and only a sliver showed. It now stays just below the header (its height is measured, so the 44px sideways-phone header works too), and pages that jump into view land below both bars.
+- **Wrong page numbers in KamaAgni view:** the counter, bookmarks and "continue reading" counted only the pages shown, so they were off whenever pages are left out (e.g. Kink List 4.0 starts at page 3). They now use the original page numbers in both views, and the counter shows the first page shown straight away.
+- **KamaAgni view didn't reopen where you left off:** it now returns to the page you reached (or the next page shown, if that one is left out), like the original view.
+- **Zoom did nothing on phones in KamaAgni view:** − / + now make pages smaller or larger (up to 2.5×, scroll sideways when zoomed in), and you stay on the same page while zooming.
+- The print panel closes with Esc.
+- Checked: all 70 Library PDFs open in KamaAgni view with the expected number of pages and no errors; random tapping on all 96 pages at four screen sizes (no script errors, broken images, overflow or unlabelled controls); axe-core on the reader: no issues.
+- Version v89, cache kamaagni-v91.
+
+## v90: no advert pages in print, sharper print, choose pages, 2 or 4 per sheet
+- **Advert pages left out** (on screen and in print), found by reading every page that was still kept: "Our Recommendations for the Best Sexy Valentines / Kinky Christmas Gift… click here" (Naughty Cards, Sex Position Cards), the "From 0 to Perfect Master" eBook plug and "What's next?" (500 BDSM Tasks for Beginners), and the four store pages at the end of From 0 to Perfect Dom. 8 more pages skipped (118 in all). New `ADPAGE` rule in tools/pdf-clean.py, so adverts in PDFs added later are caught too.
+- **Plugs inside useful pages are covered, the page is kept:** the Kink List 3.0 plug at the end of "Know Your Limits" and the "500 questions… in this product" plug (How to Be a Good Submissive), "Free future updates… after purchasing" (Discover Your Kink: Rules), the Etsy leaderboard contest in rule 4 (Cum & Orgasm Bucket List), "You can find such a chart in our G&J Store" (Taking Control), "stand out on Etsy" (Tasks for Switch Couple).
+- **Covers are more precise:** a shop sentence that shares a line with real text is covered word by word (found with the PDF's own text positions) instead of hiding the whole line; sentences are followed across lines and blocks; headings and ";)" end a sentence; brand lines no longer spread covers into titles (the Ejaculation Control eBook title and contents now show); a section's own icon just above its heading is never covered.
+- **Print panel (🖨️ Print / PDF) has new choices:**
+  - **Pages:** all, or only some ("3-10, 15", using the page numbers shown at the top).
+  - **Pages on each sheet:** 1 (full size), 2 (the same paper turned sideways, two pages side by side; halves the paper), or 4 (2 × 2, good for cards).
+  - **Sharpest print (300 dpi)**, on by default: pages are drawn again at print resolution (an A4 page is 2480 × 3508 pixels) instead of reusing the screen pictures (about 145–200 dpi), so small text prints crisp. Untick it for a smaller saved PDF.
+  - A live summary: "9 pages → 5 sheets (3 if you print on both sides)".
+  - The KamaAgni front page (still off by default) shows "4 of 39 pages" when only some pages are printed.
+  - Print sheets are built separately from the screen view and released after printing.
+- Checked: print PDFs at 1, 2 and 4 per sheet, a page range and the front page (right sheet counts and paper sizes), all 70 PDFs open with the expected pages, reader tests, axe-core with the print panel open: no issues.
+- Version v90, cache kamaagni-v92.
+
+## v91: site-wide UX pass
+Every page (96) was screenshotted at phone size and reviewed; the Games hub was also reviewed end to end.
+- **Games hub grouped:** browsing (no search, no vibe filter) now shows New first, then sections 😜 Playful, 🔥 Wild, 💗 Romantic & close, 📖 Learn & explore, 🗓️ Plan & keep, each with a heading and a short line. A **jump row** (with counts) stays pinned under the header, so any section is one tap away instead of scrolling through 82 cards (~14,000px on a phone). Searching or filtering by vibe still gives one list. Game descriptions are trimmed to three lines on cards.
+- **↑ Back to top** button on long pages (appears after about two screens of scrolling, on pages at least four screens long; keyboard focus moves to the page title). Helps the Games hub, Kink Explorer, Bucket List, Task Deck, Role-play, Playlist, Challenges, Library and long PDFs.
+- **Name bar removed from the top of pages:** the big "Manav and Partner" bar showed on about half the pages (only older page layouts) and pushed everything down ~80px. It now appears only when you've set an anniversary, as one slim line ("Manav and Riya · Together for 1,234 days").
+- **Page subtitles fixed:** a lookup bug meant 12 pages never used their own playful line, and 26 more had none, so about 30 pages showed the same "Whisper something nice. Then something naughty." on the same day. Every page now has its own lines (2 each).
+- **Duplicate floating "?" removed** on Ludo, Intimacy Dice, both Position selectors, Poker and Connect Foreplay. It covered buttons such as Start Game and Deal the First Hand, and these pages already have the ❓ "How to play" in the header (it stays only on a page without one).
+- **"Open Together to link"** under the Two phones option (22 games plus Connect Foreplay) is now a proper 40px tap target with a 🔗, reads "Open Together to link your phones", and no longer sits against the next heading.
+- `--hdr` (the fixed header's height) is now set on every page by js/ka-chrome.js, for anything that sticks below the header.
+- Fixed: the automatic "main region" for screen readers could pick a hidden dialog (the reader's print panel) and overwrite its dialog role; elements that already have a role, are hidden or aria-hidden are now skipped.
+- Checked: random tapping on all 96 pages at four screen sizes (no errors, overflow, broken images or unlabelled controls) and axe-core on all 96 pages (no issues).
+- Version v91, cache kamaagni-v93.
+
+## v92: the main journeys, walked through as a new couple would
+Three journeys were tested step by step on a phone-sized screen with screenshots at every step: the first visit, starting and ending a game, and linking two phones (with the mock backend, both phones signing up through the real screens).
+
+**First visit**
+- **Bug fixed: the "Start here" guide never showed on a first visit.** It only appeared if the welcome screen (names and genders) was finished before Home loaded, which is never true the first time, so new couples only saw it on their second visit, below the first screen. The welcome screen now tells Home when it's done (`ka-welcomed` event) and the guide appears straight away.
+- The guide now sits near the top, just under the search box, instead of a screen further down. Its questions show "1 of 3 / 2 of 3 / 3 of 3" and steps 2 and 3 have **← Back**.
+- Home on phones shows less branding above the fold (no "Intimacy Suite" line or 🔥 divider, tighter spacing), so the guide or Plan Tonight is on the first screen.
+- "👋 Start" (which reopened the guide) is now "🧭 Help me pick". The second "🎲 Surprise me" further down Home was removed (the one at the top stays).
+
+**Playing a game**
+- **✕ End game** (22 games on the shared setup) no longer pops up a system "OK / Cancel" box: the first tap turns the button into "Tap again to end" (or "…for both" in two-phone games) for 3 seconds, a second tap ends.
+- The pinned **Start** bar on setup screens had a background that faded to clear exactly where the button sat, so chips behind it (e.g. 🔥 Wild) showed through. It's now solid behind the buttons with a short fade above.
+- Truth or Dare and Hornopoly: the unexplained "🛡 3" chip now reads "Passes left: Manav 3 · Riya 3".
+
+**Linking two phones**
+- The vault passphrase screen now explains the difference: your password signs you in, your vault passphrase locks your data so nobody else (not even the server) can read it; use something different from your password; it can't be reset; your partner sets their own. Added "Show what I typed" (also on Unlock), and the button says "Lock my data with it".
+- After the passphrase is set or unlocked, the account panel closes by itself so you land on the next step (on Together: step 3, Invite).
+- **Bug fixed:** the yellow "Your data is not syncing yet… Set up" bar stayed on screen after the passphrase was created. It now disappears as soon as the vault is ready.
+- Together's step 2 is called "Vault passphrase" and, before one exists, says "Set your vault passphrase" with "Set it now" (it used to ask to "Unlock" a vault that didn't exist yet).
+- Checked: the whole journey through the real screens on two phones (sign up, passphrase, invite with QR, partner opens the link signed out, signs up, joins, both see each other), plus the existing two-phone tests (plans, skip a step, invitations, RSVP, wishes, remote, STOP, shared walkthrough, dice, yearly review).
+- Version v92, cache kamaagni-v94.

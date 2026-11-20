@@ -32,6 +32,8 @@
   var h = HELP[file];
   if (h) {
     var add = function () {
+      /* the header already has a ❓ "How to play" on most pages; only add this floating one where it doesn't, and keep it clear of the page's buttons */
+      if (document.getElementById('kh-how')) return;
       var b = document.createElement('button'); b.type = 'button'; b.textContent = '?'; b.setAttribute('aria-label', 'How to play');
       b.style.cssText = 'position:fixed;right:14px;bottom:150px;z-index:9990;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.2);background:#12152a;color:#f4a0ae;font:700 18px DM Sans,system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4)';
       b.onclick = function () {
@@ -44,7 +46,8 @@
       };
       document.body.appendChild(b);
     };
-    if (document.body) add(); else document.addEventListener('DOMContentLoaded', add);
+    var later = function () { setTimeout(add, 900); };
+    if (document.readyState !== 'loading') later(); else document.addEventListener('DOMContentLoaded', later);
   }
 
   /* 4. Extra content (same data shape, merged only if the game's arrays exist) */

@@ -105,7 +105,7 @@
     var d = box('<h2>Welcome 🔥</h2><p>Who is playing? Games will use your names. Everything stays on this device.</p><input id="kg1" maxlength="20" placeholder="Your name" aria-label="Your name"><select id="kg1g" aria-label="You are" style="margin-top:6px"><option value="m">I am a man</option><option value="f">I am a woman</option><option value="x">Other</option></select><input id="kg2" maxlength="20" placeholder="Partner\'s name" aria-label="Partner\'s name" style="margin-top:12px"><select id="kg2g" aria-label="Your partner is" style="margin-top:6px"><option value="f">My partner is a woman</option><option value="m">My partner is a man</option><option value="x">Other</option></select><p style="font-size:12px;opacity:.75;margin:6px 0 0">You can change names and genders later in Settings.</p><button class="kg-b" id="kgok">Let\'s go</button><button class="kg-b g" id="kgsk">Skip for now</button>');
     var done = function (save) {
       if (save) { var a = d.querySelector('#kg1').value.trim(), b = d.querySelector('#kg2').value.trim(); set('ka_couple', { p1: a || 'Partner 1', p2: b || 'Partner 2', g1: d.querySelector('#kg1g').value, g2: d.querySelector('#kg2g').value }); }
-      set('ka_welcomed', 1); d.remove();
+      set('ka_welcomed', 1); d.remove(); try { dispatchEvent(new Event('ka-welcomed')); } catch (e) {}
     };
     d.querySelector('#kgok').onclick = function () { done(true); };
     d.querySelector('#kgsk').onclick = function () { done(false); };

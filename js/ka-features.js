@@ -133,9 +133,9 @@ function injectCSS() {
 #ka-settings{position:fixed;left:68px;bottom:20px;background:#0c0e1c;border:1px solid rgba(255,255,255,0.13);border-radius:20px;padding:20px;width:240px;box-shadow:0 12px 40px rgba(0,0,0,0.65);z-index:7999;display:none;animation:kaSlideUp .22s cubic-bezier(.22,1,.36,1)}
 #ka-settings.open{display:block}
 .ka-settings-hd{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#7a8aab;margin-bottom:14px}
-#ka-couple-banner{display:none;background:linear-gradient(135deg,rgba(232,99,122,0.1),rgba(108,126,248,0.1));border:1px solid rgba(232,99,122,0.18);border-radius:14px;padding:12px 16px;margin-bottom:16px;position:relative;z-index:1;text-align:center}
+#ka-couple-banner{display:none;background:linear-gradient(135deg,rgba(232,99,122,0.1),rgba(108,126,248,0.1));border:1px solid rgba(232,99,122,0.18);border-radius:999px;padding:5px 14px;margin:0 auto 10px;width:max-content;max-width:100%;font-size:13px;color:#b8c3dc;position:relative;z-index:1;text-align:center}
 #ka-couple-banner.on{display:block}
-.ka-couple-names{font-size:16px;font-weight:700;color:#dce9ff;margin-bottom:3px}
+.ka-couple-names{font-size:13px;font-weight:700;color:#dce9ff}
 .ka-couple-days{font-size:12px;color:#7a8aab}
 #ka-fest-banner{display:none;border-radius:14px;padding:10px 16px;margin-bottom:16px;position:relative;z-index:1;text-align:center;font-weight:700;font-size:14px;animation:kaGlow 2.2s ease infinite}
 #ka-fest-banner.on{display:block}
@@ -320,14 +320,16 @@ function renderCoupleBanner() {
   const b = document.getElementById('ka-couple-banner');
   if (!b) return;
   const p = LS.get('ka_couple', {});
-  if (!p.p1 && !p.p2) { b.classList.remove('on'); return; }
+  /* only worth the space when there's a day count (anniversary set); names alone are already on every page */
+  if (!p.p1 && !p.p2 || !p.ann) { b.classList.remove('on'); return; }
   const names = [p.p1, p.p2].filter(Boolean).map(esc).join(' and ');
   let days = '';
   if (p.ann) {
     const d = Math.floor((Date.now() - new Date(p.ann)) / 86400000);
     if (d >= 0) days = `<div class="ka-couple-days">Together for ${d.toLocaleString()} days</div>`;
   }
-  b.innerHTML = `<div class="ka-couple-names">${names}</div>${days}`;
+  if (!days) { b.classList.remove('on'); return; }
+  b.innerHTML = `<span class="ka-couple-names">${names}</span> · ${days.replace(/<[^>]+>/g, '')}`;
   b.classList.add('on');
 }
 

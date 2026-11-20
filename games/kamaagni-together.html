@@ -56,7 +56,7 @@ const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a
   /* ---- guided linking: 4 steps, what it unlocks, QR invite ---- */
   const UNLOCK = [['💌', 'Invitations', 'sent to their phone, worded the way they like to be asked'], ['🌠', 'Secret wishes', 'see only the ones you both picked'], ['📱📱', 'Two-phone games', 'Truth or Dare, Poker, Ludo, Showdown and more, live'], ['✨', 'Shared plans', 'send tonight’s plan; they can skip one step'], ['🌍', 'Nudges', 'good morning, missing you, call me, in one tap'], ['🗂️', 'Shared lists', 'dates, memories, films and playlist on both phones'], ['⚙️', 'One set of settings', 'heat, topics and names stay the same on both phones'], ['🔔', 'Partner alerts', 'a notification when they send you something']];
   function steps(n) {
-    const L = ['Sign in', 'Unlock your vault', 'Invite or join', 'Partner joins'];
+    const L = ['Sign in', 'Vault passphrase', 'Invite or join', 'Partner joins'];
     return `<div class="kx-card tg-steps" aria-label="Linking steps">${L.map((t, i) => `<div class="tg-st ${i < n ? 'ok' : i === n ? 'now' : ''}"><span>${i < n ? '✓' : i + 1}</span>${t}</div>`).join('')}</div>`;
   }
   const unlocks = () => `<div class="kx-card"><div class="kx-turn">What linking unlocks</div><div class="tg-un">${UNLOCK.map(([i, t, d]) => `<div><span aria-hidden="true">${i}</span><div><b>${t}</b><small>${d}</small></div></div>`).join('')}</div><p class="kx-muted" style="margin:8px 0 0;font-size:13px">Everything you share is end-to-end encrypted with a key only your two phones have.</p></div>`;
@@ -67,7 +67,7 @@ const OI = (a, i) => window.KA_FILTER && KA_FILTER.origIdx ? KA_FILTER.origIdx(a
     if (!s.enabled) return top('Together', '') + `<div class="kx-card"><b>Cloud sync isn't switched on yet</b><p class="kx-muted">Partner features need the free online account. The site owner sets this up once (see SETUP-CLOUD.md). Everything else works as normal.</p></div>`;
     if (!s.ready) return top('Together', '') + '<div class="kx-card">Connecting…</div>';
     if (!s.user) return top('Together', 'Play and talk together, wherever you are.') + steps(0) + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Sign in first</div><p class="kx-muted">Your account keeps your data on every device and lets you link with your partner.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">👤 Sign in / Create account</button>${HASH ? '<p class="kx-muted">Your invite is saved in this page link. Come back here after signing in.</p>' : ''}</div>` + unlocks();
-    if (s.vault !== 'ready') return top('Together', '') + steps(1) + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">Unlock your vault</div><p class="kx-muted">Enter your vault passphrase to continue.</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">🔒 Unlock</button></div>` + unlocks();
+    if (s.vault !== 'ready') return top('Together', '') + steps(1) + `<div class="kx-card kx-center"><div class="kx-big" style="font-size:22px">${s.vault === 'new' ? 'Set your vault passphrase' : 'Unlock your vault'}</div><p class="kx-muted">${s.vault === 'new' ? 'A second secret that locks your data so only you two can read what you share. It takes a moment.' : 'Enter your vault passphrase (not your password) to continue.'}</p><button class="kx-btn" onclick="KA_CHROME.openAccount()">🔒 ${s.vault === 'new' ? 'Set it now' : 'Unlock'}</button></div>` + unlocks();
     return null;
   }
 

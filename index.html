@@ -385,6 +385,8 @@ body::after {
   text-align:center;
   margin-bottom:60px;
 }
+/* phones: less branding above the fold, so the first useful thing shows without scrolling */
+@media (max-width:600px){ .hero{margin-bottom:8px} .hero-sub-brand,.hero .ornament{display:none} .hero-desc{margin-top:6px;margin-bottom:0} }
 .hero > * { animation:fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both; }
 .hero > *:nth-child(1) { animation-delay:0.05s; }
 .hero > *:nth-child(2) { animation-delay:0.12s; }
@@ -777,7 +779,6 @@ body::after {
         <a class="d-go" href="games/kamaagni-session.html">🔥 Start tonight's session</a>
         <a class="d-link" href="play.html">🎮 All games</a>
         <a class="d-link" href="games/kamaagni-secret.html">💌 Send a secret</a>
-        <button class="d-link" id="d-sur" type="button">🎲 Surprise me</button>
         <button class="d-link" id="d-cal" type="button">📅 Date-night reminder</button>
       </div>
       <div class="d-next" id="d-next"></div>
@@ -1637,7 +1638,7 @@ fx.innerHTML='<div class="d-next" style="display:block">'+loop+'<div style="font
 '<div style="display:flex;gap:8px;flex-wrap:wrap">'+f.items.slice(0,4).map(function(i){return '<a href="'+i.href+'" style="flex:1;min-width:170px;padding:11px 13px;border-radius:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);text-decoration:none;color:#a8bcd8;font-size:12.5px">'+i.icon+' '+esc(i.label)+'<b style="display:block;color:#fff;font-size:13.5px;margin-top:2px">'+esc(i.title)+'</b></a>'}).join('')+'</div></div>'})}catch(e){}
 var dn=LS('ka_datenight',null);
 if(dn&&dn.dow===new Date().getDay())$('d-ban').innerHTML='<div class="d-banner">📅 Tonight is date night'+(dn.time?' · '+esc(dn.time):'')+'. Start a session when you are ready.</div>';
-$('d-sur').onclick=function(){if(window.KA&&KA.surpriseMe)KA.surpriseMe();else location.href='games/kamaagni-session.html'};
+
 $('d-cal').onclick=function(){
   var o=document.createElement('div');o.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(5,6,15,.9);display:flex;align-items:center;justify-content:center;padding:20px';
   var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];

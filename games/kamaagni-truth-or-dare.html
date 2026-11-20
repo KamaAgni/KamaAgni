@@ -85,7 +85,7 @@ function setup() {
 
 function bar() {
   const n = N();
-  return U.bar([['Turn ' + S.round + (S.total ? '/' + S.total : ''), ''], ['🛡 ' + n[0] + ' ' + (S.passes[0] > 90 ? '∞' : S.passes[0]) + ' · ' + n[1] + ' ' + (S.passes[1] > 90 ? '∞' : S.passes[1]), 'h2'], two() ? ['📱📱 Two phones', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true});
+  return U.bar([['Turn ' + S.round + (S.total ? '/' + S.total : ''), ''], ['Passes left: ' + n[0] + ' ' + (S.passes[0] > 90 ? '∞' : S.passes[0]) + ' · ' + n[1] + ' ' + (S.passes[1] > 90 ? '∞' : S.passes[1]), 'h2'], two() ? ['📱📱 Two phones', 'h1'] : ['', '']].filter(x => x[0]), {guide: true, quit: true});
 }
 function who() { const n = N(), t = S.turn; return `<div class="kd-turn p${t}"><i></i>${esc(n[t])}'s turn</div>`; }
 

@@ -52,7 +52,7 @@
     '#kh-back{font-size:32px!important;font-weight:300;line-height:1;padding:0 10px;min-width:40px;margin-right:-4px}',
     '#ka-ftr a{display:inline-flex;align-items:center;min-height:40px;padding:0 6px}',
     '.kd-more{margin-top:14px;border-top:1px solid rgba(255,255,255,.1);padding-top:6px}.kd-more>summary{list-style:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:48px;justify-content:center;padding:6px 2px}.kd-more>summary::-webkit-details-marker{display:none}.kd-more>summary b{display:flex;justify-content:space-between;font-size:15px}.kd-more>summary b::after{content:"+";opacity:.7;font-size:20px;line-height:1}.kd-more[open]>summary b::after{content:"\\2212"}.kd-more>summary span{font-size:13px;color:var(--kv-mute,#9aa3bd)}',
-    '.kd-start{position:sticky;bottom:84px;z-index:30;padding:12px 0 6px;margin-left:-4px;background:linear-gradient(to top,rgba(10,8,20,.96) 70%,transparent)}',
+    '.kd-start{position:sticky;bottom:84px;z-index:30;padding:22px 0 8px;margin-left:-4px;background:linear-gradient(to bottom,transparent,rgba(10,8,20,.97) 18px,rgba(10,8,20,.97))}',
     '.kd-act{position:sticky;bottom:84px;z-index:40;padding:14px 0 8px;background:linear-gradient(to top,#07060f 65%,transparent)}',
     '.kx-check{position:relative;width:32px;height:32px;min-width:0;min-height:0;align-self:center}.kx-check::after{content:"";position:absolute;inset:-8px}.kx-check::after{content:"";position:absolute;inset:-9px}',
     '.kx-chip,.card-tag,.gc .new,.gc .cont,.hub-chips .lbl,.gc .meta span,.gc .meta,.kx-sec,.kx-heat-lbl,.kd-all button,.kd-grp,.kd-cat em{font-size:12px!important}',
@@ -138,9 +138,9 @@
         '<input class="ka-in" id="ka-em" type="email" autocomplete="email" placeholder="Email"><input class="ka-in" id="ka-pw" type="password" autocomplete="' + (tab === 'in' ? 'current-password' : 'new-password') + '" placeholder="Password (8+ characters)">' +
         ((tab === 'up' && window.KA_CONFIG && KA_CONFIG.REQUIRE_INVITE) ? '<input class="ka-in" id="ka-iv" type="text" autocapitalize="characters" autocomplete="off" placeholder="Your invite code">' : '') + '<div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-go">' + (tab === 'in' ? 'Sign in' : 'Create account') + '</button>' + (tab === 'in' ? '<button class="ka-bt g" id="ka-fp" style="margin-top:8px">Forgot password</button>' : '');
     } else if (s.vault === 'new') {
-      h += '<h2>Create your vault passphrase</h2><p>This passphrase encrypts your data before it leaves your device. <b style="color:#ffb089">We cannot reset it.</b> If you forget it, your cloud data cannot be recovered. Write it down somewhere safe.</p><input class="ka-in" id="ka-p1" type="password" autocomplete="new-password" placeholder="Passphrase (8+ characters)"><input class="ka-in" id="ka-p2" type="password" autocomplete="new-password" placeholder="Repeat passphrase"><div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-vk">Create vault</button><button class="ka-bt g" id="ka-so" style="margin-top:8px">Sign out</button>';
+      h += '<h2>One more step: your vault passphrase</h2><p>Your <b>password</b> signs you in. Your <b>vault passphrase</b> locks your data, so it\'s scrambled before it leaves this phone and nobody else (not even the server) can read it. Use something different from your password, like a short sentence only you know.</p><p style="font-size:13px;opacity:.9">⚠️ <b style="color:#ffb089">It can\'t be reset.</b> If you forget it, your cloud copy can\'t be opened. Write it down somewhere safe. Your partner sets their own.</p><input class="ka-in" id="ka-p1" type="password" autocomplete="new-password" placeholder="Vault passphrase (8+ characters)"><input class="ka-in" id="ka-p2" type="password" autocomplete="new-password" placeholder="Type it again"><label style="display:flex;gap:8px;align-items:center;min-height:40px;font-size:14px;cursor:pointer"><input type="checkbox" id="ka-show" style="width:20px;height:20px"> Show what I typed</label><div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-vk">Lock my data with it</button><button class="ka-bt g" id="ka-so" style="margin-top:8px">Sign out</button>';
     } else if (s.vault === 'locked') {
-      h += '<h2>Unlock your vault</h2><p>Enter your vault passphrase to load your data on this device.</p><input class="ka-in" id="ka-p1" type="password" autocomplete="current-password" placeholder="Vault passphrase"><div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-vk">Unlock</button><button class="ka-bt g" id="ka-so" style="margin-top:8px">Sign out</button>';
+      h += '<h2>Unlock your vault</h2><p>Enter your vault passphrase (not your password) to open your data on this device.</p><input class="ka-in" id="ka-p1" type="password" autocomplete="current-password" placeholder="Vault passphrase"><label style="display:flex;gap:8px;align-items:center;min-height:40px;font-size:14px;cursor:pointer"><input type="checkbox" id="ka-show" style="width:20px;height:20px"> Show what I typed</label><div class="ka-msg" id="ka-m"></div><button class="ka-bt" id="ka-vk">Unlock</button><button class="ka-bt g" id="ka-so" style="margin-top:8px">Sign out</button>';
     } else {
       h += '<h2>Account</h2><div class="ka-row"><span>Signed in</span><b>' + esc(s.user.email) + '</b></div><div class="ka-row"><span>Cloud sync</span><b>' + (s.syncing ? 'syncing…' : ago(s.last)) + '</b></div><div class="ka-row"><span>Partner</span><b>' + (s.couple ? (s.couple.partnerJoined ? 'linked 💞' : 'invite waiting') : 'not linked') + '</b></div>' +
         (s.err ? '<div class="ka-msg">' + esc(s.err) + '</div>' : '<div class="ka-msg" id="ka-m"></div>') +
@@ -159,9 +159,10 @@
       busy(this, tab === 'in' ? C.signIn(em, pw) : C.signUp(em, pw, g('ka-iv') ? g('ka-iv').value : '')).then(function (r) { if (r && r.needsConfirm) { msg('Check your email to confirm, then sign in.', true); tab = 'in'; } else renderAcct(); }, function () {});
     };
     if (g('ka-fp')) g('ka-fp').onclick = function () { var em = g('ka-em').value.trim(); if (!em) return msg('Enter your email first.'); C.resetPassword(em).then(function () { msg('Reset email sent (if the account exists).', true); }, function (e) { msg(e.message); }); };
+    if (g('ka-show')) g('ka-show').onchange = function () { var t = this.checked ? 'text' : 'password'; ['ka-p1', 'ka-p2'].forEach(function (id) { if (g(id)) g(id).type = t; }); };
     if (g('ka-vk')) g('ka-vk').onclick = function () {
       var p1 = g('ka-p1').value, p2 = g('ka-p2'); if (p1.length < 8) return msg('Passphrase needs 8+ characters.'); if (p2 && p2.value !== p1) return msg('Passphrases do not match.');
-      busy(this, C.unlock(p1)).then(function () { renderAcct(); }, function () {});
+      busy(this, C.unlock(p1)).then(function () { renderAcct(); /* done: close the panel so the page underneath (e.g. Together's next step) shows */ setTimeout(closeAcct, 700); }, function () {});
     };
     if (g('ka-sy')) g('ka-sy').onclick = function () { busy(this, C.syncNow()).then(function (r) { msg(r ? 'Synced.' : 'Could not sync.', !!r); renderAcct(); }, function () {}); };
     if (g('ka-so')) g('ka-so').onclick = function () { C.signOut().then(renderAcct); };
@@ -170,7 +171,7 @@
 
   /* ---- footer ---- */
   var ftr = doc.createElement('footer'); ftr.id = 'ka-ftr'; ftr.setAttribute('role', 'contentinfo');
-  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v84</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
+  ftr.innerHTML = '<div><a href="' + u('index.html') + '">Home</a><a href="' + u(G + 'kamaagni-experts.html') + '">Experts</a><a href="' + u(G + 'kamaagni-together.html') + '">Together</a><a href="' + u(G + 'kamaagni-history.html') + '">History</a><a href="' + u(G + 'kamaagni-settings.html') + '">Settings</a><a href="' + u('about.html') + '">About &amp; Privacy</a></div><div>Made with ♡ for couples · 18+ · Consent first, always · <span id="kf-v" title="App version">v92</span></div><div><span class="fs" id="kf-s">💾 Saved on this device</span></div>';
   doc.body.appendChild(ftr);
 
   /* ---- live status ---- */
@@ -290,7 +291,7 @@
       [].forEach.call(doc.querySelectorAll('header:not(#ka-hdr), footer:not(#ka-ftr)'), function (e) { if (!e.hasAttribute('role')) e.setAttribute('role', 'none'); });
       if (!doc.querySelector('main, [role="main"]')) {
         var km = doc.getElementById('ka-main'); if (km && km.tagName !== 'A') { km.setAttribute('role', 'main'); return; }
-        kids = kids.filter(function (e) { return !/^(A|CANVAS|SVG|IMG|BUTTON)$/.test(e.tagName) && !/modal|overlay|toast|skip/i.test((e.className || '') + ' ' + (e.id || '')); });
+        kids = kids.filter(function (e) { return !/^(A|CANVAS|SVG|IMG|BUTTON)$/.test(e.tagName) && !e.hasAttribute('role') && e.getAttribute('aria-hidden') !== 'true' && getComputedStyle(e).display !== 'none' && !/modal|overlay|toast|skip/i.test((e.className || '') + ' ' + (e.id || '')); });
         var best = null, bl = -1;
         kids.forEach(function (e) { var l = (e.textContent || '').length + e.querySelectorAll('button, a, input, canvas, svg').length * 40; if (l > bl) { bl = l; best = e; } });
         if (best) best.setAttribute('role', 'main');
@@ -319,6 +320,24 @@
     var pend = 0; function run() { pend = 0; try { landmarks(); controls(); } catch (e) {} }
     run(); setTimeout(run, 800);
     try { new MutationObserver(function () { if (!pend) pend = setTimeout(run, 400); }).observe(doc.body, { childList: true, subtree: true }); } catch (e) {}
+  })();
+
+  /* --hdr: the fixed header's height, for anything that sticks below it */
+  (function () { function m() { var h = doc.getElementById('ka-hdr'); if (h) doc.documentElement.style.setProperty('--hdr', Math.round(h.getBoundingClientRect().bottom) + 'px'); }
+    addEventListener('resize', m); addEventListener('load', m); setTimeout(m, 0); setTimeout(m, 600); })();
+
+  /* ↑ back to top: appears on long pages after you've scrolled down a couple of screens */
+  (function () {
+    var t = doc.createElement('button'); t.type = 'button'; t.id = 'ka-totop'; t.textContent = '↑'; t.setAttribute('aria-label', 'Back to the top');
+    t.style.cssText = 'position:fixed;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:7990;width:44px;height:44px;border-radius:50%;border:1px solid rgba(255,255,255,.22);background:rgba(18,21,42,.92);color:#f4c58a;font:700 20px system-ui,sans-serif;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;pointer-events:none;transform:translateY(8px);transition:opacity .2s,transform .2s';
+    t.onclick = function () { var r = matchMedia('(prefers-reduced-motion: reduce)').matches; scrollTo({ top: 0, behavior: r ? 'auto' : 'smooth' }); try { var h = doc.querySelector('main h1, h1'); if (h) { h.setAttribute('tabindex', '-1'); h.focus({ preventScroll: true }); } } catch (e) {} };
+    var on = false, tick = 0;
+    function upd() { tick = 0; var show = scrollY > innerHeight * 2.2 && doc.documentElement.scrollHeight > innerHeight * 4;
+      if (show !== on) { on = show; t.style.opacity = show ? '1' : '0'; t.style.pointerEvents = show ? 'auto' : 'none'; t.style.transform = show ? 'none' : 'translateY(8px)'; t.tabIndex = show ? 0 : -1; } }
+    t.tabIndex = -1;
+    function add() { if (!doc.getElementById('ka-totop')) doc.body.appendChild(t); upd(); }
+    if (doc.body) add(); else doc.addEventListener('DOMContentLoaded', add);
+    addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(upd); }, { passive: true });
   })();
 
   window.KA_CHROME = { openAccount: openAcct, MENU: MENU, notify: notify, describe: describe, check: checkNudges };

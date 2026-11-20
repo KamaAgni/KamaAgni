@@ -25,6 +25,8 @@
   let items = [];
   try { items = await (await fetch('../data/library.json')).json(); }
   catch { app.innerHTML = top('Library', '') + '<div class="kx-card kx-center">Could not load the library list. Open this page from your hosted site.</div>'; return; }
+  /* v87: hide files that are only about the shop (every page skipped in data/pdf-clean.json) */
+  try { const CL = await (await fetch('../data/pdf-clean.json')).json(); items = items.filter(x => !(CL[x.p] && x.pg && CL[x.p].s.length >= x.pg)); } catch (e) {}
   const cats = ['All', '⭐ Featured', '📥 On this device', ...[...new Set(items.map(i => i.c))]];
   let cat = '⭐ Featured', q = '';
   const recent = () => LS.get('ka_lib_recent', []);
@@ -62,8 +64,8 @@
       <p class="kx-muted" style="margin:2px 0 ${usedBy[i.p] ? 6 : 12}px">${esc(i.d)}</p>
       ${usedBy[i.p] ? `<p style="margin:0 0 12px;font-size:13px"><span class="kx-muted">Used in:</span> ${usedBy[i.p].map(([t, u, ic]) => `<a href="../${esc(u)}" style="color:var(--rose);text-decoration:none;margin-right:10px">${ic || ''} ${esc(t)}</a>`).join('')}</p>` : ''}
       ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).n ? `<p class="kx-muted" style="margin:-6px 0 10px;font-size:12px">📖 You read up to page ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).last} of ${(LS.get('ka_pdf_meta', {})[i.p.split('/').pop()] || {}).n}</p>` : ''}
-      <div class="kx-row"><a class="kx-btn sm" href="${esc(view(i.p, i.t))}">👁 Read</a>
-      <a class="kx-btn sm gold" href="${esc(raw(i.p))}" data-dl="${esc(i.p)}" rel="noopener">⬇ Download</a>
+      <div class="kx-row"><a class="kx-btn sm" href="${esc(view(i.p, i.t) + '&view=tv')}">📖 Read</a><a class="kx-btn sm ghost" href="${esc(view(i.p, i.t) + '&view=pg')}" title="The original PDF pages">📄 Original</a>
+      <a class="kx-btn sm gold" href="${esc(view(i.p, i.t) + '&view=tv&print=1')}" title="Print it, or save it as a PDF, in KamaAgni style">🖨️ Print / PDF</a>
       <a class="kx-btn sm ghost" href="${gh(i.p)}" target="_blank" rel="noopener">GitHub</a>
       ${window.caches ? `<button class="kx-btn sm ghost" data-off="${esc(i.p)}" aria-pressed="${OFF.has(raw(i.p))}">${OFF.has(raw(i.p)) ? '✓ On this device' : '📥 Keep offline'}</button>` : ''}</div></div>`).join('') || '<p class="kx-muted kx-center">Nothing found.</p>';
   };
